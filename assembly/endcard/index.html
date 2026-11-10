@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<style>
+@font-face{font-family:MixSans;src:url('./fonts/MixSans-Regular.woff2') format('woff2');font-weight:400 500;font-display:block}
+@font-face{font-family:MixSans;src:url('./fonts/MixSans-Bold.woff2') format('woff2');font-weight:700;font-display:block}
+html,body{margin:0;background:#F4EFE6}canvas{display:block;width:1920px;height:1080px}
+</style><canvas width="1920" height="1080"></canvas>
+<script src="./vendor/rough.js"></script>
+<script type="module">
+window.READY=false;
+const {drawEndCard,bakeEndCard,endcardData}=await import('./endcard.js');
+await Promise.all([document.fonts.load('400 27px MixSans'),document.fonts.load('700 48px MixSans')]);await document.fonts.ready;
+const ctx=document.querySelector('canvas').getContext('2d');bakeEndCard();window.DUR=12;
+window.render=t=>{ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.fillStyle=endcardData.colors.paper;ctx.fillRect(0,0,1920,1080);drawEndCard(ctx,t);};
+window.render(3);window.READY=true;
+</script></html>

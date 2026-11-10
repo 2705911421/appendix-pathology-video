@@ -1,0 +1,142 @@
+{
+  "title": "《一根“香肠”的变质日记：阑尾的红→黄→黑》",
+  "titleLines": [
+    "一根“香肠”的变质日记",
+    "阑尾的红→黄→黑"
+  ],
+  "creationHeading": "创作说明",
+  "intro": "本作品使用生成式人工智能辅助创作，用途如下：",
+  "cells": [
+    [
+      "· 代码动画：garden-skills / motion-showreel",
+      "（Rough.js 墨线 · p5.brush 水彩）"
+    ],
+    [
+      "· 文本辅助：旁白脚本起草、润色与分镜编排",
+      "（AI 工具：【待填】）"
+    ],
+    [
+      "· 旁白配音：小米 MiMo TTS",
+      "（依据定稿字幕生成）"
+    ],
+    [
+      "· 图像生成：未进入本版成片",
+      "（画面均为代码绘制）"
+    ],
+    [
+      "· 配乐：AI 辅助编写 MIDI 乐谱，",
+      "以开源乐器采样渲染"
+    ]
+  ],
+  "notes": [
+    "科学表述经人工核对，依据人卫《病理学》第 9 版及 WSES 指南等；",
+    "未使用未授权病理照片。"
+  ],
+  "musicHeading": "背景音乐",
+  "music": [
+    "钢琴采样：Salamander Grand Piano V3 by Alexander Holm, CC BY 3.0",
+    "(http://creativecommons.org/licenses/by/3.0/)",
+    "管弦乐采样：VSCO 2 Community Edition by Versilian Studios (CC0)"
+  ],
+  "refsHeading": "参考文献",
+  "references": [
+    {
+      "verbatim": "[1] CHEN Y, YANG J, CONG R, et al. Comparison of Contrast-enhanced versus Non-enhanced Helical Computed Tomography in the Diagnosis of Acute Appendicitis: A Meta-analysis[J]. J Coll Physicians Surg Pak, 2023, 33(2): 205-211. DOI: 10.29271/jcpsp.2023.02.205.",
+      "lines": [
+        "[1] CHEN Y, YANG J, CONG R, et al. Comparison of Contrast-enhanced versus Non-enhanced Helical Computed Tomography in the",
+        "Diagnosis of Acute Appendicitis: A Meta-analysis[J]. J Coll Physicians Surg Pak, 2023, 33(2): 205-211. DOI:",
+        "10.29271/jcpsp.2023.02.205."
+      ]
+    },
+    {
+      "verbatim": "[2] 步宏, 李一雷. 病理学[M]. 10版. 北京: 人民卫生出版社, 2024.",
+      "lines": [
+        "[2] 步宏, 李一雷. 病理学[M]. 10版. 北京: 人民卫生出版社, 2024."
+      ]
+    },
+    {
+      "verbatim": "[3] AKINCI Ö. Predictive value of sphericity index and other multidetector computed tomography findings in perforated acute appendicitis[J]. Ulus Travma Acil Cerrahi Derg, 2023, 29(5): 590-595. DOI: 10.14744/tjtes.2023.45383.",
+      "lines": [
+        "[3] AKINCI Ö. Predictive value of sphericity index and other multidetector computed tomography findings in perforated",
+        "acute appendicitis[J]. Ulus Travma Acil Cerrahi Derg, 2023, 29(5): 590-595. DOI: 10.14744/tjtes.2023.45383."
+      ]
+    },
+    {
+      "verbatim": "[4] PODDA M, CERESOLI M, DE SIMONE B, et al. Diagnosis and Treatment of Acute Appendicitis: 2025 Edition of the World Society of Emergency Surgery Jerusalem Guidelines[J]. JAMA Surg, 2026, 161(3): 283-295. DOI: 10.1001/jamasurg.2025.6218.",
+      "lines": [
+        "[4] PODDA M, CERESOLI M, DE SIMONE B, et al. Diagnosis and Treatment of Acute Appendicitis: 2025 Edition of the World",
+        "Society of Emergency Surgery Jerusalem Guidelines[J]. JAMA Surg, 2026, 161(3): 283-295. DOI: 10.1001/jamasurg.2025.6218."
+      ]
+    },
+    {
+      "verbatim": "[5] KUMAR SS, COLLINGS AT, LAMM R, et al. SAGES guideline for the diagnosis and treatment of appendicitis[J]. Surg Endosc, 2024, 38(6): 2974-2994. DOI: 10.1007/s00464-024-10813-y.",
+      "lines": [
+        "[5] KUMAR SS, COLLINGS AT, LAMM R, et al. SAGES guideline for the diagnosis and treatment of appendicitis[J]. Surg Endosc,",
+        "2024, 38(6): 2974-2994. DOI: 10.1007/s00464-024-10813-y."
+      ]
+    }
+  ],
+  "pending": "版次、年份及页码【待填】",
+  "captions": [
+    "片尾 A · 创作说明",
+    "片尾 B · 参考文献"
+  ],
+  "layout": {
+    "width": 1920,
+    "height": 1080,
+    "frame": [
+      150,
+      72,
+      1620,
+      766
+    ],
+    "x": 220,
+    "right": 1700,
+    "titleY": 158,
+    "subtitleY": 209,
+    "titleSize": 48,
+    "subtitleSize": 32,
+    "aHeadingY": 294,
+    "introY": 345,
+    "cellY": 414,
+    "cellRow": 99,
+    "cellCol": 780,
+    "bodySize": 27,
+    "bodyLeading": 37,
+    "notesY": 728,
+    "musicHeadingY": 145,
+    "musicY": 194,
+    "musicLeading": 37,
+    "musicSize": 26,
+    "refsHeadingY": 333,
+    "refsY": 380,
+    "refSize": 23,
+    "refLeading": 29,
+    "refGap": 12,
+    "hanging": 38,
+    "captionSize": 24,
+    "captionX": 220,
+    "captionY": 40,
+    "previewLabelY": 795
+  },
+  "colors": {
+    "paper": "#F4EFE6",
+    "ink": "#2A2A35",
+    "red": "#D6453A"
+  },
+  "timing": {
+    "aIn": [
+      0,
+      1
+    ],
+    "aOut": [
+      5.9,
+      6.6
+    ],
+    "bIn": [
+      6.3,
+      7.2
+    ]
+  },
+  "previewLabel": "静态排版预览 · 非 Chromium 截图"
+}
