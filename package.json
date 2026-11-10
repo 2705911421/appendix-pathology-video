@@ -1,0 +1,13 @@
+{
+  "name": "appendix-v5",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "samples": "node render.mjs --samples",
+    "check": "node render.mjs --determinism"
+  },
+  "devDependencies": {
+    "playwright": "^1.59.1",
+    "@napi-rs/canvas": "0.1.80"
+  }
+}

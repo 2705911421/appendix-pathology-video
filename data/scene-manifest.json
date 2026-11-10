@@ -1,0 +1,149 @@
+[
+  {
+    "id": "S01",
+    "module": "s01_intro.js",
+    "from": "01",
+    "to": "05",
+    "implemented": true
+  },
+  {
+    "id": "S02",
+    "module": "s02_signals.js",
+    "from": "06",
+    "to": "10",
+    "implemented": false
+  },
+  {
+    "id": "S03",
+    "module": "s03_clinical.js",
+    "from": "11",
+    "to": "13",
+    "implemented": false
+  },
+  {
+    "id": "S04",
+    "module": "s04_ct_evidence.js",
+    "from": "14",
+    "to": "19",
+    "implemented": false
+  },
+  {
+    "id": "S05",
+    "module": "s05_pathway.js",
+    "from": "20",
+    "to": "22",
+    "implemented": false
+  },
+  {
+    "id": "S06",
+    "module": "s06_red_gross.js",
+    "from": "23",
+    "to": "24",
+    "implemented": false
+  },
+  {
+    "id": "S07",
+    "module": "s07_exudation.js",
+    "from": "25",
+    "to": "30",
+    "implemented": false
+  },
+  {
+    "id": "S08",
+    "module": "s08_red_histology.js",
+    "from": "31",
+    "to": "34",
+    "implemented": true
+  },
+  {
+    "id": "S09",
+    "module": "s09_red_ct.js",
+    "from": "35",
+    "to": "36",
+    "implemented": false
+  },
+  {
+    "id": "S10",
+    "module": "s10_yellow_wall.js",
+    "from": "37",
+    "to": "42",
+    "implemented": false
+  },
+  {
+    "id": "S11",
+    "module": "s11_yellow_surface.js",
+    "from": "43",
+    "to": "46",
+    "implemented": false
+  },
+  {
+    "id": "S12",
+    "module": "s12_yellow_ct.js",
+    "from": "47",
+    "to": "48",
+    "implemented": false
+  },
+  {
+    "id": "S13",
+    "module": "s13_black_ischemia.js",
+    "from": "49",
+    "to": "53",
+    "implemented": false
+  },
+  {
+    "id": "S14",
+    "module": "s14_black_necrosis.js",
+    "from": "54",
+    "to": "57",
+    "implemented": false
+  },
+  {
+    "id": "S15",
+    "module": "s15_black_ct.js",
+    "from": "58",
+    "to": "59",
+    "implemented": false
+  },
+  {
+    "id": "S16",
+    "module": "s16_assessment.js",
+    "from": "60",
+    "to": "62",
+    "implemented": false
+  },
+  {
+    "id": "S17",
+    "module": "s17_acute_treatment.js",
+    "from": "63",
+    "to": "65",
+    "implemented": false
+  },
+  {
+    "id": "S18",
+    "module": "s18_chronic_transition.js",
+    "from": "66",
+    "to": "68",
+    "implemented": false
+  },
+  {
+    "id": "S19",
+    "module": "s19_chronic_histology.js",
+    "from": "69",
+    "to": "70",
+    "implemented": false
+  },
+  {
+    "id": "S20",
+    "module": "s20_chronic_timing.js",
+    "from": "71",
+    "to": "74",
+    "implemented": false
+  },
+  {
+    "id": "S21",
+    "module": "s21_closing.js",
+    "from": "75",
+    "to": "77",
+    "implemented": false
+  }
+]

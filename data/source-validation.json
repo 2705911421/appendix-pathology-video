@@ -1,0 +1,13 @@
+{
+  "sentences": 77,
+  "englishCards": 136,
+  "actualHanzi": 1064,
+  "countDiscrepancies": [
+    {
+      "id": "46",
+      "declared": 15,
+      "actual": 17
+    }
+  ],
+  "policy": "Preserve verbatim source; estimate preview from actual Hanzi, not the declared count column"
+}
