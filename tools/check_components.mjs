@@ -10,7 +10,7 @@ for(const n of Object.keys(files)){assert.deepEqual(fs.readFileSync(new URL('../
 const p=await cpuPage();
 const {microscopeState}=await import('../lib/microscope_zoom.js');
 const {config}=await import('../scenes/s08_red_histology.js');
-for(const [id,fraction,y] of [['32',.4,-690],['32',.95,-925],['33',.5,-1135],['34',.5,-390]])assert.equal(microscopeState(T,T.fracId(id,fraction),config).y,y);
+for(const [id,fraction,y] of [['30',.96,-665],['31',.65,-475],['32',.9,-965],['33',.88,-435],['34',.5,-390]])assert.equal(microscopeState(T,T.fracId(id,fraction),config).y,y);
 const {drawSubtitles}=await import('../lib/subtitle_bilingual.js');
 const c=document.createElement('canvas').getContext('2d');for(const row of script.sentences)drawSubtitles(c,row,.5);
 for(const id of ['31','32','33','34','37','38','39','40','41','42','54','55','56','57','69','70'])for(const f of [.01,.15,.5,.85,.99])await p.evaluate(({id,f})=>{window.render(T.fracId(id,f));window.auditContent();},{id,f});

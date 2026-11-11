@@ -27,10 +27,10 @@ try {
  cc.save();cc.beginPath();cc.rect(0,0,1920,950);cc.clip();const sceneMetrics=s.renderMain(cc,{t,T,id:e.id,fraction:(t-e.start)/(e.end-e.start)});cc.restore();cc.save();s.renderAnnotations(cc,{t,T,id:e.id});cc.restore();cc.save();drawNotes(cc,s.sidebarState(),{id:e.id,fraction:(t-e.start)/(e.end-e.start)});cc.restore();
  // Freeze the previous scene at its last spoken frame for the handoff.
  const sceneIndex=manifest.indexOf(m),handoffEnd=T.fracId(m.from,.08);
- if(sceneIndex>0&&t<handoffEnd){hc.clearRect(0,0,1920,1080);hc.drawImage(content,0,0);cc.clearRect(0,0,1920,1080);const pm=manifest[sceneIndex-1],pt=T.endId(pm.to)-.001,ps=scenes[pm.id],pe=T.sentenceAt(pt),pf=(pt-pe.start)/(pe.end-pe.start);cc.save();cc.beginPath();cc.rect(0,0,1920,950);cc.clip();ps.renderMain(cc,{t:pt,T,id:pe.id,fraction:pf});ps.renderAnnotations(cc,{t:pt,T,id:pe.id});drawNotes(cc,ps.sidebarState(),{id:pe.id,fraction:pf});cc.restore();cc.save();const k=Math.max(0,Math.min(1,(t-T.atId(m.from))/(handoffEnd-T.atId(m.from))));cc.globalAlpha=k*k*(3-2*k);cc.drawImage(handoff,0,0);cc.restore();}
+ if(sceneIndex>0&&t<handoffEnd&&m.id!=='S08'){hc.clearRect(0,0,1920,1080);hc.drawImage(content,0,0);cc.clearRect(0,0,1920,1080);const pm=manifest[sceneIndex-1],pt=T.endId(pm.to)-.001,ps=scenes[pm.id],pe=T.sentenceAt(pt),pf=(pt-pe.start)/(pe.end-pe.start);cc.save();cc.beginPath();cc.rect(0,0,1920,950);cc.clip();ps.renderMain(cc,{t:pt,T,id:pe.id,fraction:pf});ps.renderAnnotations(cc,{t:pt,T,id:pe.id});drawNotes(cc,ps.sidebarState(),{id:pe.id,fraction:pf});cc.restore();cc.save();const k=Math.max(0,Math.min(1,(t-T.atId(m.from))/(handoffEnd-T.atId(m.from))));cc.globalAlpha=k*k*(3-2*k);cc.drawImage(handoff,0,0);cc.restore();}
  ctx.resetTransform();ctx.globalAlpha=1;ctx.fillStyle=moodAt(t,{at:i=>T.atId(String(Math.min(77,i+1)).padStart(2,'0')),end:i=>T.endId(String(Math.min(77,i+1)).padStart(2,'0')),frac:(i,f)=>T.fracId(String(i+1).padStart(2,'0'),f),DUR_CONTENT:T.duration}).paper;ctx.fillRect(0,0,1920,1080);grid(ctx,0,0,1920,1080,48);ctx.drawImage(content,0,0);
  // Subtitle is the only layer allowed below y=950.
- if(m.implemented)drawSubtitles(ctx,row,Math.max(0,Math.min(.999,(t-e.start)/(e.end-e.start))));
+ if(m.implemented||(m.id==='S07'&&e.id==='30'))drawSubtitles(ctx,row,Math.max(0,Math.min(.999,(t-e.start)/(e.end-e.start))));
  window.FRAME_INFO={scene:m.id,sentence:e.id,status:'preview',bounds:bounds.map(b=>({...b})),sceneMetrics,muscleNeutrophils:m.id==='S08'?5:undefined};
  return window.FRAME_INFO;
  };

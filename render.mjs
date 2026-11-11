@@ -19,32 +19,46 @@ try{
  const errors=[];
  async function page(){if(backend==='cpu')return cpuPage();const p=await browser.newPage({viewport:{width:1920,height:1080},deviceScaleFactor:1});p.on('pageerror',e=>errors.push(e.message));await p.route('**/*',async r=>{try{const u=new URL(r.request().url());if(u.origin!=='http://v5.local')throw Error('External network blocked');const f=path.resolve(root,'.'+decodeURIComponent(u.pathname==='/'?'/index.html':u.pathname));if(!f.startsWith(root+path.sep))throw Error('Outside root');await r.fulfill({status:200,contentType:mime[path.extname(f)]||'application/octet-stream',body:await fs.readFile(f)});}catch{await r.fulfill({status:404,body:''});}});await p.goto('http://v5.local/');await p.waitForFunction(()=>window.READY||window.LOAD_ERROR,{},{timeout:90000});const err=await p.evaluate(()=>window.LOAD_ERROR);if(err)throw Error(err);return p;}
  const p=await page(),out=path.join(root,'qa/samples');await fs.mkdir(out,{recursive:true});
- const sampleTimes=await p.evaluate(()=>[T.fracId('04',.5),T.fracId('31',.50)]);
+ const sampleTimes=await p.evaluate(()=>[T.fracId('04',.5),T.fracId('30',.50)]);
  const audit=[];
  async function frame(page,t){const info=await page.evaluate(t=>{window.render(t);return {...window.FRAME_INFO,pixelBounds:window.auditContent()};},t);audit.push({time:t,...info});return page.locator('#film').screenshot();}
  if(args.includes('--still')){const t=Number(getArg('--still'));const png=await frame(p,t);const dest=path.resolve(root,getArg('--out')||`qa/samples/still_${t}.png`);await fs.mkdir(path.dirname(dest),{recursive:true});await fs.writeFile(dest,png);console.log(dest);}
  if(args.includes('--samples')){
+ const b03=path.join(out,'b03');await fs.mkdir(b03,{recursive:true});
+ const b03Stages=await p.evaluate(()=>[
+ ['s08_low',T.fracId('30',.12)],['s08_mid',T.fracId('30',.50)],
+ ['s08_high_s30',T.fracId('30',.96)],['s08_high_s31',T.fracId('31',.65)],
+ ['s08_high_s32',T.fracId('32',.90)],['s08_high_s33',T.fracId('33',.88)],
+ ['s08_high_s34_defect',T.fracId('34',.60)]]);
+ for(const [name,t] of b03Stages)await fs.writeFile(path.join(b03,name+'.png'),await frame(p,t));
+ const b03Crops=await p.evaluate(()=>[
+ {name:'s08_mucosal_defect_200',t:T.fracId('34',.6),x:780,y:340,w:300,h:260},
+ {name:'s08_muscle_200',t:T.fracId('32',.9),x:760,y:110,w:300,h:610}
+ ].map(s=>({...s,scale:2,method:'scene re-render at 2x; no raster upscaling',png:window.renderCrop(s)})));
+ for(const z of b03Crops)await fs.writeFile(path.join(b03,z.name+'.png'),Buffer.from(z.png,'base64'));
+ await fs.writeFile(path.join(b03,'crop-metadata.json'),JSON.stringify(b03Crops.map(({png,...x})=>x),null,2));
+
  for(let i=0;i<2;i++)await fs.writeFile(path.join(out,['s01_key.png','s08_key.png'][i]),await frame(p,sampleTimes[i]));
  const stages=await p.evaluate(()=>[
- ['s08_low',T.fracId('31',.12)],['s08_mid',T.fracId('31',.50)],
- ['s08_high',T.fracId('31',.96)],['s08_zoom_transition',T.fracId('31',.33)],
+ ['s08_low',T.fracId('30',.12)],['s08_mid',T.fracId('30',.50)],
+ ['s08_high',T.fracId('30',.96)],['s08_zoom_transition',T.fracId('30',.33)],
  ['s08_high_pan',T.fracId('32',.15)],['s08_high_defect',T.fracId('34',.60)],
  ...[['s10','37','39'],['s13','50','51'],['s14','54','55'],['s19','69','70']].flatMap(([s,id,high])=>[[s+'_low',T.fracId(id,.12)],[s+'_mid',T.fracId(id,.5)],[s+'_high',T.fracId(high,.6)]])]);
  for(const [name,t] of stages)await fs.writeFile(path.join(out,name+'.png'),await frame(p,t));
  const crops=await p.evaluate(()=>[
  {name:'s08_mucosal_defect_200',t:T.fracId('34',.6),x:780,y:340,w:300,h:260},
- {name:'s08_muscle_200',t:T.fracId('31',.5),x:720,y:110,w:350,h:350}
+ {name:'s08_muscle_200',t:T.fracId('30',.5),x:720,y:110,w:350,h:350}
  ].map(s=>({...s,scale:2,method:'scene re-render at 2x; no raster upscaling',png:window.renderCrop(s)})));
  for(const z of crops)await fs.writeFile(path.join(out,z.name+'.png'),Buffer.from(z.png,'base64'));
  await fs.writeFile(path.join(out,'crop-metadata.json'),JSON.stringify(crops.map(({png,...x})=>x),null,2));
- const phone=await p.evaluate(()=>{window.render(T.fracId('31',.5));const cv=document.createElement('canvas');cv.width=390;cv.height=844;const c=cv.getContext('2d');c.fillStyle='#111114';c.fillRect(0,0,390,844);c.drawImage(document.getElementById('film'),0,(844-1080*390/1920)/2,390,1080*390/1920);return cv.toDataURL().split(',')[1];});
+ const phone=await p.evaluate(()=>{window.render(T.fracId('30',.5));const cv=document.createElement('canvas');cv.width=390;cv.height=844;const c=cv.getContext('2d');c.fillStyle='#111114';c.fillRect(0,0,390,844);c.drawImage(document.getElementById('film'),0,(844-1080*390/1920)/2,390,1080*390/1920);return cv.toDataURL().split(',')[1];});
  await fs.writeFile(path.join(out,'s08_phone_390pt.png'),Buffer.from(phone,'base64'));
- const comparison=await p.evaluate(async()=>{window.render(T.fracId('31',.5));const ref=new Image();ref.src='./qa/samples/ref04.png';await new Promise((resolve,reject)=>{ref.onload=resolve;ref.onerror=reject;});const cv=document.createElement('canvas');cv.width=3840;cv.height=1080;const c=cv.getContext('2d');c.drawImage(ref,0,0,1920,1080);c.drawImage(document.getElementById('film'),1920,0);return cv.toDataURL().split(',')[1];});
+ const comparison=await p.evaluate(async()=>{window.render(T.fracId('30',.5));const ref=new Image();ref.src='./qa/samples/ref04.png';await new Promise((resolve,reject)=>{ref.onload=resolve;ref.onerror=reject;});const cv=document.createElement('canvas');cv.width=3840;cv.height=1080;const c=cv.getContext('2d');c.drawImage(ref,0,0,1920,1080);c.drawImage(document.getElementById('film'),1920,0);return cv.toDataURL().split(',')[1];});
  await fs.writeFile(path.join(out,'对比_ref04_vs_s08.png'),Buffer.from(comparison,'base64'));
 
  }
  if(args.includes('--determinism')){
- const times=await p.evaluate(()=>['01','02','03','04','05','31','32','33','34','37','38','39','40','41','42','54','55','56','57','69','70'].flatMap(id=>[T.atId(id),T.fracId(id,.5),T.endId(id)-.001]));
+ const times=await p.evaluate(()=>['01','02','03','04','05','30','31','32','33','34','37','38','39','40','41','42','54','55','56','57','69','70'].flatMap(id=>[T.atId(id),T.fracId(id,.5),T.endId(id)-.001]));
  const hashes=new Map(),hash=b=>createHash('sha256').update(b).digest('hex');
  for(const t of times)hashes.set(t,hash(await frame(p,t)));
  for(const t of [...times].reverse())if(hash(await frame(p,t))!==hashes.get(t))throw Error(`Render order dependence at ${t}`);
