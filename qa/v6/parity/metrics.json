@@ -1,0 +1,32 @@
+{
+  "passed": false,
+  "threshold": {
+    "MAE_RGB": 1,
+    "pixels_over_16_percent": 1,
+    "lens_MAE_RGB": 1
+  },
+  "frames": [
+    {
+      "t": 89.73,
+      "width": 1920,
+      "height": 1080,
+      "MAE_RGB": 3.62039737654321,
+      "RMSE_RGB": 17.57229309178517,
+      "max_channel_difference": 191,
+      "changed_pixel_percent": 21.285108024691358,
+      "pixels_over_16_percent": 5.439911265432099,
+      "lens_MAE_RGB": 20.81866604300352
+    },
+    {
+      "t": 99.22,
+      "width": 1920,
+      "height": 1080,
+      "MAE_RGB": 30.371623906893003,
+      "RMSE_RGB": 48.9667346580672,
+      "max_channel_difference": 237,
+      "changed_pixel_percent": 88.63450038580247,
+      "pixels_over_16_percent": 82.76466049382717,
+      "lens_MAE_RGB": 93.3031100326936
+    }
+  ]
+}

@@ -1,0 +1,2606 @@
+OpenAI Codex v0.163.0
+--------
+workdir: /workspace/病理科普视频/v5
+model: gpt-6.1-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, /workspace/病理科普视频] (network access enabled)
+reasoning effort: none
+reasoning summaries: none
+session id: 01a1cad2-a127-7711-aa08-54638604f02a
+--------
+user
+# v6 b01 — 先复现样张，再做 S08（分支 v6-fresh）
+
+背景：用户 Gisele 否决了 v5 的全部画面（b01–b04），原因是和她指定的样张差距过大。现从头重做。
+唯一画风标准：qa/ref/style_target/Gisele指定_右侧为目标.png 的右列"细化样张"，以及 qa/ref/style_target/t_089.73.png、t_099.22.png、sample_zoom.png。
+这些样张就是用 engine/ 里的代码画出来的（engine/ 是 v4_mix/film_mini_detail 工作区的原样拷贝，ref_chapters/04.js 是画出样张的章节）。
+
+## 铁律
+1. engine/lib/he.js、he_detail.js、wash.js、ann.js、scope.js 一个字节都不许改。先记下 sha256，结束时再校验并写进自检。新场景只能 import 并调用它们的函数，参数照抄 04.js（hd:true, soft:true, grain:.12, edge:.3, bleed:.5 等）。需要新形状（斜切椭圆）时，在 scenes/ 下新写调用层，不准重写细胞、红细胞、纹理和水彩的绘制。
+2. 第一步：在 v6 里用 engine 原样重现 t_089.73 与 t_099.22 两帧，像素和参考图逐帧对比，输出 qa/v6/parity/ 下的对比图与差异数值。差异明显就停下，并写明原因，不要继续往下做。
+3. 第二步（只在第一步通过后做）：按 分镜/分镜_v1.md 与 qa/病理验收清单.md 做 S08 显微镜段。
+   - 低倍：斜切、略不规则的椭圆横断面（长短轴比 1.4–1.8），比视野大，被目镜裁边，管腔不规则，不画完整正圆环。
+   - 低倍到中倍到高倍连续推镜，倍数标签只写"低倍/中倍/高倍"，不写数字。
+   - 高倍路线按句号 id 计时：30 扩张的黏膜下血管和中性粒细胞游出；31 上到固有层和黏膜；32 往下扫过黏膜下层到肌层，肌层里只有少量；33 往回走，经过受损的细胞；34 停在上皮局灶缺损处。只移动到相邻层次，不跳切，不加装饰性漂移。
+   - 肌层：内环行肌是长梭形核，外纵行肌是圆点核。
+   - 讲解卡片只在对应句出现，放在目镜外的暗区，用完就退场；指引线 1.6px 细线。内容一律在 y<950 以内，下方留给字幕（中文 52px，英文 30px）。
+4. 你的沙箱启动不了 Chromium，可以用 CPU 后端自检，但要在自检里写明。最终出图由 mini 用 Chromium 执行，所以必须提供 `node render.mjs --samples` 命令，输出到 qa/v6/samples/。
+5. 不许改 assembly/、v4_mix/，不许 git commit。
+
+## 交付
+qa/v6/parity/（对比图和数值），qa/v6/samples/ 里的 s08_low、s08_mid、s08_high_s30 到 s08_high_s34，qa/v6/对比_样张vs_v6.png（同倍率的急性期并排对比），qa/v6/自检.md（写明 sha256 校验结果、差异和未完成项）。
+
+2026-11-11T13:36:05.766366Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer realm=\"OAuth\", resource_metadata=\"https://mcp.notion.com/.well-known/oauth-protected-resource/mcp\", scope=\"default\"" })
+codex
+我先检查目录和参考帧的生成方式，记录受保护文件的 SHA-256，再做两帧复现对比；通过后才继续 S08。
+
+exec
+/bin/bash -lc "pwd; rg --files -g 'AGENTS.md' -g '*render*' -g '04.js' -g '*分镜*' -g '*验收*' -g '*089*' -g '*099*' -g '*zoom*' -g '*目标*' -g 'package.json' -g 'he.js' -g 'he_detail.js' -g 'wash.js' -g 'ann.js' -g 'scope.js'" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+/workspace/病理科普视频/v5
+assembly/pipeline/render_endcard.mjs
+assembly/endcard/render.mjs
+assembly/subtitle/render.mjs
+assembly/package.json
+分镜/分镜_v1.md
+qa/病理验收清单.md
+qa/briefs/render_b04_chromium.log
+qa/ref/style_target/sample_zoom.png
+qa/ref/style_target/t_099.22.png
+qa/ref/style_target/t_089.73.png
+qa/ref/style_target/src/04.js
+qa/ref/style_target/src/wash.js
+qa/ref/style_target/src/he.js
+qa/ref/style_target/src/he_detail.js
+qa/ref/style_target/Gisele指定_右侧为目标.png
+engine/lib/wash.js
+engine/lib/ann.js
+engine/lib/scope.js
+engine/lib/he.js
+engine/lib/he_detail.js
+engine/ref_chapters/04.js
+
+exec
+/bin/bash -lc 'ls -la; find .. -name AGENTS.md -print; git status --short --branch; ls -R engine' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+total 32
+drwxr-xr-x 11 box box 4096 Nov 11 21:36 .
+drwxr-xr-x 20 box box 4096 Nov 11 21:36 ..
+dr-xr-xr-x  2 box box   40 Nov 11 21:36 .agents
+dr-xr-xr-x  2 box box   40 Nov 11 21:36 .aws
+dr-xr-xr-x  2 box box   40 Nov 11 21:36 .codex
+drwxr-xr-x  8 box box 4096 Nov 11 21:35 .git
+drwxr-xr-x  7 box box 4096 Nov 10 23:40 assembly
+drwxr-xr-x  4 box box 4096 Nov 11 21:35 assets
+drwxr-xr-x  7 box box 4096 Nov 11 21:35 engine
+drwxr-xr-x  5 box box 4096 Nov 11 21:35 qa
+drwxr-xr-x  2 box box 4096 Nov 10 22:42 分镜
+## v6-fresh
+ M assembly/endcard/data/endcard.json
+ M assembly/endcard/endcard.js
+ M assembly/endcard/static-preview.py
+ M assembly/endcard/样帧_片尾.png
+?? assembly/.gitignore
+?? assembly/package-lock.json
+?? assembly/package.json
+?? assembly/pipeline/
+?? assembly/qa/
+?? assembly/subtitle/
+?? qa/briefs/run_v6_b01.log
+?? qa/briefs/v6_b01_parity.md
+engine:
+fonts
+index.html
+lib
+main.js
+ref_chapters
+tools
+vendor
+
+engine/fonts:
+MixSans-Bold.woff2
+MixSans-Regular.woff2
+
+engine/lib:
+ann.js
+camera.js
+chapter.js
+figure.js
+he.js
+he_detail.js
+ink.js
+mood.js
+motion.js
+scope.js
+subtitle.js
+timeline.js
+tokens.js
+wash.js
+
+engine/ref_chapters:
+04.js
+
+engine/tools:
+make-chapters.py
+measure-mcb.mjs
+subset-font.sh
+
+engine/vendor:
+p5.brush.js
+p5.min.js
+rough.js
+
+exec
+/bin/bash -lc 'cat engine/ref_chapters/04.js; cat engine/main.js; cat engine/index.html; cat qa/briefs/v6_b01_parity.md; sha256sum engine/lib/{he.js,he_detail.js,wash.js,ann.js,scope.js}' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+import { prepareGangrene, gangrene } from '../lib/he_detail.js';
+// 04 三型演变 — sentences 10–13. Entry = 03 exit (LENS_EXIT, HE_EXIT, verdict on the right → wiped).
+// Same patch of wall evolves IN PLACE: rewind → 单纯性 (黏膜+黏膜下层) → 蜂窝织炎性 (全层弥漫) → 坏疽性 (缺血坏死发黑 → 穿孔).
+// A Manim-style vertical "stage track" on the right carries a marker through the three named types (one focus at a time).
+import { C } from '../lib/tokens.js';
+import * as A from '../lib/ann.js';
+import { drawWash } from '../lib/wash.js';
+import { drawLens, fieldToScreen as FTS, BANDS, VESSELS, fadeSeams } from '../lib/he.js';
+import { win, fade, titleBlock } from '../lib/chapter.js';
+import { tween, ease, seg, clamp } from '../lib/motion.js';
+import { moodAt, burstShake, holdAfter } from '../lib/mood.js';
+import { drawSurround, drawPointer, offFor } from '../lib/scope.js';
+import { LENS_EXIT, HE_EXIT } from './03.js';
+prepareGangrene(VESSELS);
+const I0 = 10, s = i => I0 + i;
+const L = LENS_EXIT, lerp = (a, b, k) => a + (b - a) * k;
+const PERF = [190, 0];                                   // perforation x in field coords (away from the 03 ulcer)
+export const EXIT_04 = { lens: L, he: { ulcer: 1, neut: 1, fibrin: 1 }, necro: 1, perf: 1 };
+// HE state as a function of t: 03 end → rewind to early (few cells, intact mucosa) → full → (gangrene overlay handles the rest)
+export function heAt(t, T) {
+  const rw = win(t, T.frac(s(0), .25), T.frac(s(0), .8));           // rewind
+  const up = win(t, T.frac(s(2), .05), T.frac(s(2), .9));            // escalate to full wall
+  const detail = ease.inOutCubic(seg(t, T.at(s(0)), T.frac(s(0), .8)));
+  const early = { ulcer: .08, neut: .2, fibrin: 0 };
+  const m = k => ({ ulcer: lerp(early.ulcer, 1, k), neut: lerp(early.neut, 1, k), fibrin: lerp(early.fibrin, 1, k) });
+  const acc = win(t, T.at(s(1)), T.end(s(1)));                       // slow accumulation while still confined to mucosa/submucosa
+  const e2 = { ulcer: lerp(early.ulcer, .16, acc), neut: lerp(early.neut, .36, acc), fibrin: 0 };
+  if (up > 0) return { ulcer: lerp(e2.ulcer, 1, up), neut: lerp(e2.neut, 1, up), fibrin: lerp(0, 1, up), detail, t };
+  if (acc > 0) return { ...e2, detail, t };
+  return { ulcer: lerp(HE_EXIT.ulcer, early.ulcer, rw), neut: lerp(HE_EXIT.neut, early.neut, rw), fibrin: lerp(HE_EXIT.fibrin, early.fibrin, rw), detail, t };
+}
+// Deliberate tempo changes in SCREEN space (the lens is not drawn through the world camera).
+// Every beat follows the measured sentence axis; repeated keys are intentional rests.
+const peakAt = T => T.frac(s(3), .78);
+const heldClock = (t, T) => Math.min(holdAfter(t, peakAt(T), .45), T.end(s(3), -.55));
+// mood_v2: after the peak settles, a very slow continuous push so the 0.8 s VO gap into 05 is not a frozen frame
+export const creep04 = (t, T) => 1 + .006 * Math.max(0, t - T.end(s(3), -.55));
+export function fsAt(t, T) { return tween(t, [
+  [T.at(s(0)), 1.06], [T.end(s(0)), 1.065],
+  [T.at(s(1)), 1.065], [T.end(s(1)), 1.085, ease.inOutSine],
+  [T.at(s(2)), 1.085], [T.frac(s(2), .62), 1.15, ease.outCubic], [T.end(s(2)), 1.15],
+  [T.at(s(3)), 1.15], [T.frac(s(3), .55), 1.24, ease.inQuad],
+  [peakAt(T), 1.48, ease.inQuad], [peakAt(T) + .45, 1.48],
+  [T.end(s(3), -.55), 1.45, ease.outCubic], [T.end(s(3)), 1.45],
+]); }
+// mood_v2: stage moves so the fixed eyepiece pointer lands in the perforation channel at the peak (no move before .55).
+export function offAt(t, T) { return tween(t, [[T.at(s(0)), [0, 0]], [T.frac(s(3), .55), [0, 0]], [peakAt(T), offFor({ r: 1 }, [180, 60], 1.48), ease.inOutSine], [T.end(s(3)), offFor({ r: 1 }, [180, 60], 1.48)]]); }
+export function lensAt(t, T) { const [dx, dy] = tween(t, [
+  [T.at(s(0)), [0, 0]], [T.end(s(1)), [3, -2], ease.inOutSine],
+  [T.frac(s(2), .62), [6, -4], ease.outCubic], [T.end(s(2)), [6, -4]],
+  [T.frac(s(3), .55), [10, -6], ease.inQuad], [peakAt(T), [14, -8], ease.inQuad],
+  [peakAt(T) + .45, [14, -8]], [T.end(s(3), -.55), [0, 0], ease.outCubic], [T.end(s(3)), [0, 0]],
+]); return { x: L.x + dx, y: L.y + dy, r: L.r }; }
+export function gangAt(t, T) { return {
+  kv: win(t, T.frac(s(3), .02), T.frac(s(3), .2)),
+  kn: win(t, T.frac(s(3), .18), T.frac(s(3), .6)),
+  kp: clamp((t - T.frac(s(3), .55)) / (peakAt(T) - T.frac(s(3), .55))) ** 1.7,
+  ko: win(t, T.frac(s(3), .72), peakAt(T)),
+}; }
+export function drawLens04(ctx, Lx, st, fs, g, off = [0, 0]) {
+  drawLens(ctx, Lx, { ...st, necrosis: g.kn * (st.detail || 0), ox: off[0], oy: off[1], vr: 420 / fs }, fs, { off }); const { kv, kn, kp, ko } = g;
+  if (kv > 0) { ctx.save(); ctx.beginPath(); ctx.arc(Lx.x, Lx.y, Lx.r, 0, 6.283); ctx.clip(); ctx.translate(Lx.x, Lx.y); const z = Lx.r / 420 * fs; ctx.scale(z, z); ctx.translate(-off[0], -off[1]);
+    gangrene(ctx, g);
+    if(ko > 0) drawWash(ctx, 'c04.leak', PERF[0], BANDS.serosa[1] + 43, 145, { grow: ko, alpha: ko * .32, blend: 'source-over', origin: [.5, .2] });
+    if (kn > 0) fadeSeams(ctx, kn, Lx, off, fs);
+    ctx.restore(); } }
+// 05 calls this with its own (shrinking) lens; everything else is 04's exact last frame
+export function drawExit04(ctx, T, Lx, t) { const te = T.end(s(3)) - 1e-3; drawLens04(ctx, Lx, { ...heAt(te, T), t: heldClock(te, T) }, fsAt(te, T), gangAt(te, T), offAt(te, T)); }
+export const DIM = .985;   // 03 leaves the world layer dimmed by a paper veil; 04 keeps it, 05 lifts it
+export default {
+  id: '04',
+  shake: (t, T) => burstShake(t, T.frac(s(3), .76), { frames: 6, amp: 3.6, seed: 404 }),
+  drift: false, boil: false, // quiet really means quiet; no perpetual global drift/ink boil
+  bake(bake) {
+    for (let i = 0; i < 4; i++) {
+      const wash = bake(`c04.necro.${i}`, (b, P) => {
+        P.fill(b, P.blob(0, 0, 290 + i * 13, 36, .38, 460 + i), i % 2 ? '#E3B7C4' : '#D7A3B3', 78 + i * 8, .42, [.65, .55]);
+        P.fill(b, P.blob(45, -25, 195, 32, .45, 470 + i), '#E7C9D2', 52, .5);
+      }, { seed: 460 + i, hd: true, soft: true, grain: .12, edge: .3, bleed: .5 });
+      // Soften pigment boundaries once in the cached watercolour bitmap.
+      const soft = document.createElement('canvas'); soft.width = wash.width; soft.height = wash.height;
+      const sc = soft.getContext('2d'); sc.filter = 'blur(15px)'; sc.drawImage(wash, 0, 0);
+      const wc = wash.getContext('2d'); wc.clearRect(0, 0, wash.width, wash.height);
+      wc.drawImage(soft, 0, 0);
+    }
+    bake('c04.thromb', (b, P) => { P.fill(b, P.blob(0, 0, 300, 22, .2, 43), '#3A1F2A', 200, .15); }, { seed: 43, hd: true, soft: true, grain: .12, edge: .3, bleed: .5 });
+    bake('c04.heme', (b, P) => {
+      P.fill(b, P.blob(0, 0, 260, 28, .5, 481), '#8E3A3E', 188, .5, [.55, .48]);
+      P.fill(b, P.blob(-48, 30, 170, 22, .55, 482), '#A8404E', 168, .46, [.5, .45]);
+      P.fill(b, P.blob(42, -26, 140, 20, .52, 483), '#9A3E48', 150, .42);
+      P.fill(b, P.blob(8, 4, 80, 14, .48, 484), '#7A3038', 120, .38);
+    }, { seed: 481, hd: true, soft: true, grain: .12, edge: .3, bleed: .5 });
+    bake('c04.leak', (b, P) => { P.fill(b, P.blob(0, 0, 330, 26, .5, 44), C.pus, 170, .3, [.6, .5]); }, { seed: 44, hd: true, soft: true, grain: .12, edge: .3, bleed: .5 });
+    bake('c04.mark', (b, P) => { P.fill(b, P.blob(0, 0, 360, 26, .3, 45), C.red, 110, .3); }, { seed: 45, hd: true, soft: true, grain: .12, edge: .3, bleed: .5 });
+    // scaleBrushes multiplies. Three extra necro bakes plus heme leave 05/06 at 2.4^4.
+    // Put the weight back; this canvas is never drawn.
+    bake('c04.brushScale', (b) => { const u = 1 / 2.4; b.scaleBrushes(u); b.scaleBrushes(u); b.scaleBrushes(u); b.scaleBrushes(u); }, { scale: 1, seed: 46 });
+  },
+  camera: T => [[T.at(s(0)), { x: 960, y: 540, zoom: 1 }], [T.end(s(3)), { x: 960, y: 520, zoom: 1 }]],
+  screen(ctx, t, T, cam, mood = moodAt(t, T)) {
+    // The global atmosphere stays behind pathology. This existing veil reads the SAME paper colour.
+    // mood_v2: still at the eyepiece → near-black surround (replaces the paper veil).
+    const Lx0 = lensAt(t, T); drawSurround(ctx, Lx0, mood.scope ?? 1);
+    const sceneT = heldClock(t, T);
+    const st = { ...heAt(t, T), t: sceneT }, fs = fsAt(t, T) * creep04(t, T);
+    const Lx = Lx0, off = offAt(t, T); drawLens04(ctx, Lx, st, fs, gangAt(t, T), off); drawPointer(ctx, Lx, 1);
+    const L = Lx, fieldToScreen = (L, p, fs) => FTS(L, p, fs, off);
+    // perforation accent lives on the LENS RIM (local object), not on the paper
+    const fr = mood.tint.flashRed; if (fr > 0) { ctx.save(); ctx.globalAlpha *= .85 * fr; ctx.strokeStyle = C.red; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(L.x, L.y, L.r + 8, 0, 6.283); ctx.stroke(); ctx.restore(); }
+    // ---- wipe 03's verdict text (it is still on screen at entry) ----
+    const kw = 1 - win(t, T.at(s(0)), T.at(s(0), .6));
+    if (kw > 0) { ctx.save(); ctx.globalAlpha = kw; A.label(ctx, '病理诊断', 1060, 330, { size: 26, alpha: .65 }); A.line(ctx, [1060, 356], [1700, 356], { w: 1.6 });
+      A.label(ctx, '急性蜂窝织炎性阑尾炎', 1060, 420, { size: 62, w: 800 }); A.label(ctx, '＝ 化脓性炎', 1060, 510, { size: 52, w: 800, col: C.red });
+      A.brace(ctx, [1060, 566], [1660, 566], { depth: 12 }); A.label(ctx, '中性粒细胞弥漫浸润全层', 1360, 612, { size: 26, align: 'center' }); ctx.restore(); }
+    // ---- band names (left), as in 03 ----
+    const xl = L.x - L.r - 26, kbn = fade(t, T.at(s(0)), T.frac(s(0), .2), T.frac(s(3), .2), T.frac(s(3), .35));
+    [['黏膜', BANDS.mucosa], ['黏膜下层', BANDS.submucosa], ['肌层', BANDS.muscularis], ['浆膜', BANDS.serosa]].forEach(([n, b]) => { const y = fieldToScreen(L, [0, (b[0] + b[1]) / 2], fs)[1];
+      if (y > L.y - L.r * .9 && y < L.y + L.r * .9) A.label(ctx, n, xl, y, { size: 24, align: 'right', alpha: .75 * kbn }); });
+    // ---- rewind cue ----
+    const kr = fade(t, T.frac(s(0), .2), T.frac(s(0), .35), T.frac(s(0), .8), T.end(s(0)));
+    A.label(ctx, '时间倒回：发病早期', L.x, L.y - L.r - 34, { size: 26, w: 700, align: 'center', col: C.red, k: kr });
+    // ---- stage track (right): three stations, marker travels ----
+    const kend = 1 - win(t, T.end(s(3), -.7), T.end(s(3), -.05)); ctx.save(); ctx.globalAlpha = kend;
+    const tx = 1120, ys = [300, 480, 660], names = ['单纯性', '蜂窝织炎性', '坏疽性'], subs = ['黏膜及黏膜下层', '全层 · 中性粒细胞弥漫浸润', '缺血坏死 · 发黑 · 穿孔'];
+    const kt = win(t, T.frac(s(0), .45), T.end(s(0)));
+    A.line(ctx, [tx, ys[0]], [tx, ys[2]], { k: kt, w: 2 }); ys.forEach((y, i) => A.tick(ctx, [tx, y], [0, 1], { k: kt, len: 10 }));
+    A.label(ctx, '急性阑尾炎 · 三型（同一段管壁）', tx - 10, ys[0] - 70, { size: 22, alpha: .65, k: kt });
+    const arrive = [win(t, T.at(s(1)), T.frac(s(1), .15)), win(t, T.at(s(2)), T.frac(s(2), .15)), win(t, T.at(s(3)), T.frac(s(3), .15))];
+    const pos = arrive[2] > 0 ? lerp(ys[1], ys[2], arrive[2]) : arrive[1] > 0 ? lerp(ys[0], ys[1], arrive[1]) : ys[0];
+    if (arrive[0] > 0) { A.dot(ctx, [tx, pos], { r: 11, col: C.red, k: arrive[0] }); A.ring(ctx, [tx, pos], 18 + 4 * Math.sin(sceneT * 3.1), { col: C.red, k: arrive[0], w: 2 }); }
+    names.forEach((n, i) => { const k = arrive[i], cur = i === 2 ? 1 : 1 - arrive[i + 1] * .55;
+      A.label(ctx, n, tx + 40, ys[i] - 14, { size: 40, w: 800, col: i === 2 ? C.ink : C.red, k, alpha: cur });
+      A.label(ctx, subs[i], tx + 42, ys[i] + 30, { size: 24, k: win(t, T.frac(s(1 + i), .15), T.frac(s(1 + i), .3)), alpha: .8 * cur }); });
+    ctx.restore();
+    // ---- in-lens annotations, one at a time ----
+    const top = fieldToScreen(L, [0, BANDS.mucosa[0]], fs), msb = fieldToScreen(L, [0, BANDS.submucosa[1]], fs), ser = fieldToScreen(L, [0, BANDS.serosa[1]], fs), bx = L.x + L.r + 22;
+    const k1 = fade(t, T.frac(s(1), .2), T.frac(s(1), .35), T.frac(s(2), .05), T.frac(s(2), .15));
+    A.brace(ctx, [bx, top[1]], [bx, msb[1]], { k: k1, depth: -14, col: C.red });
+    const k2 = fade(t, T.frac(s(2), .35), T.frac(s(2), .5), T.frac(s(3), .02), T.frac(s(3), .12));
+    A.brace(ctx, [bx, Math.max(top[1], L.y - L.r * .85)], [bx, Math.min(ser[1], L.y + L.r * .85)], { k: k2, depth: -14, col: C.red });
+    // gangrene leaders (inside → left side so the track stays clean)
+    const kl1 = fade(t, T.frac(s(3), .35), T.frac(s(3), .45), T.end(s(3), -.6), T.end(s(3), -.1)), np = fieldToScreen(L, [-160, 40], fs);
+    A.label(ctx, '血管受压闭塞 → 缺血坏死、发黑', L.x, L.y - L.r - 34, { size: 26, w: 700, align: 'center', k: kl1 });
+    const kl2 = fade(t, T.frac(s(3), .7), peakAt(T), T.end(s(3), -.6), T.end(s(3), -.1)), pp = fieldToScreen(L, [PERF[0], BANDS.serosa[0]], fs);
+    A.ring(ctx, pp, 52, { k: kl2, col: C.red, w: 3 }); A.label(ctx, '穿孔 → 可致弥漫性腹膜炎', pp[0] + 58, pp[1] + 6, { size: 28, w: 800, col: C.red, k: kl2 });
+  },
+  title(ctx, t, T) { titleBlock(ctx, t, T.frac(s(0), .1), '04 · 三型演变', '战火升级', 4); },
+};
+// Entry: render(t) contract for garden-skills/motion-showreel (window.DUR, window.render, window.READY).
+import { C, W, H, FONT } from './lib/tokens.js';
+import { loadTimeline } from './lib/timeline.js';
+import { initBaker, bake } from './lib/wash.js';
+import { grid, setBoil, BOIL_FPS } from './lib/ink.js';
+import { camAt, apply, view } from './lib/camera.js';
+import * as SUB from './lib/subtitle.js';
+import { label } from './lib/ann.js';
+import CHAPTERS from './chapters/index.js';
+import { moodAt } from './lib/mood.js';
+import { scopeAt } from './lib/scope.js';
+import { setDark } from './lib/ann.js';
+
+const q = new URLSearchParams(location.search);
+const cv = document.getElementById('c'); cv.width = W; cv.height = H; cv.style.width = W + 'px'; cv.style.height = H + 'px';
+const ctx = cv.getContext('2d');
+const END_CARD = 12;
+const T = await loadTimeline();
+window.TIMELINE = T;
+window.DUR = T.DUR_CONTENT + END_CARD;
+await document.fonts.load(`500 44px ${FONT}`); await document.fonts.load(`700 60px ${FONT}`);
+await initBaker();
+for (const ch of Object.values(CHAPTERS)) if (ch.bake) ch.bake(bake, T);   // fixed-seed washes, baked once
+const chapterAt = t => { const ids = Object.keys(T.CH).sort(); let id = ids[0]; for (const k of ids) if (t >= T.CH[k].start) id = k; if (t >= T.DUR_CONTENT) id = '07'; return id; };
+window.render = t => {
+  const id = q.get('ch') && false ? q.get('ch') : chapterAt(t), ch = CHAPTERS[id];
+  const mood = moodAt(t, T); mood.scope = scopeAt(t, T); window.__mood = mood; setDark(mood.scope);
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.fillStyle = mood.paper; ctx.fillRect(0, 0, W, H);
+  // mood_v2d: a chapter may force the boil on (boilAlways(t,T)) regardless of the shared speed hint (07 had it < .15 → frozen lines)
+  const boilOn = ch && ch.boil !== false && ((ch.boilAlways && ch.boilAlways(t, T)) || mood.speedHint >= .15);
+  setBoil(boilOn ? Math.floor(mood.ambientTime * BOIL_FPS + 1e-6) : null);
+  let cam = ch && ch.camera ? camAt(ch.camera(T), t) : { x: W / 2, y: H / 2, zoom: 1 };
+  // global slow drift (≈3–4 screen px) so no frame is ever fully static; chapter may opt out with drift:false
+  // mood_v2: drift is continuous (no on/off gating → no frozen runs / abrupt restarts); chapters may still opt out.
+  if (!ch || ch.drift !== false) cam = { ...cam, x: cam.x + 3.2 * Math.sin(t * .29) / cam.zoom, y: cam.y + 2.4 * Math.sin(t * .23 + 1) / cam.zoom };
+  window.__cam = cam;
+  // Outer SCREEN translation moves world, labels and subtitles together (never scales shake with zoom).
+  const localShake = ch && ch.shake ? ch.shake(t, T) : { dx: 0, dy: 0 };
+  ctx.save(); ctx.translate(mood.shake.dx + (localShake.dx || 0), mood.shake.dy + (localShake.dy || 0));
+  ctx.save(); apply(ctx, cam); const v = view(cam);
+  ctx.save(); ctx.globalAlpha *= mood.gridAlpha; grid(ctx, v[0] - 40, v[1] - 40, v[2] + 40, v[3] + 40); ctx.restore();
+  if (ch && ch.world) ch.world(ctx, t, T, cam, mood);
+  ctx.restore();
+  if (ch && ch.screen) { ctx.save(); ch.screen(ctx, t, T, cam, mood); ctx.restore(); }
+  if (!ch) label(ctx, `第 ${id} 章 · 待制作`, W / 2, H / 2, { size: 40, align: 'center', alpha: .4 });
+  const sk = mood.scope, pr = mood.paper.match(/\d+/g).map(Number), bk = [17, 17, 20];
+  SUB.safeFade(ctx, sk > 0 ? `rgb(${pr.map((v, i) => Math.round(v + (bk[i] - v) * sk)).join(',')})` : mood.paper, sk);
+  if (ch && ch.title) { ctx.save(); ch.title(ctx, t, T); ctx.restore(); }
+  SUB.draw(ctx, T.S, t, sk);
+  setDark(0);
+  ctx.restore();
+};
+window.READY = true;
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>疼会“搬家”的7厘米盲管</title>
+<style>
+@font-face{font-family:"MixSans";src:url(fonts/MixSans-Regular.woff2) format("woff2");font-weight:400 500}
+@font-face{font-family:"MixSans";src:url(fonts/MixSans-Bold.woff2) format("woff2");font-weight:600 900}
+html,body{margin:0;background:#F4EFE6;overflow:hidden}canvas{display:block}#bake{display:none}
+</style></head><body>
+<canvas id="c"></canvas><div id="bake"></div>
+<script src="vendor/p5.min.js"></script><script src="vendor/p5.brush.js"></script><script src="vendor/rough.js"></script>
+<script type="module" src="./main.js"></script>
+</body></html>
+# v6 b01 — 先复现样张，再做 S08（分支 v6-fresh）
+
+背景：用户 Gisele 否决了 v5 的全部画面（b01–b04），原因是和她指定的样张差距过大。现从头重做。
+唯一画风标准：qa/ref/style_target/Gisele指定_右侧为目标.png 的右列"细化样张"，以及 qa/ref/style_target/t_089.73.png、t_099.22.png、sample_zoom.png。
+这些样张就是用 engine/ 里的代码画出来的（engine/ 是 v4_mix/film_mini_detail 工作区的原样拷贝，ref_chapters/04.js 是画出样张的章节）。
+
+## 铁律
+1. engine/lib/he.js、he_detail.js、wash.js、ann.js、scope.js 一个字节都不许改。先记下 sha256，结束时再校验并写进自检。新场景只能 import 并调用它们的函数，参数照抄 04.js（hd:true, soft:true, grain:.12, edge:.3, bleed:.5 等）。需要新形状（斜切椭圆）时，在 scenes/ 下新写调用层，不准重写细胞、红细胞、纹理和水彩的绘制。
+2. 第一步：在 v6 里用 engine 原样重现 t_089.73 与 t_099.22 两帧，像素和参考图逐帧对比，输出 qa/v6/parity/ 下的对比图与差异数值。差异明显就停下，并写明原因，不要继续往下做。
+3. 第二步（只在第一步通过后做）：按 分镜/分镜_v1.md 与 qa/病理验收清单.md 做 S08 显微镜段。
+   - 低倍：斜切、略不规则的椭圆横断面（长短轴比 1.4–1.8），比视野大，被目镜裁边，管腔不规则，不画完整正圆环。
+   - 低倍到中倍到高倍连续推镜，倍数标签只写"低倍/中倍/高倍"，不写数字。
+   - 高倍路线按句号 id 计时：30 扩张的黏膜下血管和中性粒细胞游出；31 上到固有层和黏膜；32 往下扫过黏膜下层到肌层，肌层里只有少量；33 往回走，经过受损的细胞；34 停在上皮局灶缺损处。只移动到相邻层次，不跳切，不加装饰性漂移。
+   - 肌层：内环行肌是长梭形核，外纵行肌是圆点核。
+   - 讲解卡片只在对应句出现，放在目镜外的暗区，用完就退场；指引线 1.6px 细线。内容一律在 y<950 以内，下方留给字幕（中文 52px，英文 30px）。
+4. 你的沙箱启动不了 Chromium，可以用 CPU 后端自检，但要在自检里写明。最终出图由 mini 用 Chromium 执行，所以必须提供 `node render.mjs --samples` 命令，输出到 qa/v6/samples/。
+5. 不许改 assembly/、v4_mix/，不许 git commit。
+
+## 交付
+qa/v6/parity/（对比图和数值），qa/v6/samples/ 里的 s08_low、s08_mid、s08_high_s30 到 s08_high_s34，qa/v6/对比_样张vs_v6.png（同倍率的急性期并排对比），qa/v6/自检.md（写明 sha256 校验结果、差异和未完成项）。
+d1082580c1219a8b727704aec3bef03d4115003a674a7381b5b8bfab625ffcdc  engine/lib/he.js
+331533e02b6db55b6d60b42cb85625fd3ee236e40fb749333ec57f129583fdf9  engine/lib/he_detail.js
+889bacbc5c54cd57b7c6018afa33fb1df6bbcb9e8a3b744efece3539826308b9  engine/lib/wash.js
+a1168fc75660bf23424cffff32533dc7289672ffe943537bc6276d6d04742ed6  engine/lib/ann.js
+6c6079ad8a12ded36b5c203f9a3416d51d83c46c757a50d06768dda6bac9a0b2  engine/lib/scope.js
+
+exec
+/bin/bash -lc "ls -la ..; cat engine/lib/wash.js | head -90; cat engine/lib/timeline.js; cat engine/lib/he.js | head -65; ls qa/ref/style_target/src; rg --files /tmp /workspace | rg '(03.js|timeline.json|sentences|package.json|canvas|playwright)' | head -60" in /workspace/病理科普视频/v5
+ succeeded in 256ms:
+total 2756
+drwxr-xr-x  20 box box    4096 Nov 11 21:36 .
+drwxr-xr-x. 25 box box    4096 Nov 10 21:44 ..
+dr-xr-xr-x   2 box box      40 Nov 11 21:36 .agents
+dr-xr-xr-x   2 box box      40 Nov 11 21:36 .aws
+dr-xr-xr-x   2 box box      40 Nov 11 21:36 .codex
+dr-xr-xr-x   2 box box      40 Nov 11 21:36 .git
+drwxr-xr-x   2 box box    4096 Nov  9 08:09 music
+drwxr-xr-x   2 box box    4096 Nov  9 08:08 qa
+drwxr-xr-x   2 box box    4096 Nov  9 08:08 v2
+drwxr-xr-x   3 box box    4096 Nov  9 08:08 v3
+drwxr-xr-x  10 box box    4096 Nov 10 23:10 v4_mix
+drwxr-xr-x   9 box box    4096 Nov  9 08:08 v4_tools
+drwxr-xr-x  11 box box    4096 Nov 11 21:36 v5
+drwxr-xr-x   6 box box    4096 Nov  9 08:08 代码动画_测试
+drwxr-xr-x   2 box box    4096 Nov  9 08:08 关键帧
+-rw-r--r--   1 box box    2297 Nov  9 08:08 关键帧说明.md
+drwxr-xr-x  11 box box    4096 Nov  9 08:08 分层素材_v2
+-rw-r--r--   1 box box    2874 Nov  9 08:08 字幕.srt
+-rw-r--r--   1 box box 2611663 Nov  9 08:08 成片_无旁白草稿_v1.mp4
+-rw-r--r--   1 box box    4372 Nov  9 08:08 旁白脚本_v1.md
+drwxr-xr-x   2 box box    4096 Nov 10 21:20 老师意见
+-rw-r--r--   1 box box   40285 Nov  9 08:08 脚本与分镜_v1.docx
+-rw-r--r--   1 box box   41404 Nov  9 08:08 脚本与分镜编排.docx
+-rw-r--r--   1 box box   39496 Nov  9 08:08 视频脚本与分镜编排_v1.docx
+drwxr-xr-x   3 box box    4096 Nov 10 22:17 解说词_v2
+drwxr-xr-x   9 box box    4096 Nov 10 22:24 配音
+drwxr-xr-x   2 box box    4096 Nov  9 08:08 风格样张
+// p5.brush watercolour — PATHOLOGY layer only (redness, blood, exudate, pus, HE stain).
+// Washes are BAKED once at load time with a fixed seed into offscreen canvases, then composited per frame
+// (scale / alpha / radial-mask growth). This removes edge shimmer and makes frames fast + deterministic.
+import { C } from './tokens.js';
+import { fbm, hash } from './motion.js';
+const baked = new Map(); let P5 = null, SIZE = 1024;
+export function initBaker() { return new Promise(res => { new p5(p => { P5 = p; brush.instance(p);
+  p.setup = () => { p.createCanvas(SIZE, SIZE, p.WEBGL); p.pixelDensity(1); p.noLoop(); res(); }; p.draw = () => {}; }, document.createElement('div')); }); }
+// recipe(b, P): draw in local coords with origin at canvas centre, ±SIZE/2. b = brush api, P = helpers
+export function bake(key, recipe, { seed = 1, scale = 2.4, keepWhite = false, hd = false, size, grain = 0, edge = 0, bleed = 0, soft = false } = {}) {   // keepWhite: skip colour-to-alpha (pale pigments over dark washes)
+  // detail: p5.brush buffers stay bound to the original 1024 canvas; only 2D output is resized.
+  const bakeSize = size === undefined ? (hd ? 2048 : SIZE) : Math.max(1, Math.round(size));
+  const p = P5;
+  p.clear(); p.randomSeed(seed); p.noiseSeed(seed); if (brush.seed) brush.seed(seed);
+  brush.scaleBrushes(scale);
+  recipe(brush, helpers); brush.reDraw && brush.reDraw();
+  const cv = document.createElement('canvas'); cv.width = SIZE; cv.height = SIZE; const cx = cv.getContext('2d', { willReadFrequently: true }); cx.drawImage(p.canvas, 0, 0);
+  // colour-to-alpha against white: brush paper-texture speckle (near-white) becomes transparent, pigment keeps its density
+  const im = cx.getImageData(0, 0, SIZE, SIZE), d = im.data;
+  // detail: leave the legacy conversion byte-for-byte intact unless an effect is requested.
+  if (soft || grain || edge || bleed) {
+    detailWash(d, SIZE, key, { keepWhite, soft, grain: hd ? 0 : grain, edge, bleed });
+  } else if (!keepWhite) for (let i = 0; i < d.length; i += 4) { const a = d[i + 3] / 255; if (!a) continue; const m = Math.max(255 - d[i], 255 - d[i + 1], 255 - d[i + 2]) / 255; const na = m * a; if (na < .02) { d[i + 3] = 0; continue; }
+    for (let c = 0; c < 3; c++) d[i + c] = 255 - (255 - d[i + c]) * a / na; d[i + 3] = na * 255; }
+  if (!keepWhite || soft || grain || edge || bleed) cx.putImageData(im, 0, 0);
+  let output = cv;
+  if (hd || bakeSize !== SIZE) {
+    // detail: interpolate processed RGBA, never the brush canvas or its recipe coordinates.
+    output = document.createElement('canvas'); output.width = output.height = bakeSize;
+    const out = output.getContext('2d', { willReadFrequently: true });
+    out.imageSmoothingEnabled = true; out.imageSmoothingQuality = 'high';
+    out.drawImage(cv, 0, 0, bakeSize, bakeSize);
+    if (hd) {
+      const enlarged = out.getImageData(0, 0, bakeSize, bakeSize);
+      finishHD(enlarged.data, bakeSize, key, grain); out.putImageData(enlarged, 0, 0);
+    }
+  }
+  baked.set(key, output); return output;
+}
+// detail: separable scalar filters, with transparent padding; all radii use 1024-unit pixels.
+function filterPlane(src, n, radius, dilate = false) {
+  const tmp = new Float32Array(src.length), out = new Float32Array(src.length), width = 2 * radius + 1;
+  for (let axis = 0; axis < 2; axis++) {
+    const input = axis ? tmp : src, output = axis ? out : tmp;
+    for (let row = 0; row < n; row++) {
+      let sum = 0;
+      for (let j = -radius; j <= radius; j++) if (j >= 0 && j < n) sum += input[axis ? j * n + row : row * n + j];
+      for (let col = 0; col < n; col++) {
+        const i = axis ? col * n + row : row * n + col;
+        if (dilate) {
+          let max = 0;
+          for (let j = Math.max(0, col - radius); j <= Math.min(n - 1, col + radius); j++) max = Math.max(max, input[axis ? j * n + row : row * n + j]);
+          output[i] = max;
+        } else output[i] = sum / width;
+        const lo = col - radius, hi = col + radius + 1;
+        if (lo >= 0) sum -= input[axis ? lo * n + row : row * n + lo];
+        if (hi < n) sum += input[axis ? hi * n + row : row * n + hi];
+      }
+    }
+  }
+  return out;
+}
+function detailWash(d, n, key, { keepWhite, soft, grain, edge, bleed }) {
+  const unit = n / SIZE, count = n * n, alpha = new Float32Array(count);
+  let seed = 0; for (let i = 0; i < key.length; i++) seed = (hash(key.charCodeAt(i), seed) * 4294967296) | 0;
+  for (let j = 0; j < count; j++) {
+    const i = j * 4, a = d[i + 3] / 255;
+    const na = keepWhite ? a : a * Math.max(255 - d[i], 255 - d[i + 1], 255 - d[i + 2]) / 255;
+    if (!keepWhite && na) for (let c = 0; c < 3; c++) d[i + c] = 255 - (255 - d[i + c]) * a / (soft ? Math.max(na, .05) : na);
+    const k = Math.max(0, Math.min(1, (na - .008) / (.05 - .008)));
+    alpha[j] = soft ? na * k * k * (3 - 2 * k) : (keepWhite || na >= .02 ? na : 0);
+  }
+  const radius = Math.max(1, Math.round(unit)), bleedRadius = Math.ceil(3 * Math.min(1, Math.max(0, bleed)) * unit);
+  let result = soft ? filterPlane(alpha, n, radius) : alpha.slice();
+  // detail: keepWhite softening preserves existing pigment RGB; only empty pixels borrow weighted colour.
+  // detail: extend interior pigment into newly softened/bled pixels using alpha-weighted colour.
+  if (soft || bleed) {
+    const reach = Math.max(radius, bleedRadius), weight = filterPlane(alpha, n, reach);
+    for (let c = 0; c < 3; c++) {
+      const plane = new Float32Array(count);
+      for (let j = 0; j < count; j++) plane[j] = d[j * 4 + c] * alpha[j];
+      const colour = filterPlane(plane, n, reach);
+      for (let j = 0; j < count; j++) if ((keepWhite ? alpha[j] === 0 : alpha[j] < .05) && weight[j] > 0) d[j * 4 + c] = colour[j] / weight[j];
+    }
+  }
+  if (bleedRadius) {
+    const dilated = filterPlane(result, n, bleedRadius, true);
+    const inner = bleedRadius > 1 ? filterPlane(result, n, bleedRadius - 1, true) : result;
+    for (let j = 0; j < count; j++) {
+      const x = (j % n) / unit, y = Math.floor(j / n) / unit;
+// Data-driven timing. Source priority: audio/narration.json (real TTS) > data/sentences.tsv (estimate).
+// Beats are keyed as at(i, off) = start of sentence i + off seconds, or frac(i, f) = point f∈[0,1] inside sentence i.
+export async function loadTimeline() {
+  let S = null;
+  try { const r = await fetch('audio/narration.json'); if (r.ok) { const j = await r.json();
+    const segs = j.segments || [];
+    // narration.json ids are expected as "<ch>-<n>" (e.g. "01-2"); fall back to TSV chapter mapping by order
+    S = segs.map((s, i) => ({ i, ch: (s.ch || String(s.id || '').split('-')[0] || ''), start: +s.start, end: +s.end, text: s.text })); } } catch (e) {}
+  const tsv = await (await fetch('data/sentences.tsv')).text();
+  const rows = tsv.trim().split('\n').slice(1).map(l => l.split('\t')).map((c, i) => ({ i, ch: c[0].trim(), start: +c[1], end: +c[2], text: c[4].trim() }));
+  if (S && S.length === rows.length) S.forEach((s, i) => { if (!/^\d\d$/.test(s.ch)) s.ch = rows[i].ch; });
+  else S = rows;
+  const CH = {};
+  S.forEach(s => { const c = CH[s.ch] || (CH[s.ch] = { id: s.ch, start: s.start, end: s.end, idx: [] }); c.end = Math.max(c.end, s.end); c.idx.push(s.i); });
+  const DUR_CONTENT = S[S.length - 1].end;
+  const at = (i, off = 0) => S[i].start + off;
+  const end = (i, off = 0) => S[i].end + off;
+  const frac = (i, f) => S[i].start + (S[i].end - S[i].start) * f;
+  return { S, CH, DUR_CONTENT, at, end, frac, source: S === rows ? 'tsv' : 'narration.json' };
+}
+// HE-stained appendix wall field (shared by 03 → 04 continuity). Field LOCAL coords: ±420 square, lumen at top, serosa at bottom.
+// drawHE(ctx, state) draws into current transform (caller translates to lens centre, scales by r/420 and clips) — or use drawLens().
+// state: { ulcer 0..1, neut 0..1 (share of infiltrating neutrophils arrived), fibrin 0..1, t (seconds, micro-motion) }
+// v2 (polish pass): organic clustered cells (~1300), margination → emigration paths, 2–5 lobed nuclei, noisy structures.
+//                  API unchanged; drawLens/fieldToScreen gained optional extras (off, blur) — old calls behave as before.
+import { chromatin, detailedNeutrophil, fibrinMesh, tissueTexture } from './he_detail.js';
+import { C } from './tokens.js';
+import { drawWash } from './wash.js';
+import { rng, noise2, hash } from './motion.js';
+export const HE = { eosin: '#D98BA8', eosinPale: '#EBC3D0', hema: C.vio, hemaDark: '#3F2A66', rbc: '#C9455A' };
+export const BANDS = { lumen: [-420, -290], mucosa: [-290, -150], submucosa: [-150, -10], muscularis: [-10, 230], serosa: [230, 280], fibrin: [280, 420] };
+export const ULCER = [-90, 110];
+export const VESSELS = [[-270, -80, 26], [-90, -60, 20], [130, -90, 24], [300, -70, 18], [-170, 120, 14], [220, 150, 13]];
+const R = rng(2026);
+const inUlcer = x => x > ULCER[0] && x < ULCER[1];
+const gauss = () => (R() + R() + R() - 1.5) / 1.5;
+const lobePick = () => { const u = R(); return u < .15 ? 2 : u < .6 ? 3 : u < .9 ? 4 : 5; };   // 核分 2–5 叶
+const bandOf = y => Object.keys(BANDS).find(k => y >= BANDS[k][0] && y < BANDS[k][1]) || 'fibrin';
+// noisy closed outline (hand-drawn, never a perfect circle/ellipse)
+function blobPath(ctx, cx, cy, rx, ry, seed, amp = .12, n = 22) { ctx.beginPath(); for (let i = 0; i <= n; i++) { const a = i / n * 6.283, f = 1 + amp * (noise2(Math.cos(a) * 1.3 + seed, Math.sin(a) * 1.3 + seed * .7) - .5) * 2; const x = cx + Math.cos(a) * rx * f, y = cy + Math.sin(a) * ry * f; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.closePath(); }
+// --- static cell populations (fixed seed) ---
+export const CELLS = (() => { const out = [];
+  // lumen pus: clumped sheets of neutrophils (already present)
+  for (let c = 0; c < 14; c++) { const cx = -400 + R() * 800, cy = -400 + R() * 100, n = 8 + Math.floor(R() * 12);
+    for (let i = 0; i < n; i++) out.push({ x: cx + gauss() * 45, y: Math.min(-296, cy + gauss() * 30), band: 'lumen', kind: 'pus', lobes: lobePick(), rot: R() * 6.28, sz: .85 + R() * .3 }); }
+  // infiltrating: rejection sampling on density (gradient toward mucosa/ulcer) × clumping noise
+  const dens = (x, y) => { const b = bandOf(y); let d = { mucosa: 1, submucosa: .75, muscularis: .5, serosa: .65, fibrin: .55, lumen: 0 }[b];
+    d += 1.1 * Math.exp(-(((x - 10) / 130) ** 2 + ((y + 270) / 90) ** 2)); if (b === 'fibrin' && y > 400) d = 0; return d * (.25 + .75 * noise2(x / 55 + 9, y / 55 + 3)); };
+  let guard = 0; while (out.filter(c => c.kind === 'inf').length < 1150 && guard++ < 60000) { const x = -412 + R() * 824, y = -292 + R() * 700; if (R() * 1.9 < dens(x, y)) out.push({ x, y, band: bandOf(y), kind: 'inf', lobes: lobePick(), rot: R() * 6.28, sz: .8 + R() * .35 }); }
+  let maxD = 1;
+  for (const c of out) if (c.kind === 'inf') { let best = VESSELS[0], d = 1e9; for (const v of VESSELS) { const dd = Math.hypot(c.x - v[0], c.y - v[1]); if (dd < d) { d = dd; best = v; } }
+    const a = Math.atan2(c.y - best[1], c.x - best[0]); c.vx = best[0]; c.vy = best[1]; c.d = d; maxD = Math.max(maxD, d);
+    c.mx = best[0] + Math.cos(a + gauss() * .6) * best[2] * .95; c.my = best[1] + Math.sin(a + gauss() * .6) * best[2] * .95;   // margination point on the vessel wall
+    c.cx = (c.mx + c.x) / 2 + gauss() * 50; c.cy = (c.my + c.y) / 2 + gauss() * 50; }                                        // curved emigration path
+  for (const c of out) if (c.kind === 'inf') c.order = Math.min(.999, (c.d / maxD) * .72 + R() * .28);
+  return out; })();
+const SPINDLE = Array.from({ length: 170 }, () => ({ x: -410 + R() * 820, y: -10 + R() * 240, r: (R() - .5) * .3, l: 10 + R() * 9 }));
+const CRYPTS = []; for (let x = -390; x < 410; x += 58 + R() * 12) CRYPTS.push({ x: x + (R() - .5) * 14, y: -225 + (R() - .5) * 24, h: 40 + R() * 18, w: 13 + R() * 5, s: R() * 50, tilt: (R() - .5) * .25 });
+const FIBRIN = Array.from({ length: 60 }, () => { const x = -400 + R() * 800, y = 284 + R() * 100; return { x, y, a: (R() - .5) * 1.6 + (R() < .5 ? 0 : Math.PI), l: 30 + R() * 60, b: (R() - .5) * 40 }; });
+export function bakeHE(bake) {
+  bake('he.bands', (b, P) => { const band = (y0, y1, col, a) => { const pts = []; for (let x = -520; x <= 520; x += 65) pts.push([x, y0 + Math.sin(x * .013) * 9]); for (let x = 520; x >= -520; x -= 65) pts.push([x, y1 + Math.sin(x * .011 + 1) * 9]); P.fill(b, pts, col, a, .14, [.5, .55]); };
+    band(-420, -290, HE.eosinPale, 90); band(-290, -150, HE.eosin, 110); band(-150, -10, HE.eosinPale, 120); band(-10, 230, HE.eosin, 150); band(230, 282, HE.eosinPale, 120); }, { seed: 31, scale: 2 });
+  bake('he.ulcer', (b, P) => { P.fill(b, P.blob(0, 0, 150, 24, .4, 3), HE.eosinPale, 160, .3); P.fill(b, P.blob(0, 10, 90, 20, .5, 4), HE.hema, 40, .3); }, { seed: 32 });
+  bake('he.fibrin', (b, P) => { P.fill(b, [[-520, -60], [-300, -30], [-100, -70], [120, -40], [330, -75], [520, -45], [520, 70], [200, 40], [-200, 60], [-520, 50]], HE.eosin, 120, .4, [.6, .6]); }, { seed: 33 });
+  bake('he.vessel', (b, P) => { P.fill(b, P.blob(0, 0, 300, 22, .3, 5), HE.rbc, 170, .2); }, { seed: 34 });
+}
+// 0 in preserved wall, 1 in the necrotic core around thrombosed vessels and the tear (x=190).
+function coreAt(x, y) {
+  const ty = y < -320 ? -320 : y > 330 ? 330 : y;
+  let d = Math.hypot((x - 190) * .78, (y - ty) * .5);
+  for (const v of VESSELS) { const dd = Math.hypot(x - v[0], y - v[1]); if (dd < d) d = dd; }
+  const u = Math.max(0, Math.min(1, (d - 46) / 188));
+  return 1 - u * u * (3 - 2 * u);
+}
+// Crisp 1px seams in the shared band wash. Lifted only while necrosis is on.
+// Reads the baked composite (respects whatever is already drawn) and replaces a row
+// only where it is a thin darker line than the tissue just above and below it.
+export function fadeSeams(ctx, necrosis, lens, off, fs) {
+  const a = Math.max(0, Math.min(1, necrosis));
+  if (a <= 0 || !lens || !(fs > 0)) return;
+  const m = ctx.getTransform();
+  const c = m.transformPoint(new DOMPoint(off[0], off[1]));
+  const e = m.transformPoint(new DOMPoint(off[0] + 420 / fs, off[1]));
+  const rad = Math.hypot(e.x - c.x, e.y - c.y);
+  const inset = rad - 8;
+04.js
+he.js
+he_detail.js
+wash.js
+rg: /tmp/sand-image-rendition-AKazsr: Permission denied (os error 13)
+rg: /tmp/sand-box-store-pack: Permission denied (os error 13)
+rg: /tmp/sand-image-rendition-5g7QrD: Permission denied (os error 13)
+rg: /tmp/codex-daemon-1000: Permission denied (os error 13)
+/workspace/garden-skills/skills/web-video-presentation/themes/split-canvas/theme.json
+/workspace/garden-skills/skills/web-video-presentation/themes/split-canvas/tokens.css
+/workspace/garden-skills/skills/gpt-image-2/scripts/package.json
+/workspace/garden-skills/skills/motion-showreel/assets/starter/package.json
+/workspace/garden-skills/skills/motion-showreel/scripts/package.json
+/workspace/garden-skills/skills/beautiful-article/assets/scaffold-template/package.json
+/workspace/garden-skills/website/web-design-website/package.json
+/workspace/garden-skills/website/gpt-image2-website/package.json
+/workspace/garden-skills/package.json
+/workspace/病理科普视频/v4_tools/web/package.json
+/workspace/病理科普视频/v4_tools/tool_1_canvas.png
+/workspace/病理科普视频/v4_tools/1_canvas/index.html
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s11.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s21.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s08.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s28.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s06.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s09.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s31.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s15.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s23.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s16.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s13.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s18.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s32.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s14.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s20.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s12.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s19.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s24.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s22.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s26.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s02.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s01.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s07.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s03.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s10.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s25.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s30.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s05.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s29.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s27.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s04.wav
+/workspace/病理科普视频/配音/全稿_v1/v2_sentences/s17.wav
+/workspace/病理科普视频/配音/全稿_v3/backup_s29/sentences.tsv
+/workspace/病理科普视频/配音/全稿_v3/sentences.tsv
+/workspace/病理科普视频/配音/全稿_v3/timeline.json
+/workspace/病理科普视频/v4_mix/film/chapters/03.js
+/workspace/病理科普视频/v4_mix/film/data/sentences.tsv
+/workspace/病理科普视频/v4_mix/film_t1/chapters/03.js
+/workspace/病理科普视频/v4_mix/film_t1/data/sentences.tsv
+/tmp/ft/chapters/03.js
+/workspace/病理科普视频/v4_mix/film_r8/chapters/03.js
+/workspace/病理科普视频/v4_mix/film_r8/data/sentences.tsv
+/workspace/nf/docs/architecture/16-storyflow-canvas.md
+/workspace/nf/docs/storyflow-canvas/05-acceptance-plan.md
+/workspace/nf/docs/storyflow-canvas/02-story-graph-domain.md
+/workspace/nf/docs/storyflow-canvas/06-performance-baseline.md
+/workspace/nf/docs/storyflow-canvas/07-world-graph-addendum.md
+/workspace/nf/docs/storyflow-canvas/00-current-state-audit.md
+
+exec
+/bin/bash -lc "ls /tmp; ls ../v4_mix/film_mini_detail; ls /workspace/node_modules 2>/dev/null; node -e \"for (const x of ['playwright','@napi-rs/canvas','canvas'])try{console.log(x,require.resolve(x))}catch{}\"; which chromium chromium-browser google-chrome; rg --files ../v4_mix/film_mini_detail | head -30" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+04.js.halo
+04.js.phase
+04.r6.js
+06_good.js
+a120
+af
+agent-store-fuse.log
+ann99.png
+arrow.wav
+arrow_raw.wav
+asrchk
+b03-check.log
+b03-render.log
+b03-samples.log
+b04_check.log
+b04_done_render.log
+b04_edit.py
+b04_final_render.log
+b04_last.log
+b04_render.log
+b04_render2.log
+b04_verified.log
+b120
+backend-plugin-Bh4cXV
+base989
+be2.mp4
+be3.mp4
+be4.mp4
+be5.mp4
+be5b.mp4
+bitexact_test.mp4
+bk2
+blind_probe.txt
+blind_strings.txt
+box-doctor.log
+box-keyring-daemon.pid
+box-keyring-daemon.pid.lock
+box-keyring.log.lock
+br03
+brref
+bsheet1.png
+build_endcard.py
+build_v5.py
+c01.png
+c01_12.png
+c01_18.png
+c01_6.png
+c02.png
+c02_28.png
+c02_35.png
+c02_42.png
+c128a.png
+c128b.png
+c142a.png
+c142b.png
+c142live.png
+c142ref.png
+c150
+c175a.png
+c175b.png
+c1_compare.py
+c1cmp.jpg
+c50a.png
+c50b.png
+c_135.png
+c_224.png
+c_505.png
+c_535.png
+ccs.deb
+ccswitch.log
+cf
+cfd.png
+chk
+chrome:2.log
+chrome:2.log.lock
+chrome:6.log
+chrome:6.log.lock
+claude-1000
+cmp2_089.73.png
+cmp2_099.22.png
+cmp3.png
+cmp89.png
+cmp_089.73.png
+cmp_099.22.png
+cmp_a2_035.00.png
+cmp_a2_038.00.png
+cmp_a_035.00.png
+cmp_a_038.00.png
+cmp_b_016.50.png
+cmp_b_022.50.png
+cmp_e_030.00.png
+cmp_e_035.00.png
+cmp_e_038.00.png
+cmp_pus_a2_e.png
+codex-bwrap-synthetic-mount-targets-1000
+codex-daemon-1000
+com.google.Chrome.A4ijZG
+com.google.Chrome.chrome_chrome_url_fetcher_.1FZXxL
+com.google.Chrome.chrome_chrome_url_fetcher_.23Uek4
+com.google.Chrome.chrome_chrome_url_fetcher_.295BJo
+com.google.Chrome.chrome_chrome_url_fetcher_.2Lrrzb
+com.google.Chrome.chrome_chrome_url_fetcher_.2ptwAC
+com.google.Chrome.chrome_chrome_url_fetcher_.30fnQG
+com.google.Chrome.chrome_chrome_url_fetcher_.3sxvmK
+com.google.Chrome.chrome_chrome_url_fetcher_.3xIVd5
+com.google.Chrome.chrome_chrome_url_fetcher_.4qVyS0
+com.google.Chrome.chrome_chrome_url_fetcher_.54SmRe
+com.google.Chrome.chrome_chrome_url_fetcher_.5GXfkT
+com.google.Chrome.chrome_chrome_url_fetcher_.5TNoPH
+com.google.Chrome.chrome_chrome_url_fetcher_.5bo4mr
+com.google.Chrome.chrome_chrome_url_fetcher_.5oweO8
+com.google.Chrome.chrome_chrome_url_fetcher_.6y2sVE
+com.google.Chrome.chrome_chrome_url_fetcher_.7t7vOt
+com.google.Chrome.chrome_chrome_url_fetcher_.7yqsQd
+com.google.Chrome.chrome_chrome_url_fetcher_.8AwrvW
+com.google.Chrome.chrome_chrome_url_fetcher_.8Gz8Dm
+com.google.Chrome.chrome_chrome_url_fetcher_.8M6Iqv
+com.google.Chrome.chrome_chrome_url_fetcher_.8rJZes
+com.google.Chrome.chrome_chrome_url_fetcher_.90sX1b
+com.google.Chrome.chrome_chrome_url_fetcher_.9YgBZH
+com.google.Chrome.chrome_chrome_url_fetcher_.9zACAC
+com.google.Chrome.chrome_chrome_url_fetcher_.A2CIr9
+com.google.Chrome.chrome_chrome_url_fetcher_.A4vcpZ
+com.google.Chrome.chrome_chrome_url_fetcher_.AHFa6A
+com.google.Chrome.chrome_chrome_url_fetcher_.AJlLA0
+com.google.Chrome.chrome_chrome_url_fetcher_.Ap9m0i
+com.google.Chrome.chrome_chrome_url_fetcher_.BC1Bgs
+com.google.Chrome.chrome_chrome_url_fetcher_.BIemd5
+com.google.Chrome.chrome_chrome_url_fetcher_.BXA389
+com.google.Chrome.chrome_chrome_url_fetcher_.BcQ0be
+com.google.Chrome.chrome_chrome_url_fetcher_.By57sK
+com.google.Chrome.chrome_chrome_url_fetcher_.CEu9VZ
+com.google.Chrome.chrome_chrome_url_fetcher_.CXFQ4r
+com.google.Chrome.chrome_chrome_url_fetcher_.CaokE8
+com.google.Chrome.chrome_chrome_url_fetcher_.DBBsPi
+com.google.Chrome.chrome_chrome_url_fetcher_.DJaTdM
+com.google.Chrome.chrome_chrome_url_fetcher_.DJwQoD
+com.google.Chrome.chrome_chrome_url_fetcher_.Dzft7c
+com.google.Chrome.chrome_chrome_url_fetcher_.FUSRct
+com.google.Chrome.chrome_chrome_url_fetcher_.FtkmPO
+com.google.Chrome.chrome_chrome_url_fetcher_.Gb0upY
+com.google.Chrome.chrome_chrome_url_fetcher_.GrbUhY
+com.google.Chrome.chrome_chrome_url_fetcher_.HJupiX
+com.google.Chrome.chrome_chrome_url_fetcher_.I8Pwsl
+com.google.Chrome.chrome_chrome_url_fetcher_.INir3f
+com.google.Chrome.chrome_chrome_url_fetcher_.IYgDEv
+com.google.Chrome.chrome_chrome_url_fetcher_.IgYmTM
+com.google.Chrome.chrome_chrome_url_fetcher_.KBG8Lo
+com.google.Chrome.chrome_chrome_url_fetcher_.KFdrc0
+com.google.Chrome.chrome_chrome_url_fetcher_.KOF0EO
+com.google.Chrome.chrome_chrome_url_fetcher_.L9IAFi
+com.google.Chrome.chrome_chrome_url_fetcher_.LFXYLX
+com.google.Chrome.chrome_chrome_url_fetcher_.LXUcl8
+com.google.Chrome.chrome_chrome_url_fetcher_.LXWNeQ
+com.google.Chrome.chrome_chrome_url_fetcher_.LZ2lHK
+com.google.Chrome.chrome_chrome_url_fetcher_.LZbXOD
+com.google.Chrome.chrome_chrome_url_fetcher_.LaLv6r
+com.google.Chrome.chrome_chrome_url_fetcher_.LboF19
+com.google.Chrome.chrome_chrome_url_fetcher_.Li24fW
+com.google.Chrome.chrome_chrome_url_fetcher_.M5QNiV
+com.google.Chrome.chrome_chrome_url_fetcher_.M6AP1f
+com.google.Chrome.chrome_chrome_url_fetcher_.M97jzr
+com.google.Chrome.chrome_chrome_url_fetcher_.MaTKP0
+com.google.Chrome.chrome_chrome_url_fetcher_.MprD3L
+com.google.Chrome.chrome_chrome_url_fetcher_.N6KAZo
+com.google.Chrome.chrome_chrome_url_fetcher_.NaZrpu
+com.google.Chrome.chrome_chrome_url_fetcher_.OU0uhq
+com.google.Chrome.chrome_chrome_url_fetcher_.P6d4KF
+com.google.Chrome.chrome_chrome_url_fetcher_.PmBbOt
+com.google.Chrome.chrome_chrome_url_fetcher_.Po4Cq4
+com.google.Chrome.chrome_chrome_url_fetcher_.QPBJfe
+com.google.Chrome.chrome_chrome_url_fetcher_.QmkNwl
+com.google.Chrome.chrome_chrome_url_fetcher_.RxAmbo
+com.google.Chrome.chrome_chrome_url_fetcher_.SCotQn
+com.google.Chrome.chrome_chrome_url_fetcher_.SIllFQ
+com.google.Chrome.chrome_chrome_url_fetcher_.SXGLid
+com.google.Chrome.chrome_chrome_url_fetcher_.SejyfZ
+com.google.Chrome.chrome_chrome_url_fetcher_.Tdz4H9
+com.google.Chrome.chrome_chrome_url_fetcher_.U0rnYY
+com.google.Chrome.chrome_chrome_url_fetcher_.U2Zyix
+com.google.Chrome.chrome_chrome_url_fetcher_.U3en0P
+com.google.Chrome.chrome_chrome_url_fetcher_.UAHEoc
+com.google.Chrome.chrome_chrome_url_fetcher_.UeESvf
+com.google.Chrome.chrome_chrome_url_fetcher_.UuyhDZ
+com.google.Chrome.chrome_chrome_url_fetcher_.V6YGJE
+com.google.Chrome.chrome_chrome_url_fetcher_.VpPQU9
+com.google.Chrome.chrome_chrome_url_fetcher_.WGUwZx
+com.google.Chrome.chrome_chrome_url_fetcher_.WbMJ0I
+com.google.Chrome.chrome_chrome_url_fetcher_.Wg6Ywx
+com.google.Chrome.chrome_chrome_url_fetcher_.Wy4gcX
+com.google.Chrome.chrome_chrome_url_fetcher_.XAj0Op
+com.google.Chrome.chrome_chrome_url_fetcher_.XWplsK
+com.google.Chrome.chrome_chrome_url_fetcher_.XwFwFE
+com.google.Chrome.chrome_chrome_url_fetcher_.YnLsQN
+com.google.Chrome.chrome_chrome_url_fetcher_.YuncFL
+com.google.Chrome.chrome_chrome_url_fetcher_.YwMBem
+com.google.Chrome.chrome_chrome_url_fetcher_.ZEALfg
+com.google.Chrome.chrome_chrome_url_fetcher_.ZEMGBd
+com.google.Chrome.chrome_chrome_url_fetcher_.ZQqsD8
+com.google.Chrome.chrome_chrome_url_fetcher_.aK558w
+com.google.Chrome.chrome_chrome_url_fetcher_.aK6cH3
+com.google.Chrome.chrome_chrome_url_fetcher_.agN76C
+com.google.Chrome.chrome_chrome_url_fetcher_.axKGzv
+com.google.Chrome.chrome_chrome_url_fetcher_.b7KayW
+com.google.Chrome.chrome_chrome_url_fetcher_.bPEzk7
+com.google.Chrome.chrome_chrome_url_fetcher_.bSWxhD
+com.google.Chrome.chrome_chrome_url_fetcher_.bjdFiP
+com.google.Chrome.chrome_chrome_url_fetcher_.cpGlZJ
+com.google.Chrome.chrome_chrome_url_fetcher_.ctP6cE
+com.google.Chrome.chrome_chrome_url_fetcher_.d5XXFe
+com.google.Chrome.chrome_chrome_url_fetcher_.d8o4yv
+com.google.Chrome.chrome_chrome_url_fetcher_.dAmoxf
+com.google.Chrome.chrome_chrome_url_fetcher_.gAwFTI
+com.google.Chrome.chrome_chrome_url_fetcher_.god79t
+com.google.Chrome.chrome_chrome_url_fetcher_.hKZear
+com.google.Chrome.chrome_chrome_url_fetcher_.hLuA0J
+com.google.Chrome.chrome_chrome_url_fetcher_.hSPyk8
+com.google.Chrome.chrome_chrome_url_fetcher_.hZl75A
+com.google.Chrome.chrome_chrome_url_fetcher_.hltrmR
+com.google.Chrome.chrome_chrome_url_fetcher_.hv1wxZ
+com.google.Chrome.chrome_chrome_url_fetcher_.ilq8JL
+com.google.Chrome.chrome_chrome_url_fetcher_.j0y8Yn
+com.google.Chrome.chrome_chrome_url_fetcher_.jF2Cio
+com.google.Chrome.chrome_chrome_url_fetcher_.k4DUdL
+com.google.Chrome.chrome_chrome_url_fetcher_.kebc4i
+com.google.Chrome.chrome_chrome_url_fetcher_.lRKaXG
+com.google.Chrome.chrome_chrome_url_fetcher_.lWBNzC
+com.google.Chrome.chrome_chrome_url_fetcher_.lZs6vI
+com.google.Chrome.chrome_chrome_url_fetcher_.lZt6bN
+com.google.Chrome.chrome_chrome_url_fetcher_.mn9vPr
+com.google.Chrome.chrome_chrome_url_fetcher_.mvBIgv
+com.google.Chrome.chrome_chrome_url_fetcher_.nb1oL3
+com.google.Chrome.chrome_chrome_url_fetcher_.nguIVv
+com.google.Chrome.chrome_chrome_url_fetcher_.nrQLMN
+com.google.Chrome.chrome_chrome_url_fetcher_.oBqo42
+com.google.Chrome.chrome_chrome_url_fetcher_.oRqySE
+com.google.Chrome.chrome_chrome_url_fetcher_.oZ5WB5
+com.google.Chrome.chrome_chrome_url_fetcher_.ow63Jw
+com.google.Chrome.chrome_chrome_url_fetcher_.ox2o9k
+com.google.Chrome.chrome_chrome_url_fetcher_.oxIndW
+com.google.Chrome.chrome_chrome_url_fetcher_.pR7tRe
+com.google.Chrome.chrome_chrome_url_fetcher_.pRxh2Y
+com.google.Chrome.chrome_chrome_url_fetcher_.pX7duT
+com.google.Chrome.chrome_chrome_url_fetcher_.qlAbmD
+com.google.Chrome.chrome_chrome_url_fetcher_.qtbQ1T
+com.google.Chrome.chrome_chrome_url_fetcher_.rJC2PA
+com.google.Chrome.chrome_chrome_url_fetcher_.rzCTSt
+com.google.Chrome.chrome_chrome_url_fetcher_.sfPlqL
+com.google.Chrome.chrome_chrome_url_fetcher_.u2NOIZ
+com.google.Chrome.chrome_chrome_url_fetcher_.uIvKYa
+com.google.Chrome.chrome_chrome_url_fetcher_.uRJdS5
+com.google.Chrome.chrome_chrome_url_fetcher_.uSESAE
+com.google.Chrome.chrome_chrome_url_fetcher_.uiYkEm
+com.google.Chrome.chrome_chrome_url_fetcher_.usoHF4
+com.google.Chrome.chrome_chrome_url_fetcher_.uywLCg
+com.google.Chrome.chrome_chrome_url_fetcher_.v506Dg
+com.google.Chrome.chrome_chrome_url_fetcher_.v5EJN6
+com.google.Chrome.chrome_chrome_url_fetcher_.vElUr9
+com.google.Chrome.chrome_chrome_url_fetcher_.w2BhMv
+com.google.Chrome.chrome_chrome_url_fetcher_.wMaXx8
+com.google.Chrome.chrome_chrome_url_fetcher_.wZD42x
+com.google.Chrome.chrome_chrome_url_fetcher_.xRW1Df
+com.google.Chrome.chrome_chrome_url_fetcher_.xXOEW2
+com.google.Chrome.chrome_chrome_url_fetcher_.xYC8PC
+com.google.Chrome.chrome_chrome_url_fetcher_.xpN51T
+com.google.Chrome.chrome_chrome_url_fetcher_.zKUCkg
+com.google.Chrome.chrome_chrome_url_fetcher_.zsuSA0
+com.google.Chrome.ysxfPh
+computer-use
+cursor-mcp-browser-opens
+cx_endcard_acard.txt
+cx_endcard_acard_out.txt
+cx_endcard_v5.txt
+cyto_chk
+d128.png
+d225.png
+d227.png
+d85.png
+dbus:1.log
+dbus:1.log.lock
+dbus:2.log
+dbus:2.log.lock
+dbus:3.log
+dbus:3.log.lock
+dbus:4.log
+dbus:4.log.lock
+dbus:5.log
+dbus:5.log.lock
+dbus:6.log
+dbus:6.log.lock
+dpr1
+dpr1_crop.png
+dpr2
+dpr2_crop.png
+dprcmp.png
+dprt1
+dprt1.mp4
+dprt2
+dprt2.mp4
+dump-endcard-strings.mjs
+ec.png
+egress-tunnel.log
+end_t3.png
+endcard-painted-strings.json
+endcard_A.png
+endcard_A_content.png
+endcard_B.png
+endcard_v5_stills
+exec-daemon.log
+f35.png
+film_ref_128
+ft
+ft85
+ft_ann
+ft_figure
+ft_he
+ft_ink
+ft_wash
+g01.png
+g02_0.png
+g02_1.png
+g02_2.png
+g02_3.png
+g03_0.png
+g03_1.png
+g03_2.png
+g4.png
+g5.png
+g5b.png
+g6.png
+g8.png
+g_68.5.png
+g_69.5.png
+g_70.png
+g_71.png
+g_72.png
+gang_lens.png
+gb_对比_01.jpg
+gb_对比_02.jpg
+gb_对比_03.jpg
+gb_对比_07.jpg
+gf_2098.png
+gf_2099.png
+gf_2100.png
+gf_2101.png
+gf_2102.png
+gf_2104.png
+gf_2108.png
+ghost.png
+ghost2.png
+grok-file-lock-1000
+grok_login.log
+grokt
+h03_0.png
+h03_1.png
+h03_2.png
+h07_0.png
+h07_1.png
+h07_2.png
+h07_3.png
+h07_4.png
+hand_before
+he-check.mjs
+he-legacy-check.mjs
+he-verify.mjs
+he.r6.js
+he_detail.r6.js
+head
+head38
+hp_before.png
+i565
+i565b
+insitu_chk
+ir_0.png
+ir_1.png
+ir_2.png
+ir_3.png
+ir_4.png
+ir_5.png
+k02_0.png
+k02_1.png
+k02_2.png
+k02_3.png
+lens99.png
+lens99b.png
+lens99c.png
+lens_050.50.png
+lens_060.00.png
+lines_crop.png
+lines_hp.png
+livenoise
+lk
+merge-rerun
+mini_sample.jpg
+node-compile-cache
+novnc-forks.log
+novnc-forks.log.lock
+novnc:1.log
+novnc:1.log.lock
+o_ann
+o_figure
+o_he
+o_ink
+o_wash
+orig03
+p.mp4
+persist-cli-auth.log
+picom:1.log.lock
+picom:2.log.1
+picom:2.log.lock
+picom:3.log.1
+picom:3.log.lock
+picom:4.log.1
+picom:4.log.lock
+picom:5.log
+picom:5.log.lock
+picom:6.log.1
+picom:6.log.lock
+plain.mp4
+plain_blind.mp4
+plan2.log
+playwright-artifacts-01Va5n
+playwright-artifacts-09Vrd3
+playwright-artifacts-17jgJ1
+playwright-artifacts-1HZTAj
+playwright-artifacts-1LtUZ5
+playwright-artifacts-1MhIOM
+playwright-artifacts-1NAiiV
+playwright-artifacts-2M4xRA
+playwright-artifacts-2TNfKe
+playwright-artifacts-2lLsoT
+playwright-artifacts-2p8eSQ
+playwright-artifacts-34aNRW
+playwright-artifacts-3BYtgh
+playwright-artifacts-3lOPV0
+playwright-artifacts-4K3Puo
+playwright-artifacts-4Xf4Bk
+playwright-artifacts-4iEkQp
+playwright-artifacts-4maPMv
+playwright-artifacts-5110qq
+playwright-artifacts-5AVexz
+playwright-artifacts-5WmIaV
+playwright-artifacts-5qUU5j
+playwright-artifacts-6A0HXx
+playwright-artifacts-6McEF2
+playwright-artifacts-6j9JpW
+playwright-artifacts-6k8sZy
+playwright-artifacts-6oo6Rp
+playwright-artifacts-7b4FM7
+playwright-artifacts-7c8vnj
+playwright-artifacts-7nWN9Y
+playwright-artifacts-8DFP4N
+playwright-artifacts-8WXGnU
+playwright-artifacts-8mD9Yy
+playwright-artifacts-8n8pOr
+playwright-artifacts-8qYuVV
+playwright-artifacts-9Erz6X
+playwright-artifacts-9U8kTx
+playwright-artifacts-9mYmDH
+playwright-artifacts-9oYfeD
+playwright-artifacts-A4Qkh1
+playwright-artifacts-AJSUz6
+playwright-artifacts-AYgOjH
+playwright-artifacts-AZFMm6
+playwright-artifacts-AwgLsT
+playwright-artifacts-BBMTBC
+playwright-artifacts-Bb1N8K
+playwright-artifacts-BjL452
+playwright-artifacts-BpqpbG
+playwright-artifacts-CcoRGD
+playwright-artifacts-EKVn6g
+playwright-artifacts-EkbZyB
+playwright-artifacts-EwEDJz
+playwright-artifacts-FEhI7m
+playwright-artifacts-FFGbAU
+playwright-artifacts-FPxF4J
+playwright-artifacts-FopaaX
+playwright-artifacts-GgTy0n
+playwright-artifacts-GuHuSo
+playwright-artifacts-HOQ40e
+playwright-artifacts-HPAE6p
+playwright-artifacts-Ha3T3m
+playwright-artifacts-Htn59v
+playwright-artifacts-HzNrC8
+playwright-artifacts-IMS51a
+playwright-artifacts-INg8sR
+playwright-artifacts-IPIwKj
+playwright-artifacts-IVQGkY
+playwright-artifacts-Ifyw9b
+playwright-artifacts-IkQVJQ
+playwright-artifacts-IyCFjB
+playwright-artifacts-JAsSMZ
+playwright-artifacts-JJf7MT
+playwright-artifacts-JgP62w
+playwright-artifacts-JhzUIR
+playwright-artifacts-Jz54fa
+playwright-artifacts-K1D4jg
+playwright-artifacts-KLiW15
+playwright-artifacts-KOc6b9
+playwright-artifacts-KxXmCL
+playwright-artifacts-LKPGTt
+playwright-artifacts-LbYA9y
+playwright-artifacts-LltcKN
+playwright-artifacts-LtEYfS
+playwright-artifacts-M3LBE4
+playwright-artifacts-MDXjUp
+playwright-artifacts-MiL7fG
+playwright-artifacts-MtoFQM
+playwright-artifacts-Mvs5fW
+playwright-artifacts-NJyjd2
+playwright-artifacts-Nmootr
+playwright-artifacts-NsgXXZ
+playwright-artifacts-Nv0qdS
+playwright-artifacts-O3oMN7
+playwright-artifacts-OQuLo5
+playwright-artifacts-OSRN8p
+playwright-artifacts-OSvLbu
+playwright-artifacts-OtQBrX
+playwright-artifacts-P0AryN
+playwright-artifacts-P7ijRA
+playwright-artifacts-PKmStd
+playwright-artifacts-PRdYw5
+playwright-artifacts-Pj1JCg
+playwright-artifacts-Q1C65P
+playwright-artifacts-Qgxwu4
+playwright-artifacts-Rc29x3
+playwright-artifacts-RkDzev
+playwright-artifacts-RyggsD
+playwright-artifacts-SnWUuy
+playwright-artifacts-Tf07ux
+playwright-artifacts-U1DXF2
+playwright-artifacts-UofaDg
+playwright-artifacts-V0s0MK
+playwright-artifacts-V1DThi
+playwright-artifacts-VYYjU3
+playwright-artifacts-W9gqIL
+playwright-artifacts-WPCeY7
+playwright-artifacts-WiQ227
+playwright-artifacts-XD8z0B
+playwright-artifacts-Xf5h6Q
+playwright-artifacts-Y1HLaM
+playwright-artifacts-YCRtBa
+playwright-artifacts-YCt0hO
+playwright-artifacts-YMNgG5
+playwright-artifacts-ZJeJNF
+playwright-artifacts-ZtxgXR
+playwright-artifacts-ZwqS7X
+playwright-artifacts-a2EaCD
+playwright-artifacts-aLsXk2
+playwright-artifacts-ardagM
+playwright-artifacts-bMHFs6
+playwright-artifacts-bZBbHf
+playwright-artifacts-bmKUuO
+playwright-artifacts-bnN23g
+playwright-artifacts-c1Bo22
+playwright-artifacts-c4Zvpx
+playwright-artifacts-cascx7
+playwright-artifacts-dASJBA
+playwright-artifacts-ebrYrK
+playwright-artifacts-emtb0G
+playwright-artifacts-fS4pzq
+playwright-artifacts-fYm3sH
+playwright-artifacts-flr6FF
+playwright-artifacts-g4n3wP
+playwright-artifacts-gCmKaz
+playwright-artifacts-gUUClW
+playwright-artifacts-gVGsEX
+playwright-artifacts-gYgWem
+playwright-artifacts-h79M1G
+playwright-artifacts-h7KXec
+playwright-artifacts-hilCwy
+playwright-artifacts-iJIBvN
+playwright-artifacts-iSwtvX
+playwright-artifacts-icJ6Jb
+playwright-artifacts-imScwC
+playwright-artifacts-iodtrn
+playwright-artifacts-j9Cygu
+playwright-artifacts-jMs1m3
+playwright-artifacts-jOkEK8
+playwright-artifacts-jQalAo
+playwright-artifacts-jUNidR
+playwright-artifacts-jrKFj4
+playwright-artifacts-k1xEDf
+playwright-artifacts-k38ykS
+playwright-artifacts-kOEOyN
+playwright-artifacts-kaIjfB
+playwright-artifacts-l5FvDk
+playwright-artifacts-l9m1dy
+playwright-artifacts-lHoJMp
+playwright-artifacts-lSFa8f
+playwright-artifacts-mtpZWY
+playwright-artifacts-mwwkx6
+playwright-artifacts-nSNc3X
+playwright-artifacts-o47MZG
+playwright-artifacts-oCdWek
+playwright-artifacts-oYYJtt
+playwright-artifacts-oZGU0s
+playwright-artifacts-og40VH
+playwright-artifacts-osR7Nj
+playwright-artifacts-p2eGaE
+playwright-artifacts-pA2hjp
+playwright-artifacts-pJAWW2
+playwright-artifacts-pM4NtL
+playwright-artifacts-pbtXUI
+playwright-artifacts-q4c0K6
+playwright-artifacts-qNimZV
+playwright-artifacts-qqBPah
+playwright-artifacts-qwr8Rb
+playwright-artifacts-rMaksD
+playwright-artifacts-rRSoHg
+playwright-artifacts-rgqbhD
+playwright-artifacts-rxa05I
+playwright-artifacts-s7gMCG
+playwright-artifacts-s8Ytu1
+playwright-artifacts-sCqjUx
+playwright-artifacts-sFLYsY
+playwright-artifacts-se90uz
+playwright-artifacts-uCghmb
+playwright-artifacts-uoKCV2
+playwright-artifacts-vOtMa9
+playwright-artifacts-vdGuT0
+playwright-artifacts-vkzRxm
+playwright-artifacts-vldNuH
+playwright-artifacts-w8KmrJ
+playwright-artifacts-wyForu
+playwright-artifacts-xCGvyJ
+playwright-artifacts-xdUGqg
+playwright-artifacts-xoIHME
+playwright-artifacts-xwQ0a0
+playwright-artifacts-xwl0jL
+playwright-artifacts-xzfM0L
+playwright-artifacts-y8aZKa
+playwright-artifacts-yLqpwH
+playwright-artifacts-ylQ5RB
+playwright-artifacts-yvxaw2
+playwright_chromiumdev_profile-0GdX7t
+playwright_chromiumdev_profile-0Tsr6q
+playwright_chromiumdev_profile-0njuoR
+playwright_chromiumdev_profile-1AAhgB
+playwright_chromiumdev_profile-1Xac58
+playwright_chromiumdev_profile-1jhGo2
+playwright_chromiumdev_profile-1wxNyK
+playwright_chromiumdev_profile-3MKBa9
+playwright_chromiumdev_profile-3h4BlU
+playwright_chromiumdev_profile-3tcIZ7
+playwright_chromiumdev_profile-4vrosi
+playwright_chromiumdev_profile-5M7KN3
+playwright_chromiumdev_profile-5MTDGQ
+playwright_chromiumdev_profile-5Y2cEh
+playwright_chromiumdev_profile-60OJvZ
+playwright_chromiumdev_profile-6XXbux
+playwright_chromiumdev_profile-6YxXpX
+playwright_chromiumdev_profile-6wjzb6
+playwright_chromiumdev_profile-7KxiIw
+playwright_chromiumdev_profile-7hewIb
+playwright_chromiumdev_profile-7ibALI
+playwright_chromiumdev_profile-7sjr5C
+playwright_chromiumdev_profile-7yWEoi
+playwright_chromiumdev_profile-85kM9T
+playwright_chromiumdev_profile-8NRNjh
+playwright_chromiumdev_profile-8QXtz6
+playwright_chromiumdev_profile-8nCCAd
+playwright_chromiumdev_profile-8q3F3W
+playwright_chromiumdev_profile-8x5MYs
+playwright_chromiumdev_profile-9HijBj
+playwright_chromiumdev_profile-9T429c
+playwright_chromiumdev_profile-9oobRF
+playwright_chromiumdev_profile-AdHPAp
+playwright_chromiumdev_profile-Ak9VIv
+playwright_chromiumdev_profile-B94qC7
+playwright_chromiumdev_profile-BUDbEv
+playwright_chromiumdev_profile-BgVsvh
+playwright_chromiumdev_profile-Bgxus4
+playwright_chromiumdev_profile-C1VFfj
+playwright_chromiumdev_profile-C3JNRu
+playwright_chromiumdev_profile-CQKB7D
+playwright_chromiumdev_profile-CZt3a3
+playwright_chromiumdev_profile-CaC90F
+playwright_chromiumdev_profile-CbXaM0
+playwright_chromiumdev_profile-D87xNU
+playwright_chromiumdev_profile-DGmkGB
+playwright_chromiumdev_profile-Dv2LDp
+playwright_chromiumdev_profile-EFGIhX
+playwright_chromiumdev_profile-EGTeAK
+playwright_chromiumdev_profile-EnLz30
+playwright_chromiumdev_profile-F6buW7
+playwright_chromiumdev_profile-F9szM2
+playwright_chromiumdev_profile-FF1jBS
+playwright_chromiumdev_profile-FKc2vi
+playwright_chromiumdev_profile-FWzAk8
+playwright_chromiumdev_profile-Fhl7W1
+playwright_chromiumdev_profile-Fqwvns
+playwright_chromiumdev_profile-Fvsy7N
+playwright_chromiumdev_profile-G0BkiW
+playwright_chromiumdev_profile-GGle8P
+playwright_chromiumdev_profile-GP3snM
+playwright_chromiumdev_profile-GWgxYB
+playwright_chromiumdev_profile-HAkbqu
+playwright_chromiumdev_profile-IDG4iN
+playwright_chromiumdev_profile-IKjPqw
+playwright_chromiumdev_profile-IZ5Mrt
+playwright_chromiumdev_profile-IcnfFr
+playwright_chromiumdev_profile-Ie5etJ
+playwright_chromiumdev_profile-InPJl7
+playwright_chromiumdev_profile-Iob0vp
+playwright_chromiumdev_profile-J4yzny
+playwright_chromiumdev_profile-JZFRHC
+playwright_chromiumdev_profile-JZmXwT
+playwright_chromiumdev_profile-KDhHyi
+playwright_chromiumdev_profile-KUBjeE
+playwright_chromiumdev_profile-KW9Ajj
+playwright_chromiumdev_profile-KpA9K8
+playwright_chromiumdev_profile-LEIiEa
+playwright_chromiumdev_profile-LZgSIU
+playwright_chromiumdev_profile-LcFxYH
+playwright_chromiumdev_profile-Lle5rP
+playwright_chromiumdev_profile-MQuSK1
+playwright_chromiumdev_profile-MVlRa1
+playwright_chromiumdev_profile-MnUsn4
+playwright_chromiumdev_profile-Mr8yVN
+playwright_chromiumdev_profile-NDoJho
+playwright_chromiumdev_profile-NIJjfk
+playwright_chromiumdev_profile-NXp0FI
+playwright_chromiumdev_profile-NgUaTm
+playwright_chromiumdev_profile-NrhYFA
+playwright_chromiumdev_profile-O4igDw
+playwright_chromiumdev_profile-O6BC0I
+playwright_chromiumdev_profile-ODRjFG
+playwright_chromiumdev_profile-ORV3WX
+playwright_chromiumdev_profile-OwVJm4
+playwright_chromiumdev_profile-Oz9CM9
+playwright_chromiumdev_profile-P2nboo
+playwright_chromiumdev_profile-PDwd7P
+playwright_chromiumdev_profile-PRm52L
+playwright_chromiumdev_profile-PjOUdF
+playwright_chromiumdev_profile-Q4FATA
+playwright_chromiumdev_profile-QFazsB
+playwright_chromiumdev_profile-QKeDQd
+playwright_chromiumdev_profile-QO1Bz3
+playwright_chromiumdev_profile-QT3RQA
+playwright_chromiumdev_profile-RwNLVy
+playwright_chromiumdev_profile-TKFmh3
+playwright_chromiumdev_profile-Tq8887
+playwright_chromiumdev_profile-U0dx6b
+playwright_chromiumdev_profile-U6ywTi
+playwright_chromiumdev_profile-U99moP
+playwright_chromiumdev_profile-UJLVY6
+playwright_chromiumdev_profile-UfPffU
+playwright_chromiumdev_profile-V8c5fX
+playwright_chromiumdev_profile-VHJtC0
+playwright_chromiumdev_profile-VbwbKQ
+playwright_chromiumdev_profile-VdL2UX
+playwright_chromiumdev_profile-VgTSUe
+playwright_chromiumdev_profile-VngYx7
+playwright_chromiumdev_profile-VyTrvW
+playwright_chromiumdev_profile-WQHhmF
+playwright_chromiumdev_profile-WX47YJ
+playwright_chromiumdev_profile-WYvRbj
+playwright_chromiumdev_profile-Whi02v
+playwright_chromiumdev_profile-WkZ6ZK
+playwright_chromiumdev_profile-XEJBUK
+playwright_chromiumdev_profile-XEclGY
+playwright_chromiumdev_profile-XcTYzR
+playwright_chromiumdev_profile-XdV0ha
+playwright_chromiumdev_profile-XnnByX
+playwright_chromiumdev_profile-XnnMDl
+playwright_chromiumdev_profile-YXSYsz
+playwright_chromiumdev_profile-YyX38p
+playwright_chromiumdev_profile-ZAKDa2
+playwright_chromiumdev_profile-ZIknfE
+playwright_chromiumdev_profile-ZebYEy
+playwright_chromiumdev_profile-Zr0vdm
+playwright_chromiumdev_profile-ahEmy8
+playwright_chromiumdev_profile-b6dDR1
+playwright_chromiumdev_profile-bLEIq3
+playwright_chromiumdev_profile-c343aB
+playwright_chromiumdev_profile-cGrXyb
+playwright_chromiumdev_profile-d3WrxF
+playwright_chromiumdev_profile-daQpK8
+playwright_chromiumdev_profile-ddAGnu
+playwright_chromiumdev_profile-dm78sD
+playwright_chromiumdev_profile-e3OkpV
+playwright_chromiumdev_profile-ekuBUy
+playwright_chromiumdev_profile-ennCXe
+playwright_chromiumdev_profile-exs9cG
+playwright_chromiumdev_profile-fTtrJB
+playwright_chromiumdev_profile-fibacX
+playwright_chromiumdev_profile-ft2bMg
+playwright_chromiumdev_profile-gFnRUk
+playwright_chromiumdev_profile-gcj7l1
+playwright_chromiumdev_profile-h7IYuq
+playwright_chromiumdev_profile-hEvR68
+playwright_chromiumdev_profile-hJCdYW
+playwright_chromiumdev_profile-iMzLDH
+playwright_chromiumdev_profile-iYtlTh
+playwright_chromiumdev_profile-ikleDa
+playwright_chromiumdev_profile-iq6hZ4
+playwright_chromiumdev_profile-j0OO3U
+playwright_chromiumdev_profile-jFa4Qj
+playwright_chromiumdev_profile-jLzJoq
+playwright_chromiumdev_profile-jQQ73R
+playwright_chromiumdev_profile-kEPgXP
+playwright_chromiumdev_profile-kcuYCP
+playwright_chromiumdev_profile-kvWvIg
+playwright_chromiumdev_profile-kvjQ55
+playwright_chromiumdev_profile-ky91ZL
+playwright_chromiumdev_profile-lTmRL1
+playwright_chromiumdev_profile-m3GPZ2
+playwright_chromiumdev_profile-mGmHYC
+playwright_chromiumdev_profile-mutPp7
+playwright_chromiumdev_profile-nAOcxV
+playwright_chromiumdev_profile-nHQVyD
+playwright_chromiumdev_profile-nTv93Q
+playwright_chromiumdev_profile-nrKSkX
+playwright_chromiumdev_profile-ntqXjK
+playwright_chromiumdev_profile-oGPqdd
+playwright_chromiumdev_profile-oZVon2
+playwright_chromiumdev_profile-p2U9P6
+playwright_chromiumdev_profile-pOUACo
+playwright_chromiumdev_profile-pYfUYS
+playwright_chromiumdev_profile-pzAA49
+playwright_chromiumdev_profile-q3vpRv
+playwright_chromiumdev_profile-q5sNUM
+playwright_chromiumdev_profile-qDxB8i
+playwright_chromiumdev_profile-qdcn5U
+playwright_chromiumdev_profile-rNjYtb
+playwright_chromiumdev_profile-rb6Way
+playwright_chromiumdev_profile-rmtzEq
+playwright_chromiumdev_profile-ru5KW8
+playwright_chromiumdev_profile-sEcAnv
+playwright_chromiumdev_profile-spNfjj
+playwright_chromiumdev_profile-tDJ19K
+playwright_chromiumdev_profile-tkgADX
+playwright_chromiumdev_profile-vd87YU
+playwright_chromiumdev_profile-vdOy5W
+playwright_chromiumdev_profile-vtoHWK
+playwright_chromiumdev_profile-wSEakr
+playwright_chromiumdev_profile-wjVzUy
+playwright_chromiumdev_profile-x39cq7
+playwright_chromiumdev_profile-yJiYPY
+playwright_chromiumdev_profile-ytionO
+playwright_chromiumdev_profile-z2qDdI
+playwright_chromiumdev_profile-zAGvlD
+playwright_chromiumdev_profile-zMSdKX
+playwright_chromiumdev_profile-zOrL0G
+playwright_chromiumdev_profile-zTHaTM
+playwright_chromiumdev_profile-znEYSf
+playwright_chromiumdev_profile-zoohG9
+playwright_chromiumdev_profile-ztuQ3C
+pulseaudio:1.log.lock
+pulseaudio:2.log.lock
+pulseaudio:3.log.lock
+pulseaudio:4.log.lock
+pulseaudio:5.log.lock
+pulseaudio:6.log.lock
+pv
+r07
+r07c.png
+r10-base
+r10-check
+r10-halo
+r10-rerun
+r12cmp.jpg
+r2-04.js
+r2-he.js
+r2-he_detail.js
+r5chk
+r5look
+r6look
+r6look2
+r6look_r404
+r6look_r4all
+r6look_r4det
+r6look_r4he
+r6look_save
+r7_edge.png
+r7_ghost.png
+r7_lens.png
+r7_tear.png
+r7_vessel.png
+r7b
+r7look
+r7look2
+r8chk
+r9_128after102
+r9_128after99
+r9_128alone
+r9_fs
+r9_nofade
+r9diag
+r9seq
+r9try
+resync
+s7
+s70.mp4
+sand-box-boot-id
+sand-box-browser-accept-language-9224
+sand-box-browser-accept-language-9228
+sand-box-browser-coherent-fingerprint
+sand-box-browser-gpu-mode-9224
+sand-box-browser-gpu-mode-9228
+sand-box-browser-launch-markers-9224
+sand-box-browser-launch-markers-9228
+sand-box-browser-no-local-dns
+sand-box-browser-running-9224
+sand-box-browser-running-9228
+sand-box-browser-stock-fonts
+sand-box-browser-stock-notifications
+sand-box-browser-webrtc-proxy-only
+sand-box-chrome-extra-flags
+sand-box-experiments-ready
+sand-box-ready-stage
+sand-box-store-pack
+sand-box-telemetry.log
+sand-box-timezone.log
+sand-browser-accept-language-en-us
+sand-browser-egress-timezone
+sand-browser-firewall
+sand-chrome-disable-quic
+sand-cookie-launch-restore.log
+sand-cookie-persist.log
+sand-copy-in-status.json
+sand-copy-in.log
+sand-desktop
+sand-desktop-supervisor
+sand-desktop-supervisor-supervise.log
+sand-desktop-supervisor.log
+sand-egress-proxy
+sand-egress-tunnel-client
+sand-host.log
+sand-identity.sock
+sand-image-rendition-5g7QrD
+sand-image-rendition-AKazsr
+sand-log-shipper.offsets.json
+sand-managed-converge.log
+sand-memory-watch.log
+sand-monitor-busy-6
+sand-novnc-tokens.d
+sand-orbitd-supervisor.log
+sand-orbitd.log
+sand-orbitd.log.lock
+sand-playwright-mcp
+sand-playwright-secure-fill
+sand-profile-prior-boot-9224
+sand-profile-prior-boot-9228
+sand-session-sync.log
+sand-supervisor
+sand-supervisor-supervise.log
+sand-supervisor.log
+sand-ua-governor-accept-language-9224-Gap1lZ
+sand-ua-governor-accept-language-9228-vcrylK
+sand-ua-governor.log
+sand-ua-governor.log.lock
+sand-ua-token-disabled
+sand-web-bot-auth
+sand-web-bot-auth-signed.json
+sand-web-bot-auth-xhr-fetch
+sand-web-bot-auth.log.lock
+sand-window-2
+sand-window-3
+sand-window-4
+sand-window-6
+sand-window-locks.d
+sand-window-router.log
+sand-window-tokens.d
+sand-window-used.d
+scan_ok.json
+sessions
+sf
+sheet.png
+sheet0.png
+sheet1.png
+sheet2.png
+start-desktop.log
+start-desktop.log.lock
+strip279.png
+strip336.png
+strip351.png
+strip438.png
+strip543.png
+sub70.mp4
+sub_chk
+sub_full.png
+sub_over.png
+tts_probe.wav
+v1
+v1o
+v2c_190.png
+v2o
+v3
+v3check.log
+v4b
+v4c
+v4d
+v4st
+v5
+v5-source-before.sha256
+v5b
+v5c
+v5try
+v6_checklist.md
+v6_ref
+verify-r2.mjs
+watch_narration_gen.sh
+x11vnc:1.log
+x11vnc:1.log.lock
+x11vnc:2.log
+x11vnc:2.log.lock
+x11vnc:3.log
+x11vnc:3.log.lock
+x11vnc:4.log
+x11vnc:4.log.lock
+x11vnc:5.log
+x11vnc:5.log.lock
+x11vnc:6.log
+x11vnc:6.log.lock
+x2
+x2o
+x2o_xs1024
+x2o_xssoft
+x41.png
+xdg-runtime
+xdg-runtime-2
+xdg-runtime-3
+xdg-runtime-4
+xdg-runtime-6
+xdg-runtime-box
+xdg-runtime-box-2
+xdg-runtime-box-3
+xdg-runtime-box-4
+xdg-runtime-box-6
+xfce4-panel:1.log
+xfce4-panel:1.log.lock
+xfce4-panel:1.pid
+xfce4-panel:1.pid.lock
+xfce4-panel:2.log
+xfce4-panel:2.log.lock
+xfce4-panel:2.pid
+xfce4-panel:2.pid.lock
+xfce4-panel:3.log
+xfce4-panel:3.log.lock
+xfce4-panel:3.pid
+xfce4-panel:3.pid.lock
+xfce4-panel:4.log
+xfce4-panel:4.log.lock
+xfce4-panel:4.pid
+xfce4-panel:4.pid.lock
+xfce4-panel:5.log
+xfce4-panel:5.log.lock
+xfce4-panel:5.pid
+xfce4-panel:5.pid.lock
+xfce4-panel:6.log
+xfce4-panel:6.log.lock
+xfce4-panel:6.pid
+xfce4-panel:6.pid.lock
+xfwm4:1.log
+xfwm4:1.log.lock
+xfwm4:2.log
+xfwm4:2.log.lock
+xfwm4:3.log
+xfwm4:3.log.lock
+xfwm4:4.log
+xfwm4:4.log.lock
+xfwm4:5.log
+xfwm4:5.log.lock
+xfwm4:6.log
+xfwm4:6.log.lock
+xvfb:1.log.lock
+xvfb:2.log.lock
+xvfb:3.log.lock
+xvfb:4.log.lock
+xvfb:5.log.lock
+xvfb:6.log.lock
+z6.png
+z89.png
+z89_3.png
+z89_4.png
+z89_5.png
+z99.png
+zoom_gang_left.png
+zoom_lobe.png
+zoom_tear_bot.png
+zoom_tear_top.png
+audio
+chapters
+chapters.json
+data
+fonts
+index.html
+lib
+main.js
+qa
+tools
+vendor
+/usr/bin/google-chrome
+../v4_mix/film_mini_detail/vendor/rough.js
+../v4_mix/film_mini_detail/vendor/p5.brush.js
+../v4_mix/film_mini_detail/vendor/p5.min.js
+../v4_mix/film_mini_detail/chapters/07.js
+../v4_mix/film_mini_detail/chapters/04.js
+../v4_mix/film_mini_detail/chapters/05.js
+../v4_mix/film_mini_detail/chapters/06.js
+../v4_mix/film_mini_detail/chapters/03.js
+../v4_mix/film_mini_detail/chapters/02.js
+../v4_mix/film_mini_detail/chapters/01.js
+../v4_mix/film_mini_detail/chapters/index.js
+../v4_mix/film_mini_detail/lib/chapter.js
+../v4_mix/film_mini_detail/lib/mood.js
+../v4_mix/film_mini_detail/lib/figure.js
+../v4_mix/film_mini_detail/lib/timeline.js
+../v4_mix/film_mini_detail/lib/motion.js
+../v4_mix/film_mini_detail/lib/tokens.js
+../v4_mix/film_mini_detail/lib/wash.js
+../v4_mix/film_mini_detail/lib/ann.js
+../v4_mix/film_mini_detail/lib/camera.js
+../v4_mix/film_mini_detail/lib/scope.js
+../v4_mix/film_mini_detail/lib/subtitle.js
+../v4_mix/film_mini_detail/lib/ink.js
+../v4_mix/film_mini_detail/lib/he.js
+../v4_mix/film_mini_detail/lib/he_detail.js
+../v4_mix/film_mini_detail/fonts/MixSans-Bold.woff2
+../v4_mix/film_mini_detail/fonts/MixSans-Regular.woff2
+../v4_mix/film_mini_detail/index.html
+../v4_mix/film_mini_detail/tools/subset-font.sh
+../v4_mix/film_mini_detail/tools/make-chapters.py
+
+exec
+/bin/bash -lc 'ls /tmp/node_modules/@napi-rs /tmp/node_modules/playwright /tmp/node_modules/canvas /opt/node_modules 2>/dev/null; ls /tmp/*mjs | head -25; cat ../v4_mix/film_mini_detail/chapters/index.js; head -45 ../v4_mix/film_mini_detail/chapters/03.js; cat engine/lib/tokens.js | head -30; cat engine/lib/ink.js | head -25' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+/tmp/dump-endcard-strings.mjs
+/tmp/he-check.mjs
+/tmp/he-legacy-check.mjs
+/tmp/he-verify.mjs
+/tmp/verify-r2.mjs
+// Chapter registry — add your chapter file here (id must match the 段 column of data/sentences.tsv).
+import c01 from './01.js';
+import c02 from './02.js';
+import c03 from './03.js';
+import c04 from './04.js';   // mini
+import c05 from './05.js';   // mini (05a/b/c inside)
+import c06 from './06.js';   // mini
+import c07 from './07.js';   // Grok Bot (content + end card)
+export default { '01': c01, '02': c02, '03': c03, '04': c04, '05': c05, '06': c06, '07': c07 };
+// 03 镜下病理 — sentences 7–9. Entry = 02 exit (cross-section disc, EXIT_CAM2). Signature: pain line dives into the wall → eyepiece opens.
+// Exit = LENS_EXIT with full HE state (04 continues on the same wall, in place).
+import { C } from '../lib/tokens.js';
+import * as A from '../lib/ann.js';
+import { toScreen } from '../lib/camera.js';
+import { drawLens, fieldToScreen, bakeHE, BANDS, ULCER, CELLS, drawNeutrophil } from '../lib/he.js';
+import { win, fade, clamp, titleBlock } from '../lib/chapter.js';
+import c02, { XS, XS_WALL, EXIT_CAM2 } from './02.js';
+import { ease, seg, pulse } from '../lib/motion.js';
+import { holdAfter } from '../lib/mood.js';
+import { drawSurround, drawPointer, offFor, POINTER } from '../lib/scope.js';
+const I0 = 7, s = i => I0 + i;
+export const LENS_EXIT = { x: 640, y: 480, r: 340 };
+export const HE_EXIT = { ulcer: 1, neut: 1, fibrin: 1 };
+const lerp = (a, b, k) => a + (b - a) * k;
+const sm = (t, a, b) => { const k = clamp((t - a) / (b - a)); return k * k * (3 - 2 * k); };
+export function lensAt(t, T) {
+  const ko = sm(t, T.at(s(0), .08), T.frac(s(0), .80)), km = sm(t, T.frac(s(1), .82), T.end(s(1)));
+  return { x: lerp(960, LENS_EXIT.x, km), y: lerp(500, LENS_EXIT.y, km), r: lerp(380 * ko, LENS_EXIT.r, km) };
+}
+export function heAt(t, T) {
+  const u=seg(t,T.at(s(1)),T.frac(s(1),.96)), d=Math.max(0,t-T.at(s(1)));
+  const mt=holdAfter(t,T.at(s(2))+.58,.45);
+  return {ulcer:win(t,T.frac(s(1),.03),T.frac(s(1),.18)),neut:.13*u+.87*u*u,
+    fibrin:win(t,T.frac(s(1),.70),T.frac(s(1),.94)),t:mt+.055*Math.min(d,12)**2};
+}
+// mood_v2 stage tour: the eyepiece pointer is FIXED; the stage (off) + magnification (fs) move so each structure the VO
+// names lands under the pointer tip: ulcer (mucosal defect) → transmural infiltrate (muscularis) → serosal fibrin.
+// Offsets are kept inside the drawn field (|off| ≤ 430 − 420/fs) so no blank edge enters the field of view.
+const ULC = (ULCER[0] + ULCER[1]) / 2;
+const stop = (fs, g) => ({ fs, off: g ? offFor({ r: 1 }, g, fs) : [0, 0] });
+const fieldAt = (t,T) => {
+  const ko=sm(t,T.at(s(0),.08),T.frac(s(0),.88)), F=(i,k)=>T.frac(s(i),k);
+  if (t < F(1,.05)) return { fs: (.5+.5*ko)*1.0, blur: 9*(1-ko), off: [0,0] };
+  const keys = [[F(1,.05), stop(1.0)], [F(1,.15), stop(1.9, [ULC, -205])], [F(1,.44), stop(1.9, [ULC, -205])],
+    [F(1,.54), stop(1.3, [60, 90])], [F(1,.68), stop(1.3, [60, 90])], [F(1,.77), stop(2.3, [150, 285])], [F(1,.88), stop(2.3, [150, 285])],
+    [F(2,.04), stop(1.05)]];
+  let a = keys[0], b = keys[keys.length - 1];
+  for (let i = 1; i < keys.length; i++) if (t <= keys[i][0]) { a = keys[i - 1]; b = keys[i]; break; } else a = b = keys[i];
+  const k = a === b ? 1 : sm(t, a[0], b[0]);
+  // interpolate magnification in log space so the zoom speed feels even
+  return { fs: Math.exp(lerp(Math.log(a[1].fs), Math.log(b[1].fs), k)), blur: 0, off: [lerp(a[1].off[0], b[1].off[0], k), lerp(a[1].off[1], b[1].off[1], k)] };
+};
+export default {
+  id: '03', drift: false,
+// Design tokens — the ONLY place colours / fonts / sizes are defined.
+export const C = {
+  paper: '#F4EFE6', grid: 'rgba(42,42,53,.07)',
+  ink: '#2A2A35',      // structure, text
+  red: '#D6453A',      // vermilion = living tissue / inflammation / accent
+  vio: '#6B4C9A',      // HE purple = nuclei, microscopy only
+  // tint (not a 4th hue): muted ochre for pus / purulent coating only — derived as a grey-warm mix of ink+vermilion+paper
+  pus: '#B39459',
+  subAccent: '#F07A63', // vermilion lifted for legibility inside subtitles
+};
+export const FONT = '"MixSans","Noto Sans CJK SC","Noto Sans SC",sans-serif';
+export const W = 1920, H = 1080;
+export const SAFE = { subY: 1012, fadeTop: 900 };   // subtitle baseline; nothing busy below fadeTop
+// Rough.js ink — STRUCTURE layer. Shapes are generated once with a fixed seed and cached as Path2D,
+// so they never shimmer; "drawing on" is done with a dash reveal, not by regenerating.
+const gen = rough.generator();
+const cache = new Map();
+import { C } from './tokens.js';
+const base = o => Object.assign({ stroke: C.ink, strokeWidth: 2.6, roughness: .9, bowing: .8, seed: 3 }, o);
+function polyLen(pts, closed) { let L = 0; for (let i = 1; i < pts.length; i++) L += Math.hypot(pts[i][0] - pts[i-1][0], pts[i][1] - pts[i-1][1]); if (closed) L += Math.hypot(pts[0][0]-pts.at(-1)[0], pts[0][1]-pts.at(-1)[1]); return L; }
+function build(kind, args, o) {
+  const d = gen[kind](...args, o), paths = gen.toPaths(d).map(p => ({ p: new Path2D(p.d), stroke: p.stroke, w: p.strokeWidth, fill: p.fill }));
+  let len = 1000; const pts = kind === 'linearPath' || kind === 'curve' ? args[0] : kind === 'polygon' ? args[0] : null;
+  if (pts) len = polyLen(pts, kind === 'polygon') * 1.15; else if (kind === 'ellipse') len = Math.PI * (args[2] + args[3]) * .6; else if (kind === 'circle') len = Math.PI * args[2] * 1.1;
+  return { paths, len };
+}
+// key: unique stable name. If geometry changes per frame (morph), pass dynamic=true (seed stays fixed so it morphs smoothly).
+// BOIL (hand-drawn life): main.js calls setBoil(floor(t*8)); every cached shape cycles through 3 fixed-seed variants
+// at 8 fps. Deterministic (depends only on t). Opt out per shape with roughOpts.boil = false, or globally with setBoil(null).
+let BOIL = null; export const BOIL_FPS = 10, BOIL_VARIANTS = 3;
+export function setBoil(frame) { BOIL = frame == null ? null : ((frame % BOIL_VARIANTS) + BOIL_VARIANTS) % BOIL_VARIANTS; }
+export function shape(key, kind, args, o = {}, dynamic = false) {
+  const v = (BOIL == null || o.boil === false) ? 0 : BOIL, ck = v ? key + '#' + v : key;
+  if (!dynamic && cache.has(ck)) return cache.get(ck);
+  const oo = base(o); if (v) oo.seed = (oo.seed || 1) * 31 + v * 7919; delete oo.boil;
+  const s = build(kind, args, oo); if (!dynamic) cache.set(ck, s); return s;
+}
+// draw with optional reveal k∈[0,1] (pen draws on) and alpha
+
+codex
+确认当前分支是 `v6-fresh`，五个受保护文件的哈希已记录。另发现 `engine/` 缺少原入口依赖的 `chapters/`、时间轴和音频元数据；我会从原工作区只读复制这些依赖到独立复现目录。水彩烘焙依赖 p5 WebGL，CPU 检查若无法保留这一步，就不能认定复现通过。
+
+exec
+/bin/bash -lc "cat /tmp/he-check.mjs | head -70; cat /workspace/garden-skills/skills/motion-showreel/scripts/package.json; ls /tmp/v6_ref; du -sh ../v4_mix/film_mini_detail/{chapters,data,audio}; rg -n 'drawWash|document|window' engine/lib/{he.js,he_detail.js,ann.js,scope.js}" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+import fs from 'node:fs';
+import path from 'node:path';
+import {loadChromium,launch} from '/workspace/garden-skills/skills/motion-showreel/scripts/lib/browser.mjs';
+const root=process.cwd(),browser=await launch(await loadChromium(root));
+const page=await browser.newPage({viewport:{width:1920,height:1080}});
+page.on('pageerror',e=>console.error(e));
+await page.route('http://plate.local/**',async route=>{const u=new URL(route.request().url());let p=decodeURIComponent(u.pathname);if(p==='/')p='/index.html';const f=path.join(root,p);const types={'.html':'text/html','.js':'text/javascript','.json':'application/json','.woff2':'font/woff2'};try{await route.fulfill({body:fs.readFileSync(f),contentType:types[path.extname(f)]||'application/octet-stream'});}catch{await route.fulfill({status:404,body:''});}});
+await page.goto('http://plate.local/?render=1');await page.waitForFunction(()=>window.READY===true,null,{timeout:180000});
+fs.mkdirSync('qa/codex_check',{recursive:true});
+for(const t of [60,73.05,89.73,95.66,99.224,101.55,102.45]){const ms=await page.evaluate(t=>{const a=performance.now();window.render(t);return performance.now()-a;},t);await page.screenshot({path:`qa/codex_check/t${t}.png`});console.log(t,ms);}
+await browser.close();
+{
+  "name": "motion-showreel-tools",
+  "private": true,
+  "type": "module",
+  "description": "Render / audio / QA tools for the motion-showreel skill. Playwright renders frames, Tone.js powers tier-2 audio; ffmpeg must be on PATH.",
+  "dependencies": {
+    "playwright": "^1.55.0",
+    "tone": "15.1.22"
+  },
+  "scripts": {
+    "test": "node --test --test-concurrency=1 test/*.test.mjs"
+  }
+}
+style_target
+128K	../v4_mix/film_mini_detail/chapters
+16K	../v4_mix/film_mini_detail/data
+12K	../v4_mix/film_mini_detail/audio
+engine/lib/he_detail.js:4:import { drawWash } from './wash.js';
+engine/lib/he_detail.js:147: for(const h of heme){const g=h.tear?Math.min(kv,kp):kv;if(!(g>0))continue;const a=Math.min(.55,Math.max(.35,h.alpha))*g;drawWash(ctx,'c04.heme',h.x,h.y,h.size,{alpha:a,grow:g,rot:h.rot,blend:'source-over',soft:.82});}
+engine/lib/he_detail.js:148: for(const p of territories)if(kn>0)drawWash(ctx,`c04.necro.${p.key}`,p.x,p.y,p.size*.62,{alpha:kn*.2,grow:kn,rot:p.rot,soft:.72,blend:'source-over'});
+engine/lib/he.js:8:import { drawWash } from './wash.js';
+engine/lib/he.js:153:  drawWash(ctx, 'he.bands', 0, 0, 1024);
+engine/lib/he.js:154:  drawWash(ctx, 'he.fibrin', 0, 330, 1024, { grow: fibrin, alpha: fibrin, origin: [.5, .3] });
+engine/lib/he.js:161:  drawWash(ctx, 'he.ulcer', (ULCER[0] + ULCER[1]) / 2, -265, 330, { grow: ulcer, alpha: ulcer });
+engine/lib/he.js:162:  VESSELS.forEach((v, i) => { drawWash(ctx, 'he.vessel', v[0], v[1], v[2] * 3.6); ctx.strokeStyle = HE.hema; ctx.lineWidth = 2.2; blobPath(ctx, v[0], v[1], v[2] * 1.1, v[2] * .85, i * 3.1, .16); ctx.stroke(); });
+engine/lib/he.js:176:  drawWash(ctx, 'he.bands', 0, 0, 1024);
+engine/lib/he.js:179:  drawWash(ctx, 'he.fibrin', 0, 330, 1024, { grow: fibrin, alpha: fibrin, origin: [.5, .3] });
+engine/lib/he.js:199:  drawWash(ctx, 'he.ulcer', (ULCER[0] + ULCER[1]) / 2, -265, 330, { grow: ulcer, alpha: ulcer * (necrosis > 0 ? 1 - necrosis * .75 : 1) });
+engine/lib/he.js:202:  VESSELS.forEach((v, i) => { drawWash(ctx, 'he.vessel', v[0], v[1], v[2] * 3.6); ctx.strokeStyle = HE.hema; ctx.lineWidth = 2.2; blobPath(ctx, v[0], v[1], v[2] * 1.1, v[2] * .85, i * 3.1, .16); ctx.stroke(); });
+
+exec
+/bin/bash -lc "cat /workspace/garden-skills/skills/motion-showreel/scripts/lib/browser.mjs | head -100; ls /workspace/garden-skills/skills/motion-showreel/scripts/node_modules/playwright; ls /tmp | rg 'node|cpu|canvas'" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+// Shared browser plumbing: resolve Playwright, serve the project over HTTP, open a page that
+// exposes the render(t) contract and wait until it is READY.
+import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
+import { createRequire } from 'node:module';
+import { pathToFileURL, fileURLToPath } from 'node:url';
+
+const SCRIPTS_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+// Playwright can live next to this skill (scripts/node_modules), in the project, or globally.
+export async function loadChromium(projectDir) {
+  const pick = m => m.chromium || m.default?.chromium;
+  const bases = [SCRIPTS_DIR, projectDir, process.cwd()].filter(Boolean);
+  for (const base of bases) {
+    const req = createRequire(path.join(path.resolve(base), 'package.json'));
+    for (const name of ['playwright', 'playwright-core']) {
+      try { const c = pick(await import(pathToFileURL(req.resolve(name)).href)); if (c) return c; } catch {}
+    }
+  }
+  for (const name of ['playwright', 'playwright-core']) {
+    try { const c = pick(await import(name)); if (c) return c; } catch {}
+  }
+  die('Playwright is not installed. Run:  sh <skill>/scripts/setup.sh   (or: npm i -D playwright && npx playwright install chromium)');
+}
+
+// macOS: force Metal, otherwise new headless shells may fall back to SwiftShader (≈6× slower WebGL).
+const angle = process.env.SHOWREEL_ANGLE || (process.platform === 'darwin' ? 'metal' : '');
+export const ARGS = [
+  ...(angle && angle !== 'default' ? [`--use-angle=${angle}`] : []),
+  '--enable-gpu', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader',
+  '--font-render-hinting=none', '--force-color-profile=srgb', '--hide-scrollbars',
+  '--autoplay-policy=no-user-gesture-required',
+];
+
+export async function launch(chromium) {
+  const tries = process.env.CHROME_PATH ? [{ executablePath: process.env.CHROME_PATH }] : [{}, { channel: 'chrome' }, { channel: 'msedge' }];
+  const errors = [];
+  for (const opt of tries) {
+    try { return await chromium.launch({ headless: true, args: ARGS, ...opt }); }
+    catch (e) { errors.push(`${opt.channel || opt.executablePath || 'bundled chromium'}: ${String(e.message).split('\n')[0]}`); }
+  }
+  die('No usable headless browser.\n  ' + errors.join('\n  ') + '\nFix: npx playwright install chromium   (or install Google Chrome, or set CHROME_PATH)');
+}
+
+const MIME = {
+  '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png',
+  '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.avif': 'image/avif',
+  '.woff': 'font/woff', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.otf': 'font/otf',
+  '.wav': 'audio/wav', '.mp3': 'audio/mpeg', '.m4a': 'audio/mp4', '.ogg': 'audio/ogg',
+  '.mp4': 'video/mp4', '.webm': 'video/webm', '.glb': 'model/gltf-binary', '.gltf': 'model/gltf+json',
+  '.bin': 'application/octet-stream', '.hdr': 'application/octet-stream', '.exr': 'application/octet-stream',
+  '.wasm': 'application/wasm', '.txt': 'text/plain; charset=utf-8',
+};
+
+// mounts: { '/__msr/': '/abs/dir' } serve extra folders (tool assets, shared samples) next to the project root
+export function serve(root, mounts = {}) {
+  root = path.resolve(root);
+  return new Promise(resolve => {
+    const server = http.createServer((req, res) => {
+      let p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+      if (p.endsWith('/')) p += 'index.html';
+      let base = root, rel = p;
+      for (const [prefix, dir] of Object.entries(mounts)) if (p.startsWith(prefix)) { base = path.resolve(dir); rel = '/' + p.slice(prefix.length); break; }
+      const file = path.resolve(base, '.' + rel);
+      if (!file.startsWith(base) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); res.end('not found'); return; }
+      res.writeHead(200, { 'Content-Type': MIME[path.extname(file).toLowerCase()] || 'application/octet-stream', 'Cache-Control': 'no-store', 'Access-Control-Allow-Origin': '*' });
+      fs.createReadStream(file).pipe(res);
+    });
+    server.listen(0, '127.0.0.1', () => resolve({ server, port: server.address().port }));
+  });
+}
+
+// target = project folder (with index.html) or an .html file inside it
+export function resolveTarget(target) {
+  if (!target) die('missing <project-dir | page.html>');
+  const abs = path.resolve(target);
+  if (!fs.existsSync(abs)) die(`not found: ${target}`);
+  const isDir = fs.statSync(abs).isDirectory();
+  const page = isDir ? path.join(abs, 'index.html') : abs;
+  if (!fs.existsSync(page)) die(`no index.html in ${target}`);
+  return { root: isDir ? abs : path.dirname(abs), page, rel: path.basename(page) };
+}
+
+// init: a self-contained function run in the page before any of its scripts (e.g. the text-framing hook)
+export async function openPage(browser, { port, rel, w, h, dpr = 1, query = '', init = null }) {
+  const page = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: dpr });
+  if (init) await page.addInitScript(init);
+  const recent = [];
+  page.on('console', m => { if (m.type() === 'error') { const s = '[page] ' + m.text().slice(0, 300); recent.push(s); if (recent.length > 6) recent.shift(); console.error(s); } });
+  page.on('pageerror', e => die(`[pageerror] ${e.message}\n(render(t) threw or a module failed; fix the page and retry)`));
+  page.on('response', r => {
+    if (r.status() >= 400 && !r.url().endsWith('favicon.ico')) {
+      const type = r.request().resourceType();
+      const msg = `[page] ${r.status()} ${new URL(r.url()).pathname} (${type})`;
+      if (type === 'script' || type === 'document') die(msg + ' — a required script/page is missing; paths are relative to the project folder');
+      console.error(msg);
+    }
+  });
+ls: cannot access '/workspace/garden-skills/skills/motion-showreel/scripts/node_modules/playwright': No such file or directory
+node-compile-cache
+
+exec
+/bin/bash -lc "mkdir -p qa/v6/parity tools; python - <<'PY'
+import pathlib,hashlib,json,shutil
+root=pathlib.Path('.')
+names=['he.js','he_detail.js','wash.js','ann.js','scope.js']
+h={f'engine/lib/{n}':hashlib.sha256((root/'engine/lib'/n).read_bytes()).hexdigest() for n in names}
+(root/'qa/v6/parity/sha256_before.json').write_text(json.dumps(h,indent=2)+'\\n')
+src=root.parent/'v4_mix/film_mini_detail'
+dst=root/'parity_runtime'
+dst.mkdir(exist_ok=True)
+for name in ['chapters','data','audio']:
+ shutil.copytree(src/name,dst/name,dirs_exist_ok=True)
+for name in ['lib','fonts','vendor']:
+ (dst/name).symlink_to('../engine/'+name,target_is_directory=True)
+for name in ['index.html','main.js']:
+ shutil.copyfile(root/'engine'/name,dst/name)
+shutil.copyfile(root/'engine/ref_chapters/04.js',dst/'chapters/04.js')
+PY
+npm init -y --prefix /tmp/v6-parity-deps >/dev/null" in /workspace/病理科普视频/v5
+ succeeded in 704ms:
+/bin/bash: line 1: python: command not found
+
+exec
+/bin/bash -lc "cat package.json; python3 - <<'PY'
+import pathlib,hashlib,json,shutil
+root=pathlib.Path('.')
+names=['he.js','he_detail.js','wash.js','ann.js','scope.js']
+h={f'engine/lib/{n}':hashlib.sha256((root/'engine/lib'/n).read_bytes()).hexdigest() for n in names}
+(root/'qa/v6/parity/sha256_before.json').write_text(json.dumps(h,indent=2)+'\\n')
+src=root.parent/'v4_mix/film_mini_detail';dst=root/'parity_runtime';dst.mkdir(exist_ok=True)
+for name in ['chapters','data','audio']: shutil.copytree(src/name,dst/name,dirs_exist_ok=True)
+for name in ['lib','fonts','vendor']: (dst/name).symlink_to('../engine/'+name,target_is_directory=True)
+for name in ['index.html','main.js']: shutil.copyfile(root/'engine'/name,dst/name)
+shutil.copyfile(root/'engine/ref_chapters/04.js',dst/'chapters/04.js')
+PY
+npm install --prefix /tmp/v6-parity-deps playwright @napi-rs/canvas" in /workspace/病理科普视频/v5
+ exited 1 in 283ms:
+{
+  "name": "v5",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
+Traceback (most recent call last):
+  File "<stdin>", line 7, in <module>
+  File "/usr/lib/python3.13/shutil.py", line 591, in copytree
+    with os.scandir(src) as itr:
+         ~~~~~~~~~~^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'v4_mix/film_mini_detail/chapters'
+npm error code ENOENT
+npm error syscall mkdir
+npm error path /home/box/.npm/_cacache
+npm error errno ENOENT
+npm error enoent Invalid response body while trying to fetch https://registry.npmjs.org/@napi-rs%2fcanvas: ENOENT: no such file or directory, mkdir '/home/box/.npm/_cacache'
+npm error enoent This is related to npm not being able to find a file.
+npm error enoent
+npm error Log files were not written due to an error writing to the directory: /home/box/.npm/_logs
+npm error You can rerun the command with `--loglevel=verbose` to see the logs in your terminal
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+import pathlib,shutil,json
+root=pathlib.Path.cwd();src=root.parent/'v4_mix/film_mini_detail';dst=root/'parity_runtime'
+for name in ['chapters','data','audio']: shutil.copytree(src/name,dst/name,dirs_exist_ok=True)
+for name in ['lib','fonts','vendor']: (dst/name).symlink_to('../engine/'+name,target_is_directory=True)
+for name in ['index.html','main.js']: shutil.copyfile(root/'engine'/name,dst/name)
+shutil.copyfile(root/'engine/ref_chapters/04.js',dst/'chapters/04.js')
+(root/'package.json').write_text(json.dumps({'name':'pathology-v6','private':True,'type':'module','dependencies':{'@napi-rs/canvas':'0.1.80','playwright':'1.55.0'}},indent=2)+'\\n')
+PY
+npm install --cache /tmp/v6-npm-cache" in /workspace/病理科普视频/v5
+ succeeded in 2003ms:
+
+added 4 packages, and audited 5 packages in 2s
+
+1 high severity vulnerability
+
+To address all issues, run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+npm notice
+npm notice New major version of npm available! 11.21.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+exec
+/bin/bash -lc "node --input-type=module - <<'JS'
+import {chromium} from 'playwright';import fs from 'node:fs';try {let b=await chromium.launch({executablePath:'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--use-angle=swiftshader','--enable-unsafe-swiftshader']});await b.close();console.log('launched')}catch(e){fs.writeFileSync('qa/v6/parity/chromium_error.log',String(e));console.log(String(e).slice(0,1700))}
+JS" in /workspace/病理科普视频/v5
+ succeeded in 339ms:
+launched
+
+exec
+/bin/bash -lc "cat > render.mjs <<'JS'
+import fs from 'node:fs';
+import path from 'node:path';
+import http from 'node:http';
+import {fileURLToPath} from 'node:url';
+import {chromium} from 'playwright';
+const root=path.dirname(fileURLToPath(import.meta.url));
+const parity=process.argv.includes('--parity');
+if("'!parity && !process.argv.includes('"'--samples')) throw Error('Use --parity or --samples');
+if("'!parity){
+ const result=JSON.parse(fs.readFileSync(path.join(root,'"'qa/v6/parity/metrics.json')));
+ if("'!result.passed) throw Error('"'Parity gate failed: S08 is not implemented; see qa/v6/自检.md');
+ throw Error('S08 has not been implemented');
+}
+const out=path.join(root,'qa/v6/parity');fs.mkdirSync(out,{recursive:true});
+const mime={'.html':'text/html','.js':'text/javascript','.woff2':'font/woff2','.json':'application/json','.tsv':'text/plain'};
+const server=http.createServer((req,res)=>{let rel=decodeURIComponent(new URL(req.url,'http://local').pathname);if(rel.endsWith('/'))rel+='index.html';const f=path.resolve(root,'parity_runtime','.'+rel);if("'!f.startsWith(path.join(root,'"'parity_runtime')+path.sep)){res.writeHead(403);res.end();return;}try{res.setHeader('Content-Type',mime[path.extname(f)]||'application/octet-stream');res.end(fs.readFileSync(f));}catch{res.writeHead(404);res.end();}});
+await new Promise(r=>server.listen(0,'127.0.0.1',r));
+let browser;
+try{
+ browser=await chromium.launch({executablePath:process.env.CHROME_PATH||'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--use-angle=swiftshader','--enable-unsafe-swiftshader','--font-render-hinting=none','--force-color-profile=srgb','--hide-scrollbars']});
+ const page=await browser.newPage({viewport:{width:1920,height:1080},deviceScaleFactor:1});const errors=[];page.on('pageerror',e=>errors.push(String(e)));page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
+ await page.goto("'`http://127.0.0.1:${server.address().port}/`);
+ await page.waitForFunction(()=>window.READY===true,null,{timeout:240000});
+ for(const t of [89.73,99.22]){
+ await page.evaluate(t=>window.render(t),t);
+ const data=await page.locator('"'#c').evaluate(c=>c.toDataURL());
+ fs.writeFileSync(path.join(out,"'`render_${t.toFixed(2)}.png`),Buffer.from(data.split('"',')[1],'base64'));
+ }
+ fs.writeFileSync(path.join(out,'browser.json'),JSON.stringify({browser:await browser.version(),backend:'Chromium Canvas2D + SwiftShader WebGL (CPU software rasterizer)',errors},null,2));
+}finally{await browser?.close();server.close();}
+await import('./tools/compare-parity.mjs');
+JS
+cat > tools/compare-parity.mjs <<'JS'
+import {createCanvas,loadImage} from '@napi-rs/canvas';
+import fs from 'node:fs';
+const dir='qa/v6/parity';const frames=[];
+for(const t of ['89.73','99.22']){
+ const ref=await loadImage("'`qa/ref/style_target/t_0${t}.png`),actual=await loadImage(`${dir}/render_${t}.png`);
+ if(ref.width!==actual.width||ref.height!==actual.height)throw Error('"'Image dimension mismatch');
+ const w=ref.width,h=ref.height;const c=createCanvas(w,h),ctx=c.getContext('2d');ctx.drawImage(ref,0,0);const a=ctx.getImageData(0,0,w,h);ctx.clearRect(0,0,w,h);ctx.drawImage(actual,0,0);const b=ctx.getImageData(0,0,w,h),diff=ctx.createImageData(w,h);
+ let sum=0,sq=0,changed=0,over16=0,max=0,lensSum=0,lensN=0;
+ for(let p=0;p<w*h;p++){let dmax=0;for(let k=0;k<3;k++){const d=Math.abs(a.data[p*4+k]-b.data[p*4+k]);sum+=d;sq+=d*d;max=Math.max(max,d);dmax=Math.max(dmax,d);diff.data[p*4+k]=Math.min(255,d*4);if(Math.hypot(p%w-640,Math.floor(p/w)-480)<330){lensSum+=d;lensN++;}}diff.data[p*4+3]=255;changed+=dmax>0;over16+=dmax>16;}
+ ctx.putImageData(diff,0,0);fs.writeFileSync("'`${dir}/diff_${t}_x4.png`,c.toBuffer('"'image/png'));
+ const sheet=createCanvas(w*3,h+50),sc=sheet.getContext('2d');sc.fillStyle='#18181c';sc.fillRect(0,0,w*3,h+50);sc.fillStyle='white';sc.font='26px sans-serif';for(const [i,label]of ['REFERENCE','ENGINE RENDER','ABS DIFF x4'].entries())sc.fillText(label,i*w+20,34);sc.drawImage(ref,0,50);sc.drawImage(actual,w,50);sc.drawImage(c,w*2,50);fs.writeFileSync("'`${dir}/compare_${t}.png`,sheet.toBuffer('"'image/png'));
+ frames.push({t:Number(t),width:w,height:h,MAE_RGB:sum/(w*h*3),RMSE_RGB:Math.sqrt(sq/(w*h*3)),max_channel_difference:max,changed_pixel_percent:changed/(w*h)*100,pixels_over_16_percent:over16/(w*h)*100,lens_MAE_RGB:lensSum/lensN});
+}
+// Strict near-identity gate; broad visible differences must block S08.
+const passed=frames.every(f=>f.MAE_RGB<=1&&f.pixels_over_16_percent<=1&&f.lens_MAE_RGB<=1);
+fs.writeFileSync("'`${dir}/metrics.json`,JSON.stringify({passed,threshold:{MAE_RGB:1,pixels_over_16_percent:1,lens_MAE_RGB:1},frames},null,2)+'"'\\n');console.log(JSON.stringify({passed,frames},null,2));
+JS
+node render.mjs --parity > qa/v6/parity/render.log 2>&1" in /workspace/病理科普视频/v5
+codex
+本次实际测试中，Chromium 能以 SwiftShader 软件后端启动，原始 p5 水彩烘焙正在运行。两帧会用完整入口渲染，再计算全图及目镜区域的像素差异，不省略水彩层。
+
+exec
+/bin/bash -lc 'git status --short; cat qa/病理验收清单.md | head -30; cmp engine/lib/he.js ../v4_mix/film_mini_detail/lib/he.js; cmp engine/ref_chapters/04.js ../v4_mix/film_mini_detail/chapters/04.js; cat parity_runtime/data/sentences.tsv | head -16' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+ M assembly/endcard/data/endcard.json
+ M assembly/endcard/endcard.js
+ M assembly/endcard/static-preview.py
+ M assembly/endcard/样帧_片尾.png
+?? assembly/.gitignore
+?? assembly/package-lock.json
+?? assembly/package.json
+?? assembly/pipeline/
+?? assembly/qa/
+?? assembly/subtitle/
+?? node_modules/
+?? package-lock.json
+?? package.json
+?? parity_runtime/
+?? qa/briefs/run_v6_b01.log
+?? qa/briefs/v6_b01_parity.md
+?? qa/v6/
+?? render.mjs
+?? tools/
+# 新片病理验收清单（look，2026-11-10）
+每个镜头出样后按此逐条打勾；不过不合并。
+
+## 通用
+- H&E 配色：核苏木素蓝紫，胞质/纤维素/坏死伊红粉红；组织颜色不得为情绪改色。
+- 红细胞 rx≈5；中性粒细胞约 1.5× 红细胞直径，核 2–5 叶；脓细胞=核固缩/碎裂的中性粒细胞，与完好分叶核混画。
+- "会动的表面"只用于大体标本、人体示意、血管示意，H&E 镜下禁用。
+- 抖动只在 穿孔、腹膜炎 等节点，≤0.3 s。
+- 左侧说明栏只在讲解时出现，讲完退场，主画面恢复全宽；画面内容在字幕区以上（约 y<950，以 Grok Bot 同步的新安全区为准）。
+- CT 一律自绘并标"CT表现示意"，不用真实患者影像。
+
+## 正常阑尾（若出现）
+- 黏膜管状隐窝（柱状上皮+杯状细胞）；黏膜下淋巴滤泡带生发中心；横断面上内环肌切为纵切面（长梭形核）、外纵肌切为横切面（圆点状核）；浆膜。
+
+## 红·单纯性
+- 大体：轻度肿胀、浆膜充血、失去光泽，无脓苔。
+- 镜下：中性粒细胞集中在黏膜及黏膜下层，肌层仅零星几个；浆膜干净仅充血；黏膜上皮局灶缺损脱落；间质水肿。
+- CT示意：管径增粗、壁增厚、周围脂肪轻度模糊。
+
+## 黄·化脓性（蜂窝织炎性）
+- 大体：明显肿胀，浆膜覆灰黄色脓苔。
+- 镜下：中性粒细胞弥漫浸润全层（肌层也要多）；腔内脓液；浆膜面纤维素网+脓细胞（纤维素性脓性渗出）。
+- CT示意：壁增厚强化、周围渗出明显。
+
+## 黑·坏疽性
+- 大体：暗红至暗紫/黑，非全根必黑。
+- 镜下：全层坏死（伊红色、结构消失、核消失、核碎屑）+出血；血管血栓（可分层）。
+- CT示意：壁强化缺损；穿孔时腔外气体/脓肿。
+- 穿孔裂隙内为脓液和纤维素。
+
+段	起	止	时长	句子
+01	   0.0	   3.8	 3.8	午饭后，你的肚脐周围开始隐隐作痛。
+01	   4.3	   8.5	 4.2	起初你以为只是吃坏了肚子，忍忍就过去了。
+01	   9.0	  19.8	10.9	可到了半夜，这股疼突然“搬了家”——死死钉在右下腹，连咳嗽、按压都像针扎，体温也飙了上去。
+01	  20.3	  24.0	 3.8	急诊室里，医生敲定诊断：急性阑尾炎。
+02	  24.8	  29.9	 5.0	切下来的这根阑尾，早已不是平时粉白细长的模样。
+02	  30.3	  39.7	 9.4	它肿得像根暗红色的香肠，表面糊着一层灰黄色的脓苔，切开管腔，里面更是积满了浑浊的脓液。
+02	  40.3	  45.1	 4.8	这短短几小时里，你的右下腹究竟经历了什么？
+03	  45.9	  50.3	 4.5	把切片推到显微镜下，“案发现场”才真正显露：
+03	  50.8	  63.6	12.8	阑尾黏膜已经破溃缺损，成千上万的中性粒细胞像急行军一样，弥漫浸润了整层阑尾壁，连最外层的浆膜都在往外渗出纤维素。
+03	  64.0	  72.2	 8.2	病理医生会写下一行精准的判决：急性蜂窝织炎性阑尾炎——也就是典型的化脓性炎。
+04	  73.0	  77.4	 4.3	其实，在这根盲管里，战火是一步步升级的：
+04	  77.8	  84.1	 6.3	如果战火只局限在黏膜及黏膜下层，还只是温和的单纯性阑尾炎；
+04	  84.6	  90.3	 5.7	一旦蔓延全层、化脓积液，就升级成了刚才的蜂窝织炎性；
+04	  90.8	 101.6	10.9	要是再拖下去，血管被压迫堵死，整根阑尾发黑坏死、甚至穿孔破裂，就会沦为凶险的坏疽性阑尾炎。
+05	 102.4	 108.0	 5.6	看到这儿你可能会问：把阑尾折腾成这样的“炎症”，到底是个什么东西？
+
+exec
+/bin/bash -lc 'tail -12 qa/v6/parity/render.log; du -sh parity_runtime node_modules; cat .gitignore 2>/dev/null; ls qa/v6/parity' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+168K	parity_runtime
+43M	node_modules
+render.log
+sha256_before.json
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+import pathlib,hashlib,json
+r=pathlib.Path.cwd();src=r.parent/'v4_mix/film_mini_detail'
+report={}
+for p in sorted((r/'engine').rglob('*')):
+ if p.is_file():
+  rel=p.relative_to(r/'engine'); q=src/rel
+  if rel.parts[0]=='ref_chapters':q=src/'chapters'/p.name
+  report[str(rel)]={'matches_original':q.is_file() and p.read_bytes()==q.read_bytes()}
+(r/'qa/v6/parity/source_audit.json').write_text(json.dumps(report,indent=2)+'\\n')
+print('engine/source mismatches:',[k for k,v in report.items() if not v['matches_original']])
+PY
+cat > .gitignore <<'EOF'
+node_modules/
+EOF" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+engine/source mismatches: []
+
+exec
+/bin/bash -lc "ps -eo pid,etime,pcpu,comm | rg 'chrome|node' | tail -14; ls -lh qa/v6/parity" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+total 1.4M
+-rw-r--r-- 1 box box  216 Nov 11 21:38 browser.json
+-rw-r--r-- 1 box box    0 Nov 11 21:37 render.log
+-rw-r--r-- 1 box box 991K Nov 11 21:38 render_89.73.png
+-rw-r--r-- 1 box box 325K Nov 11 21:38 render_99.22.png
+-rw-r--r-- 1 box box  466 Nov 11 21:37 sha256_before.json
+-rw-r--r-- 1 box box 1.4K Nov 11 21:38 source_audit.json
+
+ succeeded in 34285ms:
+exec
+/bin/bash -lc 'cat qa/v6/parity/metrics.json; cat qa/v6/parity/browser.json; ls -lh qa/v6/parity' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+{
+  "passed": false,
+  "threshold": {
+    "MAE_RGB": 1,
+    "pixels_over_16_percent": 1,
+    "lens_MAE_RGB": 1
+  },
+  "frames": [
+    {
+      "t": 89.73,
+      "width": 1920,
+      "height": 1080,
+      "MAE_RGB": 3.62039737654321,
+      "RMSE_RGB": 17.57229309178517,
+      "max_channel_difference": 191,
+      "changed_pixel_percent": 21.285108024691358,
+      "pixels_over_16_percent": 5.439911265432099,
+      "lens_MAE_RGB": 20.81866604300352
+    },
+    {
+      "t": 99.22,
+      "width": 1920,
+      "height": 1080,
+      "MAE_RGB": 30.371623906893003,
+      "RMSE_RGB": 48.9667346580672,
+      "max_channel_difference": 237,
+      "changed_pixel_percent": 88.63450038580247,
+      "pixels_over_16_percent": 82.76466049382717,
+      "lens_MAE_RGB": 93.3031100326936
+    }
+  ]
+}
+{
+  "browser": "156.0.8078.47",
+  "backend": "Chromium Canvas2D + SwiftShader WebGL (CPU software rasterizer)",
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ]
+}total 6.0M
+-rw-r--r-- 1 box box  216 Nov 11 21:38 browser.json
+-rw-r--r-- 1 box box 2.5M Nov 11 21:38 compare_89.73.png
+-rw-r--r-- 1 box box 1.4M Nov 11 21:38 compare_99.22.png
+-rw-r--r-- 1 box box 603K Nov 11 21:38 diff_89.73_x4.png
+-rw-r--r-- 1 box box 316K Nov 11 21:38 diff_99.22_x4.png
+-rw-r--r-- 1 box box  784 Nov 11 21:38 metrics.json
+-rw-r--r-- 1 box box  689 Nov 11 21:38 render.log
+-rw-r--r-- 1 box box 991K Nov 11 21:38 render_89.73.png
+-rw-r--r-- 1 box box 325K Nov 11 21:38 render_99.22.png
+-rw-r--r-- 1 box box  466 Nov 11 21:37 sha256_before.json
+-rw-r--r-- 1 box box 1.4K Nov 11 21:38 source_audit.json
+
+exec
+/bin/bash -lc "rg -n 'drawLens|globalCompositeOperation|clearRect|fadeSeams' engine/lib/he.js; sed -n '65,110p' engine/lib/he.js; tail -40 engine/lib/he.js; rg -n 'paper|fillRect' engine/lib/scope.js engine/lib/mood.js" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+2:// drawHE(ctx, state) draws into current transform (caller translates to lens centre, scales by r/420 and clips) — or use drawLens().
+5://                  API unchanged; drawLens/fieldToScreen gained optional extras (off, blur) — old calls behave as before.
+58:export function fadeSeams(ctx, necrosis, lens, off, fs) {
+229:export function drawLens(ctx, L, state, fs = 1, opt = {}) { if (L.r <= 1) return; const off = opt.off || [0, 0];
+  const inset = rad - 8;
+  if (!(inset > 12)) return;
+  const cvs = ctx.canvas;
+  const x0 = Math.max(0, Math.floor(c.x - inset));
+  const y0 = Math.max(0, Math.floor(c.y - inset));
+  const x1 = Math.min(cvs.width, Math.ceil(c.x + inset));
+  const y1 = Math.min(cvs.height, Math.ceil(c.y + inset));
+  const w = x1 - x0, h = y1 - y0;
+  if (w < 8 || h < 8) return;
+  const img = ctx.getImageData(x0, y0, w, h);
+  const src = new Uint8ClampedArray(img.data);
+  const d = img.data;
+  const luma = (row, col) => {
+    const i = (row * w + col) * 4;
+    return src[i] * .299 + src[i + 1] * .587 + src[i + 2] * .114;
+  };
+  const inside = (col, row) => {
+    const dx = x0 + col - c.x, dy = y0 + row - c.y;
+    return dx * dx + dy * dy < inset * inset;
+  };
+  const dipAt = (row, col) => {
+    if (!inside(col, row) || !inside(col, row - 2) || !inside(col, row + 2)) return false;
+    const up = luma(row - 2, col), dn = luma(row + 2, col), mid = luma(row, col);
+    return Math.abs(up - dn) < 28 && mid <= Math.min(up, dn) - 7;
+  };
+  const rows = [];
+  for (let row = 2; row < h - 2; row++) {
+    let chord = 0, dips = 0;
+    for (let col = 0; col < w; col++) { if (!inside(col, row)) continue; chord++; if (dipAt(row, col)) dips++; }
+    if (dips >= 64 && dips > chord * .30) rows.push(row);
+  }
+  if (!rows.length) return;
+  // The seam is often 2–3 px thick. The darkest row matches ±2; the shoulder
+  // still holds the line, so lift it from a sample just outside the trough.
+  const lift = (rt, col, dist, th) => {
+    if (rt - dist < 0 || rt + dist >= h) return false;
+    if (!inside(col, rt) || !inside(col, rt - dist) || !inside(col, rt + dist)) return false;
+    const up = luma(rt - dist, col), dn = luma(rt + dist, col), mid = luma(rt, col);
+    return Math.abs(up - dn) < 34 && mid <= Math.min(up, dn) - th;
+  };
+  const paint = (rt, col, dist) => {
+    const i = (rt * w + col) * 4;
+    const iu = ((rt - dist) * w + col) * 4, idn = ((rt + dist) * w + col) * 4;
+    for (let ch = 0; ch < 3; ch++) d[i + ch] = Math.round(src[i + ch] * (1 - a) + (src[iu + ch] + src[idn + ch]) * .5 * a);
+  };
+  const changed = [];
+  }
+  drawWash(ctx, 'he.ulcer', (ULCER[0] + ULCER[1]) / 2, -265, 330, { grow: ulcer, alpha: ulcer * (necrosis > 0 ? 1 - necrosis * .75 : 1) });
+  // Old congested disc fades; the layered thrombus and wall are drawn on top in the gangrene plate.
+  if (necrosis > 0) { ctx.save(); ctx.globalAlpha *= 1 - necrosis * .86; }
+  VESSELS.forEach((v, i) => { drawWash(ctx, 'he.vessel', v[0], v[1], v[2] * 3.6); ctx.strokeStyle = HE.hema; ctx.lineWidth = 2.2; blobPath(ctx, v[0], v[1], v[2] * 1.1, v[2] * .85, i * 3.1, .16); ctx.stroke(); });
+  if (necrosis > 0) ctx.restore();
+  ctx.fillStyle = 'rgba(80,52,120,.75)'; for (const m of SPINDLE) {
+    if (necrosis > 0) { ctx.save(); ctx.globalAlpha *= structAlpha(m.x, m.y, necrosis, ox, oy, vr); }
+    ctx.beginPath(); ctx.ellipse(m.x, m.y, m.l, 2.4, m.r, 0, 6.283); ctx.fill(); if(detail) { ctx.save();ctx.globalAlpha *= detail;chromatin(ctx,m.x,m.y,m.l,2.4,m.r);ctx.restore(); }
+    if (necrosis > 0) ctx.restore(); }
+  // fibrin strands (eosinophilic, outward from serosa). The tear corridor lets them go.
+  ctx.strokeStyle = 'rgba(206,110,145,.95)'; ctx.lineWidth = 2.4 * (1 - detail * .85); const fibA = ctx.globalAlpha;
+  for (let i = 0; i < FIBRIN.length; i++) { const f = FIBRIN[i], k = Math.min(1, Math.max(0, fibrin * 1.6 - i / FIBRIN.length * .6)); if (k <= 0) continue;
+    if (necrosis > 0) { const keep = Math.max(0, Math.min(1, (Math.abs(f.x - 190) - 18) / 64)); ctx.save(); ctx.globalAlpha = fibA * (1 - necrosis * (1 - keep)); }
+    ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.quadraticCurveTo(f.x + Math.cos(f.a) * f.l * .5 * k, f.y + Math.sin(f.a) * f.l * .5 * k + f.b * k, f.x + Math.cos(f.a) * f.l * k, f.y + Math.sin(f.a) * f.l * k + 10 * k); ctx.stroke();
+    if (necrosis > 0) ctx.restore(); }
+  if(detail) fibrinMesh(ctx,fibrin*detail*(necrosis > 0 ? .45 : 1));
+  // neutrophils: margination along the vessel wall → emigration on a curved path → settle (jiggle)
+  for (const c of CELLS) { let x = c.x, y = c.y, s = 1;
+    if (c.kind === 'inf') { const k = Math.min(1, Math.max(0, (neut * 1.3 - c.order) / .3)); if (k <= 0) continue;
+      if (k < .25) { const q = k / .25; x = c.vx + (c.mx - c.vx) * q; y = c.vy + (c.my - c.vy) * q; s = .6; }
+      else { const q = (k - .25) / .75, e = 1 - Math.pow(1 - q, 2.2); [x, y] = bez([c.mx, c.my], [c.cx, c.cy], [c.x, c.y], e); s = .6 + .4 * Math.min(1, q * 2); } }
+    x += Math.sin(t * 1.3 + c.rot * 5) * 1.3; y += Math.cos(t * 1.1 + c.rot * 3) * .9;
+    if(detail > 0) { ctx.save();
+      if (necrosis > 0) { const core = coreAt(x, y), edge = edgeAt(x, y, ox, oy, vr), kill = core * (core > .5 ? 1 : 1 - .5 * edge), h = hash(Math.imul(Math.round(x * 4), 374761) ^ Math.imul(Math.round(y * 4), 668265), 29);
+        if (h > 1 - necrosis * kill * .985) { ctx.restore(); continue; }
+        ctx.globalAlpha *= 1 - necrosis * (.4 + .55 * kill); }
+      if(detail<1){ctx.save();ctx.globalAlpha *= 1-detail;neutro(ctx,x,y,c,s);ctx.restore();} ctx.globalAlpha *= detail; detailedNeutrophil(ctx,x,y,c,s);ctx.restore(); } else neutro(ctx, x, y, c, s); }
+}
+// Screen-space eyepiece: clips to a circle and draws the HE field. L = {x, y, r}; fs = field zoom (1 = full field).
+// opt (optional): { off:[fx,fy] field-units pan, blur: px defocus }
+export function drawLens(ctx, L, state, fs = 1, opt = {}) { if (L.r <= 1) return; const off = opt.off || [0, 0];
+  ctx.save(); ctx.shadowColor = 'rgba(42,42,53,.28)'; ctx.shadowBlur = 40; ctx.fillStyle = '#F6EEF0'; ctx.beginPath(); ctx.arc(L.x, L.y, L.r, 0, 6.283); ctx.fill(); ctx.restore();
+  ctx.save(); ctx.beginPath(); ctx.arc(L.x, L.y, L.r, 0, 6.283); ctx.clip();
+  ctx.translate(L.x, L.y); const k = L.r / 420 * fs; ctx.scale(k, k); ctx.translate(-off[0], -off[1]); drawHE(ctx, state); ctx.restore();
+  // defocus: canvas blur filters drop the baked wash layers in software GL, so 'blur' is a milky veil that clears as focus lands
+  if (opt.blur > .05) { ctx.save(); ctx.fillStyle = `rgba(246,238,240,${Math.min(.85, opt.blur / 9 * .85).toFixed(3)})`; ctx.beginPath(); ctx.arc(L.x, L.y, L.r, 0, 6.283); ctx.fill(); ctx.restore(); }
+  ctx.save(); const g = ctx.createRadialGradient(L.x, L.y, L.r * .78, L.x, L.y, L.r); g.addColorStop(0, 'rgba(42,42,53,0)'); g.addColorStop(1, 'rgba(42,42,53,.2)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(L.x, L.y, L.r, 0, 6.283); ctx.fill(); ctx.strokeStyle = C.ink; ctx.lineWidth = 5; ctx.stroke(); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(L.x, L.y, L.r + 9, 0, 6.283); ctx.stroke(); ctx.restore(); }
+export const fieldToScreen = (L, p, fs = 1, off = [0, 0]) => [L.x + (p[0] - off[0]) * L.r / 420 * fs, L.y + (p[1] - off[1]) * L.r / 420 * fs];
+engine/lib/mood.js:2:// moodAt(t,T): paper/grid + short screen-space shake; all anchors follow measured sentences.
+engine/lib/mood.js:3:// mini: paper is global already. Export ch.shake(t,T) using burstShake for your 04/06 peaks.
+engine/lib/mood.js:9:const P=rgb(C.paper), INK=rgb(C.ink), RED=rgb(C.red);
+engine/lib/mood.js:15:// mood_v2: paper changes are SUBTLE and contextual (cool-neutral while worried, plain stock while explaining,
+engine/lib/mood.js:16:// slightly lifted at the close). No red/flash tint on the paper any more — accents live on local objects
+engine/lib/mood.js:17:// (e.g. the lens rim in 04). The microscope's dark surround is NOT a paper mood: see lib/scope.js.
+engine/lib/mood.js:38:  let paper=keys[0][1],gridAlpha=keys[0][2];
+engine/lib/mood.js:41:    if(t<=b[0]){const k=ease.inOutCubic(seg(t,a[0],b[0]));paper=blend(a[1],b[1],k);gridAlpha=lerp(a[2],b[2],k);break;}
+engine/lib/mood.js:42:    paper=b[1];gridAlpha=b[2];
+engine/lib/mood.js:58:  return {paper:css(paper),gridAlpha,tint,shake:{dx:a.dx+b.dx,dy:a.dy+b.dy},contrast:1,speedHint,ambientTime,held};
+
+codex
+两帧均未通过，按你的要求停在第一步，不继续 S08。89.73 秒的目镜区域平均 RGB 差异为 20.82/255；99.22 秒为 93.30/255，后者出现大片组织和目镜底色缺失。我会将对比图、差异数值、软件后端信息及未完成项写入自检。
+
+exec
+/bin/bash -lc "cmp qa/ref/style_target/src/04.js engine/ref_chapters/04.js; cmp qa/ref/style_target/src/he.js engine/lib/he.js; cat qa/ref/style_target/src/04.js | head -3; ls -la qa/ref/style_target; sed -n '120,155p' engine/lib/he_detail.js; cat parity_runtime/audio/narration.json | head -5" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+import { prepareGangrene, gangrene } from '../lib/he_detail.js';
+// 04 三型演变 — sentences 10–13. Entry = 03 exit (LENS_EXIT, HE_EXIT, verdict on the right → wiped).
+// Same patch of wall evolves IN PLACE: rewind → 单纯性 (黏膜+黏膜下层) → 蜂窝织炎性 (全层弥漫) → 坏疽性 (缺血坏死发黑 → 穿孔).
+total 4344
+drwxr-xr-x 3 box box    4096 Nov 11 21:35 .
+drwxr-xr-x 3 box box    4096 Nov 11 21:35 ..
+-rw-r--r-- 1 box box 2258857 Nov 11 21:35 Gisele指定_右侧为目标.png
+-rw-r--r-- 1 box box  707361 Nov 11 21:35 sample_zoom.png
+drwxr-xr-x 2 box box    4096 Nov 11 21:35 src
+-rw-r--r-- 1 box box  786195 Nov 11 21:35 t_089.73.png
+-rw-r--r-- 1 box box  678463 Nov 11 21:35 t_099.22.png
+tearOrganic.closePath();
+function rag(x,y,ang,len,w){const dx=Math.cos(ang),dy=Math.sin(ang),px=-dy,py=dx,bow=(TR()-.5)*len*.45,tip=.7,bx=x+dx*len*tip,by=y+dy*len*tip;
+ ragsBody.moveTo(x+px*w,y+py*w);ragsBody.bezierCurveTo(x+dx*len*.28+px*(w*.4+bow),y+dy*len*.28+py*(w*.4+bow),bx+px*w*.4,by+py*w*.4,bx+px*w*.2,by+py*w*.2);ragsBody.lineTo(bx-px*w*.2,by-py*w*.2);ragsBody.bezierCurveTo(x+dx*len*.22-px*w*.45,y+dy*len*.22-py*w*.45,x-px*w*.55,y-py*w*.55,x-px*w*.15,y-py*w*.15);ragsBody.closePath();
+ ragsTip.moveTo(bx+px*w*.2,by+py*w*.2);ragsTip.bezierCurveTo(x+dx*len*.86+px*w*.05,y+dy*len*.86+py*w*.05,x+dx*len*.95,y+dy*len*.95,x+dx*len,y+dy*len);ragsTip.bezierCurveTo(x+dx*len*.88-px*w*.04,y+dy*len*.88-py*w*.04,bx-px*w*.08,by-py*w*.08,bx-px*w*.2,by-py*w*.2);ragsTip.closePath();}
+function dress(wall,other){for(let i=1;i<wall.length-1;){const [x,y]=wall[i],[ox,oy]=other[Math.min(i,other.length-1)],inward=Math.atan2(oy-y,ox-x),half=Math.hypot(ox-x,oy-y)*.5,roll=TR();if(roll<.42){i+=3+Math.floor(TR()*6);continue;}const len=Math.min(half*.78,roll<.62?4+TR()*9:roll<.84?12+TR()*16:24+TR()*26),ang=inward+(TR()-.5)*2.5,w=.55+TR()*2.4;rag(x,y,ang,len,w);if(TR()<.18)rag(x,y,inward+(TR()-.5)*2.7,Math.min(half*.5,5+TR()*14),.45+TR()*1.4);i+=3+Math.floor(TR()*5);}}
+dress(rimL,rimR);dress(rimR,rimL);
+const ST=rng(40847), stumpBody=new Path2D(), stumpTip=new Path2D(), stumpFib=new Path2D();
+function addStump(x,y,ang,len,bw){const dx=Math.cos(ang),dy=Math.sin(ang),px=-dy,py=dx,bow=(ST()-.5)*len*.65,kink=(ST()-.5)*.55,ax=Math.cos(ang+kink),ay=Math.sin(ang+kink),tx=x+ax*len,ty=y+ay*len,mx=x+dx*len*.4+px*bow,my=y+dy*len*.4+py*bow,bw2=Math.max(.7,bw*(.28+ST()*.2));stumpBody.moveTo(x+px*bw,y+py*bw);stumpBody.quadraticCurveTo(mx+px*bw*.55,my+py*bw*.55,tx+px*bw2,ty+py*bw2);stumpBody.lineTo(tx-px*bw2,ty-py*bw2);stumpBody.quadraticCurveTo(mx-px*bw*.4,my-py*bw*.4,x-px*bw*.85,y-py*bw*.85);stumpBody.closePath();const s=.55,sx=x+ax*len*s,sy_=y+ay*len*s,tw=bw*(.34+ST()*.12);stumpTip.moveTo(sx+px*tw,sy_+py*tw);stumpTip.quadraticCurveTo(tx+px*bw2,ty+py*bw2,tx+(ST()-.5)*1.6,ty+(ST()-.5)*1.6);stumpTip.quadraticCurveTo(tx-px*bw2,ty-py*bw2,sx-px*tw,sy_-py*tw);stumpTip.closePath();if(ST()<.5){const fl=4+ST()*8;stumpFib.moveTo(tx,ty);stumpFib.quadraticCurveTo(tx+ax*fl*.6+px*(ST()-.5)*6,ty+ay*fl*.6,tx+ax*fl,ty+ay*fl);}}
+function stud(wall,other){const n=8+Math.floor(ST()*7),used=new Set();let guard=0;while(used.size<n&&guard++<80){const i=2+Math.floor(ST()*(wall.length-4));if(used.has(i))continue;used.add(i);const [x,y]=wall[i],[ox,oy]=other[i],inward=Math.atan2(oy-y,ox-x),len=5+ST()*9,ang=inward+(ST()-.5)*.7,bw=2.1+ST()*3.2;addStump(x,y,ang,len,bw);if(ST()<.35)addStump(x+(ST()-.5)*3,y+(ST()-.5)*2.5,ang+(ST()-.5)*.5,4+ST()*6,bw*.55);}}
+stud(rimL,rimR);stud(rimR,rimL);
+const zahnWalls=[],zahnBands=[],spray=[];
+const SR=rng(40661);
+function pushDisc(out,x,y,rnd){const rx=3.1*(.72+rnd()*.6),ry=rx*(.36+rnd()*.4),a=rnd()*TAU,p=new Path2D(),c=new Path2D();ellipse(p,x,y,rx,ry,a);ellipse(c,x,y,rx*.46,ry*.38,a);out.push({p,c,alpha:.48+rnd()*.45,under:false,lysed:rnd()<.25});}
+const TS=rng(40677);
+for(let i=2;i<rimL.length-2;i+=3){const gate=TS();if(gate<.4)continue;const wall=TS()<.5?rimL[i]:rimR[i],other=wall===rimL[i]?rimR[i]:rimL[i],inward=Math.atan2(other[1]-wall[1],other[0]-wall[0]);let ang=inward+Math.PI+(TS()-.5)*1.05;const n=gate>.84?4:gate>.64?2:1;for(let k=0;k<n;k++){ang+=(TS()-.5)*.65;const d=7+k*(7+TS()*6)+TS()*5;pushDisc(spray,wall[0]+Math.cos(ang)*d+(TS()-.5)*4,wall[1]+Math.sin(ang)*d+(TS()-.5)*4,TS);}}
+const cellGhosts=new Path2D(),cellGhostOpen=new Path2D(),CG=rng(40601);
+for(let i=0;i<52;i++){const x=-390+CG()*780,y=-265+CG()*545,sc=.8+CG()*.4,rx=9.2*sc*(.82+CG()*.36),ry=7.4*sc*(.75+CG()*.4),rot=CG()*TAU,ph=CG()*6.2,broken=CG()<.38,N=28,path=broken?cellGhostOpen:cellGhosts,k0=broken?1+Math.floor(CG()*6):0,k1=broken?N-3-Math.floor(CG()*8):N;for(let k=k0;k<=k1;k++){const a=k/N*TAU;let f=1+.22*Math.sin(2*a+ph)+.15*Math.sin(3*a+ph*1.3)+.1*Math.sin(5*a+ph*.55)+(CG()-.5)*.18;if((k-k0)%11===4)f-=.28;const u=Math.cos(a)*rx*f,v=Math.sin(a)*ry*f,px=x+u*Math.cos(rot)-v*Math.sin(rot),py=y+u*Math.sin(rot)+v*Math.cos(rot);k===k0?path.moveTo(px,py):path.lineTo(px,py);}if(!broken)path.closePath();}
+const gapFib=new Path2D(),gapFibFine=new Path2D(),FR=rng(40691);
+for(let n=0;n<64;n++){const i=1+Math.floor(FR()*(rimL.length-2)),t=.18+FR()*.64,x=rimL[i][0]*(1-t)+rimR[i][0]*t,y=rimL[i][1]*(1-t)+rimR[i][1]*t,len=16+FR()*48,lean=(FR()-.5)*22,bow=(FR()-.5)*14,path=FR()<.35?gapFibFine:gapFib;path.moveTo(x,y);path.bezierCurveTo(x+bow,y+len*.34,x+lean*.4,y+len*.68,x+lean,y+len);}
+let gapArea=0;for(let i=1;i<rimL.length;i++){const w0=rimR[i-1][0]-rimL[i-1][0],w1=rimR[i][0]-rimL[i][0];gapArea+=Math.abs((w0+w1)*.5*(rimL[i][1]-rimL[i-1][1]));}
+const gapCells=[],PR=rng(40707),nGap=Math.max(8,Math.round(gapArea/400));
+for(let n=0;n<nGap;n++){const i=1+Math.floor(PR()*(rimL.length-2)),t=.16+PR()*.68;gapCells.push({x:rimL[i][0]*(1-t)+rimR[i][0]*t+(PR()-.5)*4,y:rimL[i][1]*(1-t)+rimR[i][1]*t+(PR()-.5)*5,lobes:2+Math.floor(PR()*4),rot:PR()*TAU,sz:.72+PR()*.36,fade:PR()<.5?.3+PR()*.22:.58+PR()*.32});}
+const halo=[];
+for(let i=3;i<rimL.length;i+=8){for(const pair of [[rimL[i],rimR[i]],[rimR[i],rimL[i]]]){const wall=pair[0],other=pair[1],ang=Math.atan2(wall[1]-other[1],wall[0]-other[0]);halo.push([wall[0]+Math.cos(ang)*20,wall[1]+Math.sin(ang)*14]);}}
+function drawBlood(ctx,pool){ctx.save();const alpha=ctx.globalAlpha;for(const d of pool){if(d.lysed){ctx.globalAlpha=alpha*d.alpha*.28;ctx.fillStyle='#C9A4AC';ctx.fill(d.p);continue;}ctx.globalAlpha=alpha*d.alpha;ctx.fillStyle='#A8404E';ctx.fill(d.p);ctx.strokeStyle='#7E2A38';ctx.lineWidth=.28;ctx.stroke(d.p);ctx.fillStyle='#C9A8AE';ctx.fill(d.c);}ctx.restore();}
+function drawZahn(ctx,kv){ctx.save();ctx.globalAlpha*=kv;ctx.lineJoin='round';ctx.lineCap='round';for(let i=0;i<zahnWalls.length;i++){for(const b of zahnBands[i]){if(b.fill){ctx.fillStyle=b.rbc?'#8E3A3E':'#F0D4DC';ctx.fill(b.path);}else{ctx.strokeStyle=b.rbc?'#A8404E':'#F3D5DE';ctx.lineWidth=b.w;ctx.stroke(b.path);}}const w=zahnWalls[i];ctx.strokeStyle='#EBC3D0';ctx.lineWidth=1.45;ctx.stroke(w.outer);ctx.strokeStyle='#D98BA8';ctx.lineWidth=.85;ctx.stroke(w.inner);ctx.fillStyle='#6B4C9A';ctx.fill(w.nuclei);}ctx.restore();}
+export function gangrene(ctx,{kv,kn,kp,ko}){
+ for(const h of heme){const g=h.tear?Math.min(kv,kp):kv;if(!(g>0))continue;const a=Math.min(.55,Math.max(.35,h.alpha))*g;drawWash(ctx,'c04.heme',h.x,h.y,h.size,{alpha:a,grow:g,rot:h.rot,blend:'source-over',soft:.82});}
+ for(const p of territories)if(kn>0)drawWash(ctx,`c04.necro.${p.key}`,p.x,p.y,p.size*.62,{alpha:kn*.2,grow:kn,rot:p.rot,soft:.72,blend:'source-over'});
+ if(kn>0){ctx.save();ctx.globalAlpha*=kn;ctx.fillStyle='rgba(236,214,218,.15)';ctx.fill(cellGhosts);ctx.strokeStyle='rgba(176,132,148,.32)';ctx.lineWidth=.65;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke(cellGhosts);ctx.stroke(cellGhostOpen);ctx.fillStyle='#3F2A66';ctx.globalAlpha*=.85;ctx.fill(dust);ctx.globalAlpha/=.85;ctx.fillStyle='rgba(217,163,184,.3)';ctx.fill(smudge);ctx.fillStyle='#3F2A66';ctx.fill(kary);ctx.fillStyle='#2E1F45';ctx.fill(karyDark);ctx.restore();}
+ if(kv>0){ctx.save();ctx.globalAlpha*=kv*.92;drawBlood(ctx,spray);ctx.restore();drawZahn(ctx,kv);}
+ if(kp>0){ctx.save();ctx.beginPath();ctx.rect(42,-336,312,700*kp);ctx.clip();
+  ctx.fillStyle='#E9DDB0';ctx.fill(tearOrganic);
+  ctx.save();ctx.clip(tearOrganic);ctx.lineCap='round';ctx.strokeStyle='#D98BA8';ctx.lineWidth=.75;ctx.stroke(gapFib);ctx.strokeStyle='#E7B4C4';ctx.lineWidth=.45;ctx.stroke(gapFibFine);
+  for(const c of gapCells){ctx.save();ctx.globalAlpha*=c.fade*kp;detailedNeutrophil(ctx,c.x,c.y,c,1);ctx.restore();}
+  ctx.restore();
+{
+  "version": 1,
+  "source": "配音/全稿_v1/新时间轴.tsv",
+  "audio": "../../../配音/全稿_v1/旁白_连续版.wav",
+  "duration": 239.3,
+
+exec
+/bin/bash -lc "cat >> render.mjs <<'JS'
+if("'!JSON.parse(fs.readFileSync(path.join(out,'"'metrics.json'))).passed)process.exitCode=2;
+JS
+cat > tools/finalize-parity.mjs <<'JS'
+import fs from 'node:fs';
+import {createHash} from 'node:crypto';
+import {createCanvas,loadImage} from '@napi-rs/canvas';
+const d='qa/v6/parity',before=JSON.parse(fs.readFileSync("'`${d}/sha256_before.json`));
+const after=Object.fromEntries(Object.keys(before).map(p=>[p,createHash('"'sha256').update(fs.readFileSync(p)).digest('hex')]));
+fs.writeFileSync("'`${d}/sha256_after.json`,JSON.stringify(after,null,2)+'"'\\n');
+const ok=Object.keys(before).every(p=>before[p]===after[p]);if("'!ok)throw Error('"'Protected engine file changed');
+const ref=await loadImage('qa/ref/style_target/t_089.73.png'),actual=await loadImage("'`${d}/render_89.73.png`);
+const cv=createCanvas(3840,1140),cx=cv.getContext('"'2d');cx.fillStyle='#18181c';cx.fillRect(0,0,3840,1140);cx.fillStyle='white';cx.font='28px sans-serif';cx.fillText('REFERENCE t=89.73',24,40);cx.fillText('V6 PARITY ATTEMPT — FAILED; S08 NOT STARTED',1944,40);cx.drawImage(ref,0,60);cx.drawImage(actual,1920,60);fs.writeFileSync('qa/v6/对比_样张vs_v6.png',cv.toBuffer('image/png'));
+const m=JSON.parse(fs.readFileSync("'`${d}/metrics.json`));
+const hashes=Object.keys(before).map(p=>`| ${p} | '"\\"'`${before[p]}'"\\"'` | 一致 |`).join('"'\\n');
+const rows=m.frames.map(f=>"'`| ${f.t} | ${f.MAE_RGB.toFixed(4)} | ${f.RMSE_RGB.toFixed(4)} | ${f.changed_pixel_percent.toFixed(4)}% | ${f.pixels_over_16_percent.toFixed(4)}% | ${f.lens_MAE_RGB.toFixed(4)} |`).join('"'\\n');
+fs.writeFileSync('qa/v6/自检.md',"'`# v6 b01 自检：第一步未通过，停止 S08'"\\n\\n当前分支 v6-fresh；没有 git commit；未编辑 assembly/、v4_mix/。assembly/ 中已有改动在任务开始时即存在。\\n\\n## 复现路径和后端\\n\\nengine/main.js 和 index.html 原样复制至 parity_runtime/；缺少的 chapters/、data/、audio/ 从 ../v4_mix/film_mini_detail/ 只读复制。04.js 使用 engine/ref_chapters/04.js 原文，lib/、fonts/、vendor/ 链接到 engine/。保留全部章节的原始 bake 顺序和参数，未替换水彩、细胞或纹理。engine 与原工作区逐文件一致，见 parity/source_audit.json；样张随附 src/ 的 04.js、he.js、he_detail.js、wash.js 也与 engine 一致。\\n\\n环境实际测试与预期不同：本次 Chromium 成功启动。Chromium 156.0.8078.47，Canvas2D + SwiftShader WebGL（CPU 软件后端），并非纯 Node Canvas 的画面替代。p5 WebGL 水彩烘焙及 window.READY 均完成；PNG 直接取 1920×1080 原始 canvas，DPR=1。@napi-rs/canvas 仅做读取、像素比较和拼图。browser.json 记录一个 404 控制台错误，未记录具体 URL；没有 pageerror。原样张的浏览器版本、GPU 后端和渲染调用历史未记录，不能认定跨后端像素一致。\\n\\n## 逐帧差异\\n\\nRGB 数值范围 0–255；忽略 alpha（画面不透明）；不缩放、不配准、不做颜色校正。变更像素指任一 RGB 通道不同；>16 指任一通道绝对差值超过 16。目镜区域为圆心 (640,480)、半径 330 的固定圆形 ROI。对比图依次为参考、复现、绝对差值放大 4 倍（截断至 255）。\\n\\n| 时间 | RGB MAE | RGB RMSE | 变更像素 | 差值>16的像素 | 目镜 RGB MAE |\\n|---|---:|---:|---:|---:|---:|\\n"'${rows}'"\\n\\n本次采用保守门槛：两帧分别满足全图 MAE≤1、目镜 MAE≤1、差值>16 的像素比例≤1%。这是本次实现的近像素一致检查门槛，并非用户另行指定的数值。两帧均失败，且有明显可见差异，非仅数值门槛导致。详见 parity/metrics.json。\\n\\n89.73 秒：组织位置基本对应，但细胞描边、色阶及右侧阶段标签有明显差别。99.22 秒：复现画面目镜底色、组织和轮廓大面积缺失，暗区底色也不同。确定的是原代码在当前软件渲染环境未产生参考结果；根因尚未证实。engine/lib/he.js 自带注释提醒软件 GL 下 canvas blur 可能丢失烘焙层，因此后端合成/滤镜是待查方向；它尚不能解释全部差异，不能据此断言唯一原因。没有通过修改受保护代码、后期修图或复制参考图来消除差异。\\n\\n## SHA-256（开始与结束）\\n\\n以下每项开始与结束哈希完全一致；原始记录见 parity/sha256_before.json 和 sha256_after.json。\\n\\n| 文件 | 开始/结束 SHA-256 | 校验 |\\n|---|---|---|\\n"'${hashes}'"\\n\\n## 命令与未完成项\\n\\n安装依赖：\\n\\n\\"'`'"\\"'`'"\\"'`sh'"\\nnpm ci --cache /tmp/v6-npm-cache\\nnode render.mjs --parity\\nnode tools/finalize-parity.mjs\\n\\"'`'"\\"'`'"\\"'`'"\\n\\nparity 不通过时 render.mjs 返回退出码 2；首次生成产物后补上这一失败退出码规则，未为验证该退出码重复烘焙。可用 CHROME_PATH 指定 mini 的 Chromium 路径（默认 /usr/bin/google-chrome）。像素比较可单独执行 node tools/compare-parity.mjs。\\n\\n按“差异明显就停下”要求，未创建 S08 场景、未进入第二步。qa/v6/samples/s08_low、s08_mid、s08_high_s30–s34 均未生成。低中高连续推镜、句号 30–34 路线、肌层核型、卡片及字幕安全区尚未实现或验收。samples/README.md 标明停工原因。\\n\\n已提供要求的命令入口：\\n\\n\\"'`'"\\"'`'"\\"'`sh'"\\nnode render.mjs --samples\\n\\"'`'"\\"'`'"\\"'`'"\\n\\n当前该命令明确报 parity gate failed，不输出伪造样帧。它不是已完成的 S08 渲染器；通过原样复现后仍须实现第二步，才可输出 qa/v6/samples/。\\n\\n顶层 对比_样张vs_v6.png 为 89.73 秒同倍率急性期参考与 v6 原码复现尝试的并排对比，标题标注 FAILED；不是 S08 成果。下一步应先在 mini 的目标 Chromium 环境运行 --parity，排查后端与参考图生成上下文；通过后再开发 S08。\\n"'`);
+JS
+mkdir -p qa/v6/samples
+cat > qa/v6/samples/README.md <<'"'EOF'
+第一步原样复现未通过，按用户铁律停止，未生成任何 S08 样帧。
+详见 ../自检.md 与 ../parity/metrics.json。
+node render.mjs --samples 当前明确报错，不能将 parity 复现图冒充 S08。
+EOF
+node tools/finalize-parity.mjs
+node --check render.mjs
+node render.mjs --samples > qa/v6/parity/samples_gate.log 2>&1" in /workspace/病理科普视频/v5
+ exited 1 in 721ms:
+exec
+/bin/bash -lc 'sha256sum engine/lib/{he.js,he_detail.js,wash.js,ann.js,scope.js}; cmp qa/ref/style_target/src/he_detail.js engine/lib/he_detail.js; cmp qa/ref/style_target/src/wash.js engine/lib/wash.js; node --check tools/compare-parity.mjs; node --check tools/finalize-parity.mjs; git diff --stat; git status --short; cat qa/v6/parity/samples_gate.log | head -9' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+d1082580c1219a8b727704aec3bef03d4115003a674a7381b5b8bfab625ffcdc  engine/lib/he.js
+331533e02b6db55b6d60b42cb85625fd3ee236e40fb749333ec57f129583fdf9  engine/lib/he_detail.js
+889bacbc5c54cd57b7c6018afa33fb1df6bbcb9e8a3b744efece3539826308b9  engine/lib/wash.js
+a1168fc75660bf23424cffff32533dc7289672ffe943537bc6276d6d04742ed6  engine/lib/ann.js
+6c6079ad8a12ded36b5c203f9a3416d51d83c46c757a50d06768dda6bac9a0b2  engine/lib/scope.js
+ assembly/endcard/data/endcard.json |  26 +++++++++++---------------
+ assembly/endcard/endcard.js        |   2 +-
+ assembly/endcard/static-preview.py |   6 ++++--
+ assembly/endcard/样帧_片尾.png     | Bin 1001237 -> 1044750 bytes
+ 4 files changed, 16 insertions(+), 18 deletions(-)
+ M assembly/endcard/data/endcard.json
+ M assembly/endcard/endcard.js
+ M assembly/endcard/static-preview.py
+ M assembly/endcard/样帧_片尾.png
+?? .gitignore
+?? assembly/.gitignore
+?? assembly/package-lock.json
+?? assembly/package.json
+?? assembly/pipeline/
+?? assembly/qa/
+?? assembly/subtitle/
+?? package-lock.json
+?? package.json
+?? parity_runtime/
+?? qa/briefs/run_v6_b01.log
+?? qa/briefs/v6_b01_parity.md
+?? qa/v6/
+?? render.mjs
+?? tools/
+file:///workspace/%E7%97%85%E7%90%86%E7%A7%91%E6%99%AE%E8%A7%86%E9%A2%91/v5/render.mjs:11
+ if(!result.passed) throw Error('Parity gate failed: S08 is not implemented; see qa/v6/自检.md');
+                          ^
+
+Error: Parity gate failed: S08 is not implemented; see qa/v6/自检.md
+    at file:///workspace/%E7%97%85%E7%90%86%E7%A7%91%E6%99%AE%E8%A7%86%E9%A2%91/v5/render.mjs:11:27
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+codex
+第一步复现未通过，已按铁律停止，未继续 S08。
+
+- 两帧目镜 RGB 平均差异：89.73 秒 **20.82/255**；99.22 秒 **93.30/255**，后者组织大面积缺失。
+- 五个受保护文件 SHA-256 前后一致。
+- 本次实际成功运行 Chromium＋SwiftShader CPU 软件后端，根因尚未证实。
+- 未改 `assembly/`、`v4_mix/`，未提交 commit。
+
+交付：[自检报告](/workspace/病理科普视频/v5/qa/v6/自检.md)、[差异数值](/workspace/病理科普视频/v5/qa/v6/parity/metrics.json)、[并排对比图](/workspace/病理科普视频/v5/qa/v6/对比_样张vs_v6.png)。
+
+已提供 `node render.mjs --parity`；`--samples` 当前明确报门禁失败，不生成 S08 样帧。
+tokens used
+89,971
+第一步复现未通过，已按铁律停止，未继续 S08。
+
+- 两帧目镜 RGB 平均差异：89.73 秒 **20.82/255**；99.22 秒 **93.30/255**，后者组织大面积缺失。
+- 五个受保护文件 SHA-256 前后一致。
+- 本次实际成功运行 Chromium＋SwiftShader CPU 软件后端，根因尚未证实。
+- 未改 `assembly/`、`v4_mix/`，未提交 commit。
+
+交付：[自检报告](/workspace/病理科普视频/v5/qa/v6/自检.md)、[差异数值](/workspace/病理科普视频/v5/qa/v6/parity/metrics.json)、[并排对比图](/workspace/病理科普视频/v5/qa/v6/对比_样张vs_v6.png)。
+
+已提供 `node render.mjs --parity`；`--samples` 当前明确报门禁失败，不生成 S08 样帧。

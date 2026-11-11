@@ -5,7 +5,7 @@ import { prepareGangrene, gangrene } from '../lib/he_detail.js';
 import { C } from '../lib/tokens.js';
 import * as A from '../lib/ann.js';
 import { drawWash } from '../lib/wash.js';
-import { drawLens, fieldToScreen as FTS, BANDS, VESSELS, fadeSeams } from '../lib/he.js';
+import { drawLens, fieldToScreen as FTS, BANDS, VESSELS } from '../lib/he.js';
 import { win, fade, titleBlock } from '../lib/chapter.js';
 import { tween, ease, seg, clamp } from '../lib/motion.js';
 import { moodAt, burstShake, holdAfter } from '../lib/mood.js';
@@ -58,11 +58,11 @@ export function gangAt(t, T) { return {
   ko: win(t, T.frac(s(3), .72), peakAt(T)),
 }; }
 export function drawLens04(ctx, Lx, st, fs, g, off = [0, 0]) {
-  drawLens(ctx, Lx, { ...st, necrosis: g.kn * (st.detail || 0), ox: off[0], oy: off[1], vr: 420 / fs }, fs, { off }); const { kv, kn, kp, ko } = g;
+  drawLens(ctx, Lx, { ...st, necrosis: g.kn * (st.detail || 0) }, fs, { off }); const { kv, kn, kp, ko } = g;
   if (kv > 0) { ctx.save(); ctx.beginPath(); ctx.arc(Lx.x, Lx.y, Lx.r, 0, 6.283); ctx.clip(); ctx.translate(Lx.x, Lx.y); const z = Lx.r / 420 * fs; ctx.scale(z, z); ctx.translate(-off[0], -off[1]);
+    for (const v of VESSELS) drawWash(ctx, 'c04.thromb', v[0], v[1], v[2] * 3.4, { alpha: kv * .9, grow: kv });
     gangrene(ctx, g);
     if(ko > 0) drawWash(ctx, 'c04.leak', PERF[0], BANDS.serosa[1] + 43, 145, { grow: ko, alpha: ko * .32, blend: 'source-over', origin: [.5, .2] });
-    if (kn > 0) fadeSeams(ctx, kn, Lx, off, fs);
     ctx.restore(); } }
 // 05 calls this with its own (shrinking) lens; everything else is 04's exact last frame
 export function drawExit04(ctx, T, Lx, t) { const te = T.end(s(3)) - 1e-3; drawLens04(ctx, Lx, { ...heAt(te, T), t: heldClock(te, T) }, fsAt(te, T), gangAt(te, T), offAt(te, T)); }
@@ -74,8 +74,8 @@ export default {
   bake(bake) {
     for (let i = 0; i < 4; i++) {
       const wash = bake(`c04.necro.${i}`, (b, P) => {
-        P.fill(b, P.blob(0, 0, 290 + i * 13, 36, .38, 460 + i), i % 2 ? '#E3B7C4' : '#D7A3B3', 78 + i * 8, .42, [.65, .55]);
-        P.fill(b, P.blob(45, -25, 195, 32, .45, 470 + i), '#E7C9D2', 52, .5);
+        P.fill(b, P.blob(0, 0, 290 + i * 13, 36, .38, 460 + i), i % 2 ? C.ink : '#3A1F2A', 105 + i * 22, .42, [.65, .55]);
+        P.fill(b, P.blob(45, -25, 195, 32, .45, 470 + i), '#3A1F2A', 65 + i * 12, .5);
       }, { seed: 460 + i, hd: true, soft: true, grain: .12, edge: .3, bleed: .5 });
       // Soften pigment boundaries once in the cached watercolour bitmap.
       const soft = document.createElement('canvas'); soft.width = wash.width; soft.height = wash.height;
@@ -84,17 +84,8 @@ export default {
       wc.drawImage(soft, 0, 0);
     }
     bake('c04.thromb', (b, P) => { P.fill(b, P.blob(0, 0, 300, 22, .2, 43), '#3A1F2A', 200, .15); }, { seed: 43, hd: true, soft: true, grain: .12, edge: .3, bleed: .5 });
-    bake('c04.heme', (b, P) => {
-      P.fill(b, P.blob(0, 0, 260, 28, .5, 481), '#8E3A3E', 188, .5, [.55, .48]);
-      P.fill(b, P.blob(-48, 30, 170, 22, .55, 482), '#A8404E', 168, .46, [.5, .45]);
-      P.fill(b, P.blob(42, -26, 140, 20, .52, 483), '#9A3E48', 150, .42);
-      P.fill(b, P.blob(8, 4, 80, 14, .48, 484), '#7A3038', 120, .38);
-    }, { seed: 481, hd: true, soft: true, grain: .12, edge: .3, bleed: .5 });
     bake('c04.leak', (b, P) => { P.fill(b, P.blob(0, 0, 330, 26, .5, 44), C.pus, 170, .3, [.6, .5]); }, { seed: 44, hd: true, soft: true, grain: .12, edge: .3, bleed: .5 });
     bake('c04.mark', (b, P) => { P.fill(b, P.blob(0, 0, 360, 26, .3, 45), C.red, 110, .3); }, { seed: 45, hd: true, soft: true, grain: .12, edge: .3, bleed: .5 });
-    // scaleBrushes multiplies. Three extra necro bakes plus heme leave 05/06 at 2.4^4.
-    // Put the weight back; this canvas is never drawn.
-    bake('c04.brushScale', (b) => { const u = 1 / 2.4; b.scaleBrushes(u); b.scaleBrushes(u); b.scaleBrushes(u); b.scaleBrushes(u); }, { scale: 1, seed: 46 });
   },
   camera: T => [[T.at(s(0)), { x: 960, y: 540, zoom: 1 }], [T.end(s(3)), { x: 960, y: 520, zoom: 1 }]],
   screen(ctx, t, T, cam, mood = moodAt(t, T)) {
