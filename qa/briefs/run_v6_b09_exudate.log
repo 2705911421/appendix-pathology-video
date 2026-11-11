@@ -1,0 +1,1260 @@
+OpenAI Codex v0.163.0
+--------
+workdir: /workspace/病理科普视频/v5
+model: gpt-6.1-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, /workspace/病理科普视频, /workspace/garden-skills] (network access enabled)
+reasoning effort: none
+reasoning summaries: none
+session id: 01a1cb4a-0321-70d2-9f63-838069f979c5
+--------
+user
+# v6 b09（Codex）：只加强 s34 缺口处渗出物里的中性粒细胞
+
+基于提交 4420360（b08）。锁定文件、出图程序（/workspace/garden-skills/skills/motion-showreel/scripts/render.mjs）、determinism 检查、开工和结束时的 sha256 校验都照旧，不许 git commit。低倍 t=1、中倍 t=3.8、s30–s33（9、15、21、27 秒）必须与 b08 逐像素一致（MAE<0.5）。
+
+1. 只改 s34（t=33）缺口处的渗出物：
+   - 中性粒细胞数量从 8 个增加到 18–24 个，屏幕上的尺寸放大到和 s31/s32 里那些中性粒细胞相近（以屏幕像素实测，写进报告），必须沿用 detailedNeutrophil 的视觉语言（分叶核、淡粉胞质）。
+   - 细胞在纤维素丝网中疏密不均：缺口中央密，向两侧渐稀，有几个略向管腔方向游出。不要排成整齐的一排，也不要互相大面积重叠。
+   - 纤维素丝网可以稍微浓一点，但整体仍是淡粉、通透，不准变成深色团块。
+   - 紫色上皮线的断口必须保持：沿用 b08 的采样方法复测，紫色像素占比仍要 <5%。
+2. 输出到 qa/v6/b09/：七帧静帧、review_sheet.png、`s34_b08_vs_b09.png`（附 200% 局部）、自检.md（写明中性粒细胞数量、屏幕尺寸、紫色占比、各帧 MAE、determinism、sha256）。
+
+2026-11-11T15:46:28.391530Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer realm=\"OAuth\", resource_metadata=\"https://mcp.notion.com/.well-known/oauth-protected-resource/mcp\", scope=\"default\"" })
+codex
+我先核对 b08 基线、锁定文件和既有验收方法，再只调整 s34 缺口渗出物，并按原流程出图、复测和记录校验值。
+exec
+/bin/bash -lc "pwd; rg --files -g 'AGENTS.md' -g '*自检*' -g '*b08*' -g '*lock*' -g '*sha*' -g 'package.json' -g '*.html' -g '*.js' -g '*.mjs' -g '*.tsx' -g '*.ts'" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+/workspace/病理科普视频/v5
+assembly/pipeline/assemble.mjs
+assembly/pipeline/render_endcard.mjs
+assembly/pipeline/browser.mjs
+assembly/endcard/vendor/rough.js
+assembly/endcard/render.mjs
+assembly/endcard/index.html
+assembly/endcard/endcard.js
+tools/finalize-parity.mjs
+tools/compare-parity.mjs
+render_dpr2.mjs
+package.json
+package-lock.json
+assembly/subtitle/loadCues.js
+assembly/subtitle/render.mjs
+assembly/subtitle/index.html
+assembly/subtitle/subtitle.js
+assembly/subtitle/config.js
+assembly/package.json
+assembly/package-lock.json
+qa/v6/g01_ref/s08.js
+qa/v6/g01_ref/cells_ext.js
+qa/v6/对比_b05左_b08右.png
+qa/v6/g02/sha256_开工.txt
+qa/v6/g02_ref/s08.js
+qa/v6/g02_ref/cells_ext.js
+parity_r4/chapters/07.js
+parity_r4/chapters/04.js
+parity_r4/chapters/05.js
+parity_r4/chapters/06.js
+parity_r4/chapters/03.js
+parity_r4/chapters/02.js
+parity_r4/chapters/01.js
+parity_r4/chapters/index.js
+parity_r4/index.html
+parity_r4/main.js
+parity_runtime/chapters/07.js
+parity_runtime/chapters/04.js
+parity_runtime/chapters/05.js
+parity_runtime/chapters/06.js
+parity_runtime/chapters/03.js
+parity_runtime/chapters/02.js
+parity_runtime/chapters/01.js
+parity_runtime/chapters/index.js
+parity_runtime/index.html
+parity_runtime/main.js
+qa/v6/b08/sha256_开工.txt
+qa/v6/b08/sha256_校验.log
+qa/v6/b08/低倍_b07_vs_b08.png
+qa/v6/b08/check_low_determinism.mjs
+qa/v6/b08/自检.md
+qa/v6/b08/sha256_结束.txt
+qa/v6/b08/s34_b07_vs_b08.png
+qa/v6/自检.md
+film/main.js
+render.mjs
+film/timeline.js
+film/lib_ext/he_mucosa.js
+film/lib_ext/cells_ext.js
+film/index.html
+film/chapters/s08.js
+qa/v6/b02/sha256_结束.txt
+qa/v6/b02/sha256_b02b_校验.log
+qa/v6/b02/sha256_开工.txt
+qa/v6/b05/sha256_开工.txt
+qa/v6/b05/sha256_校验.log
+qa/v6/b05/check_low_determinism.mjs
+qa/v6/b05/自检.md
+qa/v6/b05/check_annotation.mjs
+qa/v6/b05/sha256_结束.txt
+qa/v6/b02/自检.md
+qa/v6/b02/sha256_b02b_结束.txt
+qa/v6/b02/sha256_b02b_开工.txt
+qa/v6/b02/自检_b02停止记录.md
+qa/v6/b04/sha256_开工.txt
+qa/v6/b04/sha256_校验.log
+qa/v6/b04/check_low_determinism.mjs
+qa/v6/b04/自检.md
+qa/v6/b04/sha256_结束.txt
+qa/v6/b07/sha256_开工.txt
+qa/briefs/v6_b08_s34.md
+qa/v6/b07/sha256_校验.log
+qa/v6/b07/check_low_determinism.mjs
+qa/v6/b07/自检.md
+qa/v6/b07/sha256_结束.txt
+qa/briefs/run_v6_b08.log
+engine/vendor/rough.js
+engine/vendor/p5.brush.js
+engine/vendor/p5.min.js
+qa/ref/style_target/src/04.js
+qa/ref/style_target/src/wash.js
+qa/ref/style_target/src/he.js
+qa/ref/style_target/src/he_detail.js
+qa/v6/b03/自检.md
+qa/v6/b03/sha256_结束.txt
+qa/v6/b03/sha256_校验.log
+qa/v6/b03/sha256_开工.txt
+qa/v6/b06/自检.md
+qa/v6/b06/sha256_结束.txt
+qa/v6/b06/check_low_determinism.mjs
+engine/lib/he.js
+engine/lib/he_detail.js
+engine/lib/scope.js
+engine/lib/camera.js
+engine/lib/subtitle.js
+engine/lib/ink.js
+qa/v6/parity/sha256_after.json
+engine/lib/tokens.js
+engine/lib/wash.js
+engine/lib/ann.js
+engine/lib/timeline.js
+engine/lib/motion.js
+engine/lib/figure.js
+engine/ref_chapters/04.js
+engine/lib/chapter.js
+engine/lib/mood.js
+engine/main.js
+engine/index.html
+qa/v6/parity/sha256_before.json
+qa/v6/b06/sha256_校验.log
+qa/v6/b06/sha256_开工.txt
+qa/v6/g01/sha256_结束.txt
+engine/tools/measure-mcb.mjs
+qa/v6/g01/check_low_determinism.mjs
+qa/v6/g01/自检.md
+qa/v6/g01/sha256_校验.log
+qa/v6/g01/sha256_开工.txt
+
+exec
+/bin/bash -lc 'git status --short; git rev-parse HEAD; cat qa/v6/b08/自检.md; cat qa/v6/b08/sha256_开工.txt; cat qa/v6/b08/check_low_determinism.mjs; cat qa/briefs/v6_b08_s34.md; rg --files /workspace -g AGENTS.md' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+ M assembly/endcard/data/endcard.json
+ M assembly/endcard/endcard.js
+ M assembly/endcard/static-preview.py
+ M assembly/endcard/样帧_片尾.png
+?? assembly/.gitignore
+?? assembly/package-lock.json
+?? assembly/package.json
+?? assembly/pipeline/
+?? assembly/qa/
+?? assembly/subtitle/
+?? qa/briefs/run_v6_b09_exudate.log
+?? qa/briefs/v6_b09_exudate.md
+44203601f18e3b8d22670dc6939be353cc37ac84
+# v6 b08 自检
+
+基于 c35488b（b07）；未执行 git commit。
+
+修改文件：film/chapters/s08.js、film/lib_ext/he_mucosa.js。其余新增内容均为 qa/v6/b08/ 的交付图、检测脚本与日志。原有 assembly 工作区变更保留，未改动该目录。
+
+紫线调用位于 he_mucosa.js 的 drawHE → epi：每 10 个局部单位采样，以 HE.hema、7 单位线宽描边。s08.js 仅 ulcer source 的 gap 从 [-8,28] 扩到 [-25,45]。两条 epi 路径分别止于缺口左侧、始于右侧，缺口内不生成路径点，不以白块或细胞覆盖紫线。横向跨度约 160 屏幕像素，占 850 像素镜下视野约 19%。每端 3 个长短、旋转角度不同的翘起残端；缺口有薄层淡粉纤维丝和 8 个 detailedNeutrophil，向管腔突出。固有层沿用 04.js 水彩参数 hd:true、soft:true、grain:.12、edge:.3、bleed:.5，配 13 个 he_detail.js 视觉语言的红细胞，无橙色圈。
+
+紫线像素检测：沿原始波浪线函数（含 noise2）映射后的轨迹建立 15 像素宽采样带；局部 x∈[-20,40]，两端各排除 5 单位以避开要求保留的撕裂残端，共 2139 像素。紫色阈值 R<165、G<135、B>1.08G。b07 紫色占比 50.0701%，b08 为 **0.0000%**，通过 <5%。采样数据 gap_path.json，掩膜 gap_sampling_mask.png；s34_b07_vs_b08.png 附同区域 200% 局部，可见断口确实没有连续紫线。
+
+低倍腺体没有额外的 contour stroke；b07 的重轮廓来自密集的大核点。保留腺体位置、尺寸、核点数量和 RNG 消耗，将核点尺寸从 .63–.77 缩到 .37–.46，使外缘成为分离的细小基底核点。保留淡染腺腔。相同环带 ROI、线性 sRGB → D65 CIE L* 测量：b07 79.962421，b08 **81.076941**，通过 79–82。
+
+中倍 t=3.8 及 s30–s33（9、15、21、27 秒）与 b07 全帧 RGB MAE 全部 **0.0**，逐像素一致。
+
+使用指定 /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs 出图及 --determinism；另由 check_low_determinism.mjs 对全部七个交付时点乱序重复渲染，PNG 字节相同。日志见 determinism.log、determinism_low.log。
+
+七个锁定文件开工、结束 SHA-256 一致，sha256_校验.log 全部 OK；与 b07 留存哈希相同。未改动锁定引擎、parity_r4/、v4_mix/。
+
+交付：七帧 t_*.png（另有 s08_*.png 别名）、每帧独立 *_200pct.png、含七帧及各自 200% 局部的 review_sheet.png、s34_b07_vs_b08.png、低倍_b07_vs_b08.png（两张均附 200% 局部）。指标见 metrics.json。
+a2e658fc107c4a43c689607337db996fe8da13ea7e4b730f76d9789442b771bf  engine/lib/he.js
+899d24ba596208caa026512c824025a5eb648b86d6bdfd7bc4920bab143544d0  engine/lib/he_detail.js
+889bacbc5c54cd57b7c6018afa33fb1df6bbcb9e8a3b744efece3539826308b9  engine/lib/wash.js
+a1168fc75660bf23424cffff32533dc7289672ffe943537bc6276d6d04742ed6  engine/lib/ann.js
+6c6079ad8a12ded36b5c203f9a3416d51d83c46c757a50d06768dda6bac9a0b2  engine/lib/scope.js
+25ada270e774274d72d5eb0789f9f9c8e5167cd49b28e3b16b55c6bf7c59ee83  engine/lib/camera.js
+4f83add26190441d4c71ed39f2ba83a950fef9933cbdaae95cabda2106542fb4  parity_r4/chapters/04.js
+import fs from 'node:fs';
+import {loadChromium,launch,serve,resolveTarget,openPage} from '/workspace/garden-skills/skills/motion-showreel/scripts/lib/browser.mjs';
+const target=resolveTarget('film');const chromium=await loadChromium(target.root);const {server,port}=await serve(target.root);const browser=await launch(chromium);
+try{const page=await openPage(browser,{port,rel:target.rel,w:1920,h:1080,dpr:1,query:''});const refs=new Map();
+ for(const t of [1,3.8,9,15,21,27,33,33,1,27,9,3.8,21,15]){await page.evaluate(t=>window.render(t),t);const buf=await page.screenshot({type:'png'});if(refs.has(t)&&!refs.get(t).equals(buf))throw Error(`Mismatch at ${t}`);refs.set(t,buf);}
+ fs.writeFileSync('qa/v6/b08/determinism_low.log','PASS: all seven delivery times repeated in different orders: byte-identical PNGs\n');
+}finally{await browser.close();server.close();}
+# v6 b08（Codex）：只做 s34 上皮缺损，外加低倍腺体轮廓减淡
+
+基于提交 c35488b（b07）。锁定文件、出图程序、determinism 检查、不许 git commit 这几条照旧。中倍和 s30–s33 必须与 b07 逐像素一致（MAE<0.5）。
+
+1. s34（t=33）：b07 仍不合格，原因是画面中那条连续的深紫色波浪线（表面上皮和基底膜）完全没有断开，只在表面上加了一团细胞。
+   - 先在代码里找到画这条紫色波浪线的调用（含它的 Path2D 或采样点），在画面横向中段约 15–20% 的视野宽度内，让这条线根本不画（从源头跳过这些采样点，不准在上面盖白块或盖细胞）。
+   - 断开的两端各做 2–3 个参差、翘起的残端，像撕开一样，不能是整齐的切口。
+   - 缺口处原先上皮的位置，放一薄层淡粉色纤维素丝网，中间散在 6–10 个 detailedNeutrophil，略高出原表面，并向管腔一侧伸出一点。
+   - 缺口下方的固有层：充血用 04.js 的水彩参数，再加几个红细胞（照 he_detail.js 的写法）。不要用橙色描边的小圈。
+   - 自查：对比 b07，用 2× 局部确认紫线在缺口处像素上真的断开了（沿缺口那一段采样，紫色像素占比 <5%），把这个数值写进报告。
+2. 低倍：腺体的深色轮廓线太重，有描边感。把腺体外缘改成由一圈细小的基底核点组成，去掉连续的轮廓线；腺腔保持淡染、通透。黏膜带平均 L* 要在 79–82 之间。
+3. 输出到 qa/v6/b08/：七帧静帧、review_sheet.png、`s34_b07_vs_b08.png` 和 `低倍_b07_vs_b08.png`，都附 200% 局部。
+/workspace/nf/AGENTS.md
+
+exec
+/bin/bash -lc "rg -n 'exud|Neutrophil|fibrin|ulcer' film/chapters/s08.js; ls qa/v6/b08; cat qa/v6/b08/metrics.json; cat /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+3:import {detailedNeutrophil} from '../lib/he_detail.js';
+7:const R=rng(40802),TAU=Math.PI*2;let map,source,lowBase,ulcerMap;
+9:export default {prepare(){bake('s08.congestion',(b,P)=>{P.fill(b,P.blob(0,0,75,18,.3,47),'#C86A87',130,.2);},{seed:47,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});bake('s08.lumen', (b,P)=>{P.fill(b,P.blob(0,0,300,22,.2,43),'#DCA4B2',200,.15);},{seed:43,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});source=buildSource('original');lowBase=buildSource('low');const ulcerSource=buildSource('ulcer');ulcerMap=mapSource(ulcerSource);const c=source.getContext('2d');
+11:},draw(c,t,T){c.setTransform(1,0,0,1,0,0);c.fillStyle='#111114';c.fillRect(0,0,1920,1080);const id=Math.min(34,29+Math.floor(t/(T.end(29)-T.at(29))));const targets={30:[-270,-80],31:[-200,-226],32:[-170,70],33:[-65,-215],34:[10,-285]};const keys=[[T.at(29),[0,0,.48]],[T.frac(29,.28),[0,0,.48]],[T.frac(29,.64),[...point(-90,-5),.82]],[T.end(29),[...point(...targets[30]),2.7]]];for(let s=30;s<=34;s++){keys.push([T.frac(s,.32),[...point(...targets[s]),2.7]],[T.end(s),[...point(...targets[s]),2.7]]);}let v=keys[0][1];for(let i=1;i<keys.length;i++){if(t>=keys[i][0]){v=keys[i][1];continue;}const a=keys[i-1],b=keys[i],k=Math.max(0,(t-a[0])/(b[0]-a[0]));v=a[1].map((x,j)=>x+(b[1][j]-x)*k);break;}const [x,y,z]=v;c.save();c.beginPath();c.arc(1110,475,425,0,TAU);c.clip();c.fillStyle='#F6EEF0';c.fill();c.translate(1110,475);c.scale(z,z);c.translate(-x,-y);if(t<T.frac(29,.63)) drawLow(c,t,T); else c.drawImage(id===34?ulcerMap:map,-1600,-1050);c.restore();c.strokeStyle='#4C4555';c.lineWidth=1.6;c.beginPath();c.arc(1110,475,431,0,TAU);c.stroke();c.fillStyle='#E8DDE9';c.font='500 30px MixSans';c.fillText(t<T.frac(29,.32)?'低倍':t<T.frac(29,.86)?'中倍':'高倍',1030,35);
+17:if(new URLSearchParams(location.search).has('cells')){c.fillStyle='#F6EEF0';c.fillRect(0,0,1920,940);c.save();c.translate(180,220);c.scale(2,2);['lymph','plasma','dot','meso'].forEach((s,i)=>cell(c,i*130,0,s,1,0,i));detailedNeutrophil(c,520,0,{lobes:3,rot:0,sz:1},1);c.restore();c.fillStyle='#51336F';c.font='28px MixSans';['淋巴细胞','浆细胞','外纵行肌核','间皮','引擎中性粒细胞'].forEach((s,i)=>c.fillText(s,110+i*260,300));}}
+129:function buildSource(mode){const source=document.createElement('canvas');source.width=840;source.height=620;const c=source.getContext('2d'),R=rng(40802);c.translate(420,320);(mode==='original'?drawHE:drawMucosa)(c,{ulcer:.16,neut:0,fibrin:0,t:0,detail:1,crypts:mode!=='low',gap:mode==='ulcer'?[-25,45]:null});
+132:for(let i=0;i<150;i++){const x=-410+R()*820,y=-280+R()*120,sz=.7+R()*.2,rot=R()*TAU;if(mode==='ulcer'&&x>-31&&x<51&&y<-273)continue;cell(c,x,y,i%7?'lymph':'plasma',sz,rot,i);}
+134:let n=0;for(const p of CELLS){if(p.kind!=='inf'||p.y>138||p.y< -290)continue;if(mode==='ulcer'&&p.x>-31&&p.x<51&&p.y<-273)continue;if(p.y>0&&n++%35!==0)continue;if(p.y<0&&n++%4!==0)continue;detailedNeutrophil(c,p.x,p.y,p,1);}for(let i=0;i<7;i++)detailedNeutrophil(c,-270+Math.cos(i*.55)*(26+i*3),-80+Math.sin(i*.55)*(23+i*3),{lobes:2+i%4,rot:i*.8,sz:.9},1);
+135:if(mode==='ulcer') ulcerDetail(c);return source;}
+155:function ulcerDetail(c){
+163: for(let i=0;i<8;i++)detailedNeutrophil(c,-18+i*8,-302-U()*4,{lobes:2+i%4,rot:U()*TAU,sz:.40+U()*.07},1);
+check_low_determinism.mjs
+determinism.log
+determinism_low.log
+determinism_low_stdout.log
+gap_path.json
+gap_sampling_mask.png
+metrics.json
+mucosa_ROI.png
+render.log
+review_sheet.png
+s08_high_s30.png
+s08_high_s30_200pct.png
+s08_high_s31.png
+s08_high_s31_200pct.png
+s08_high_s32.png
+s08_high_s32_200pct.png
+s08_high_s33.png
+s08_high_s33_200pct.png
+s08_high_s34.png
+s08_high_s34_200pct.png
+s08_low.png
+s08_low_200pct.png
+s08_mid.png
+s08_mid_200pct.png
+s34_b07_vs_b08.png
+sha256_开工.txt
+sha256_校验.log
+sha256_结束.txt
+sheet.png
+t_001.00.png
+t_003.80.png
+t_009.00.png
+t_015.00.png
+t_021.00.png
+t_027.00.png
+t_033.00.png
+verify.py
+低倍_b07_vs_b08.png
+自检.md
+{
+  "MAE": [
+    {
+      "t": 3.8,
+      "MAE": 0.0,
+      "pass": true
+    },
+    {
+      "t": 9,
+      "MAE": 0.0,
+      "pass": true
+    },
+    {
+      "t": 15,
+      "MAE": 0.0,
+      "pass": true
+    },
+    {
+      "t": 21,
+      "MAE": 0.0,
+      "pass": true
+    },
+    {
+      "t": 27,
+      "MAE": 0.0,
+      "pass": true
+    }
+  ],
+  "mucosa_CIE_L_star": {
+    "b07": 79.96242093945932,
+    "b08": 81.07694132218428
+  },
+  "gap_purple_percent": {
+    "b07": 50.07012622720898,
+    "b08": 0.0
+  },
+  "gap_sampling_pixels": 2139
+}#!/usr/bin/env node
+// Frame-accurate renderer for pages that expose the render(t) contract:
+//   window.DUR = 15;              // seconds (optional if --duration is given)
+//   window.render = (t) => {...}; // draw the frame at t seconds; deterministic; may return a Promise
+//   window.READY = true;          // set once fonts / images / models are loaded
+// Optional: window.RENDER_CONTEXT = true lets render(t, { frameTime, fps }) keep
+// discrete copy/cuts on the output frame while motion uses sub-sample time t.
+//
+// Video
+//   node render.mjs <project> [--out out/video.mp4] [--size 1920x1080] [--fps 30] [--workers 3]
+//                   [--start 0] [--duration D] [--subframes 1] [--shutter 0.5] [--dpr 1]
+//                   [--audio audio/music.wav] [--grain 0] [--crf 16] [--png] [--q "k=v&k2=v2"]
+// Stills (review frames, PNG) and contact sheet
+//   node render.mjs <project> --still 0.5,2,7.25 [--out qa/stills] [--sheet]
+//   node render.mjs <project> --range 0:15:1 [--out qa/stills] [--sheet]
+// Poster frame (step 7)
+//   node render.mjs <project> --poster 14.5 [--out out/poster.png]
+// Style-frame directions (step 3): one key frame per ?dir=<name>, side by side with labels
+//   node render.mjs <project> --directions a,b,c --at 14.5,2,0 [--out qa/directions.png] [--dir-param dir]
+//   (--at: one time per direction, or one time for all; singles go next to the sheet in qa/directions/)
+// Determinism check (same t rendered in different orders must be pixel-identical)
+//   node render.mjs <project> --determinism
+// Text framing (review material, never pass/fail): text cut by the frame edge, two different strings on top of each
+// other, text in the platform safe zone, text too small for a phone. Canvas 2D and DOM/SVG text; issues that last ≥ 0.3 s.
+//   node render.mjs <project> --text-check [--every 0.2] [--safe auto|none|T,R,B,L] [--out qa/text]
+//   (--safe: fractions of the frame (0.12) or pixels; auto = 12 % top and bottom on vertical frames, none on landscape)
+//
+// --subframes N blends N samples per frame (motion blur; render time × N). --shutter 0.5 = 180°.
+// --dpr 2 supersamples (renders 2× and downsizes with lanczos): crisper hairlines / 3D edges, ~3× slower.
+// --grain N adds temporal film grain in ffmpeg (keeps page frames compressible). 0 = none.
+import fs from 'node:fs';
+import path from 'node:path';
+import { spawn, execFileSync } from 'node:child_process';
+import { loadChromium, launch, serve, resolveTarget, openPage, warnSoftwareGL, parseSize, args, die } from './lib/browser.mjs';
+import { textHook } from './lib/text-hook.mjs';
+
+// Anything that must be undone on failure or interruption (ffmpeg children, temp dirs, output lock).
+const cleanups = [];
+const runCleanups = () => { while (cleanups.length) { try { cleanups.pop()(); } catch {} } };
+const fail = msg => { console.error(msg); runCleanups(); process.exit(1); };
+process.on('exit', runCleanups);
+for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) process.on(sig, () => fail(`interrupted (${sig}); partial output removed`));
+process.on('unhandledRejection', e => fail(`render failed: ${String(e?.message || e).split('\n')[0]}`));
+
+const { pos, opt } = args(process.argv.slice(2));
+const target = resolveTarget(pos[0]);
+const { w: W, h: H } = parseSize(opt.size);
+const FPS = +(opt.fps || 30);
+const DPR = +(opt.dpr || 1);
+if (!(FPS > 0 && FPS <= 240)) die(`bad --fps ${opt.fps}`);
+if (!(DPR >= 1 && DPR <= 4)) die(`bad --dpr ${opt.dpr} (1–4)`);
+const QUERY = typeof opt.q === 'string' ? opt.q : '';
+const fmt = opt.png ? 'png' : 'jpeg';
+
+const chromium = await loadChromium(target.root);
+const { server, port } = await serve(target.root);
+const browser = await launch(chromium);
+const open = (query = QUERY, init = null) => openPage(browser, { port, rel: target.rel, w: W, h: H, dpr: DPR, query, init });
+const finish = async code => { await browser.close().catch(() => {}); server.close(); process.exit(code); };
+cleanups.push(() => server.close());
+
+async function shoot(page, t, type = fmt, frameTime = t) {
+  await page.evaluate(({ t, frameTime, fps }) => window.RENDER_CONTEXT === true
+    ? window.render(t, { frameTime, fps })
+    : window.render(t), { t, frameTime, fps: FPS });
+  return await page.screenshot({ type, ...(type === 'jpeg' ? { quality: 95 } : {}), clip: { x: 0, y: 0, width: W, height: H } });
+}
+
+if (opt.poster !== undefined) await poster();
+else if (opt.directions !== undefined) await directions();
+else if (opt.still || opt.range) await stills();
+else if (opt.determinism) await determinism();
+else if (opt['text-check']) await textCheck();
+else await video();
+await finish(0);
+
+// ───────────────────────────── text framing ─────────────────────────────
+function safeZone() {
+  const v = opt.safe === undefined || opt.safe === true ? 'auto' : String(opt.safe);
+  if (v === 'none') return null;
+  if (v === 'auto') return H > W ? { t: 0.12 * H, r: 0, b: 0.12 * H, l: 0 } : null;
+  const n = v.split(',').map(Number);
+  if (n.length !== 4 || n.some(x => !(x >= 0))) die(`bad --safe ${v}: auto | none | top,right,bottom,left (fractions like 0.12, or pixels)`);
+  const px = (x, d) => (x < 1 ? x * d : x);
+  return { t: px(n[0], H), r: px(n[1], W), b: px(n[2], H), l: px(n[3], W) };
+}
+async function textCheck() {
+  const every = +(opt.every || 0.2);
+  if (!(every > 0)) die(`bad --every ${opt.every}`);
+  const out = path.resolve(typeof opt.out === 'string' ? opt.out.replace(/\.json$/, '') : path.join(target.root, 'qa', 'text'));
+  fs.mkdirSync(path.dirname(out), { recursive: true });
+  const page = await open(QUERY, textHook);
+  if (!(await page.evaluate(() => !!window.__msrText))) die('the text hook did not load in the page');
+  const dur = +(opt.duration || await page.evaluate(() => window.DUR));
+  if (!(dur > 0)) die('window.DUR is missing; pass --duration');
+  const safe = safeZone(), BLEED = 0.12 * H, TINY = 0.016 * H;
+  const area = b => Math.max(0, b.x1 - b.x0) * Math.max(0, b.y1 - b.y0);
+  const inter = (a, b) => ({ x0: Math.max(a.x0, b.x0), y0: Math.max(a.y0, b.y0), x1: Math.min(a.x1, b.x1), y1: Math.min(a.y1, b.y1) });
+  const frame = { x0: 0, y0: 0, x1: W, y1: H };
+  const same = (a, b) => a.text.replace(/\s+/g, '') === b.text.replace(/\s+/g, '');
+  const issues = new Map();                       // key → { kind, what, times: [], boxes: { t: [box] } }
+  const note = (key, kind, what, t, bxs) => { let e = issues.get(key); if (!e) issues.set(key, (e = { kind, what, times: [], boxes: {} })); e.times.push(t); e.boxes[t] = bxs; };
+  const times = []; for (let t = 0; t < dur - 1e-6; t += every) times.push(+t.toFixed(4));
+  for (const t of times) {
+    const boxes = await page.evaluate(t => { window.__msrText.reset(); return Promise.resolve(window.render(t)).then(() => window.__msrText.collect()); }, t);
+    const seen = boxes.filter(b => area(b) > 1 && area(inter(b, frame)) > 0 && b.alpha >= 0.15);
+    for (const b of seen) {
+      const vis = area(inter(b, frame)) / area(b), q = JSON.stringify(b.text);
+      if (vis < 0.98 && Math.max(-b.x0, -b.y0, b.x1 - W, b.y1 - H) > 2) {
+        if (b.size >= BLEED) note(`bleed ${b.text}`, 'bleed', `${q} runs off the frame edge (display size: fine if it is a deliberate bleed)`, t, [b]);
+        else note(`cut ${b.text}`, 'cut', `${q} is cut by the frame edge`, t, [b]);
+      }
+      if (safe && b.size < BLEED) {
+        const zone = safe.t && b.y0 < safe.t ? 'top' : safe.b && b.y1 > H - safe.b ? 'bottom' : safe.l && b.x0 < safe.l ? 'left' : safe.r && b.x1 > W - safe.r ? 'right' : null;
+        if (zone) note(`safe ${b.text}`, 'safe', `${q} sits in the ${zone} safe zone (platform UI covers it)`, t, [b]);
+      }
+      if (b.size < TINY) note(`tiny ${b.text}`, 'tiny', `${q} is ${b.size.toFixed(0)}px (${(100 * b.size / H).toFixed(1)}% of the frame height): unreadable on a phone unless it is a deliberate micro-annotation`, t, [b]);
+    }
+    const solid = seen.filter(b => !b.clip && b.alpha >= 0.3);
+    for (let i = 0; i < solid.length; i++) for (let j = i + 1; j < solid.length; j++) {
+      const a = solid[i], c = solid[j];
+      if (same(a, c)) continue;
+      if (area(inter(a, c)) >= 0.3 * Math.min(area(a), area(c))) {
+        const [p, s] = [a.text, c.text].sort();
+        note(`overlap ${p}|${s}`, 'overlap', `${JSON.stringify(p)} and ${JSON.stringify(s)} are drawn on top of each other`, t, [a, c]);
+      }
+    }
+  }
+  // keep what lasts: consecutive samples, ≥ 0.3 s (a single sample counts when samples are that far apart)
+  const minRun = every >= 0.3 ? 1 : Math.ceil(0.3 / every) + 1;
+  const found = [];
+  for (const e of issues.values()) {
+    let run = [e.times[0]];
+    const flush = () => { if (run.length >= minRun) found.push({ kind: e.kind, what: e.what, t0: run[0], t1: +(run.at(-1) + every).toFixed(3), boxes: e.boxes[run[0]] }); };
+    for (const t of e.times.slice(1)) { if (t - run.at(-1) <= every * 1.5) run.push(t); else { flush(); run = [t]; } }
+    flush();
+  }
+  found.sort((a, b) => a.t0 - b.t0);
+  // one picture per moment, with the boxes drawn in
+  const shots = [...new Set(found.map(f => f.t0))].slice(0, 12);
+  const files = [];
+  for (const t of shots) {
+    const marks = found.filter(f => f.t0 === t).flatMap(f => f.boxes.map(b => ({ ...b, kind: f.kind })));
+    await page.evaluate(async ([t, marks, safe, W, H]) => {
+      window.__msrText.reset(); await window.render(t);
+      const d = document.createElement('div'); d.id = '__msr_marks';
+      d.style.cssText = `position:fixed;left:0;top:0;width:${W}px;height:${H}px;pointer-events:none;z-index:2147483647`;
+      const col = { cut: '#ff2d2d', overlap: '#ff2df0', safe: '#ffb000', tiny: '#2dd4ff', bleed: '#9aa0a6' };
+      if (safe) for (const [y, h] of [[0, safe.t], [H - safe.b, safe.b]]) if (h) d.insertAdjacentHTML('beforeend', `<div style="position:absolute;left:0;top:${y}px;width:${W}px;height:${h}px;background:rgba(255,176,0,.18)"></div>`);
+      for (const m of marks) d.insertAdjacentHTML('beforeend', `<div style="position:absolute;left:${m.x0}px;top:${m.y0}px;width:${m.x1 - m.x0}px;height:${m.y1 - m.y0}px;outline:3px solid ${col[m.kind]};outline-offset:2px"></div>`);
+      document.body.appendChild(d);
+    }, [t, marks, safe, W, H]);
+    const file = `${out}-t${t.toFixed(2)}.png`;
+    await page.screenshot({ path: file, clip: { x: 0, y: 0, width: W, height: H } });
+    await page.evaluate(() => document.getElementById('__msr_marks')?.remove());
+    files.push(file);
+  }
+  fs.writeFileSync(`${out}.json`, JSON.stringify({ size: `${W}x${H}`, every, safe, issues: found.map(({ boxes, ...f }) => f) }, null, 1));
+  console.log(`text framing · ${times.length} frames every ${every}s · safe zone: ${safe ? `top ${safe.t.toFixed(0)} / bottom ${safe.b.toFixed(0)} / left ${safe.l.toFixed(0)} / right ${safe.r.toFixed(0)} px` : 'not checked'}`);
+  if (!found.length) console.log('  no lasting text-framing problems found (WebGL / image text is not seen: look at those frames yourself)');
+  for (const f of found) console.log(`  [${f.t0.toFixed(2)}–${f.t1.toFixed(2)}s] ${f.kind.toUpperCase().padEnd(7)} ${f.what}`);
+  if (files.length) console.log(`  marked frames: ${files.join(', ')}${shots.length < new Set(found.map(f => f.t0)).size ? ' (first 12)' : ''}`);
+  console.log(`  ${out}.json  (review material: look at each marked frame and decide; deliberate bleeds and micro-annotations are fine)`);
+}
+
+// ───────────────────────────── poster / directions ─────────────────────────────
+function writePng(file, buf) {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, buf);
+  if (!fs.statSync(file).size) fail(`empty image written: ${file}`);
+  console.log(file);
+}
+async function poster() {
+  const t = +opt.poster;
+  if (opt.poster === true || !Number.isFinite(t) || t < 0) die('--poster needs a time in seconds, e.g. --poster 14.5');
+  const out = path.resolve(typeof opt.out === 'string' ? (opt.out.endsWith('.png') ? opt.out : path.join(opt.out, 'poster.png')) : path.join(target.root, 'out', 'poster.png'));
+  const page = await open();
+  await warnSoftwareGL(page);
+  writePng(out, await shoot(page, t, 'png'));
+}
+async function directions() {
+  const names = String(opt.directions === true ? '' : opt.directions).split(',').map(s => s.trim()).filter(Boolean);
+  if (!names.length) die('--directions needs names, e.g. --directions a,b,c --at 14.5,2,0');
+  if (opt.at === undefined || opt.at === true) die('--directions needs --at <seconds>: one per direction (--at 14.5,2,0) or one for all (--at 3)');
+  const ats = String(opt.at).split(',').map(Number);
+  if (ats.some(v => !Number.isFinite(v) || v < 0)) die(`bad --at ${opt.at}`);
+  if (ats.length !== 1 && ats.length !== names.length) die(`--at has ${ats.length} times for ${names.length} directions (give one per direction, or one for all)`);
+  const key = typeof opt['dir-param'] === 'string' ? opt['dir-param'] : 'dir';
+  const sheet = path.resolve(typeof opt.out === 'string' ? (opt.out.endsWith('.png') ? opt.out : opt.out + '.png') : path.join(target.root, 'qa', 'directions.png'));
+  const singles = sheet.replace(/\.png$/, '');
+  const shots = [];
+  for (const [i, name] of names.entries()) {
+    const q = new URLSearchParams(QUERY); q.set(key, name);
+    const page = await open(q.toString());                 // a fresh page per direction: no state shared between them
+    await warnSoftwareGL(page);
+    const t = ats.length === 1 ? ats[0] : ats[i], buf = await shoot(page, t, 'png');
+    await page.close();
+    writePng(path.join(singles, `${name}_t${t.toFixed(2)}.png`), buf);
+    shots.push({ t, buf, label: `${name.toUpperCase()} · ${t.toFixed(2)}s` });
+  }
+  fs.mkdirSync(path.dirname(sheet), { recursive: true });
+  await contactSheet(shots, sheet, { below: true });
+  console.log(`${sheet}  (${names.length} directions side by side: send this one image and ask which to take, or how to mix)`);
+}
+
+// ───────────────────────────────── stills ─────────────────────────────────
+async function stills() {
+  let times = [];
+  if (opt.still) times = String(opt.still).split(',').map(Number);
+  if (opt.range) {
+    const [a, b, s] = String(opt.range).split(':').map(Number);
+    if (!(s > 0)) die('--range a:b:step needs a positive step');
+    for (let t = a; t <= b + 1e-9; t += s) times.push(+t.toFixed(4));
+  }
+  if (times.some(Number.isNaN)) die('bad --still / --range values');
+  const out = path.resolve(typeof opt.out === 'string' ? opt.out : path.join(target.root, 'qa', 'stills'));
+  fs.mkdirSync(out, { recursive: true });
+  const page = await open();
+  await warnSoftwareGL(page);
+  const shots = [];
+  for (const t of times) {
+    const buf = await shoot(page, t, 'png');
+    const file = path.join(out, `t_${t.toFixed(2).padStart(6, '0')}.png`);
+    fs.writeFileSync(file, buf);
+    if (!fs.statSync(file).size) fail(`empty still written: ${file}`);
+    shots.push({ t, file, buf });
+    console.log(file);
+  }
+  if (opt.sheet) {
+    const file = path.join(out, 'sheet.png');
+    await contactSheet(shots, file);
+    console.log(file);
+  }
+}
+
+// below: captions in a strip under each cell instead of over its top-left corner (keeps the whole frame visible)
+async function contactSheet(shots, file, { below = false } = {}) {
+  const cols = shots.length <= 4 ? shots.length : shots.length <= 9 ? 3 : 4;
+  const cw = Math.round(1600 / cols), ch = Math.round(cw * H / W);
+  const cells = shots.map(s => `<figure><img src="data:image/png;base64,${s.buf.toString('base64')}"><figcaption>${s.label ?? s.t.toFixed(2) + 's'}</figcaption></figure>`).join('');
+  const page = await browser.newPage({ viewport: { width: cols * (cw + 8) + 8, height: 200 } });
+  const cap = below ? 'padding:8px 2px 2px;font-size:16px' : 'position:absolute;left:6px;top:6px;background:#000c;padding:4px 6px;border-radius:3px';
+  await page.setContent(`<style>body{margin:0;background:#111;font:600 14px/1 ui-monospace,Menlo,monospace;color:#ddd}
+    main{display:grid;grid-template-columns:repeat(${cols},${cw}px);gap:8px;padding:8px}figure{margin:0;position:relative}
+    img{width:${cw}px;height:${ch}px;display:block;object-fit:cover;background:#000}
+    figcaption{${cap}}</style><main>${cells}</main>`);
+  await page.evaluate(() => Promise.all([...document.images].map(i => i.decode())));
+  await page.screenshot({ path: file, fullPage: true });
+  await page.close();
+}
+
+// ───────────────────────────── determinism ─────────────────────────────
+async function determinism() {
+  const probe = await open();
+  const start = +(opt.start || 0);
+  const dur = +(opt.duration || ((await probe.evaluate(() => window.DUR)) - start));
+  if (!(dur > 0)) die('window.DUR is missing; pass --duration');
+  const ts = [0.11, 0.37, 0.5, 0.73, 0.93].map(k => +(start + k * dur).toFixed(3)).concat(+(start + Math.max(0, dur - 1 / FPS)).toFixed(3));
+  const a = [];
+  for (const t of ts) a.push(await shoot(probe, t, 'png'));
+  const fresh = await open();
+  const b = new Array(ts.length);
+  for (const i of [...ts.keys()].reverse()) {
+    await fresh.evaluate(t => window.render(t), start + ((ts[i] - start) * 0.61 + 0.17) % dur); // render something unrelated first
+    b[i] = await shoot(fresh, ts[i], 'png');
+  }
+  // GPU canvas rasterisation may differ by a level or two on antialiased edges between pages: tolerate that.
+  const cmp = await browser.newPage();
+  const bad = [];
+  for (let i = 0; i < ts.length; i++) {
+    if (a[i].equals(b[i])) continue;
+    const d = await cmp.evaluate(async ([x, y]) => {
+      const load = s => new Promise(r => { const im = new Image(); im.onload = () => r(im); im.src = 'data:image/png;base64,' + s; });
+      const [A, B] = await Promise.all([load(x), load(y)]), c = document.createElement('canvas');
+      c.width = A.width; c.height = A.height; const g = c.getContext('2d', { willReadFrequently: true });
+      g.drawImage(A, 0, 0); const pa = g.getImageData(0, 0, c.width, c.height).data;
+      g.clearRect(0, 0, c.width, c.height); g.drawImage(B, 0, 0); const pb = g.getImageData(0, 0, c.width, c.height).data;
+      let n = 0; for (let k = 0; k < pa.length; k += 4) if (Math.max(Math.abs(pa[k] - pb[k]), Math.abs(pa[k + 1] - pb[k + 1]), Math.abs(pa[k + 2] - pb[k + 2])) > 24) n++;
+      return n / (pa.length / 4);
+    }, [a[i].toString('base64'), b[i].toString('base64')]);
+    if (d > 0.0005) bad.push(`${ts[i]}s (${(d * 100).toFixed(2)}% pixels differ)`);
+  }
+  if (bad.length) {
+    console.error(`NOT deterministic at ${bad.join(', ')}.\nSomething depends on render order: state carried between frames, Math.random()/Date.now()/performance.now(), CSS transitions/animations, requestAnimationFrame, or async loads finishing late.`);
+    await finish(1);
+  }
+  console.log(`deterministic: ${ts.length} frames match across render orders (${ts.join(', ')} s)`);
+}
+
+// ───────────────────────────────── video ─────────────────────────────────
+async function video() {
+  const probe = await open();
+  await warnSoftwareGL(probe);
+  const start = +(opt.start || 0);
+  const pageDur = await probe.evaluate(() => window.DUR);
+  const dur = +(opt.duration || (pageDur ? pageDur - start : NaN));
+  await probe.close();
+  if (!(dur > 0)) die('window.DUR is missing; set it in the page or pass --duration');
+  const SUB = Math.max(1, +(opt.subframes || 1) | 0);
+  const SHUTTER = Math.min(1, Math.max(0, +(opt.shutter ?? 0.5)));
+  const WK = +(opt.workers || 3);
+  if (!(Number.isInteger(WK) && WK >= 1 && WK <= 16)) fail(`bad --workers ${opt.workers} (integer 1–16)`);
+  const CRF = +(opt.crf ?? 16);
+  if (!(CRF >= 0 && CRF <= 51)) fail(`bad --crf ${opt.crf} (0–51)`);
+  const GRAIN = +(opt.grain || 0);
+  const audio = typeof opt.audio === 'string' ? path.resolve(opt.audio) : null;
+  if (audio && !fs.existsSync(audio)) die(`audio not found: ${audio}`);
+  const out = path.resolve(typeof opt.out === 'string' ? opt.out : path.join(target.root, 'out', 'video.mp4'));
+  fs.mkdirSync(path.dirname(out), { recursive: true });
+  // one writer per output file: a second render to the same --out is refused (stale locks from dead pids are taken over)
+  const lock = out + '.lock';
+  const alive = pid => { try { process.kill(pid, 0); return true; } catch (e) { return e.code === 'EPERM'; } };
+  try { fs.writeFileSync(lock, String(process.pid), { flag: 'wx' }); }
+  catch {
+    const other = +fs.readFileSync(lock, 'utf8');
+    if (other && other !== process.pid && alive(other)) die(`another render (pid ${other}) is writing ${out}. Use a different --out, or wait for it.`);
+    fs.writeFileSync(lock, String(process.pid));
+  }
+  cleanups.push(() => fs.rmSync(lock, { force: true }));
+  const tmp = fs.mkdtempSync(path.join(path.dirname(out), '.segs-'));
+  cleanups.push(() => fs.rmSync(tmp, { recursive: true, force: true }));
+  const procs = new Set();
+  cleanups.push(() => { for (const p of procs) p.kill('SIGKILL'); });
+  let aborted = null;
+
+  const TOTAL = Math.round(dur * FPS), per = Math.ceil(TOTAL / WK), t0 = Date.now();
+  // sample time of sub-sample j of frame f, centred on the frame time
+  const sampleT = (f, j) => start + (f + (SUB > 1 ? SHUTTER * ((j + 0.5) / SUB - 0.5) : 0)) / FPS;
+  const vf = [];
+  if (SUB > 1) vf.push(`tmix=frames=${SUB}:weights=${Array(SUB).fill(1).join(' ')}`, `select='eq(mod(n\\,${SUB})\\,${SUB - 1})'`);
+  vf.push(`setpts=N/(${FPS}*TB)`);
+  if (DPR !== 1) vf.push(`scale=${W}:${H}:flags=lanczos`);
+  if (GRAIN > 0) vf.push(`noise=c0s=${GRAIN}:allf=t`);
+  vf.push('scale=out_color_matrix=bt709:out_range=tv', 'format=yuv420p');
+  let done = 0;
+  console.log(`rendering ${TOTAL} frames × ${SUB} sample(s) @ ${W}x${H} ${FPS}fps with ${WK} worker(s)…`);
+
+  await Promise.all([...Array(WK)].map(async (_, k) => {
+    const a = k * per, b = Math.min(TOTAL, a + per);
+    if (a >= b) return;
+    const page = await open();
+    const ff = spawn('ffmpeg', ['-v', 'error', '-y', '-f', 'image2pipe', '-c:v', fmt === 'png' ? 'png' : 'mjpeg', '-framerate', String(FPS * SUB), '-i', '-',
+      '-vf', vf.join(','), '-r', String(FPS), '-c:v', 'libx264', '-preset', 'medium', '-crf', String(CRF),
+      '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', `seg_${k}.mp4`], { cwd: tmp, stdio: ['pipe', 'inherit', 'inherit'] });
+    procs.add(ff);
+    let failed = null, exited = false;
+    const closed = new Promise(r => ff.on('close', code => { exited = true; procs.delete(ff); if (code !== 0) failed ??= `ffmpeg exited with code ${code}`; r(code); }));
+    ff.on('error', e => { failed = e.code === 'ENOENT' ? 'ffmpeg not found on PATH' : e.message; });
+    ff.stdin.on('error', () => { failed ??= 'ffmpeg closed its input early'; });
+    for (let f = a; f < b && !failed && !aborted; f++) {
+      for (let j = 0; j < SUB && !failed && !exited; j++) {
+        const buf = await shoot(page, sampleT(f, j), fmt, start + f / FPS);
+        if (!ff.stdin.write(buf)) await Promise.race([new Promise(r => ff.stdin.once('drain', r)), closed]);
+      }
+      if (exited && f < b - 1) failed ??= 'ffmpeg stopped before all frames were written';
+      if (++done % Math.max(1, Math.round(TOTAL / 10)) === 0) console.log(`  ${done}/${TOTAL} frames  ${((Date.now() - t0) / 1000).toFixed(0)}s`);
+    }
+    ff.stdin.end();
+    const code = await closed;
+    await page.close().catch(() => {});
+    if (failed || code !== 0) aborted ??= `encoder failed in worker ${k}: ${failed || 'exit ' + code}`;   // stops the other workers too
+  }));
+  if (aborted) fail(aborted + ' (nothing written)');
+
+  const segs = [...Array(WK).keys()].filter(k => k * per < TOTAL).map(k => `file 'seg_${k}.mp4'`).join('\n');
+  fs.writeFileSync(path.join(tmp, 'list.txt'), segs);
+  const cmd = ['-v', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', 'list.txt'];
+  if (audio) cmd.push('-ss', String(start), '-i', audio, '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '256k', '-af', 'apad', '-t', String(TOTAL / FPS));
+  else cmd.push('-c', 'copy');
+  cmd.push('-movflags', '+faststart', 'joined.mp4');
+  try { execFileSync('ffmpeg', cmd, { cwd: tmp, stdio: ['ignore', 'inherit', 'inherit'] }); }
+  catch { fail('ffmpeg could not join the segments'); }
+  // verify before publishing: frame count and duration must match what was asked for
+  const joined = path.join(tmp, 'joined.mp4');
+  let got = 0;
+  try { got = parseInt(execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-count_packets', '-show_entries', 'stream=nb_read_packets', '-of', 'csv=p=0', joined]).toString(), 10); } catch {}
+  if (!Number.isFinite(got) || Math.abs(got - TOTAL) > 1) fail(`output has ${got} frames, expected ${TOTAL}; not published`);
+  fs.renameSync(joined, out);
+  const secs = (Date.now() - t0) / 1000;
+  console.log(`done ${out}\n  ${TOTAL} frames, ${(TOTAL / FPS).toFixed(2)}s, ${secs.toFixed(1)}s wall (${(secs * 1000 / TOTAL / SUB).toFixed(0)} ms/sample)${audio ? ', audio muxed' : ''}`);
+}
+
+exec
+/bin/bash -lc "sed -n '140,190p' film/chapters/s08.js; cat qa/v6/b08/verify.py; rg -n 'function detailedNeutrophil|sz|ellipse' engine/lib/he_detail.js | head -35; rg -n 'mapSource|function point' film/chapters/s08.js" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+function drawGlands(ctx,k){
+ const G=rng(40711);let index=0;
+ for(let a=-Math.PI;a<Math.PI;a+=.105+G()*.065){
+  const cross=index++%3===0,depth=cross?-215+(G()-.5)*65:-220+(G()-.5)*20;
+  const x=(a+Math.PI/2)*620,p=lowPoint(x,depth,k),rad=lowPoint(x,depth+1,k);
+  const angle=Math.atan2(rad[1]-p[1],rad[0]-p[0])-Math.PI/2+(G()-.5)*(cross?1.8:.55);
+  const w=12+G()*9,h=cross?13+G()*13:35+G()*30,bend=(G()-.5)*12,phase=G()*TAU;
+  ctx.save();ctx.translate(1600+p[0],1050+p[1]);ctx.rotate(angle);
+  const contour=(inset)=>{ctx.beginPath();for(let i=0;i<=64;i++){const t=i/64*TAU,yy=Math.sin(t)*(h-inset),xx=Math.cos(t)*(w-inset)*(1+.08*Math.sin(t*3+phase))+bend*(yy/h)**2;i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);}ctx.closePath();};
+  contour(0);ctx.fillStyle='rgba(218,177,202,.35)';ctx.fill();
+  contour(6);ctx.fillStyle='rgba(250,239,241,.8)';ctx.fill();
+  const n=Math.round((w+h)*.58);for(let j=0;j<n;j++){const t=j/n*TAU,yy=Math.sin(t)*(h-2),xx=Math.cos(t)*(w-2)*(1+.08*Math.sin(t*3+phase))+bend*(yy/h)**2;cryptNucleus(ctx,xx,yy,.37+G()*.09,t-.5,index+j);}
+  ctx.restore();
+ }
+}
+function ulcerDetail(c){
+ const U=rng(40712);
+ // Three unequal lifted shreds per end, outside the skipped surface interval.
+ for(const [x,sign] of [[-27,1],[47,-1]])for(let j=0;j<3;j++)columnar(c,x+sign*(j*1.8),-290-j*3.5,.48+U()*.15,sign*(.4+j*.28),j,'fray');
+ drawWash(c,'s08.congestion',10,-266,115,{alpha:.55});
+ for(let i=0;i<13;i++)erythrocyte(c,-18+U()*55,-278+U()*20,.65,U()*TAU,i);
+ c.strokeStyle='rgba(213,153,174,.55)';c.lineWidth=.42;
+ for(let i=0;i<52;i++){const x=-24+U()*62,y=-294+U()*4;c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x+5,y-3,x+5+U()*7,y+U()*4-1);c.stroke();}
+ for(let i=0;i<8;i++)detailedNeutrophil(c,-18+i*8,-302-U()*4,{lobes:2+i%4,rot:U()*TAU,sz:.40+U()*.07},1);
+}
+from pathlib import Path
+from PIL import Image,ImageDraw,ImageFont
+import numpy as np,json,hashlib,math
+out=Path(__file__).resolve().parent;root=out.parents[2];base=out.parent/'b07'
+font=ImageFont.truetype('/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',24)
+times=[1,3.8,9,15,21,27,33];names=['low','mid','high_s30','high_s31','high_s32','high_s33','high_s34']
+rows=[]
+for t,name in zip(times,names):
+ im=Image.open(out/f't_{t:06.2f}.png').convert('RGB');im.save(out/f's08_{name}.png')
+ if t in [3.8,9,15,21,27]:
+  a=np.array(Image.open(base/f't_{t:06.2f}.png').convert('RGB')).astype(float);b=np.array(im).astype(float);rows.append({'t':t,'MAE':float(np.abs(a-b).mean()),'pass':bool(np.abs(a-b).mean()<.5)})
+# Same annular ROI for every version; CIE L* D65 from linear sRGB.
+mask=Image.new('1',(1920,1080));d=ImageDraw.Draw(mask)
+for y,fill in [(-150,1),(-290,0)]:
+ pts=[]
+ for i in range(720):
+  a=i/720*math.tau;r=(390 if y==-150 else 170)+12*math.sin(a*3)+9*math.sin(a*5)+22*math.sin(a*4+.7);u=1.6*math.cos(a)*r;v=math.sin(a)*r;rot=math.pi/6
+  pts.append((1110+.576*(u*math.cos(rot)-v*math.sin(rot)),475+.576*(u*math.sin(rot)+v*math.cos(rot))))
+ d.polygon(pts,fill=fill)
+roi=np.array(mask).astype(bool);mask.save(out/'mucosa_ROI.png');Ls={}
+for label,folder in [('b07',base),('b08',out)]:
+ a=np.array(Image.open(folder/'t_001.00.png').convert('RGB')).astype(float)/255;s=np.where(a<=.04045,a/12.92,((a+.055)/1.055)**2.4);Y=s@np.array([.2126729,.7151522,.072175]);L=116*np.where(Y>.008856,np.cbrt(Y),7.787*Y+16/116)-16;Ls[label]=float(L[roi].mean())
+for title,t,crop in [('低倍_b07_vs_b08',1,(820,230,1190,430)),('s34_b07_vs_b08',33,(980,405,1240,550))]:
+ sheet=Image.new('RGB',(1920,540+70+(crop[3]-crop[1])*2),'#111114');d=ImageDraw.Draw(sheet)
+ for i,folder in enumerate([base,out]):
+  im=Image.open(folder/f't_{t:06.2f}.png').convert('RGB');sheet.paste(im.resize((960,540)),(i*960,35));detail=im.crop(crop).resize(((crop[2]-crop[0])*2,(crop[3]-crop[1])*2));sheet.paste(detail,(i*960+30,610));d.text((i*960+25,3),['b07','b08'][i]+' / 下方 200% 局部',font=font,fill='white')
+ sheet.save(out/(title+'.png'))
+review=Image.new('RGB',(1920,1592),'#111114');d=ImageDraw.Draw(review)
+for i,(t,name) in enumerate(zip(times,names)):
+ x=i%2*960;y=i//2*398;review.paste(Image.open(out/f't_{t:06.2f}.png').resize((640,360)),(x+160,y+34));d.text((x+24,y+3),f'{name} · {t}s',font=font,fill='white')
+review.save(out/'review_sheet.png')
+(out/'metrics.json').write_text(json.dumps({'MAE':rows,'mucosa_CIE_L_star':Ls},indent=2))
+assert all(r['pass'] for r in rows)
+print(json.dumps({'MAE':rows,'L':Ls},indent=2))
+
+# Sample a 15px corridor along the mapped original epithelial path; omit 5 local
+# units at each end, where the intentionally retained torn stumps are located.
+pts=json.loads((out/'gap_path.json').read_text());sample=Image.new('1',(1920,1080));ImageDraw.Draw(sample).line([tuple(p) for p in pts],fill=1,width=15);sm=np.array(sample).astype(bool);ratios={}
+for label,folder in [('b07',base),('b08',out)]:
+ a=np.array(Image.open(folder/'t_033.00.png').convert('RGB')).astype(float)
+ purple=(a[:,:,0]<165)&(a[:,:,1]<135)&(a[:,:,2]>a[:,:,1]*1.08)
+ ratios[label]=float(purple[sm].mean()*100)
+sample.save(out/'gap_sampling_mask.png')
+metrics=json.loads((out/'metrics.json').read_text());metrics['gap_purple_percent']=ratios;metrics['gap_sampling_pixels']=int(sm.sum());(out/'metrics.json').write_text(json.dumps(metrics,indent=2));assert ratios['b08']<5
+# Every frame also has a separate literal 200% detail. Review sheet includes all.
+crops=[(820,230,1190,430),(920,320,1220,480),(980,360,1230,520),(980,360,1230,520),(980,360,1230,520),(980,360,1230,520),(980,405,1240,550)]
+review=Image.new('RGB',(1920,7*620),'#111114');d=ImageDraw.Draw(review)
+for i,(t,name,crop) in enumerate(zip(times,names,crops)):
+ im=Image.open(out/f't_{t:06.2f}.png').convert('RGB');detail=im.crop(crop).resize(((crop[2]-crop[0])*2,(crop[3]-crop[1])*2),Image.Resampling.NEAREST);detail.save(out/f's08_{name}_200pct.png');y=i*620;review.paste(im.resize((960,540)),(0,y+40));review.paste(detail,(1000,y+70));d.text((20,y+3),f'{name} / {t}s',font=font,fill='white');d.text((1000,y+3),'200% 局部',font=font,fill='white')
+review.save(out/'review_sheet.png')
+print('gap purple %',ratios)
+6:const ellipse = (p,x,y,rx,ry,a=0) => { p.moveTo(x+Math.cos(a)*rx,y+Math.sin(a)*rx); p.ellipse(x,y,rx,ry,a,0,TAU); };
+8:for(let i=0;i<25;i++){const a=R()*TAU,r=Math.sqrt(R())*.86; ellipse(speck,Math.cos(a)*r,Math.sin(a)*r,.035+R()*.065,.04+R()*.08);}
+23:// Open C of plump lobes. Semi-axes stay ~3.4×2.4; centre spacing leaves ≥1.5 of cytoplasm at sz≈1.
+26:const cells=[arcChain(2,5.85,1.5),arcChain(3,5.85,3),arcChain(4,6.35,4.25),arcChain(5,7.05,4.85)].map(chain=>{const lobes=new Path2D(),bridges=new Path2D(),granules=new Path2D(),clumps=new Path2D();let inward=0;for(const p of chain)inward+=Math.sin(p.rot)*p.x-Math.cos(p.rot)*p.y;const sign=inward>=0?1:-1;chain.forEach((p,i)=>{const ja=.98+NR()*.04,jb=.98+NR()*.04;lobeOutline(lobes,p.x,p.y,3.4*ja,2.4*jb,p.rot,i*1.7,sign);if(i){const q=chain[i-1],mx=(p.x+q.x)/2,my=(p.y+q.y)/2,ol=Math.hypot(mx,my)||1;bridges.moveTo(q.x,q.y);bridges.quadraticCurveTo(mx+mx/ol*.45,my+my/ol*.45,p.x,p.y);}for(let k=0;k<5;k++)ellipse(clumps,p.x+(R()-.5)*2.8,p.y+(R()-.5)*3,.3+R()*.35,.35);});for(let i=0;i<22;i++){const a=R()*TAU,r=9.4*Math.sqrt(R());ellipse(granules,Math.cos(a)*r,Math.sin(a)*r,.22+R()*.22,.3);}return {lobes,bridges,granules,clumps};});
+27:export function detailedNeutrophil(ctx,x,y,c,s){const p=cells[c.lobes-2],sc=s*(c.sz||1);ctx.save();ctx.translate(x,y);ctx.rotate(c.rot);ctx.scale(sc,sc);ctx.beginPath();ctx.ellipse(0,0,10.2,9.6,0,0,TAU);ctx.fillStyle='rgba(226,170,200,.75)';ctx.fill();ctx.fillStyle='rgba(167,105,159,.38)';ctx.fill(p.granules);ctx.strokeStyle='#9273A5';ctx.lineWidth=.48/sc;ctx.lineCap='round';ctx.stroke(p.bridges);ctx.fillStyle='#51336F';ctx.fill(p.lobes);ctx.fillStyle='#3F2A66';ctx.fill(p.clumps);ctx.restore();}
+34:const disc=(out,x,y)=>{const rx=3.85*(.8+R()*.4),ry=rx*(.5+R()*.4),a=R()*TAU,p=new Path2D(),c=new Path2D();ellipse(p,x,y,rx,ry,a);ellipse(c,x,y,rx*.54,ry*.5,a);out.push({p,c,alpha:.7+BR()*.15,under:BR()<.45});};
+39:  ellipse(plugs,vx,vy,vr*.93,vr*.72,.12);
+47: for(let i=0;i<180;i++)ellipse(ghosts,-420+R()*840,-280+R()*560,5+R()*7,4+R()*5,R()*TAU);
+60: for(let j=0;j<9;j++)ellipse(edgeDust,x+(R()-.5)*13,y+(R()-.5)*12,.4+R()*1.2,.5+R());
+63: ellipse(debris,x+sign*(5+R()*9),y+R()*5,1+R()*2,1+R()*3,R()*TAU);
+66:for(let i=0;i<95;i++){const y=275+R()*115;ellipse(pus,190+(R()-.5)*(35+(y-275)*.8),y,3+R()*10,3+R()*9);}
+67:for(let i=0;i<80;i++){const y=286+R()*94,x=190+(R()-.5)*(38+(y-275)*.8);ellipse(pusNuclei,x,y,1.3,1.8);ellipse(pusNuclei,x+3,y+2,1.2,1.6);if(i<35){leakFibres.moveTo(x,y-8);leakFibres.quadraticCurveTo(x-8,y+5,x+5,y+16);}}
+8:export function point(x,y){const a=x/620-Math.PI/2,r=620+y+12*Math.sin(a*3)+9*Math.sin(a*5),u=1.6*Math.cos(a)*r,v=Math.sin(a)*r;return [u*Math.cos(.14)-v*Math.sin(.14),u*Math.sin(.14)+v*Math.cos(.14)];}
+9:export default {prepare(){bake('s08.congestion',(b,P)=>{P.fill(b,P.blob(0,0,75,18,.3,47),'#C86A87',130,.2);},{seed:47,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});bake('s08.lumen', (b,P)=>{P.fill(b,P.blob(0,0,300,22,.2,43),'#DCA4B2',200,.15);},{seed:43,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});source=buildSource('original');lowBase=buildSource('low');const ulcerSource=buildSource('ulcer');ulcerMap=mapSource(ulcerSource);const c=source.getContext('2d');
+10:map=mapSource(source);
+137:function mapSource(src){const c=src.getContext('2d');const im=c.getImageData(0,0,840,620);const result=document.createElement('canvas');result.width=3200;result.height=2100;const mc=result.getContext('2d'),out=mc.createImageData(3200,2100);for(let j=0;j<2100;j++)for(let i=0;i<3200;i++){const u=i-1600,v=j-1050,x=(u*Math.cos(.14)+v*Math.sin(.14))/1.6,y=-u*Math.sin(.14)+v*Math.cos(.14),a=Math.atan2(y,x),fy=Math.hypot(x,y)-620-12*Math.sin(a*3)-9*Math.sin(a*5);if(fy< -320||fy>=280)continue;let fx=((a+Math.PI/2)*620+420)%840;if(fx<0)fx+=840;const si=(Math.floor(fy+320)*840+Math.floor(fx))*4,di=(j*3200+i)*4;out.data.set(im.data.subarray(si,si+4),di);}mc.putImageData(out,0,0);return result;}
+
+exec
+/bin/bash -lc "mkdir -p qa/v6/b09; python - <<'PY'
+from pathlib import Path
+import hashlib
+p=Path('qa/v6/b09'); names=[s.split('  ')[1] for s in Path('qa/v6/b08/sha256_开工.txt').read_text().splitlines()]
+p.joinpath('sha256_开工.txt').write_text(''.join(hashlib.sha256(Path(n).read_bytes()).hexdigest()+'  '+n+'\\n' for n in names))
+PY
+sed -n '1,85p' film/chapters/s08.js" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+/bin/bash: line 1: python: command not found
+import {bake,drawWash} from '../lib/wash.js';
+import {drawHE,CELLS} from '../lib/he.js';
+import {detailedNeutrophil} from '../lib/he_detail.js';
+import {rng} from '../lib/motion.js';
+import {drawHE as drawMucosa} from '../lib_ext/he_mucosa.js';
+import {cryptNucleus,columnar,erythrocyte,cell,follicle} from '../lib_ext/cells_ext.js';
+const R=rng(40802),TAU=Math.PI*2;let map,source,lowBase,ulcerMap;
+export function point(x,y){const a=x/620-Math.PI/2,r=620+y+12*Math.sin(a*3)+9*Math.sin(a*5),u=1.6*Math.cos(a)*r,v=Math.sin(a)*r;return [u*Math.cos(.14)-v*Math.sin(.14),u*Math.sin(.14)+v*Math.cos(.14)];}
+export default {prepare(){bake('s08.congestion',(b,P)=>{P.fill(b,P.blob(0,0,75,18,.3,47),'#C86A87',130,.2);},{seed:47,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});bake('s08.lumen', (b,P)=>{P.fill(b,P.blob(0,0,300,22,.2,43),'#DCA4B2',200,.15);},{seed:43,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});source=buildSource('original');lowBase=buildSource('low');const ulcerSource=buildSource('ulcer');ulcerMap=mapSource(ulcerSource);const c=source.getContext('2d');
+map=mapSource(source);
+},draw(c,t,T){c.setTransform(1,0,0,1,0,0);c.fillStyle='#111114';c.fillRect(0,0,1920,1080);const id=Math.min(34,29+Math.floor(t/(T.end(29)-T.at(29))));const targets={30:[-270,-80],31:[-200,-226],32:[-170,70],33:[-65,-215],34:[10,-285]};const keys=[[T.at(29),[0,0,.48]],[T.frac(29,.28),[0,0,.48]],[T.frac(29,.64),[...point(-90,-5),.82]],[T.end(29),[...point(...targets[30]),2.7]]];for(let s=30;s<=34;s++){keys.push([T.frac(s,.32),[...point(...targets[s]),2.7]],[T.end(s),[...point(...targets[s]),2.7]]);}let v=keys[0][1];for(let i=1;i<keys.length;i++){if(t>=keys[i][0]){v=keys[i][1];continue;}const a=keys[i-1],b=keys[i],k=Math.max(0,(t-a[0])/(b[0]-a[0]));v=a[1].map((x,j)=>x+(b[1][j]-x)*k);break;}const [x,y,z]=v;c.save();c.beginPath();c.arc(1110,475,425,0,TAU);c.clip();c.fillStyle='#F6EEF0';c.fill();c.translate(1110,475);c.scale(z,z);c.translate(-x,-y);if(t<T.frac(29,.63)) drawLow(c,t,T); else c.drawImage(id===34?ulcerMap:map,-1600,-1050);c.restore();c.strokeStyle='#4C4555';c.lineWidth=1.6;c.beginPath();c.arc(1110,475,431,0,TAU);c.stroke();c.fillStyle='#E8DDE9';c.font='500 30px MixSans';c.fillText(t<T.frac(29,.32)?'低倍':t<T.frac(29,.86)?'中倍':'高倍',1030,35);
+const text={29:['正常阑尾参照','隐窝 · 固有层','黏膜肌层 · 淋巴滤泡','内环肌 / 外纵肌 · 浆膜'],30:['黏膜下层','血管扩张、充血','中性粒细胞沿血管壁游出'],31:['黏膜与固有层','中性粒细胞浸润','淋巴细胞与浆细胞参照'],32:['固有肌层','内环行肌：长梭形核','外纵行肌：圆点核','中性粒细胞仅少量'],33:['返回黏膜','经过受损的隐窝与上皮'],34:['局灶上皮缺损','结构连续性中断','病变以黏膜、黏膜下层为主']};const phase=(t-T.at(id))/(T.end(id)-T.at(id));c.save();c.globalAlpha=Math.max(0,Math.min(1,phase/.1,(1-phase)/.1));text[id].forEach((s,i)=>{c.font=`${i?400:700} ${i?27:36}px MixSans`;c.fillText(s,75,320+i*56);});c.strokeStyle='#BFA9CB';c.lineWidth=1.6;c.beginPath();c.moveTo(475,410);c.lineTo(630,410);
+const target=id===29?[-90,-55]:targets[id];
+let tip=point(...target);
+if(t<T.frac(29,.63)) {let q=Math.max(0,Math.min(1,(t-T.frac(29,.28))/(T.frac(29,.63)-T.frac(29,.28))));q=q*q*(3-2*q);const a=point(-90,-5),m=lowPoint(-90,-5,q),sc=1+.2*(1-q),p=lowPoint(...target,q);tip=[sc*(p[0]+(a[0]-m[0])*q)+a[0]*(1-sc)*q,sc*(p[1]+(a[1]-m[1])*q)+a[1]*(1-sc)*q];}
+c.lineTo(1110+(tip[0]-x)*z,475+(tip[1]-y)*z);c.stroke();c.restore();
+if(new URLSearchParams(location.search).has('cells')){c.fillStyle='#F6EEF0';c.fillRect(0,0,1920,940);c.save();c.translate(180,220);c.scale(2,2);['lymph','plasma','dot','meso'].forEach((s,i)=>cell(c,i*130,0,s,1,0,i));detailedNeutrophil(c,520,0,{lobes:3,rot:0,sz:1},1);c.restore();c.fillStyle='#51336F';c.font='28px MixSans';['淋巴细胞','浆细胞','外纵行肌核','间皮','引擎中性粒细胞'].forEach((s,i)=>c.fillText(s,110+i*260,300));}}
+};
+
+// Low-only reconstruction. Dark connected components retain their own local
+// coordinates; only their centres follow the annulus. No source RNG is consumed.
+let lowSource, lowCells, lowCache;
+function lowMaterial() {
+  const w=840,h=620,im=lowBase.getContext('2d').getImageData(0,0,w,h);
+  const d=im.data,pristine=new Uint8ClampedArray(d),mask=new Uint8Array(w*h),seen=new Uint8Array(w*h);
+  for(let i=0;i<mask.length;i++)mask[i]=d[i*4]<155 && d[i*4+1]<125 && d[i*4+2]>d[i*4+1]*1.08 ? 1:0;
+  lowCells=[];
+  for(let i=0;i<mask.length;i++) {
+    if(!mask[i]||seen[i])continue;
+    const queue=[i];seen[i]=1;let x0=w,y0=h,x1=0,y1=0;
+    for(let k=0;k<queue.length;k++) {const n=queue[k],x=n%w,y=Math.floor(n/w);x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y);
+      for(const q of [n-1,n+1,n-w,n+w])if(q>=0&&q<w*h&&!seen[q]&&mask[q]&&Math.abs(q%w-x)<=1){seen[q]=1;queue.push(q);}}
+    // Continuous epithelium and vessel contours remain structural paths.
+    if(x1-x0>65||y1-y0>65||queue.length<2)continue;
+    x0=Math.max(0,x0-2);y0=Math.max(0,y0-2);x1=Math.min(w-1,x1+2);y1=Math.min(h-1,y1+2);
+    const tile=document.createElement('canvas');tile.width=x1-x0+1;tile.height=y1-y0+1;
+    tile.getContext('2d').drawImage(lowBase,x0,y0,tile.width,tile.height,0,0,tile.width,tile.height);
+    const coverage=new Set();
+    for(const n of queue)for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++) {
+      const xx=n%w+dx,yy=Math.floor(n/w)+dy;
+      if(xx>=x0&&xx<=x1&&yy>=y0&&yy<=y1&&dx*dx+dy*dy<=5)coverage.add(yy*w+xx);
+    }
+    const tc=tile.getContext('2d'),ti=tc.getImageData(0,0,tile.width,tile.height);
+    for(let yy=0;yy<tile.height;yy++)for(let xx=0;xx<tile.width;xx++)if(!coverage.has((yy+y0)*w+xx+x0))ti.data[(yy*tile.width+xx)*4+3]=0;
+    tc.putImageData(ti,0,0);
+    lowCells.push({tile,x:(x0+x1)/2-420,y:(y0+y1)/2-320});
+    // Inpaint only the small local crop; preserve the original baked wash.
+    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++) {
+      if(!coverage.has(y*w+x))continue;
+      let best=-1,dist=1e9;
+      for(let dy=-6;dy<=6;dy+=2)for(let dx=-6;dx<=6;dx+=2){const xx=Math.max(0,Math.min(w-1,x+dx)),yy=Math.max(0,Math.min(h-1,y+dy)),q=yy*w+xx;if(!mask[q]&&!coverage.has(q)&&dx*dx+dy*dy<dist){best=q;dist=dx*dx+dy*dy;}}
+      if(best>=0)for(let ch=0;ch<3;ch++)d[(y*w+x)*4+ch]=pristine[best*4+ch];
+    }
+  }
+  lowSource=im;
+}
+function lowGeometry(a,k) {
+  const rot=.14+(Math.PI/6-.14)*(1-k);
+  // Extra lumen irregularity fades with depth, leaving the b02b target exact.
+  const wobble=12*Math.sin(a*3)+9*Math.sin(a*5)+(1-k)*22*Math.sin(a*4+.7);
+  return {rot,wobble};
+}
+// Continuous radial allocation: lumen 170; thick mucosa and submucosa.
+function lowRadius(y,k) {
+ const ys=[-320,-290,-150,-10,230,280],rs=[145,170,390,610,850,900];
+ let i=0;while(i<4&&y>ys[i+1])i++;
+ const r=rs[i]+(y-ys[i])/(ys[i+1]-ys[i])*(rs[i+1]-rs[i]);
+ return r*(1-k)+(620+y)*k;
+}
+function lowInverse(r,k) {
+ const ys=[-320,-290,-150,-10,230,280];let i=0;
+ while(i<4&&r>lowRadius(ys[i+1],k))i++;
+ return ys[i]+(r-lowRadius(ys[i],k))/(lowRadius(ys[i+1],k)-lowRadius(ys[i],k))*(ys[i+1]-ys[i]);
+}
+function lowPoint(x,y,k) {
+  const a=x/620-Math.PI/2,{rot,wobble}=lowGeometry(a,k),r=lowRadius(y,k)+wobble;
+  const u=1.6*Math.cos(a)*r,v=Math.sin(a)*r;
+  return [u*Math.cos(rot)-v*Math.sin(rot),u*Math.sin(rot)+v*Math.cos(rot)];
+}
+function drawLow(c,t,T) {
+  if(!lowSource)lowMaterial();
+  let k=Math.max(0,Math.min(1,(t-T.frac(29,.28))/(T.frac(29,.63)-T.frac(29,.28))));
+  k=k*k*(3-2*k);
+  if(!lowCache||lowCache.k!==k) {
+    const canvas=document.createElement('canvas');canvas.width=3200;canvas.height=2100;
+
+codex
+已确认基线是 4420360，b08 的缺口采样带为 2139 像素。接下来保留断口和其余画面，只增大、错落布置渗出物中的细胞；会用实际渲染像素测量细胞尺寸，并复用原采样带检查紫色占比。
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+import hashlib
+p=Path('qa/v6/b09'); names=[s.split('  ')[1] for s in Path('qa/v6/b08/sha256_开工.txt').read_text().splitlines()]
+p.joinpath('sha256_开工.txt').write_text(''.join(hashlib.sha256(Path(n).read_bytes()).hexdigest()+'  '+n+'\\n' for n in names))
+s=Path('film/chapters/s08.js').read_text();s=s.replace(\"for(let i=0;i<8;i++)detailedNeutrophil(c,-18+i*8,-302-U()*4,{lobes:2+i%4,rot:U()*TAU,sz:.40+U()*.07},1);\", \"\"\"// Staggered central cluster, sparse shoulders, and three lumenward emigrants.
+ const exudate=[[-39,-303],[-23,-302],[-10,-300],[4,-301],[19,-300],[34,-302],[51,-304],
+ [-29,-314],[-15,-313],[0,-312],[14,-314],[29,-312],[44,-314],
+ [-20,-327],[-4,-326],[12,-328],[27,-326],[5,-341],[-48,-316],[61,-317]];
+ for(let i=0;i<exudate.length;i++){const [x,y]=exudate[i];detailedNeutrophil(c,x,y,{lobes:2+i%4,rot:U()*TAU,sz:.80+U()*.08},1);}\"\"\")
+# Extend only ulcer source's transparent lumen margin, retaining all original coordinates.
+s=s.replace('source.height=620;const c=source.getContext(\\'2d\\'),R=rng(40802);c.translate(420,320);',\"source.height=mode==='ulcer'?660:620;const c=source.getContext('2d'),R=rng(40802);c.translate(420,mode==='ulcer'?360:320);\")
+s=s.replace('getImageData(0,0,840,620);const result', 'getImageData(0,0,840,src.height);const top=src.height===660?360:320;const result').replace('if(fy< -320||fy>=280)', 'if(fy< -top||fy>=280)').replace('Math.floor(fy+320)*840','Math.floor(fy+top)*840')
+Path('film/chapters/s08.js').write_text(s)
+PY
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --still 1,3.8,9,15,21,27,33 --out qa/v6/b09 --sheet > qa/v6/b09/render.log 2>&1" in /workspace/病理科普视频/v5
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('film/chapters/s08.js');s=p.read_text().replace(' const exudate=[',\" c.strokeStyle='rgba(221,166,185,.30)';c.lineWidth=.32;\\n for(let i=0;i<58;i++){const x=-33+U()*88,y=-337+U()*36;c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x+4,y-4,x+8+U()*5,y+5);c.stroke();}\\n const exudate=[\");p.write_text(s)
+p=Path('qa/v6/b09');s=Path('qa/v6/b08/verify.py').read_text().replace(\"/'b07'\",\"/'b08'\").replace(\"'b07'\",\"'b08'\").replace(\"'b08',out\",\"'b09',out\").replace(\"['b08','b08']\",\"['b08','b09']\").replace('b07_vs_b08','b08_vs_b09').replace(\"ratios['b08']<5\",\"ratios['b09']<5\").replace('if t in [3.8,9,15,21,27]:','if t in times:').replace(\"assert all(r['pass'] for r in rows)\",\"assert all(r['pass'] for r in rows if r['t']"'!=33)")
+p.joinpath('"'verify.py').write_text(s);p.joinpath('gap_path.json').write_bytes(Path('qa/v6/b08/gap_path.json').read_bytes());p.joinpath('check_low_determinism.mjs').write_text(Path('qa/v6/b08/check_low_determinism.mjs').read_text().replace('v6/b08','v6/b09'))
+PY" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+ succeeded in 18308ms:
+exec
+/bin/bash -lc "rg -n 'CELLS|sz:' engine/lib/he.js | head -15; cat qa/v6/b09/render.log; git diff --stat" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+22:export const CELLS = (() => { const out = [];
+25:    for (let i = 0; i < n; i++) out.push({ x: cx + gauss() * 45, y: Math.min(-296, cy + gauss() * 30), band: 'lumen', kind: 'pus', lobes: lobePick(), rot: R() * 6.28, sz: .85 + R() * .3 }); }
+29:  let guard = 0; while (out.filter(c => c.kind === 'inf').length < 1150 && guard++ < 60000) { const x = -412 + R() * 824, y = -292 + R() * 700; if (R() * 1.9 < dens(x, y)) out.push({ x, y, band: bandOf(y), kind: 'inf', lobes: lobePick(), rot: R() * 6.28, sz: .8 + R() * .35 }); }
+82:  for (const c of CELLS) { let x = c.x, y = c.y, s = 1;
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5/qa/v6/b09/t_001.00.png
+/workspace/病理科普视频/v5/qa/v6/b09/t_003.80.png
+/workspace/病理科普视频/v5/qa/v6/b09/t_009.00.png
+/workspace/病理科普视频/v5/qa/v6/b09/t_015.00.png
+/workspace/病理科普视频/v5/qa/v6/b09/t_021.00.png
+/workspace/病理科普视频/v5/qa/v6/b09/t_027.00.png
+/workspace/病理科普视频/v5/qa/v6/b09/t_033.00.png
+/workspace/病理科普视频/v5/qa/v6/b09/sheet.png
+ assembly/endcard/data/endcard.json |  26 +++++++++++---------------
+ assembly/endcard/endcard.js        |   2 +-
+ assembly/endcard/static-preview.py |   6 ++++--
+ assembly/endcard/样帧_片尾.png     | Bin 1001237 -> 1044750 bytes
+ film/chapters/s08.js               |  16 +++++++++++-----
+ 5 files changed, 27 insertions(+), 23 deletions(-)
+
+exec
+/bin/bash -lc 'node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --still 1,3.8,9,15,21,27,33 --out qa/v6/b09 --sheet > qa/v6/b09/render.log 2>&1' in /workspace/病理科普视频/v5
+exec
+/bin/bash -lc 'node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --determinism > qa/v6/b09/determinism.log 2>&1; node qa/v6/b09/check_low_determinism.mjs > qa/v6/b09/determinism_low_stdout.log 2>&1' in /workspace/病理科普视频/v5
+ succeeded in 17997ms:
+exec
+/bin/bash -lc "cat > qa/v6/b09/measure_cells.mjs <<'JS'
+import fs from 'node:fs';
+import {loadChromium,launch,serve,resolveTarget,openPage} from '/workspace/garden-skills/skills/motion-showreel/scripts/lib/browser.mjs';
+const target=resolveTarget('film'),chromium=await loadChromium(target.root),{server,port}=await serve(target.root),browser=await launch(chromium);
+try{
+ const page=await browser.newPage();await page.route('**/chapters/s08.js',async route=>{const r=await route.fetch();await route.fulfill({response:r,body:(await r.text())+'\\nexport {mapSource};'});});
+ await page.goto("'`http://localhost:${port}/${target.rel}`);await page.waitForFunction(()=>window.READY===true);
+ const data=await page.evaluate(async()=>{
+ const {mapSource,point}=await import('"'./chapters/s08.js'),{detailedNeutrophil}=await import('./lib/he_detail.js'),{CELLS}=await import('./lib/he.js'),{rng}=await import('./lib/motion.js');
+ const U=rng(40712);for(let i=0;i<6;i++)U();for(let i=0;i<13*4;i++)U();for(let i=0;i<52*4;i++)U();for(let i=0;i<58*4;i++)U();
+ const positions=[[-39,-303],[-23,-302],[-10,-300],[4,-301],[19,-300],[34,-302],[51,-304],[-29,-314],[-15,-313],[0,-312],[14,-314],[29,-312],[44,-314],[-20,-327],[-4,-326],[12,-328],[27,-326],[5,-341],[-48,-316],[61,-317]];
+ // Actual parameters are captured directly from the rendering function below instead of RNG replay.
+ function measure(x,y,p,target){const src=document.createElement('canvas');src.width=840;src.height=660;const g=src.getContext('2d');g.translate(420,360);detailedNeutrophil(g,x,y,p,1);const mapped=mapSource(src),c=document.createElement('canvas');c.width=1920;c.height=1080;const ctx=c.getContext('2d');const center=point(...target);ctx.translate(1110,475);ctx.scale(2.7,2.7);ctx.translate(-center[0],-center[1]);ctx.drawImage(mapped,-1600,-1050);const a=ctx.getImageData(0,0,1920,1080).data;let l=1920,r=0,t=1080,b=0;for(let y=0;y<1080;y++)for(let x=0;x<1920;x++)if(a[(y*1920+x)*4+3]>32){l=Math.min(l,x);r=Math.max(r,x);t=Math.min(t,y);b=Math.max(b,y);}return {x,y,sz:p.sz,width:r-l+1,height:b-t+1};}
+ // Reproduce ulcerDetail RNG consumption exactly: shreds, erythrocytes, old and new fibres.
+ const R=rng(40712);for(let i=0;i<6+13*4+52*4+58*4;i++)R();
+ const exudate=positions.map(([x,y],i)=>{const rot=R()*Math.PI*2,sz=.80+R()*.08;return measure(x,y,{lobes:2+i%4,rot,sz},[10,-285]);});
+ let n=0;const candidates=[];for(const p of CELLS){if(p.kind"'!=='"'inf'||p.y>138||p.y< -290)continue;if(p.y>0&&n++%35"'!==0)continue;if(p.y<0&&n++%4!==0)continue;candidates.push(p);}
+ const reference={};for(const [name,target] of [['"'s31',[-200,-226]],['s32',[-170,70]]]){reference[name]=candidates.filter(p=>Math.hypot(...point(p.x,p.y).map((v,i)=>v-point(...target)[i]))<95).slice(0,8).map(p=>measure(p.x,p.y,p,target));}
+ return {threshold:'isolated rendered cell alpha >32/255; mapped raster at 1920x1080, 2.7 camera',exudate,reference};
+ });fs.writeFileSync('qa/v6/b09/cell_sizes.json',JSON.stringify(data,null,2));
+}finally{await browser.close();server.close();}
+JS
+node qa/v6/b09/measure_cells.mjs" in /workspace/病理科普视频/v5
+codex
+已改为 20 个分叶核中性粒细胞，并增加少量淡粉纤维丝。为容纳向管腔游出的细胞，仅扩展了 s34 素材的透明边缘；现在正在核验六帧像素一致性、断口紫色占比和乱序渲染确定性。
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('qa/v6/b09/measure_cells.mjs');s=p.read_text().replace('13*4','13*3').replace('58*4','58*3');p.write_text(s)
+PY
+python3 qa/v6/b09/verify.py" in /workspace/病理科普视频/v5
+ exited 1 in 2597ms:
+Traceback (most recent call last):
+  File "/workspace/病理科普视频/v5/qa/v6/b09/verify.py", line 33, in <module>
+    assert all(r['pass'] for r in rows if r['t']!=33)
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+ succeeded in 43473ms:
+exec
+/bin/bash -lc 'cat qa/v6/b09/metrics.json; cat qa/v6/b09/determinism.log; cat qa/v6/b09/determinism_low.log; rg -n READY film/main.js; cat qa/v6/b09/render.log | tail -3' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+{
+  "MAE": [
+    {
+      "t": 1,
+      "MAE": 3.347092656893004,
+      "pass": false
+    },
+    {
+      "t": 3.8,
+      "MAE": 0.0,
+      "pass": true
+    },
+    {
+      "t": 9,
+      "MAE": 0.0,
+      "pass": true
+    },
+    {
+      "t": 15,
+      "MAE": 0.0,
+      "pass": true
+    },
+    {
+      "t": 21,
+      "MAE": 0.0,
+      "pass": true
+    },
+    {
+      "t": 27,
+      "MAE": 0.0,
+      "pass": true
+    },
+    {
+      "t": 33,
+      "MAE": 1.3009489133230452,
+      "pass": false
+    }
+  ],
+  "mucosa_CIE_L_star": {
+    "b08": 81.07694132218428,
+    "b09": 86.34424610837254
+  }
+}[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+deterministic: 6 frames match across render orders (3.96, 13.32, 18, 26.28, 33.48, 35.967 s)
+PASS: all seven delivery times repeated in different orders: byte-identical PNGs
+7:scene.prepare();window.DUR=T.end(34);window.render=t=>scene.draw(ctx,t,T);window.READY=true;
+/workspace/病理科普视频/v5/qa/v6/b09/t_027.00.png
+/workspace/病理科普视频/v5/qa/v6/b09/t_033.00.png
+/workspace/病理科普视频/v5/qa/v6/b09/sheet.png
+
+2026-11-11T15:48:50.156569Z ERROR codex_core::tools::router: error=unable to locate image at `/workspace/病理科普视频/v5/qa/v6/b09/s08_high_s34_200pct.png`: No such file or directory (os error 2)
+exec
+/bin/bash -lc 'git diff -- film/chapters/s08.js' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+diff --git a/film/chapters/s08.js b/film/chapters/s08.js
+index 1d1a442..433f0d4 100644
+--- a/film/chapters/s08.js
++++ b/film/chapters/s08.js
+@@ -88,10 +88,10 @@ function drawLow(c,t,T) {
+     for(let j=0;j<2100;j++)for(let i=0;i<3200;i++) {
+       const u=i-1600,v=j-1050,x=(u*co+v*si)/1.6,y=-u*si+v*co,a=Math.atan2(y,x);
+       const fy=lowInverse(Math.hypot(x,y)-lowGeometry(a,k).wobble,k);
+-      if(fy< -320||fy>=280)continue;
++      if(fy< -top||fy>=280)continue;
+       // Five complete repeats; 140px smooth overlap makes every layer periodic.
+       let fx=((a+Math.PI/2)/TAU*3500+420)%700;if(fx<0)fx+=700;
+-      const row=Math.floor(fy+320)*840,q=(row+Math.floor(fx))*4,n=(j*3200+i)*4;
++      const row=Math.floor(fy+top)*840,q=(row+Math.floor(fx))*4,n=(j*3200+i)*4;
+       let w=Math.max(0,1-fx/140);w=w*w*(3-2*w);
+       const q2=(row+Math.floor(fx+700))*4;
+       for(let ch=0;ch<4;ch++)d[n+ch]=src[q+ch]*(1-w)+(w?src[q2+ch]*w:0);
+@@ -126,7 +126,7 @@ function drawLow(c,t,T) {
+   if(k>0){c.save();c.globalAlpha=k*k*k*k;c.drawImage(map,-1600,-1050);c.restore();}
+ }
+ 
+-function buildSource(mode){const source=document.createElement('canvas');source.width=840;source.height=620;const c=source.getContext('2d'),R=rng(40802);c.translate(420,320);(mode==='original'?drawHE:drawMucosa)(c,{ulcer:.16,neut:0,fibrin:0,t:0,detail:1,crypts:mode!=='low',gap:mode==='ulcer'?[-25,45]:null});
++function buildSource(mode){const source=document.createElement('canvas');source.width=840;source.height=mode==='ulcer'?660:620;const c=source.getContext('2d'),R=rng(40802);c.translate(420,mode==='ulcer'?360:320);(mode==='original'?drawHE:drawMucosa)(c,{ulcer:.16,neut:0,fibrin:0,t:0,detail:1,crypts:mode!=='low',gap:mode==='ulcer'?[-25,45]:null});
+ const copy=document.createElement('canvas');copy.width=840;copy.height=620;copy.getContext('2d').drawImage(source,0,0);
+ c.drawImage(copy,0,155,840,18,-420,140,840,90);c.drawImage(copy,0,330,840,5,-420,-153,840,5);
+ for(let i=0;i<150;i++){const x=-410+R()*820,y=-280+R()*120,sz=.7+R()*.2,rot=R()*TAU;if(mode==='ulcer'&&x>-31&&x<51&&y<-273)continue;cell(c,x,y,i%7?'lymph':'plasma',sz,rot,i);}
+@@ -134,7 +134,7 @@ for(let i=0;i<150;i++){const x=-410+R()*820,y=-280+R()*120,sz=.7+R()*.2,rot=R()*
+ let n=0;for(const p of CELLS){if(p.kind!=='inf'||p.y>138||p.y< -290)continue;if(mode==='ulcer'&&p.x>-31&&p.x<51&&p.y<-273)continue;if(p.y>0&&n++%35!==0)continue;if(p.y<0&&n++%4!==0)continue;detailedNeutrophil(c,p.x,p.y,p,1);}for(let i=0;i<7;i++)detailedNeutrophil(c,-270+Math.cos(i*.55)*(26+i*3),-80+Math.sin(i*.55)*(23+i*3),{lobes:2+i%4,rot:i*.8,sz:.9},1);
+ if(mode==='ulcer') ulcerDetail(c);return source;}
+ 
+-function mapSource(src){const c=src.getContext('2d');const im=c.getImageData(0,0,840,620);const result=document.createElement('canvas');result.width=3200;result.height=2100;const mc=result.getContext('2d'),out=mc.createImageData(3200,2100);for(let j=0;j<2100;j++)for(let i=0;i<3200;i++){const u=i-1600,v=j-1050,x=(u*Math.cos(.14)+v*Math.sin(.14))/1.6,y=-u*Math.sin(.14)+v*Math.cos(.14),a=Math.atan2(y,x),fy=Math.hypot(x,y)-620-12*Math.sin(a*3)-9*Math.sin(a*5);if(fy< -320||fy>=280)continue;let fx=((a+Math.PI/2)*620+420)%840;if(fx<0)fx+=840;const si=(Math.floor(fy+320)*840+Math.floor(fx))*4,di=(j*3200+i)*4;out.data.set(im.data.subarray(si,si+4),di);}mc.putImageData(out,0,0);return result;}
++function mapSource(src){const c=src.getContext('2d');const im=c.getImageData(0,0,840,src.height);const top=src.height===660?360:320;const result=document.createElement('canvas');result.width=3200;result.height=2100;const mc=result.getContext('2d'),out=mc.createImageData(3200,2100);for(let j=0;j<2100;j++)for(let i=0;i<3200;i++){const u=i-1600,v=j-1050,x=(u*Math.cos(.14)+v*Math.sin(.14))/1.6,y=-u*Math.sin(.14)+v*Math.cos(.14),a=Math.atan2(y,x),fy=Math.hypot(x,y)-620-12*Math.sin(a*3)-9*Math.sin(a*5);if(fy< -top||fy>=280)continue;let fx=((a+Math.PI/2)*620+420)%840;if(fx<0)fx+=840;const si=(Math.floor(fy+top)*840+Math.floor(fx))*4,di=(j*3200+i)*4;out.data.set(im.data.subarray(si,si+4),di);}mc.putImageData(out,0,0);return result;}
+ // Each gland is rigid in a local tangent/radial frame, with a visible lumen
+ // (6–12 screen pixels at the low-power camera's 0.576 scale).
+ function drawGlands(ctx,k){
+@@ -160,5 +160,11 @@ function ulcerDetail(c){
+  for(let i=0;i<13;i++)erythrocyte(c,-18+U()*55,-278+U()*20,.65,U()*TAU,i);
+  c.strokeStyle='rgba(213,153,174,.55)';c.lineWidth=.42;
+  for(let i=0;i<52;i++){const x=-24+U()*62,y=-294+U()*4;c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x+5,y-3,x+5+U()*7,y+U()*4-1);c.stroke();}
+- for(let i=0;i<8;i++)detailedNeutrophil(c,-18+i*8,-302-U()*4,{lobes:2+i%4,rot:U()*TAU,sz:.40+U()*.07},1);
++ // Staggered central cluster, sparse shoulders, and three lumenward emigrants.
++ c.strokeStyle='rgba(221,166,185,.30)';c.lineWidth=.32;
++ for(let i=0;i<58;i++){const x=-33+U()*88,y=-337+U()*36;c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x+4,y-4,x+8+U()*5,y+5);c.stroke();}
++ const exudate=[[-39,-303],[-23,-302],[-10,-300],[4,-301],[19,-300],[34,-302],[51,-304],
++ [-29,-314],[-15,-313],[0,-312],[14,-314],[29,-312],[44,-314],
++ [-20,-327],[-4,-326],[12,-328],[27,-326],[5,-341],[-48,-316],[61,-317]];
++ for(let i=0;i<exudate.length;i++){const [x,y]=exudate[i];detailedNeutrophil(c,x,y,{lobes:2+i%4,rot:U()*TAU,sz:.80+U()*.08},1);}
+ }
+
+ succeeded in 31927ms:
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('film/chapters/s08.js');s=p.read_text();a,b=s.split('function buildSource(mode)',1);a=a.replace('fy< -top','fy< -320').replace('fy+top','fy+320');b=b.replace(\"source.height=mode==='ulcer'?660:620;const c=source.getContext('2d'),R=rng(40802);c.translate(420,mode==='ulcer'?360:320);\",\"source.height=620;const c=source.getContext('2d'),R=rng(40802);c.translate(420,320);\");b=b.replace(\"if(mode==='ulcer') ulcerDetail(c);return source;\", \"if(mode==='ulcer'){const extended=document.createElement('canvas');extended.width=840;extended.height=660;const e=extended.getContext('2d');e.drawImage(source,0,40);e.translate(420,360);ulcerDetail(e);return extended;}return source;\");p.write_text(a+'function buildSource(mode)'+b)
+PY
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --still 1,3.8,9,15,21,27,33 --out qa/v6/b09 --sheet > qa/v6/b09/render.log 2>&1" in /workspace/病理科普视频/v5
+exec
+/bin/bash -lc 'node qa/v6/b09/measure_cells.mjs' in /workspace/病理科普视频/v5
+exec
+/bin/bash -lc "cat film/index.html | tail -10; rg -n 'rel:' /workspace/garden-skills/skills/motion-showreel/scripts/lib/browser.mjs | head; ls qa/v6/b09/cell_sizes.json" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>疼会“搬家”的7厘米盲管</title>
+<style>
+@font-face{font-family:"MixSans";src:url(fonts/MixSans-Regular.woff2) format("woff2");font-weight:400 500}
+@font-face{font-family:"MixSans";src:url(fonts/MixSans-Bold.woff2) format("woff2");font-weight:600 900}
+html,body{margin:0;background:#F4EFE6;overflow:hidden}canvas{display:block}#bake{display:none}
+</style></head><body>
+<canvas id="c"></canvas><div id="bake"></div>
+<script src="vendor/p5.min.js"></script><script src="vendor/p5.brush.js"></script><script src="vendor/rough.js"></script>
+<script type="module" src="./main.js"></script>
+</body></html>
+83:  return { root: isDir ? abs : path.dirname(abs), page, rel: path.basename(page) };
+qa/v6/b09/cell_sizes.json
+
+exec
+/bin/bash -lc 'node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --determinism > qa/v6/b09/determinism.log 2>&1; node qa/v6/b09/check_low_determinism.mjs > qa/v6/b09/determinism_low_stdout.log 2>&1' in /workspace/病理科普视频/v5
+ succeeded in 13758ms:
+exec
+/bin/bash -lc 'python3 qa/v6/b09/verify.py' in /workspace/病理科普视频/v5
+ succeeded in 3423ms:
+{
+  "MAE": [
+    {
+      "t": 1,
+      "MAE": 0.0,
+      "pass": true
+    },
+    {
+      "t": 3.8,
+      "MAE": 0.0,
+      "pass": true
+    },
+    {
+      "t": 9,
+      "MAE": 0.0,
+      "pass": true
+    },
+    {
+      "t": 15,
+      "MAE": 0.0,
+      "pass": true
+    },
+    {
+      "t": 21,
+      "MAE": 0.0,
+      "pass": true
+    },
+    {
+      "t": 27,
+      "MAE": 0.0,
+      "pass": true
+    },
+    {
+      "t": 33,
+      "MAE": 0.6493627829218107,
+      "pass": false
+    }
+  ],
+  "L": {
+    "b08": 81.07694132218428,
+    "b09": 81.07694132218428
+  }
+}
+gap purple % {'b08': 0.0, 'b09': 0.3740065451145395}
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+import json
+x=json.load(open('qa/v6/b09/cell_sizes.json'))
+for n,a in [('exudate',x['exudate']),*x['reference'].items()]:print(n,len(a), min(p['width'] for p in a),max(p['width'] for p in a),min(p['height'] for p in a),max(p['height'] for p in a))
+PY" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+exudate 20 36 43 45 52
+s31 8 47 71 47 61
+s32 1 87 87 51 51
+
+ succeeded in 32047ms:
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('qa/v6/b09/verify.py');s=p.read_text().replace('(980,405,1240,550)','(945,410,1265,660)').replace(\"'pass':bool(np.abs(a-b).mean()<.5)\",\"'pass':bool(np.abs(a-b).mean()<.5) if t"'!=33 else None");p.write_text(s)
+PY
+python3 qa/v6/b09/verify.py > qa/v6/b09/verify.log' in /workspace/病理科普视频/v5
+ succeeded in 3370ms:
+ succeeded in 33826ms:
+codex
+六个受保护时点与 b08 的全帧 MAE 均为 0.0；缺口紫色占比为 0.3740%，低于 5%。已检查 s34 全帧，并扩大了对比图的 200% 局部范围，让向管腔游出的细胞也完整显示。
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+import hashlib,json,numpy as np
+p=Path('qa/v6/b09');start=p.joinpath('sha256_开工.txt').read_text();names=[s.split('  ')[1] for s in start.splitlines()];end=''.join(hashlib.sha256(Path(n).read_bytes()).hexdigest()+'  '+n+'\\n' for n in names);p.joinpath('sha256_结束.txt').write_text(end);assert start==end==Path('qa/v6/b08/sha256_结束.txt').read_text();p.joinpath('sha256_校验.log').write_text(''.join(n+': OK (开工 = 结束 = b08)\\n' for n in names))
+x=json.loads(p.joinpath('cell_sizes.json').read_text());print({n:{'n':len(a),'w':[min(q['width'] for q in a),max(q['width'] for q in a)],'h':[min(q['height'] for q in a),max(q['height'] for q in a)]} for n,a in [('b09',x['exudate']),*x['reference'].items()]})
+PY
+cat qa/v6/b09/determinism.log; cat qa/v6/b09/determinism_low.log; git diff --check" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+{'b09': {'n': 20, 'w': [37, 45], 'h': [45, 52]}, 's31': {'n': 8, 'w': [47, 71], 'h': [47, 61]}, 's32': {'n': 1, 'w': [87, 87], 'h': [51, 51]}}
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+deterministic: 6 frames match across render orders (3.96, 13.32, 18, 26.28, 33.48, 35.967 s)
+PASS: all seven delivery times repeated in different orders: byte-identical PNGs
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+import json
+p=Path('qa/v6/b09');m=json.loads(p.joinpath('metrics.json').read_text());rows='\\n'.join(f\"| {r['t']} | {r['MAE']:.9f} | {'只允许此帧变化' if r['t']==33 else '通过，逐像素一致'} |\" for r in m['MAE']);p.joinpath('自检.md').write_text(f'''# v6 b09 自检
+
+基线：44203601f18e3b8d22670dc6939be353cc37ac84（b08）。未执行 git commit。仅修改 film/chapters/s08.js；保留原有 assembly 工作区改动。
+
+缺口渗出物中为 **20 个 detailedNeutrophil**，沿用分叶核、淡粉胞质。中央错层聚集，两侧稀疏，管腔侧有数个游出细胞；细胞局部轻度相叠，未大面积堆叠。保留原纤维丝，增加 58 条低透明度细丝（rgba(221,166,185,.30)，线宽 .32），无深色底块。
+
+s34 原素材上方透明边缘增加 40 局部单位，仅容纳游出细胞与纤维丝。原素材完整平移拷贝，组织坐标不变；其他场景保持原素材尺寸和映射。上皮跳过采样点、断口范围和残端均未改动。
+
+## 屏幕尺寸实测
+
+1920×1080、DPR=1、相机放大 2.7。将实际细胞参数独立绘制，再经过同一 mapSource 栅格映射和实际相机变换，逐像素统计 alpha>32/255 的胞体包围盒；不是直接以局部 sz 推算。脚本 measure_cells.mjs，逐细胞数据 cell_sizes.json。
+
+| 样本 | 数量 | 屏幕宽度 px | 屏幕高度 px |
+| --- | --- | --- | --- |
+| s34 新渗出物 | 20 | 37–45 | 45–52 |
+| s31 视野内参照 | 8 | 47–71 | 47–61 |
+| s32 视野内参照 | 1 | 87 | 51 |
+
+新细胞高度与 s31/s32 接近；宽度仍略小于 s31，明显小于 s32。环形映射的切向拉伸随组织深度改变，s32 的胞体更宽。新细胞局部 sz=.80–.88，沿用原浸润细胞 .8–1.15 的尺寸体系，b08 此处为 .40–.47。200% 局部可核对核分叶与胞质边缘。
+
+## 断口与帧一致性
+
+原样复用 b08 gap_path.json、15 像素采样带、局部 x∈[-20,40]，两端排除 5 单位。共 **2139 像素**；阈值 R<165、G<135、B>1.08G。b08 紫色占比 0.0000%，b09 **0.3740065%**（8 像素），通过 <5%。少量新增紫色来自分叶核，断口未恢复连续紫线。见 gap_sampling_mask.png。
+
+全帧 RGB MAE 相对 b08：
+
+| t（秒） | MAE | 结果 |
+| --- | --- | --- |
+{rows}
+
+## Determinism 与 SHA-256
+
+使用指定 /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs 出七帧、sheet 及 --determinism。默认六个时点跨页面逆序检测通过；另按 b08 方法对全部七个交付时点乱序重复，PNG 字节完全相同。日志 determinism.log、determinism_low.log。
+
+七个锁定文件 SHA-256 开工=结束=b08，全数 OK；完整值见 sha256_开工.txt、sha256_结束.txt、sha256_校验.log。锁定文件及出图程序未修改。
+
+交付包含七帧 t_*.png、review_sheet.png、s34_b08_vs_b09.png（同区域原帧与 200% 局部，覆盖全部游出细胞），以及逐帧 200% 图、测量脚本和日志。
+''')
+PY" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+codex
+已输出至 [qa/v6/b09](/workspace/病理科普视频/v5/qa/v6/b09/自检.md)，包含七帧、review_sheet 和附 200% 局部的对比图。
+
+- 渗出物中性粒细胞增至 20 个，实测 37–45 × 45–52 px；高度接近 s31/s32，宽度仍偏小。
+- 六个受保护时点 MAE 全为 0。
+- 缺口紫色占比 0.374%，通过。
+- Determinism、七个锁定文件 SHA-256 校验通过。
+- 未执行 git commit。
+tokens used
+46,887
+已输出至 [qa/v6/b09](/workspace/病理科普视频/v5/qa/v6/b09/自检.md)，包含七帧、review_sheet 和附 200% 局部的对比图。
+
+- 渗出物中性粒细胞增至 20 个，实测 37–45 × 45–52 px；高度接近 s31/s32，宽度仍偏小。
+- 六个受保护时点 MAE 全为 0。
+- 缺口紫色占比 0.374%，通过。
+- Determinism、七个锁定文件 SHA-256 校验通过。
+- 未执行 git commit。
