@@ -126,12 +126,12 @@ function drawLow(c,t,T) {
   if(k>0){c.save();c.globalAlpha=k*k*k*k;c.drawImage(map,-1600,-1050);c.restore();}
 }
 
-function buildSource(mode){const source=document.createElement('canvas');source.width=840;source.height=620;const c=source.getContext('2d'),R=rng(40802);c.translate(420,320);(mode==='original'?drawHE:drawMucosa)(c,{ulcer:.16,neut:0,fibrin:0,t:0,detail:1,crypts:mode!=='low',gap:mode==='ulcer'?[-8,28]:null});
+function buildSource(mode){const source=document.createElement('canvas');source.width=840;source.height=620;const c=source.getContext('2d'),R=rng(40802);c.translate(420,320);(mode==='original'?drawHE:drawMucosa)(c,{ulcer:.16,neut:0,fibrin:0,t:0,detail:1,crypts:mode!=='low',gap:mode==='ulcer'?[-25,45]:null});
 const copy=document.createElement('canvas');copy.width=840;copy.height=620;copy.getContext('2d').drawImage(source,0,0);
 c.drawImage(copy,0,155,840,18,-420,140,840,90);c.drawImage(copy,0,330,840,5,-420,-153,840,5);
-for(let i=0;i<150;i++)cell(c,-410+R()*820,-280+R()*120,i%7?'lymph':'plasma',.7+R()*.2,R()*TAU,i);
+for(let i=0;i<150;i++){const x=-410+R()*820,y=-280+R()*120,sz=.7+R()*.2,rot=R()*TAU;if(mode==='ulcer'&&x>-31&&x<51&&y<-273)continue;cell(c,x,y,i%7?'lymph':'plasma',sz,rot,i);}
 [-390,40,360].forEach(x=>{c.save();c.translate(x,-55);c.scale(.78,.78);follicle(c,0,0);c.restore();});for(let i=0;i<85;i++)cell(c,-410+R()*820,148+R()*76,'dot',.9,R()*TAU,i);for(let i=0;i<62;i++)cell(c,-414+i*13.5,274+Math.sin(i*.4)*2,'meso',.8,0,i);
-let n=0;for(const p of CELLS){if(p.kind!=='inf'||p.y>138||p.y< -290)continue;if(p.y>0&&n++%35!==0)continue;if(p.y<0&&n++%4!==0)continue;detailedNeutrophil(c,p.x,p.y,p,1);}for(let i=0;i<7;i++)detailedNeutrophil(c,-270+Math.cos(i*.55)*(26+i*3),-80+Math.sin(i*.55)*(23+i*3),{lobes:2+i%4,rot:i*.8,sz:.9},1);
+let n=0;for(const p of CELLS){if(p.kind!=='inf'||p.y>138||p.y< -290)continue;if(mode==='ulcer'&&p.x>-31&&p.x<51&&p.y<-273)continue;if(p.y>0&&n++%35!==0)continue;if(p.y<0&&n++%4!==0)continue;detailedNeutrophil(c,p.x,p.y,p,1);}for(let i=0;i<7;i++)detailedNeutrophil(c,-270+Math.cos(i*.55)*(26+i*3),-80+Math.sin(i*.55)*(23+i*3),{lobes:2+i%4,rot:i*.8,sz:.9},1);
 if(mode==='ulcer') ulcerDetail(c);return source;}
 
 function mapSource(src){const c=src.getContext('2d');const im=c.getImageData(0,0,840,620);const result=document.createElement('canvas');result.width=3200;result.height=2100;const mc=result.getContext('2d'),out=mc.createImageData(3200,2100);for(let j=0;j<2100;j++)for(let i=0;i<3200;i++){const u=i-1600,v=j-1050,x=(u*Math.cos(.14)+v*Math.sin(.14))/1.6,y=-u*Math.sin(.14)+v*Math.cos(.14),a=Math.atan2(y,x),fy=Math.hypot(x,y)-620-12*Math.sin(a*3)-9*Math.sin(a*5);if(fy< -320||fy>=280)continue;let fx=((a+Math.PI/2)*620+420)%840;if(fx<0)fx+=840;const si=(Math.floor(fy+320)*840+Math.floor(fx))*4,di=(j*3200+i)*4;out.data.set(im.data.subarray(si,si+4),di);}mc.putImageData(out,0,0);return result;}
@@ -148,17 +148,17 @@ function drawGlands(ctx,k){
   const contour=(inset)=>{ctx.beginPath();for(let i=0;i<=64;i++){const t=i/64*TAU,yy=Math.sin(t)*(h-inset),xx=Math.cos(t)*(w-inset)*(1+.08*Math.sin(t*3+phase))+bend*(yy/h)**2;i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);}ctx.closePath();};
   contour(0);ctx.fillStyle='rgba(218,177,202,.35)';ctx.fill();
   contour(6);ctx.fillStyle='rgba(250,239,241,.8)';ctx.fill();
-  const n=Math.round((w+h)*.58);for(let j=0;j<n;j++){const t=j/n*TAU,yy=Math.sin(t)*(h-2),xx=Math.cos(t)*(w-2)*(1+.08*Math.sin(t*3+phase))+bend*(yy/h)**2;cryptNucleus(ctx,xx,yy,.63+G()*.14,t-.5,index+j);}
+  const n=Math.round((w+h)*.58);for(let j=0;j<n;j++){const t=j/n*TAU,yy=Math.sin(t)*(h-2),xx=Math.cos(t)*(w-2)*(1+.08*Math.sin(t*3+phase))+bend*(yy/h)**2;cryptNucleus(ctx,xx,yy,.37+G()*.09,t-.5,index+j);}
   ctx.restore();
  }
 }
 function ulcerDetail(c){
  const U=rng(40712);
- // Ragged residual cells stop at two unequal, irregular torn ends.
- for(const [x,sign] of [[-11,1],[31,-1]])for(let j=0;j<5;j++)columnar(c,x+sign*(U()*5),-294+j*2.6,.52+U()*.18,sign*(.2+U()*.8),j,'fray');
- drawWash(c,'s08.congestion',10,-269,100,{alpha:.55});
- for(let i=0;i<19;i++)erythrocyte(c,-5+U()*30,-279+U()*22,.65,U()*TAU,i);
- c.strokeStyle='rgba(205,129,158,.7)';c.lineWidth=.48;
- for(let i=0;i<40;i++){const x=-7+U()*32,y=-300+U()*8;c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x+6,y-4,x+9+U()*8,y+U()*4-2);c.stroke();}
- for(let i=0;i<5;i++)detailedNeutrophil(c,-3+i*6,-297+U()*5,{lobes:2+i%4,rot:U()*TAU,sz:.42},1);
+ // Three unequal lifted shreds per end, outside the skipped surface interval.
+ for(const [x,sign] of [[-27,1],[47,-1]])for(let j=0;j<3;j++)columnar(c,x+sign*(j*1.8),-290-j*3.5,.48+U()*.15,sign*(.4+j*.28),j,'fray');
+ drawWash(c,'s08.congestion',10,-266,115,{alpha:.55});
+ for(let i=0;i<13;i++)erythrocyte(c,-18+U()*55,-278+U()*20,.65,U()*TAU,i);
+ c.strokeStyle='rgba(213,153,174,.55)';c.lineWidth=.42;
+ for(let i=0;i<52;i++){const x=-24+U()*62,y=-294+U()*4;c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x+5,y-3,x+5+U()*7,y+U()*4-1);c.stroke();}
+ for(let i=0;i<8;i++)detailedNeutrophil(c,-18+i*8,-302-U()*4,{lobes:2+i%4,rot:U()*TAU,sz:.40+U()*.07},1);
 }

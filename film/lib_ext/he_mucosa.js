@@ -68,6 +68,7 @@ export function drawHE(ctx, { ulcer = 1, neut = 1, fibrin = 1, t = 0, detail = 0
   // surface epithelium (wavy) with ulcer gap
   ctx.strokeStyle = HE.hema; ctx.lineWidth = 7; ctx.lineCap = 'round'; const gap0 = ULCER[0] + 100 * (1 - ulcer), gap1 = ULCER[1] - 100 * (1 - ulcer);
   const epi = (x0, x1) => { ctx.beginPath(); for (let x = x0; x <= x1; x += 10) { const y = -290 + 5 * Math.sin(x * .05) + 4 * (noise2(x / 40, 2) - .5); x === x0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } ctx.stroke(); };
+  // Skip the gap at source: neither a path segment nor sampling points cross it.
   epi(-430, gap ? gap[0] : gap0); epi(gap ? gap[1] : gap1, 430);
   drawWash(ctx, 'he.ulcer', (ULCER[0] + ULCER[1]) / 2, -265, 330, { grow: ulcer, alpha: ulcer });
   // congested vessels (irregular)
