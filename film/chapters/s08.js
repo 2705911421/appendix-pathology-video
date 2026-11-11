@@ -6,7 +6,7 @@ import {drawHE as drawMucosa} from '../lib_ext/he_mucosa.js';
 import {cryptNucleus,columnar,erythrocyte,cell,follicle} from '../lib_ext/cells_ext.js';
 const R=rng(40802),TAU=Math.PI*2;let map,source,lowBase,ulcerMap;
 export function point(x,y){const a=x/620-Math.PI/2,r=620+y+12*Math.sin(a*3)+9*Math.sin(a*5),u=1.6*Math.cos(a)*r,v=Math.sin(a)*r;return [u*Math.cos(.14)-v*Math.sin(.14),u*Math.sin(.14)+v*Math.cos(.14)];}
-export default {prepare(){bake('s08.congestion',(b,P)=>{P.fill(b,P.blob(0,0,75,18,.3,47),'#C86A87',130,.2);},{seed:47,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});bake('s08.lumen', (b,P)=>{P.fill(b,P.blob(0,0,300,22,.2,43),'#DCA4B2',200,.15);},{seed:43,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});source=buildSource('original');lowBase=buildSource('low');const ulcerSource=buildSource('ulcer');ulcerMap=mapSource(ulcerSource);const c=source.getContext('2d');
+export default {prepare(){bake('s08.congestion',(b,P)=>{P.fill(b,P.blob(0,0,75,18,.3,47),'#C86A87',130,.2);},{seed:47,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});bake('s08.lumen', (b,P)=>{P.fill(b,P.blob(0,0,300,22,.2,43),'#DCA4B2',200,.15);},{seed:43,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});bake('s08.pus.escape',(b,P)=>{const fan=[[-75,150],[-100,90],[-165,22],[-222,-60],[-255,-145],[-184,-210],[-130,-185],[-65,-245],[8,-213],[75,-250],[145,-190],[227,-162],[185,-82],[140,-25],[111,52],[68,130],[38,180],[-15,198]];P.fill(b,fan,'#E9B4B7',85,.65);P.fill(b,fan.map(([x,y])=>[x*.72+12,y*.82+28]),'#E7C5A4',70,.7);},{seed:40720,hd:true,soft:true,grain:.12,edge:.18,bleed:.85});source=buildSource('original');lowBase=buildSource('low');const ulcerSource=buildSource('ulcer');ulcerMap=mapSource(ulcerSource);const c=source.getContext('2d');
 map=mapSource(source);
 },draw(c,t,T){c.setTransform(1,0,0,1,0,0);c.fillStyle='#111114';c.fillRect(0,0,1920,1080);const id=Math.min(34,29+Math.floor(t/(T.end(29)-T.at(29))));const targets={30:[-270,-80],31:[-200,-226],32:[-170,70],33:[-65,-215],34:[10,-285]};const keys=[[T.at(29),[0,0,.48]],[T.frac(29,.28),[0,0,.48]],[T.frac(29,.64),[...point(-90,-5),.82]],[T.end(29),[...point(...targets[30]),2.7]]];for(let s=30;s<=34;s++){keys.push([T.frac(s,.32),[...point(...targets[s]),2.7]],[T.end(s),[...point(...targets[s]),2.7]]);}let v=keys[0][1];for(let i=1;i<keys.length;i++){if(t>=keys[i][0]){v=keys[i][1];continue;}const a=keys[i-1],b=keys[i],k=Math.max(0,(t-a[0])/(b[0]-a[0]));v=a[1].map((x,j)=>x+(b[1][j]-x)*k);break;}const [x,y,z]=v;c.save();c.beginPath();c.arc(1110,475,425,0,TAU);c.clip();c.fillStyle='#F6EEF0';c.fill();c.translate(1110,475);c.scale(z,z);c.translate(-x,-y);if(t<T.frac(29,.63)) drawLow(c,t,T); else c.drawImage(id===34?ulcerMap:map,-1600,-1050);c.restore();c.strokeStyle='#4C4555';c.lineWidth=1.6;c.beginPath();c.arc(1110,475,431,0,TAU);c.stroke();c.fillStyle='#E8DDE9';c.font='500 30px MixSans';c.fillText(t<T.frac(29,.32)?'低倍':t<T.frac(29,.86)?'中倍':'高倍',1030,35);
 const text={29:['正常阑尾参照','隐窝 · 固有层','黏膜肌层 · 淋巴滤泡','内环肌 / 外纵肌 · 浆膜'],30:['黏膜下层','血管扩张、充血','中性粒细胞沿血管壁游出'],31:['黏膜与固有层','中性粒细胞浸润','淋巴细胞与浆细胞参照'],32:['固有肌层','内环行肌：长梭形核','外纵行肌：圆点核','中性粒细胞仅少量'],33:['返回黏膜','经过受损的隐窝与上皮'],34:['局灶上皮缺损','结构连续性中断','病变以黏膜、黏膜下层为主']};const phase=(t-T.at(id))/(T.end(id)-T.at(id));c.save();c.globalAlpha=Math.max(0,Math.min(1,phase/.1,(1-phase)/.1));text[id].forEach((s,i)=>{c.font=`${i?400:700} ${i?27:36}px MixSans`;c.fillText(s,75,320+i*56);});c.strokeStyle='#BFA9CB';c.lineWidth=1.6;c.beginPath();c.moveTo(475,410);c.lineTo(630,410);
@@ -132,9 +132,9 @@ c.drawImage(copy,0,155,840,18,-420,140,840,90);c.drawImage(copy,0,330,840,5,-420
 for(let i=0;i<150;i++){const x=-410+R()*820,y=-280+R()*120,sz=.7+R()*.2,rot=R()*TAU;if(mode==='ulcer'&&x>-31&&x<51&&y<-273)continue;cell(c,x,y,i%7?'lymph':'plasma',sz,rot,i);}
 [-390,40,360].forEach(x=>{c.save();c.translate(x,-55);c.scale(.78,.78);follicle(c,0,0);c.restore();});for(let i=0;i<85;i++)cell(c,-410+R()*820,148+R()*76,'dot',.9,R()*TAU,i);for(let i=0;i<62;i++)cell(c,-414+i*13.5,274+Math.sin(i*.4)*2,'meso',.8,0,i);
 let n=0;for(const p of CELLS){if(p.kind!=='inf'||p.y>138||p.y< -290)continue;if(mode==='ulcer'&&p.x>-31&&p.x<51&&p.y<-273)continue;if(p.y>0&&n++%35!==0)continue;if(p.y<0&&n++%4!==0)continue;detailedNeutrophil(c,p.x,p.y,p,1);}for(let i=0;i<7;i++)detailedNeutrophil(c,-270+Math.cos(i*.55)*(26+i*3),-80+Math.sin(i*.55)*(23+i*3),{lobes:2+i%4,rot:i*.8,sz:.9},1);
-if(mode==='ulcer'){const extended=document.createElement('canvas');extended.width=840;extended.height=660;const e=extended.getContext('2d');e.drawImage(source,0,40);e.translate(420,360);ulcerDetail(e);return extended;}return source;}
+if(mode==='ulcer'){const extended=document.createElement('canvas');extended.width=840;extended.height=750;const e=extended.getContext('2d');e.drawImage(source,0,130);e.translate(420,450);escapedPus(e);ulcerDetail(e);return extended;}return source;}
 
-function mapSource(src){const c=src.getContext('2d');const im=c.getImageData(0,0,840,src.height);const top=src.height===660?360:320;const result=document.createElement('canvas');result.width=3200;result.height=2100;const mc=result.getContext('2d'),out=mc.createImageData(3200,2100);for(let j=0;j<2100;j++)for(let i=0;i<3200;i++){const u=i-1600,v=j-1050,x=(u*Math.cos(.14)+v*Math.sin(.14))/1.6,y=-u*Math.sin(.14)+v*Math.cos(.14),a=Math.atan2(y,x),fy=Math.hypot(x,y)-620-12*Math.sin(a*3)-9*Math.sin(a*5);if(fy< -top||fy>=280)continue;let fx=((a+Math.PI/2)*620+420)%840;if(fx<0)fx+=840;const si=(Math.floor(fy+top)*840+Math.floor(fx))*4,di=(j*3200+i)*4;out.data.set(im.data.subarray(si,si+4),di);}mc.putImageData(out,0,0);return result;}
+function mapSource(src){const c=src.getContext('2d');const im=c.getImageData(0,0,840,src.height);const top=src.height===750?450:320;const result=document.createElement('canvas');result.width=3200;result.height=2100;const mc=result.getContext('2d'),out=mc.createImageData(3200,2100);for(let j=0;j<2100;j++)for(let i=0;i<3200;i++){const u=i-1600,v=j-1050,x=(u*Math.cos(.14)+v*Math.sin(.14))/1.6,y=-u*Math.sin(.14)+v*Math.cos(.14),a=Math.atan2(y,x),fy=Math.hypot(x,y)-620-12*Math.sin(a*3)-9*Math.sin(a*5);if(fy< -top||fy>=280)continue;let fx=((a+Math.PI/2)*620+420)%840;if(fx<0)fx+=840;const si=(Math.floor(fy+top)*840+Math.floor(fx))*4,di=(j*3200+i)*4;out.data.set(im.data.subarray(si,si+4),di);}mc.putImageData(out,0,0);return result;}
 // Each gland is rigid in a local tangent/radial frame, with a visible lumen
 // (6–12 screen pixels at the low-power camera's 0.576 scale).
 function drawGlands(ctx,k){
@@ -167,4 +167,25 @@ function ulcerDetail(c){
  [-29,-314],[-15,-313],[0,-312],[14,-314],[29,-312],[44,-314],
  [-20,-327],[-4,-326],[12,-328],[27,-326],[5,-341],[-48,-316],[61,-317]];
  for(let i=0;i<exudate.length;i++){const [x,y]=exudate[i];detailedNeutrophil(c,x,y,{lobes:2+i%4,rot:U()*TAU,sz:.80+U()*.08},1);}
+}
+
+// Lumen-only additions use an independent stream; b09 ulcerDetail stays unchanged.
+function escapedPus(c){
+ const E=rng(40721);
+ c.save();c.translate(0,-340);c.scale(1.18,.62);c.translate(0,340);drawWash(c,'s08.pus.escape',12,-372,340,{alpha:.68,soft:.8});c.restore();
+ const pts=[[-53,-344],[-34,-348],[-12,-350],[12,-351],[35,-346],[57,-345],[77,-349],[-67,-360],[-45,-367],[-23,-363],[0,-370],[23,-368],[47,-364],[70,-369],[-76,-382],[-51,-383],[-26,-386],[4,-386],[32,-384],[62,-389],[87,-380],[-62,-401],[-34,-408],[-4,-405],[27,-409],[55,-406],[-81,-417],[-42,-428],[3,-424],[41,-429],[-14,-441],[67,-438]];
+ for(let i=0;i<pts.length;i++){
+  const x=pts[i][0]*1.18+(E()-.5)*7,y=-340+(pts[i][1]+340)*.62+(E()-.5)*5,d=Math.max(0,(-y-342)/65),sz=.70-d*.31,rot=E()*TAU;
+  c.save();c.globalAlpha=.9-d*.3;
+  if(i%3!==1)detailedNeutrophil(c,x,y,{lobes:2+i%4,rot,sz},1);
+  else {
+   c.save();c.translate(x,y);c.rotate(rot);c.scale(sz,sz);
+   c.filter='blur(1px)';c.beginPath();c.ellipse(0,0,10.2,9.6,0,0,TAU);c.fillStyle='rgba(226,170,200,.44)';c.fill();c.filter='none';
+   for(let j=0;j<4;j++){c.beginPath();c.ellipse(-4+j*2.6,(j%2?2:-2)+E()*2,1.1+E()*.7,1.5+E(),j*.7,0,TAU);c.fillStyle=j%2?'#50345F':'#64416E';c.fill();}
+   c.restore();
+  }c.restore();
+ }
+ c.strokeStyle='rgba(223,173,186,.25)';c.lineWidth=.32;
+ for(let i=0;i<27;i++){const y=-345-E()*52,x=12+(E()-.5)*(140+(-y-345)*.9);c.beginPath();c.moveTo(x,y);c.bezierCurveTo(x+6,y-3,x-3,y-7,x+7,y-12);c.stroke();}
+ for(const [i,x,y] of [[0,-57,-353],[1,48,-365],[2,-26,-379],[3,88,-382]]){c.save();c.globalAlpha=.45;erythrocyte(c,x,y,.38,E()*TAU,i);c.restore();}
 }
