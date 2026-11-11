@@ -1,10 +1,11 @@
+import {bake,drawWash} from '../lib/wash.js';
 import {drawHE,CELLS} from '../lib/he.js';
 import {detailedNeutrophil} from '../lib/he_detail.js';
 import {rng} from '../lib/motion.js';
 import {cell,follicle} from '../lib_ext/cells_ext.js';
 const R=rng(40802),TAU=Math.PI*2;let map,source;
 export function point(x,y){const a=x/620-Math.PI/2,r=620+y+12*Math.sin(a*3)+9*Math.sin(a*5),u=1.6*Math.cos(a)*r,v=Math.sin(a)*r;return [u*Math.cos(.14)-v*Math.sin(.14),u*Math.sin(.14)+v*Math.cos(.14)];}
-export default {prepare(){source=document.createElement('canvas');source.width=840;source.height=620;const c=source.getContext('2d');c.translate(420,320);drawHE(c,{ulcer:.16,neut:0,fibrin:0,t:0,detail:1});
+export default {prepare(){bake('s08.lumen', (b,P)=>{P.fill(b,P.blob(0,0,300,22,.2,43),'#DCA4B2',200,.15);},{seed:43,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});source=document.createElement('canvas');source.width=840;source.height=620;const c=source.getContext('2d');c.translate(420,320);drawHE(c,{ulcer:.16,neut:0,fibrin:0,t:0,detail:1});
 const copy=document.createElement('canvas');copy.width=840;copy.height=620;copy.getContext('2d').drawImage(source,0,0);
 c.drawImage(copy,0,155,840,18,-420,140,840,90);c.drawImage(copy,0,330,840,5,-420,-153,840,5);
 for(let i=0;i<150;i++)cell(c,-410+R()*820,-280+R()*120,i%7?'lymph':'plasma',.7+R()*.2,R()*TAU,i);
@@ -12,7 +13,11 @@ for(let i=0;i<150;i++)cell(c,-410+R()*820,-280+R()*120,i%7?'lymph':'plasma',.7+R
 let n=0;for(const p of CELLS){if(p.kind!=='inf'||p.y>138||p.y< -290)continue;if(p.y>0&&n++%35!==0)continue;if(p.y<0&&n++%4!==0)continue;detailedNeutrophil(c,p.x,p.y,p,1);}for(let i=0;i<7;i++)detailedNeutrophil(c,-270+Math.cos(i*.55)*(26+i*3),-80+Math.sin(i*.55)*(23+i*3),{lobes:2+i%4,rot:i*.8,sz:.9},1);
 const im=c.getImageData(0,0,840,620);map=document.createElement('canvas');map.width=3200;map.height=2100;const mc=map.getContext('2d'),out=mc.createImageData(3200,2100);for(let j=0;j<2100;j++)for(let i=0;i<3200;i++){const u=i-1600,v=j-1050,x=(u*Math.cos(.14)+v*Math.sin(.14))/1.6,y=-u*Math.sin(.14)+v*Math.cos(.14),a=Math.atan2(y,x),fy=Math.hypot(x,y)-620-12*Math.sin(a*3)-9*Math.sin(a*5);if(fy< -320||fy>=280)continue;let fx=((a+Math.PI/2)*620+420)%840;if(fx<0)fx+=840;const si=(Math.floor(fy+320)*840+Math.floor(fx))*4,di=(j*3200+i)*4;out.data.set(im.data.subarray(si,si+4),di);}mc.putImageData(out,0,0);
 },draw(c,t,T){c.setTransform(1,0,0,1,0,0);c.fillStyle='#111114';c.fillRect(0,0,1920,1080);const id=Math.min(34,29+Math.floor(t/(T.end(29)-T.at(29))));const targets={30:[-270,-80],31:[-200,-226],32:[-170,70],33:[-65,-215],34:[10,-285]};const keys=[[T.at(29),[0,0,.48]],[T.frac(29,.28),[0,0,.48]],[T.frac(29,.64),[...point(-90,-5),.82]],[T.end(29),[...point(...targets[30]),2.7]]];for(let s=30;s<=34;s++){keys.push([T.frac(s,.32),[...point(...targets[s]),2.7]],[T.end(s),[...point(...targets[s]),2.7]]);}let v=keys[0][1];for(let i=1;i<keys.length;i++){if(t>=keys[i][0]){v=keys[i][1];continue;}const a=keys[i-1],b=keys[i],k=Math.max(0,(t-a[0])/(b[0]-a[0]));v=a[1].map((x,j)=>x+(b[1][j]-x)*k);break;}const [x,y,z]=v;c.save();c.beginPath();c.arc(1110,475,425,0,TAU);c.clip();c.fillStyle='#F6EEF0';c.fill();c.translate(1110,475);c.scale(z,z);c.translate(-x,-y);if(t<T.frac(29,.63)) drawLow(c,t,T); else c.drawImage(map,-1600,-1050);c.restore();c.strokeStyle='#4C4555';c.lineWidth=1.6;c.beginPath();c.arc(1110,475,431,0,TAU);c.stroke();c.fillStyle='#E8DDE9';c.font='500 30px MixSans';c.fillText(t<T.frac(29,.32)?'低倍':t<T.frac(29,.86)?'中倍':'高倍',1030,35);
-const text={29:['正常阑尾参照','隐窝 · 固有层','黏膜肌层 · 淋巴滤泡','内环肌 / 外纵肌 · 浆膜'],30:['黏膜下层','血管扩张、充血','中性粒细胞沿血管壁游出'],31:['黏膜与固有层','中性粒细胞浸润','淋巴细胞与浆细胞参照'],32:['固有肌层','内环行肌：长梭形核','外纵行肌：圆点核','中性粒细胞仅少量'],33:['返回黏膜','经过受损的隐窝与上皮'],34:['局灶上皮缺损','结构连续性中断','病变以黏膜、黏膜下层为主']};const phase=(t-T.at(id))/(T.end(id)-T.at(id));c.save();c.globalAlpha=Math.max(0,Math.min(1,phase/.1,(1-phase)/.1));text[id].forEach((s,i)=>{c.font=`${i?400:700} ${i?27:36}px MixSans`;c.fillText(s,75,320+i*56);});c.strokeStyle='#BFA9CB';c.lineWidth=1.6;c.beginPath();c.moveTo(475,410);c.lineTo(630,410);c.stroke();c.restore();
+const text={29:['正常阑尾参照','隐窝 · 固有层','黏膜肌层 · 淋巴滤泡','内环肌 / 外纵肌 · 浆膜'],30:['黏膜下层','血管扩张、充血','中性粒细胞沿血管壁游出'],31:['黏膜与固有层','中性粒细胞浸润','淋巴细胞与浆细胞参照'],32:['固有肌层','内环行肌：长梭形核','外纵行肌：圆点核','中性粒细胞仅少量'],33:['返回黏膜','经过受损的隐窝与上皮'],34:['局灶上皮缺损','结构连续性中断','病变以黏膜、黏膜下层为主']};const phase=(t-T.at(id))/(T.end(id)-T.at(id));c.save();c.globalAlpha=Math.max(0,Math.min(1,phase/.1,(1-phase)/.1));text[id].forEach((s,i)=>{c.font=`${i?400:700} ${i?27:36}px MixSans`;c.fillText(s,75,320+i*56);});c.strokeStyle='#BFA9CB';c.lineWidth=1.6;c.beginPath();c.moveTo(475,410);c.lineTo(630,410);
+const target=id===29?[-90,-55]:targets[id];
+let tip=point(...target);
+if(t<T.frac(29,.63)) {let q=Math.max(0,Math.min(1,(t-T.frac(29,.28))/(T.frac(29,.63)-T.frac(29,.28))));q=q*q*(3-2*q);const a=point(-90,-5),m=lowPoint(-90,-5,q),sc=1+.2*(1-q),p=lowPoint(...target,q);tip=[sc*(p[0]+(a[0]-m[0])*q)+a[0]*(1-sc)*q,sc*(p[1]+(a[1]-m[1])*q)+a[1]*(1-sc)*q];}
+c.lineTo(1110+(tip[0]-x)*z,475+(tip[1]-y)*z);c.stroke();c.restore();
 if(new URLSearchParams(location.search).has('cells')){c.fillStyle='#F6EEF0';c.fillRect(0,0,1920,940);c.save();c.translate(180,220);c.scale(2,2);['lymph','plasma','dot','meso'].forEach((s,i)=>cell(c,i*130,0,s,1,0,i));detailedNeutrophil(c,520,0,{lobes:3,rot:0,sz:1},1);c.restore();c.fillStyle='#51336F';c.font='28px MixSans';['淋巴细胞','浆细胞','外纵行肌核','间皮','引擎中性粒细胞'].forEach((s,i)=>c.fillText(s,110+i*260,300));}}
 };
 
@@ -59,8 +64,20 @@ function lowGeometry(a,k) {
   const wobble=12*Math.sin(a*3)+9*Math.sin(a*5)+(1-k)*22*Math.sin(a*4+.7);
   return {rot,wobble};
 }
+// Continuous radial allocation: lumen 170; thick mucosa and submucosa.
+function lowRadius(y,k) {
+ const ys=[-320,-290,-150,-10,230,280],rs=[145,170,390,610,850,900];
+ let i=0;while(i<4&&y>ys[i+1])i++;
+ const r=rs[i]+(y-ys[i])/(ys[i+1]-ys[i])*(rs[i+1]-rs[i]);
+ return r*(1-k)+(620+y)*k;
+}
+function lowInverse(r,k) {
+ const ys=[-320,-290,-150,-10,230,280];let i=0;
+ while(i<4&&r>lowRadius(ys[i+1],k))i++;
+ return ys[i]+(r-lowRadius(ys[i],k))/(lowRadius(ys[i+1],k)-lowRadius(ys[i],k))*(ys[i+1]-ys[i]);
+}
 function lowPoint(x,y,k) {
-  const a=x/620-Math.PI/2,{rot,wobble}=lowGeometry(a,k),r=620+y+wobble;
+  const a=x/620-Math.PI/2,{rot,wobble}=lowGeometry(a,k),r=lowRadius(y,k)+wobble;
   const u=1.6*Math.cos(a)*r,v=Math.sin(a)*r;
   return [u*Math.cos(rot)-v*Math.sin(rot),u*Math.sin(rot)+v*Math.cos(rot)];
 }
@@ -74,19 +91,24 @@ function drawLow(c,t,T) {
     const rot=.14+(Math.PI/6-.14)*(1-k),co=Math.cos(rot),si=Math.sin(rot);
     for(let j=0;j<2100;j++)for(let i=0;i<3200;i++) {
       const u=i-1600,v=j-1050,x=(u*co+v*si)/1.6,y=-u*si+v*co,a=Math.atan2(y,x);
-      const fy=Math.hypot(x,y)-620-lowGeometry(a,k).wobble;
+      const fy=lowInverse(Math.hypot(x,y)-lowGeometry(a,k).wobble,k);
       if(fy< -320||fy>=280)continue;
-      let fx=((a+Math.PI/2)*620+420)%840;if(fx<0)fx+=840;
-      const q=(Math.floor(fy+320)*840+Math.floor(fx))*4,n=(j*3200+i)*4;
-      d[n]=src[q];d[n+1]=src[q+1];d[n+2]=src[q+2];d[n+3]=src[q+3];
+      // Five complete repeats; 140px smooth overlap makes every layer periodic.
+      let fx=((a+Math.PI/2)/TAU*3500+420)%700;if(fx<0)fx+=700;
+      const row=Math.floor(fy+320)*840,q=(row+Math.floor(fx))*4,n=(j*3200+i)*4;
+      let w=Math.max(0,1-fx/140);w=w*w*(3-2*w);
+      const q2=(row+Math.floor(fx+700))*4;
+      for(let ch=0;ch<4;ch++)d[n+ch]=src[q+ch]*(1-w)+(w?src[q2+ch]*w:0);
     }
     ctx.putImageData(out,0,0);
     // Repeat the identical source population around the wall as in b02b.
     for(let turn=-3;turn<=3;turn++)for(const p of lowCells) {
-      const x=p.x+turn*840,a=x/620-Math.PI/2;if(a< -Math.PI||a>=Math.PI)continue;
+      const sx=p.x+420;
+      let opacity=1;if(sx<140){let w=1-sx/140;opacity=1-w*w*(3-2*w);}else if(sx>=700){let w=1-(sx-700)/140;opacity=w*w*(3-2*w);}
+      const x=(p.x+turn*700)*TAU*620/3500,a=x/620-Math.PI/2;if(a< -Math.PI||a>=Math.PI)continue;
       const centre=lowPoint(x,p.y,k),dx=lowPoint(x+.5,p.y,k),dy=lowPoint(x,p.y+.5,k);
       const angle=Math.atan2(dx[1]-centre[1],dx[0]-centre[0]);
-      ctx.save();ctx.translate(1600+centre[0],1050+centre[1]);
+      ctx.save();ctx.globalAlpha=opacity;ctx.translate(1600+centre[0],1050+centre[1]);
       // Local rigid frame at low power; approach the original map Jacobian.
       ctx.transform((1-k)*Math.cos(angle)+k*2*(dx[0]-centre[0]),(1-k)*Math.sin(angle)+k*2*(dx[1]-centre[1]),
         (1-k)*Math.sin(angle)+k*2*(dy[0]-centre[0]),-(1-k)*Math.cos(angle)+k*2*(dy[1]-centre[1]),0,0);
@@ -100,6 +122,8 @@ function drawLow(c,t,T) {
   c.save();
   c.translate(anchor[0]*(1-scale)*k,anchor[1]*(1-scale)*k);
   c.scale(scale,scale);c.translate((anchor[0]-moved[0])*k,(anchor[1]-moved[1])*k);
+  // Pale eosinophilic luminal debris, using the existing baked wash only.
+  c.save();c.globalAlpha=1-k;c.rotate(Math.PI/6);drawWash(c,'s08.lumen',-35,5,155,{alpha:.32});drawWash(c,'s08.lumen',65,20,80,{alpha:.22});c.restore();
   c.drawImage(lowCache.canvas,-1600,-1050);
   c.restore();
   if(k>0){c.save();c.globalAlpha=k*k*k*k;c.drawImage(map,-1600,-1050);c.restore();}
