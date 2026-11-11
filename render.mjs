@@ -24,12 +24,12 @@ try{
  async function frame(page,t){const info=await page.evaluate(t=>{window.render(t);return {...window.FRAME_INFO,pixelBounds:window.auditContent()};},t);audit.push({time:t,...info});return page.locator('#film').screenshot();}
  if(args.includes('--still')){const t=Number(getArg('--still'));const png=await frame(p,t);const dest=path.resolve(root,getArg('--out')||`qa/samples/still_${t}.png`);await fs.mkdir(path.dirname(dest),{recursive:true});await fs.writeFile(dest,png);console.log(dest);}
  if(args.includes('--samples')){
- const b03=path.join(out,'b03');await fs.mkdir(b03,{recursive:true});
+ const b03=path.join(out,'b04');await fs.mkdir(b03,{recursive:true});
  const b03Stages=await p.evaluate(()=>[
  ['s08_low',T.fracId('30',.12)],['s08_mid',T.fracId('30',.50)],
  ['s08_high_s30',T.fracId('30',.96)],['s08_high_s31',T.fracId('31',.65)],
  ['s08_high_s32',T.fracId('32',.90)],['s08_high_s33',T.fracId('33',.88)],
- ['s08_high_s34_defect',T.fracId('34',.60)]]);
+ ['s08_high_s34_defect',T.fracId('34',.60)],['s10_mid',T.fracId('37',.50)],['s14_mid',T.fracId('54',.50)],['s14_perforation',T.fracId('57',.80)]]);
  for(const [name,t] of b03Stages)await fs.writeFile(path.join(b03,name+'.png'),await frame(p,t));
  const b03Crops=await p.evaluate(()=>[
  {name:'s08_mucosal_defect_200',t:T.fracId('34',.6),x:780,y:340,w:300,h:260},
@@ -38,6 +38,13 @@ try{
  for(const z of b03Crops)await fs.writeFile(path.join(b03,z.name+'.png'),Buffer.from(z.png,'base64'));
  await fs.writeFile(path.join(b03,'crop-metadata.json'),JSON.stringify(b03Crops.map(({png,...x})=>x),null,2));
 
+ let canvasAPI;for(const name of ['@napi-rs/canvas',process.env.CANVAS_MODULE,'/opt/sand/sand-host/node_modules/@napi-rs/canvas/index.js'].filter(Boolean)){try{canvasAPI=await import(name);break;}catch{}}const {createCanvas,loadImage}=canvasAPI;
+ const compare=createCanvas(1600,1600),cc=compare.getContext('2d');cc.fillStyle='#111114';cc.fillRect(0,0,1600,1600);
+ for(const [row,ref,name,crop] of [[0,'t_089.73.png','s10_mid',[310,140,680,680]],[1,'t_099.22.png','s14_perforation',[257,140,725,660]]]){
+ const target=await loadImage(path.join(root,'qa/ref/style_target',ref));const actual=await loadImage(path.join(b03,name+'.png'));
+ cc.drawImage(target,...crop,0,row*800,800,800);cc.drawImage(actual,455,30,890,890,800,row*800,800,800);
+ }
+ await fs.writeFile(path.join(b03,'对比_目标vs_b04.png'),compare.toBuffer('image/png'));
  for(let i=0;i<2;i++)await fs.writeFile(path.join(out,['s01_key.png','s08_key.png'][i]),await frame(p,sampleTimes[i]));
  const stages=await p.evaluate(()=>[
  ['s08_low',T.fracId('30',.12)],['s08_mid',T.fracId('30',.50)],

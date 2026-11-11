@@ -1,0 +1,124 @@
+{
+  "status": "PASS",
+  "backend": "cpu",
+  "targetSources": "HE, detail, wash byte-identical after import path and shared baker bootstrap normalization",
+  "reverseOrderFrames": 9,
+  "cameraContinuitySamples": 2000,
+  "highRoute": "30 vessel → 31 mucosa → 32 muscle → 33 return → 34 defect",
+  "ellipseAxes": 1.6,
+  "lowCamera": {
+    "x": 340,
+    "y": -280,
+    "zoom": 0.52,
+    "level": "低倍",
+    "transition": false,
+    "defocus": 0,
+    "keys": [
+      [
+        96.52,
+        {
+          "x": 340,
+          "y": -280,
+          "zoom": 0.52
+        }
+      ],
+      [
+        97.32039999999999,
+        {
+          "x": 340,
+          "y": -280,
+          "zoom": 0.52
+        }
+      ],
+      [
+        97.9816,
+        {
+          "x": 0,
+          "y": -740,
+          "zoom": 1.02
+        }
+      ],
+      [
+        98.608,
+        {
+          "x": 0,
+          "y": -740,
+          "zoom": 1.02
+        }
+      ],
+      [
+        99.58239999999999,
+        {
+          "x": -80,
+          "y": -665,
+          "zoom": 2.15
+        }
+      ],
+      [
+        100,
+        {
+          "x": -80,
+          "y": -665,
+          "zoom": 2.15
+        }
+      ],
+      [
+        101.1136,
+        {
+          "x": -30,
+          "y": -475,
+          "zoom": 2.15
+        }
+      ],
+      [
+        103.48,
+        {
+          "x": -30,
+          "y": -475,
+          "zoom": 2.15
+        }
+      ],
+      [
+        106.25500000000001,
+        {
+          "x": 0,
+          "y": -965,
+          "zoom": 2.15
+        }
+      ],
+      [
+        107.18,
+        {
+          "x": 0,
+          "y": -965,
+          "zoom": 2.15
+        }
+      ],
+      [
+        109.5272,
+        {
+          "x": 65,
+          "y": -435,
+          "zoom": 2.15
+        }
+      ],
+      [
+        110.44,
+        {
+          "x": 65,
+          "y": -435,
+          "zoom": 2.15
+        }
+      ],
+      [
+        111.2224,
+        {
+          "x": 0,
+          "y": -390,
+          "zoom": 2.15
+        }
+      ]
+    ]
+  },
+  "browserQA": "pending mini Chromium"
+}
