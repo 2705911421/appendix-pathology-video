@@ -6,3 +6,37 @@ const cache=Array.from({length:12},()=>({rim:shape(6.3,6),n:shape(5.3,5.1),pl:sh
 export function cell(c,x,y,type='lymph',s=1,rot=0,key=0){const p=cache[key%12];c.save();c.translate(x,y);c.rotate(rot);c.scale(s,s);c.fillStyle='rgba(226,170,200,.75)';if(type==='lymph'||type==='plasma')c.fill(type==='plasma'?p.pl:p.rim);c.fillStyle='#51336F';c.fill(type==='plasma'?p.pn:type==='dot'?p.dot:type==='meso'?p.flat:p.n);if(type==='plasma'){c.fillStyle='rgba(255,248,250,.85)';c.beginPath();c.ellipse(2.5,0,2.5,3.2,0,0,TAU);c.fill();c.strokeStyle='#3F2A66';c.lineWidth=.9;for(let i=0;i<7;i++){const a=i*TAU/7;c.beginPath();c.moveTo(-3+Math.cos(a)*1.9,Math.sin(a)*1.9);c.lineTo(-3+Math.cos(a)*3.8,Math.sin(a)*3.8);c.stroke();}}else if(type==='lymph'){c.fillStyle='rgba(63,42,102,.4)';c.fill(p.n);chromatin(c,0,0,4.7,4.6,0);}c.restore();}
 const pop=Array.from({length:170},(_,i)=>{const a=R()*TAU,m=i<110,r=m?.72+R()*.28:Math.sqrt(R())*.62;return [Math.cos(a)*r*65,Math.sin(a)*r*53,m?.65:1,m?1:.5,R()*TAU];});
 export function follicle(c,x,y){pop.forEach((p,i)=>{c.save();c.globalAlpha*=p[3];cell(c,x+p[0],y+p[1],'lymph',p[2],p[4],i);c.restore();});}
+// Separate seed: must not advance R, or cell()/follicle() shapes used by the b05 map would shift.
+const R2=rng(40917);
+function shape2(rx,ry,x=0){const p=new Path2D(),phase=R2()*TAU;for(let i=0;i<=32;i++){const a=i/32*TAU,f=1+.04*Math.sin(3*a+phase)+.022*Math.cos(5*a+phase*1.3);i?p.lineTo(x+Math.cos(a)*rx*f,Math.sin(a)*ry*f):p.moveTo(x+rx*f,0);}p.closePath();return p;}
+const colCache=Array.from({length:12},()=>({body:shape2(4.2,11.8),nuc:shape2(2.6,4.5),gob:shape2(5.6,8.8),gn:shape2(2.3,2.1),tiny:shape2(2.7,3.5),fray:shape2(3.6,7.2)}));
+// Columnar epithelial cell. Origin at mid-body; +y is basal. `fray` is a short torn shred, eosin not white.
+export function columnar(c,x,y,s=1,rot=0,key=0,kind='abs'){
+  const p=colCache[key%12];
+  c.save();c.translate(x,y);c.rotate(rot);c.scale(s,s);
+  c.fillStyle=kind==='gob'?'rgba(236,214,220,.8)':kind==='fray'?'rgba(206,138,166,.82)':'rgba(220,168,190,.72)';
+  c.fill(kind==='gob'?p.gob:kind==='fray'?p.fray:p.body);
+  c.fillStyle='#51336F';
+  c.save();c.translate(0,kind==='gob'?5.2:kind==='fray'?2.4:4.4);
+  c.fill(kind==='gob'?p.gn:p.nuc);
+  chromatin(c,0,0,kind==='gob'?2:2.15,kind==='gob'?1.8:kind==='fray'?2.5:3.5,0);
+  c.restore();c.restore();
+}
+// Basal crypt nucleus at low power: dark purple grain, same outline language as detailedNeutrophil.
+export function cryptNucleus(c,x,y,s=1,rot=0,key=0){
+  const p=colCache[key%12];
+  c.save();c.translate(x,y);c.rotate(rot);c.scale(s,s);
+  c.fillStyle='#51336F';c.fill(p.tiny);
+  c.fillStyle='#3F2A66';c.globalAlpha*=.4;c.fill(p.tiny);
+  c.restore();
+}
+// RBC disc, same construction as he_detail.js drawBlood: eosinophilic rim, pale center, no nucleus.
+const RC=rng(40919);
+const ellipsePath=(p,x,y,rx,ry,a=0)=>{p.moveTo(x+Math.cos(a)*rx,y+Math.sin(a)*rx);p.ellipse(x,y,rx,ry,a,0,TAU);};
+const rbcCache=Array.from({length:8},()=>{const rx=3.85*(.8+RC()*.4),ry=rx*(.5+RC()*.4),a=RC()*TAU,path=new Path2D(),center=new Path2D();ellipsePath(path,0,0,rx,ry,a);ellipsePath(center,0,0,rx*.54,ry*.5,a);return {path,center,alpha:.7+RC()*.15};});
+export function erythrocyte(c,x,y,s=1,rot=0,key=0){
+  const d=rbcCache[((key%8)+8)%8];
+  c.save();c.translate(x,y);c.rotate(rot);c.scale(s,s);c.globalAlpha*=d.alpha;
+  c.fillStyle='#A8404E';c.fill(d.path);c.strokeStyle='#7E2A38';c.lineWidth=.32;c.stroke(d.path);c.fillStyle='#C98A92';c.fill(d.center);
+  c.restore();
+}

@@ -1,0 +1,1231 @@
+OpenAI Codex v0.163.0
+--------
+workdir: /workspace/病理科普视频/v5
+model: gpt-6.1-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, /workspace/病理科普视频, /workspace/garden-skills] (network access enabled)
+reasoning effort: none
+reasoning summaries: none
+session id: 01a1caf8-08ec-7ae0-86eb-db77ace4f028
+--------
+user
+# v6 b06：低倍黏膜和 s34 上皮缺损（在 b05 基础上，b05 已提交）
+
+规则同 b05：锁定文件核对 sha256，出图程序和 determinism 检查照旧，不许 git commit。
+
+1. 低倍黏膜：现在的隐窝从管腔向外呈放射状一根根排开，像车轮的辐条。真实切片里，隐窝是一个个大小、形状和间距都不均匀的管状腺，走向大致垂直于腔面，但长短不一、略微弯曲，有些是斜切或横切开的（横切面是小圆形，腺上皮呈一圈，中央是腺腔）。隐窝之间是固有层，里面散在淋巴细胞和浆细胞。去掉辐条感。只改低倍、两张过渡帧和这一处黏膜；中倍、s30、s31、s32、s33 必须和 b05 逐像素一致，MAE<0.5。
+2. s34 上皮局灶缺损：要看得出一小段表面上皮缺失，两侧残留的柱状上皮边缘不齐，缺损处的表面有少量纤维素和中性粒细胞组成的渗出物，下方固有层充血。细胞仍然只能用 b02b 的画法；渗出物和充血只能用现有的水彩烘焙接口，参数照 04.js。
+3. 输出到 qa/v6/b06/：review_sheet.png（七帧），加两张对比图 `低倍_b05_vs_b06.png` 和 `s34_b05_vs_b06.png`。
+
+2026-11-11T14:16:55.807768Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer realm=\"OAuth\", resource_metadata=\"https://mcp.notion.com/.well-known/oauth-protected-resource/mcp\", scope=\"default\"" })
+codex
+我先核对 b05 的规则、锁定文件和出图流程，再修改低倍黏膜与 s34，最后检查确定性和指定帧的像素一致性；不会执行 git commit。
+exec
+/bin/bash -lc "pwd; rg --files -g 'AGENTS.md' -g '*04.js' -g '*b05*' -g '*determin*' -g '*lock*' -g '*sha*' -g '*b02b*' -g '*06*' -g 'package.json'" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+/workspace/病理科普视频/v5
+package.json
+package-lock.json
+parity_runtime/chapters/04.js
+parity_runtime/chapters/06.js
+assembly/package.json
+parity_r4/chapters/04.js
+parity_r4/chapters/06.js
+assembly/package-lock.json
+qa/v6/parity_r4/t_060.00.png
+qa/v6/b03/sha256_开工.txt
+qa/v6/b03/sha256_校验.log
+qa/v6/b03/determinism.log
+qa/v6/b03/sha256_结束.txt
+qa/v6/b03/低倍_b02b_vs_b03.png
+qa/v6/b02/sha256_开工.txt
+qa/v6/b04/determinism_low_browser.log
+qa/v6/b04/sha256_开工.txt
+qa/v6/b04/sha256_校验.log
+qa/v6/b04/determinism.log
+qa/v6/b04/determinism_low.log
+qa/v6/b04/check_low_determinism.mjs
+qa/v6/b04/低倍_b02b_vs_b04.png
+qa/v6/b04/sha256_结束.txt
+qa/v6/b02/sha256_b02b_校验.log
+qa/v6/b02/sha256_b02b_开工.txt
+qa/v6/b02/determinism.log
+qa/v6/b02/sha256_b02b_结束.txt
+qa/v6/b02/sha256_结束.txt
+qa/briefs/v6_b02b_s08.md
+qa/briefs/run_v6_b05.log
+qa/briefs/run_v6_b06.log
+qa/briefs/run_v6_b02b.log
+qa/briefs/v6_b06_mucosa.md
+qa/briefs/v6_b05_low_polish.md
+qa/v6/parity/sha256_before.json
+qa/v6/parity/sha256_after.json
+qa/ref/style_target/src/04.js
+qa/v6/b05/sha256_结束.txt
+qa/v6/b05/低倍_b04_vs_b05.png
+engine/ref_chapters/04.js
+qa/v6/b05/determinism_low.log
+qa/v6/b05/check_low_determinism.mjs
+qa/v6/b05/determinism.log
+qa/v6/b05/sha256_开工.txt
+qa/v6/b05/sha256_校验.log
+
+exec
+/bin/bash -lc 'ls -a; cat qa/briefs/v6_b06_mucosa.md qa/briefs/v6_b05_low_polish.md; cat package.json; find .. -name AGENTS.md -print' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+.
+..
+.agents
+.aws
+.codex
+.git
+.gitignore
+assembly
+assets
+engine
+film
+node_modules
+package-lock.json
+package.json
+parity_r4
+parity_runtime
+qa
+render.mjs
+render_dpr2.mjs
+tools
+分镜
+# v6 b06：低倍黏膜和 s34 上皮缺损（在 b05 基础上，b05 已提交）
+
+规则同 b05：锁定文件核对 sha256，出图程序和 determinism 检查照旧，不许 git commit。
+
+1. 低倍黏膜：现在的隐窝从管腔向外呈放射状一根根排开，像车轮的辐条。真实切片里，隐窝是一个个大小、形状和间距都不均匀的管状腺，走向大致垂直于腔面，但长短不一、略微弯曲，有些是斜切或横切开的（横切面是小圆形，腺上皮呈一圈，中央是腺腔）。隐窝之间是固有层，里面散在淋巴细胞和浆细胞。去掉辐条感。只改低倍、两张过渡帧和这一处黏膜；中倍、s30、s31、s32、s33 必须和 b05 逐像素一致，MAE<0.5。
+2. s34 上皮局灶缺损：要看得出一小段表面上皮缺失，两侧残留的柱状上皮边缘不齐，缺损处的表面有少量纤维素和中性粒细胞组成的渗出物，下方固有层充血。细胞仍然只能用 b02b 的画法；渗出物和充血只能用现有的水彩烘焙接口，参数照 04.js。
+3. 输出到 qa/v6/b06/：review_sheet.png（七帧），加两张对比图 `低倍_b05_vs_b06.png` 和 `s34_b05_vs_b06.png`。
+# v6 b05：低倍收尾（在 b04 基础上，b04 已提交）
+
+规则同 b04：中倍和高倍必须和 b02b 逐像素一致（MAE<0.5），锁定文件核对 sha256，出图程序和 determinism 检查照旧，不许 git commit。只改低倍和"低倍到中倍"这段推镜。
+
+这一轮要修：
+1. 低倍里能看到一条条放射状的拼接缝（扇区边界上的直线和断层），尤其黏膜那一圈和肌层里最明显。要全部消掉，每一层都得是连续的组织。
+2. 管腔太大太空：现在约占视野的一半，而且一片纯白。缩到内腔长轴约为视野直径的 35–40%，形状保留不规则的斜椭圆，腔内加少量淡染的嗜酸性内容物（只能用现有的水彩烘焙接口，参数照 04.js 来）。
+3. 中间腾出来的空间给黏膜和黏膜下层：黏膜下层要宽，里面的淋巴滤泡要看得出套区和生发中心。
+4. 讲解卡片的指引线现在悬空，要改成从卡片连到目镜里所指的结构，线宽 1.6px。中倍和高倍的指引线也要一起修，所以这一条可以例外，不受逐像素一致的约束，但除指引线以外的像素仍然必须一致，并写进报告。
+5. 输出到 qa/v6/b05/：s08_low、两张过渡帧、review_sheet.png（七帧），另加一张 `低倍_b04_vs_b05.png`。
+{
+  "name": "pathology-v6",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@napi-rs/canvas": "0.1.80",
+    "playwright": "1.55.0"
+  }
+}
+
+exec
+/bin/bash -lc "cat qa/briefs/v6_b04*; ls tools; ls qa/v6/b05; git status --short; rg -n 'crypt|mucosa|s34|b05|b04' film tools engine | head -100" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+# v6 b04：只改低倍（b03 已作废）
+
+b03 退步明显，已整体撤回：film/ 回到提交 677475a（b02b）的状态，b03 的改动在 git stash 里，不许再用。具体退步有三处：低倍变成了一条裂隙；高倍的细胞密度掉得很厉害；隐窝画成了带空心的蛋形圈，失去了样张的画风。
+
+这一轮只做下面这些，其余一律不动：
+1. 只改低倍和"低倍到中倍"这段推镜，函数级别只动低倍相关的代码。中倍和所有高倍帧必须和 b02b 逐像素一致（出图后和 qa/v6/b02/ 里对应的帧做像素比较，把 MAE 写进自检，要求 <0.5）。
+2. 低倍要求：画面是从 b02b 那个环形截面变形过来的同一套组织（同样的细胞、同样的密度、同样的层次和画风），区别只在于——
+   - 外轮廓是斜切、略不规则的椭圆，长短轴比约 1.6，长轴斜放约 30°，椭圆比目镜视野更大，至少两侧被目镜边缘裁掉；
+   - 管腔是不规则的椭圆或星形，不是正圆；
+   - 去掉鱼眼式的切向拉伸：每个细胞在自己的局部坐标里画，不跟着变形，只把摆放位置映射到椭圆环带上。
+3. 推镜：从低倍推进到中倍要连续，中倍取景对应低倍椭圆上的某一段。
+4. 锁定文件、出图程序、determinism 检查的要求都同 b02b。输出到 qa/v6/b04/：s08_low、s08_mid、过渡帧两张、`低倍_b02b_vs_b04.png`，再加一份像素一致性报告。不许 git commit。
+compare-parity.mjs
+finalize-parity.mjs
+check_annotation.mjs
+check_low_determinism.mjs
+determinism.log
+determinism_low.log
+no_leader_15.png
+no_leader_21.png
+no_leader_27.png
+no_leader_3.8.png
+no_leader_33.png
+no_leader_9.png
+review_sheet.png
+s08_high_s30.png
+s08_high_s30_指引线例外遮罩.png
+s08_high_s31.png
+s08_high_s31_指引线例外遮罩.png
+s08_high_s32.png
+s08_high_s32_指引线例外遮罩.png
+s08_high_s33.png
+s08_high_s33_指引线例外遮罩.png
+s08_high_s34.png
+s08_high_s34_指引线例外遮罩.png
+s08_low.png
+s08_mid.png
+s08_mid_指引线例外遮罩.png
+s08_transition_01.png
+s08_transition_02.png
+sha256_开工.txt
+sha256_校验.log
+sha256_结束.txt
+t_001.00.png
+t_002.30.png
+t_003.20.png
+t_003.80.png
+t_009.00.png
+t_015.00.png
+t_021.00.png
+t_027.00.png
+t_033.00.png
+verify.py
+低倍_b04_vs_b05.png
+像素一致性报告.json
+像素一致性报告.md
+自检.md
+ M assembly/endcard/data/endcard.json
+ M assembly/endcard/endcard.js
+ M assembly/endcard/static-preview.py
+ M assembly/endcard/样帧_片尾.png
+?? assembly/.gitignore
+?? assembly/package-lock.json
+?? assembly/package.json
+?? assembly/pipeline/
+?? assembly/qa/
+?? assembly/subtitle/
+?? qa/briefs/run_v6_b06.log
+?? qa/briefs/v6_b06_mucosa.md
+tools/finalize-parity.mjs:2:import {createHash} from 'node:crypto';
+tools/finalize-parity.mjs:13:fs.writeFileSync('qa/v6/自检.md',`# v6 b01 自检：第一步未通过，停止 S08\n\n当前分支 v6-fresh；没有 git commit；未编辑 assembly/、v4_mix/。assembly/ 中已有改动在任务开始时即存在。\n\n## 复现路径和后端\n\nengine/main.js 和 index.html 原样复制至 parity_runtime/；缺少的 chapters/、data/、audio/ 从 ../v4_mix/film_mini_detail/ 只读复制。04.js 使用 engine/ref_chapters/04.js 原文，lib/、fonts/、vendor/ 链接到 engine/。保留全部章节的原始 bake 顺序和参数，未替换水彩、细胞或纹理。engine 与原工作区逐文件一致，见 parity/source_audit.json；样张随附 src/ 的 04.js、he.js、he_detail.js、wash.js 也与 engine 一致。\n\n环境实际测试与预期不同：本次 Chromium 成功启动。Chromium 156.0.8078.47，Canvas2D + SwiftShader WebGL（CPU 软件后端），并非纯 Node Canvas 的画面替代。p5 WebGL 水彩烘焙及 window.READY 均完成；PNG 直接取 1920×1080 原始 canvas，DPR=1。@napi-rs/canvas 仅做读取、像素比较和拼图。browser.json 记录一个 404 控制台错误，未记录具体 URL；没有 pageerror。原样张的浏览器版本、GPU 后端和渲染调用历史未记录，不能认定跨后端像素一致。\n\n## 逐帧差异\n\nRGB 数值范围 0–255；忽略 alpha（画面不透明）；不缩放、不配准、不做颜色校正。变更像素指任一 RGB 通道不同；>16 指任一通道绝对差值超过 16。目镜区域为圆心 (640,480)、半径 330 的固定圆形 ROI。对比图依次为参考、复现、绝对差值放大 4 倍（截断至 255）。\n\n| 时间 | RGB MAE | RGB RMSE | 变更像素 | 差值>16的像素 | 目镜 RGB MAE |\n|---|---:|---:|---:|---:|---:|\n${rows}\n\n本次采用保守门槛：两帧分别满足全图 MAE≤1、目镜 MAE≤1、差值>16 的像素比例≤1%。这是本次实现的近像素一致检查门槛，并非用户另行指定的数值。两帧均失败，且有明显可见差异，非仅数值门槛导致。详见 parity/metrics.json。\n\n89.73 秒：组织位置基本对应，但细胞描边、色阶及右侧阶段标签有明显差别。99.22 秒：复现画面目镜底色、组织和轮廓大面积缺失，暗区底色也不同。确定的是原代码在当前软件渲染环境未产生参考结果；根因尚未证实。engine/lib/he.js 自带注释提醒软件 GL 下 canvas blur 可能丢失烘焙层，因此后端合成/滤镜是待查方向；它尚不能解释全部差异，不能据此断言唯一原因。没有通过修改受保护代码、后期修图或复制参考图来消除差异。\n\n## SHA-256（开始与结束）\n\n以下每项开始与结束哈希完全一致；原始记录见 parity/sha256_before.json 和 sha256_after.json。\n\n| 文件 | 开始/结束 SHA-256 | 校验 |\n|---|---|---|\n${hashes}\n\n## 命令与未完成项\n\n安装依赖：\n\n\`\`\`sh\nnpm ci --cache /tmp/v6-npm-cache\nnode render.mjs --parity\nnode tools/finalize-parity.mjs\n\`\`\`\n\nparity 不通过时 render.mjs 返回退出码 2；首次生成产物后补上这一失败退出码规则，未为验证该退出码重复烘焙。可用 CHROME_PATH 指定 mini 的 Chromium 路径（默认 /usr/bin/google-chrome）。像素比较可单独执行 node tools/compare-parity.mjs。\n\n按“差异明显就停下”要求，未创建 S08 场景、未进入第二步。qa/v6/samples/s08_low、s08_mid、s08_high_s30–s34 均未生成。低中高连续推镜、句号 30–34 路线、肌层核型、卡片及字幕安全区尚未实现或验收。samples/README.md 标明停工原因。\n\n已提供要求的命令入口：\n\n\`\`\`sh\nnode render.mjs --samples\n\`\`\`\n\n当前该命令明确报 parity gate failed，不输出伪造样帧。它不是已完成的 S08 渲染器；通过原样复现后仍须实现第二步，才可输出 qa/v6/samples/。\n\n顶层 对比_样张vs_v6.png 为 89.73 秒同倍率急性期参考与 v6 原码复现尝试的并排对比，标题标注 FAILED；不是 S08 成果。下一步应先在 mini 的目标 Chromium 环境运行 --parity，排查后端与参考图生成上下文；通过后再开发 S08。\n`);
+film/chapters/s08.js:67:// Continuous radial allocation: lumen 170; thick mucosa and submucosa.
+engine/ref_chapters/04.js:19:// HE state as a function of t: 03 end → rewind to early (few cells, intact mucosa) → full → (gangrene overlay handles the rest)
+engine/ref_chapters/04.js:26:  const acc = win(t, T.at(s(1)), T.end(s(1)));                       // slow accumulation while still confined to mucosa/submucosa
+engine/ref_chapters/04.js:108:    [['黏膜', BANDS.mucosa], ['黏膜下层', BANDS.submucosa], ['肌层', BANDS.muscularis], ['浆膜', BANDS.serosa]].forEach(([n, b]) => { const y = fieldToScreen(L, [0, (b[0] + b[1]) / 2], fs)[1];
+engine/ref_chapters/04.js:127:    const top = fieldToScreen(L, [0, BANDS.mucosa[0]], fs), msb = fieldToScreen(L, [0, BANDS.submucosa[1]], fs), ser = fieldToScreen(L, [0, BANDS.serosa[1]], fs), bx = L.x + L.r + 22;
+engine/lib/he.js:11:export const BANDS = { lumen: [-420, -290], mucosa: [-290, -150], submucosa: [-150, -10], muscularis: [-10, 230], serosa: [230, 280], fibrin: [280, 420] };
+engine/lib/he.js:26:  // infiltrating: rejection sampling on density (gradient toward mucosa/ulcer) × clumping noise
+engine/lib/he.js:27:  const dens = (x, y) => { const b = bandOf(y); let d = { mucosa: 1, submucosa: .75, muscularis: .5, serosa: .65, fibrin: .55, lumen: 0 }[b];
+engine/lib/he.js:64:  // crypts — irregular, destroyed inside the ulcer
+
+exec
+/bin/bash -lc 'cat film/chapters/s08.js' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+import {bake,drawWash} from '../lib/wash.js';
+import {drawHE,CELLS} from '../lib/he.js';
+import {detailedNeutrophil} from '../lib/he_detail.js';
+import {rng} from '../lib/motion.js';
+import {cell,follicle} from '../lib_ext/cells_ext.js';
+const R=rng(40802),TAU=Math.PI*2;let map,source;
+export function point(x,y){const a=x/620-Math.PI/2,r=620+y+12*Math.sin(a*3)+9*Math.sin(a*5),u=1.6*Math.cos(a)*r,v=Math.sin(a)*r;return [u*Math.cos(.14)-v*Math.sin(.14),u*Math.sin(.14)+v*Math.cos(.14)];}
+export default {prepare(){bake('s08.lumen', (b,P)=>{P.fill(b,P.blob(0,0,300,22,.2,43),'#DCA4B2',200,.15);},{seed:43,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});source=document.createElement('canvas');source.width=840;source.height=620;const c=source.getContext('2d');c.translate(420,320);drawHE(c,{ulcer:.16,neut:0,fibrin:0,t:0,detail:1});
+const copy=document.createElement('canvas');copy.width=840;copy.height=620;copy.getContext('2d').drawImage(source,0,0);
+c.drawImage(copy,0,155,840,18,-420,140,840,90);c.drawImage(copy,0,330,840,5,-420,-153,840,5);
+for(let i=0;i<150;i++)cell(c,-410+R()*820,-280+R()*120,i%7?'lymph':'plasma',.7+R()*.2,R()*TAU,i);
+[-390,40,360].forEach(x=>{c.save();c.translate(x,-55);c.scale(.78,.78);follicle(c,0,0);c.restore();});for(let i=0;i<85;i++)cell(c,-410+R()*820,148+R()*76,'dot',.9,R()*TAU,i);for(let i=0;i<62;i++)cell(c,-414+i*13.5,274+Math.sin(i*.4)*2,'meso',.8,0,i);
+let n=0;for(const p of CELLS){if(p.kind!=='inf'||p.y>138||p.y< -290)continue;if(p.y>0&&n++%35!==0)continue;if(p.y<0&&n++%4!==0)continue;detailedNeutrophil(c,p.x,p.y,p,1);}for(let i=0;i<7;i++)detailedNeutrophil(c,-270+Math.cos(i*.55)*(26+i*3),-80+Math.sin(i*.55)*(23+i*3),{lobes:2+i%4,rot:i*.8,sz:.9},1);
+const im=c.getImageData(0,0,840,620);map=document.createElement('canvas');map.width=3200;map.height=2100;const mc=map.getContext('2d'),out=mc.createImageData(3200,2100);for(let j=0;j<2100;j++)for(let i=0;i<3200;i++){const u=i-1600,v=j-1050,x=(u*Math.cos(.14)+v*Math.sin(.14))/1.6,y=-u*Math.sin(.14)+v*Math.cos(.14),a=Math.atan2(y,x),fy=Math.hypot(x,y)-620-12*Math.sin(a*3)-9*Math.sin(a*5);if(fy< -320||fy>=280)continue;let fx=((a+Math.PI/2)*620+420)%840;if(fx<0)fx+=840;const si=(Math.floor(fy+320)*840+Math.floor(fx))*4,di=(j*3200+i)*4;out.data.set(im.data.subarray(si,si+4),di);}mc.putImageData(out,0,0);
+},draw(c,t,T){c.setTransform(1,0,0,1,0,0);c.fillStyle='#111114';c.fillRect(0,0,1920,1080);const id=Math.min(34,29+Math.floor(t/(T.end(29)-T.at(29))));const targets={30:[-270,-80],31:[-200,-226],32:[-170,70],33:[-65,-215],34:[10,-285]};const keys=[[T.at(29),[0,0,.48]],[T.frac(29,.28),[0,0,.48]],[T.frac(29,.64),[...point(-90,-5),.82]],[T.end(29),[...point(...targets[30]),2.7]]];for(let s=30;s<=34;s++){keys.push([T.frac(s,.32),[...point(...targets[s]),2.7]],[T.end(s),[...point(...targets[s]),2.7]]);}let v=keys[0][1];for(let i=1;i<keys.length;i++){if(t>=keys[i][0]){v=keys[i][1];continue;}const a=keys[i-1],b=keys[i],k=Math.max(0,(t-a[0])/(b[0]-a[0]));v=a[1].map((x,j)=>x+(b[1][j]-x)*k);break;}const [x,y,z]=v;c.save();c.beginPath();c.arc(1110,475,425,0,TAU);c.clip();c.fillStyle='#F6EEF0';c.fill();c.translate(1110,475);c.scale(z,z);c.translate(-x,-y);if(t<T.frac(29,.63)) drawLow(c,t,T); else c.drawImage(map,-1600,-1050);c.restore();c.strokeStyle='#4C4555';c.lineWidth=1.6;c.beginPath();c.arc(1110,475,431,0,TAU);c.stroke();c.fillStyle='#E8DDE9';c.font='500 30px MixSans';c.fillText(t<T.frac(29,.32)?'低倍':t<T.frac(29,.86)?'中倍':'高倍',1030,35);
+const text={29:['正常阑尾参照','隐窝 · 固有层','黏膜肌层 · 淋巴滤泡','内环肌 / 外纵肌 · 浆膜'],30:['黏膜下层','血管扩张、充血','中性粒细胞沿血管壁游出'],31:['黏膜与固有层','中性粒细胞浸润','淋巴细胞与浆细胞参照'],32:['固有肌层','内环行肌：长梭形核','外纵行肌：圆点核','中性粒细胞仅少量'],33:['返回黏膜','经过受损的隐窝与上皮'],34:['局灶上皮缺损','结构连续性中断','病变以黏膜、黏膜下层为主']};const phase=(t-T.at(id))/(T.end(id)-T.at(id));c.save();c.globalAlpha=Math.max(0,Math.min(1,phase/.1,(1-phase)/.1));text[id].forEach((s,i)=>{c.font=`${i?400:700} ${i?27:36}px MixSans`;c.fillText(s,75,320+i*56);});c.strokeStyle='#BFA9CB';c.lineWidth=1.6;c.beginPath();c.moveTo(475,410);c.lineTo(630,410);
+const target=id===29?[-90,-55]:targets[id];
+let tip=point(...target);
+if(t<T.frac(29,.63)) {let q=Math.max(0,Math.min(1,(t-T.frac(29,.28))/(T.frac(29,.63)-T.frac(29,.28))));q=q*q*(3-2*q);const a=point(-90,-5),m=lowPoint(-90,-5,q),sc=1+.2*(1-q),p=lowPoint(...target,q);tip=[sc*(p[0]+(a[0]-m[0])*q)+a[0]*(1-sc)*q,sc*(p[1]+(a[1]-m[1])*q)+a[1]*(1-sc)*q];}
+c.lineTo(1110+(tip[0]-x)*z,475+(tip[1]-y)*z);c.stroke();c.restore();
+if(new URLSearchParams(location.search).has('cells')){c.fillStyle='#F6EEF0';c.fillRect(0,0,1920,940);c.save();c.translate(180,220);c.scale(2,2);['lymph','plasma','dot','meso'].forEach((s,i)=>cell(c,i*130,0,s,1,0,i));detailedNeutrophil(c,520,0,{lobes:3,rot:0,sz:1},1);c.restore();c.fillStyle='#51336F';c.font='28px MixSans';['淋巴细胞','浆细胞','外纵行肌核','间皮','引擎中性粒细胞'].forEach((s,i)=>c.fillText(s,110+i*260,300));}}
+};
+
+// Low-only reconstruction. Dark connected components retain their own local
+// coordinates; only their centres follow the annulus. No source RNG is consumed.
+let lowSource, lowCells, lowCache;
+function lowMaterial() {
+  const w=840,h=620,im=source.getContext('2d').getImageData(0,0,w,h);
+  const d=im.data,pristine=new Uint8ClampedArray(d),mask=new Uint8Array(w*h),seen=new Uint8Array(w*h);
+  for(let i=0;i<mask.length;i++)mask[i]=d[i*4]<155 && d[i*4+1]<125 && d[i*4+2]>d[i*4+1]*1.08 ? 1:0;
+  lowCells=[];
+  for(let i=0;i<mask.length;i++) {
+    if(!mask[i]||seen[i])continue;
+    const queue=[i];seen[i]=1;let x0=w,y0=h,x1=0,y1=0;
+    for(let k=0;k<queue.length;k++) {const n=queue[k],x=n%w,y=Math.floor(n/w);x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y);
+      for(const q of [n-1,n+1,n-w,n+w])if(q>=0&&q<w*h&&!seen[q]&&mask[q]&&Math.abs(q%w-x)<=1){seen[q]=1;queue.push(q);}}
+    // Continuous epithelium and vessel contours remain structural paths.
+    if(x1-x0>65||y1-y0>65||queue.length<2)continue;
+    x0=Math.max(0,x0-2);y0=Math.max(0,y0-2);x1=Math.min(w-1,x1+2);y1=Math.min(h-1,y1+2);
+    const tile=document.createElement('canvas');tile.width=x1-x0+1;tile.height=y1-y0+1;
+    tile.getContext('2d').drawImage(source,x0,y0,tile.width,tile.height,0,0,tile.width,tile.height);
+    const coverage=new Set();
+    for(const n of queue)for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++) {
+      const xx=n%w+dx,yy=Math.floor(n/w)+dy;
+      if(xx>=x0&&xx<=x1&&yy>=y0&&yy<=y1&&dx*dx+dy*dy<=5)coverage.add(yy*w+xx);
+    }
+    const tc=tile.getContext('2d'),ti=tc.getImageData(0,0,tile.width,tile.height);
+    for(let yy=0;yy<tile.height;yy++)for(let xx=0;xx<tile.width;xx++)if(!coverage.has((yy+y0)*w+xx+x0))ti.data[(yy*tile.width+xx)*4+3]=0;
+    tc.putImageData(ti,0,0);
+    lowCells.push({tile,x:(x0+x1)/2-420,y:(y0+y1)/2-320});
+    // Inpaint only the small local crop; preserve the original baked wash.
+    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++) {
+      if(!coverage.has(y*w+x))continue;
+      let best=-1,dist=1e9;
+      for(let dy=-6;dy<=6;dy+=2)for(let dx=-6;dx<=6;dx+=2){const xx=Math.max(0,Math.min(w-1,x+dx)),yy=Math.max(0,Math.min(h-1,y+dy)),q=yy*w+xx;if(!mask[q]&&!coverage.has(q)&&dx*dx+dy*dy<dist){best=q;dist=dx*dx+dy*dy;}}
+      if(best>=0)for(let ch=0;ch<3;ch++)d[(y*w+x)*4+ch]=pristine[best*4+ch];
+    }
+  }
+  lowSource=im;
+}
+function lowGeometry(a,k) {
+  const rot=.14+(Math.PI/6-.14)*(1-k);
+  // Extra lumen irregularity fades with depth, leaving the b02b target exact.
+  const wobble=12*Math.sin(a*3)+9*Math.sin(a*5)+(1-k)*22*Math.sin(a*4+.7);
+  return {rot,wobble};
+}
+// Continuous radial allocation: lumen 170; thick mucosa and submucosa.
+function lowRadius(y,k) {
+ const ys=[-320,-290,-150,-10,230,280],rs=[145,170,390,610,850,900];
+ let i=0;while(i<4&&y>ys[i+1])i++;
+ const r=rs[i]+(y-ys[i])/(ys[i+1]-ys[i])*(rs[i+1]-rs[i]);
+ return r*(1-k)+(620+y)*k;
+}
+function lowInverse(r,k) {
+ const ys=[-320,-290,-150,-10,230,280];let i=0;
+ while(i<4&&r>lowRadius(ys[i+1],k))i++;
+ return ys[i]+(r-lowRadius(ys[i],k))/(lowRadius(ys[i+1],k)-lowRadius(ys[i],k))*(ys[i+1]-ys[i]);
+}
+function lowPoint(x,y,k) {
+  const a=x/620-Math.PI/2,{rot,wobble}=lowGeometry(a,k),r=lowRadius(y,k)+wobble;
+  const u=1.6*Math.cos(a)*r,v=Math.sin(a)*r;
+  return [u*Math.cos(rot)-v*Math.sin(rot),u*Math.sin(rot)+v*Math.cos(rot)];
+}
+function drawLow(c,t,T) {
+  if(!lowSource)lowMaterial();
+  let k=Math.max(0,Math.min(1,(t-T.frac(29,.28))/(T.frac(29,.63)-T.frac(29,.28))));
+  k=k*k*(3-2*k);
+  if(!lowCache||lowCache.k!==k) {
+    const canvas=document.createElement('canvas');canvas.width=3200;canvas.height=2100;
+    const ctx=canvas.getContext('2d'),out=ctx.createImageData(3200,2100),d=out.data,src=lowSource.data;
+    const rot=.14+(Math.PI/6-.14)*(1-k),co=Math.cos(rot),si=Math.sin(rot);
+    for(let j=0;j<2100;j++)for(let i=0;i<3200;i++) {
+      const u=i-1600,v=j-1050,x=(u*co+v*si)/1.6,y=-u*si+v*co,a=Math.atan2(y,x);
+      const fy=lowInverse(Math.hypot(x,y)-lowGeometry(a,k).wobble,k);
+      if(fy< -320||fy>=280)continue;
+      // Five complete repeats; 140px smooth overlap makes every layer periodic.
+      let fx=((a+Math.PI/2)/TAU*3500+420)%700;if(fx<0)fx+=700;
+      const row=Math.floor(fy+320)*840,q=(row+Math.floor(fx))*4,n=(j*3200+i)*4;
+      let w=Math.max(0,1-fx/140);w=w*w*(3-2*w);
+      const q2=(row+Math.floor(fx+700))*4;
+      for(let ch=0;ch<4;ch++)d[n+ch]=src[q+ch]*(1-w)+(w?src[q2+ch]*w:0);
+    }
+    ctx.putImageData(out,0,0);
+    // Repeat the identical source population around the wall as in b02b.
+    for(let turn=-3;turn<=3;turn++)for(const p of lowCells) {
+      const sx=p.x+420;
+      let opacity=1;if(sx<140){let w=1-sx/140;opacity=1-w*w*(3-2*w);}else if(sx>=700){let w=1-(sx-700)/140;opacity=w*w*(3-2*w);}
+      const x=(p.x+turn*700)*TAU*620/3500,a=x/620-Math.PI/2;if(a< -Math.PI||a>=Math.PI)continue;
+      const centre=lowPoint(x,p.y,k),dx=lowPoint(x+.5,p.y,k),dy=lowPoint(x,p.y+.5,k);
+      const angle=Math.atan2(dx[1]-centre[1],dx[0]-centre[0]);
+      ctx.save();ctx.globalAlpha=opacity;ctx.translate(1600+centre[0],1050+centre[1]);
+      // Local rigid frame at low power; approach the original map Jacobian.
+      ctx.transform((1-k)*Math.cos(angle)+k*2*(dx[0]-centre[0]),(1-k)*Math.sin(angle)+k*2*(dx[1]-centre[1]),
+        (1-k)*Math.sin(angle)+k*2*(dy[0]-centre[0]),-(1-k)*Math.cos(angle)+k*2*(dy[1]-centre[1]),0,0);
+      ctx.drawImage(p.tile,-p.tile.width/2,-p.tile.height/2);ctx.restore();
+    }
+    lowCache={k,canvas};
+  }
+  // Same wall segment as the original camera; affine recentering keeps the
+  // selected patch registered while the oblique section turns into b02b.
+  const anchor=point(-90,-5),moved=lowPoint(-90,-5,k),scale=1+.2*(1-k);
+  c.save();
+  c.translate(anchor[0]*(1-scale)*k,anchor[1]*(1-scale)*k);
+  c.scale(scale,scale);c.translate((anchor[0]-moved[0])*k,(anchor[1]-moved[1])*k);
+  // Pale eosinophilic luminal debris, using the existing baked wash only.
+  c.save();c.globalAlpha=1-k;c.rotate(Math.PI/6);drawWash(c,'s08.lumen',-35,5,155,{alpha:.32});drawWash(c,'s08.lumen',65,20,80,{alpha:.22});c.restore();
+  c.drawImage(lowCache.canvas,-1600,-1050);
+  c.restore();
+  if(k>0){c.save();c.globalAlpha=k*k*k*k;c.drawImage(map,-1600,-1050);c.restore();}
+}
+
+exec
+/bin/bash -lc 'cat qa/v6/b05/自检.md qa/v6/b05/check_low_determinism.mjs; cat render.mjs | tail -100; cat qa/v6/b05/verify.py' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+# v6 b05 自检
+
+基于已提交 b04；仅修改 film/chapters/s08.js。未执行 git commit，未触碰开工已有 assembly 改动。
+
+## 低倍与推镜
+
+低倍复用 b04 / b02b 的同一组织源图与细胞群。原横向 840px 硬重复改为 700px 周期、140px smoothstep 重叠；全圆严格五个完整周期，消除 atan2 闭环首尾错位。底色逐通道连续混合，局部细胞同步使用相同周期及互补透明度，黏膜、黏膜下层、肌层和浆膜不再有扇区硬截断。组织自身隐窝腔隙、纤维方向保留。
+
+径向配置由源图 y=[-320,-290,-150,-10,230,280] 对应到 r=[145,170,390,610,850,900]。低倍内腔长轴约为 850px 目镜直径的 37%（边界保留三、四、五阶不规则起伏，实际轮廓有局部变化），维持斜置不规则椭圆。黏膜约220单位、黏膜下层约220单位；原滤泡的外围密集套区与较疏淡生发中心保留，细胞局部坐标保持原大小。
+
+内腔少量嗜酸性内容物仅调用现有 bake / drawWash 接口，配方依据 parity_r4/chapters/04.js 的 c04.thromb：P.blob(0,0,300,22,.2,43)、P.fill 强度200、透明度.15，seed:43、hd:true、soft:true、grain:.12、edge:.3、bleed:.5；颜色改为淡嗜酸性色 #DCA4B2，低透明度分两处复合。没有新增水彩算法。
+
+低到中倍按同一 smoothstep 参数连续恢复原径向配置、旋转及相机锚点，3.78秒之后回到原中高倍地图。沿用 b04 的原地图混合方式；过渡期间存在重映射与渐变复合，并非单一刚性相机运动。
+
+## 指引线例外
+
+所有倍率从卡片右侧 (475,410) 经 (630,410) 连到组织目标的屏幕投影，宽度1.6px。低倍目标随低倍变形、相机缩放平移同步；中高倍使用原 point 与当前相机投影。线继承原卡片透明度。
+
+例外仅限指引线实际覆盖像素。check_annotation.mjs 通过浏览器请求拦截仅移除新增指引线路径指令，保存 no_leader 静帧，不修改磁盘生产源码。该组中高倍图与 b02b 的 RGB MAE 全部为0。正式图在新增指引线覆盖区域外 MAE 也全部为0；含线的全帧 MAE 为0.0203–0.0282。见像素一致性报告.md/json及六张实际像素例外遮罩。
+
+## 产物
+
+s08_low.png；s08_transition_01.png（2.3秒）；s08_transition_02.png（3.2秒）；s08_mid.png；五张 s08_high_s30–s34.png。review_sheet.png 严格七帧：低倍、中倍、五张高倍；过渡另行提供。低倍_b04_vs_b05.png 为全帧并排对照，原始 t_*.png 同时保留。
+
+## 验证
+
+- engine/lib 全部文件及 parity_r4/chapters/04.js：b04结束、b05开工、b05结束 SHA256 一致。
+- film/lib_ext/cells_ext.js 未修改。
+- 指定 render.mjs --determinism：六个默认时点乱序一致，退出0。
+- 额外1、2.3、3.2、3.8秒乱序重绘：PNG字节完全一致。
+- git diff --check 通过。
+- 已查看低倍、过渡第二帧及七帧总览。favicon 404 不影响画面。
+
+复核命令：
+
+```sh
+cd film
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs . --still 1,2.3,3.2,3.8,9,15,21,27,33 --out ../qa/v6/b05
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs . --determinism
+cd ..
+node qa/v6/b05/check_low_determinism.mjs
+node qa/v6/b05/check_annotation.mjs
+python3 qa/v6/b05/verify.py
+```
+import fs from 'node:fs';
+import {loadChromium,launch,serve,resolveTarget,openPage} from '/workspace/garden-skills/skills/motion-showreel/scripts/lib/browser.mjs';
+const target=resolveTarget('film');const chromium=await loadChromium(target.root);const {server,port}=await serve(target.root);const browser=await launch(chromium);
+try{const page=await openPage(browser,{port,rel:target.rel,w:1920,h:1080,dpr:1,query:''});const refs=new Map();
+ for(const t of [1,2.3,3.2,3.8,3.2,1,3.8,2.3]){await page.evaluate(t=>window.render(t),t);const buf=await page.screenshot({type:'png'});if(refs.has(t)&&!refs.get(t).equals(buf))throw Error(`Mismatch at ${t}`);refs.set(t,buf);}
+ fs.writeFileSync('qa/v6/b05/determinism_low.log','PASS: 1, 2.3, 3.2, 3.8 s repeated in different orders: byte-identical PNGs\n');
+}finally{await browser.close();server.close();}
+import fs from 'node:fs';
+import path from 'node:path';
+import http from 'node:http';
+import {fileURLToPath} from 'node:url';
+import {chromium} from 'playwright';
+const root=path.dirname(fileURLToPath(import.meta.url));
+const parity=process.argv.includes('--parity');
+if(!parity && !process.argv.includes('--samples')) throw Error('Use --parity or --samples');
+if(!parity){
+ const result=JSON.parse(fs.readFileSync(path.join(root,'qa/v6/parity/metrics.json')));
+ if(!result.passed) throw Error('Parity gate failed: S08 is not implemented; see qa/v6/自检.md');
+ throw Error('S08 has not been implemented');
+}
+const out=path.join(root,'qa/v6/parity');fs.mkdirSync(out,{recursive:true});
+const mime={'.html':'text/html','.js':'text/javascript','.woff2':'font/woff2','.json':'application/json','.tsv':'text/plain'};
+const server=http.createServer((req,res)=>{let rel=decodeURIComponent(new URL(req.url,'http://local').pathname);if(rel.endsWith('/'))rel+='index.html';const f=path.resolve(root,'parity_runtime','.'+rel);if(!f.startsWith(path.join(root,'parity_runtime')+path.sep)){res.writeHead(403);res.end();return;}try{res.setHeader('Content-Type',mime[path.extname(f)]||'application/octet-stream');res.end(fs.readFileSync(f));}catch{res.writeHead(404);res.end();}});
+await new Promise(r=>server.listen(0,'127.0.0.1',r));
+let browser;
+try{
+ browser=await chromium.launch({executablePath:process.env.CHROME_PATH||'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--use-angle=swiftshader','--enable-unsafe-swiftshader','--font-render-hinting=none','--force-color-profile=srgb','--hide-scrollbars']});
+ const page=await browser.newPage({viewport:{width:1920,height:1080},deviceScaleFactor:1});const errors=[];page.on('pageerror',e=>errors.push(String(e)));page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
+ await page.goto(`http://127.0.0.1:${server.address().port}/`);
+ await page.waitForFunction(()=>window.READY===true,null,{timeout:240000});
+ for(const t of [89.73,99.22]){
+ await page.evaluate(t=>window.render(t),t);
+ const data=await page.locator('#c').evaluate(c=>c.toDataURL());
+ fs.writeFileSync(path.join(out,`render_${t.toFixed(2)}.png`),Buffer.from(data.split(',')[1],'base64'));
+ }
+ fs.writeFileSync(path.join(out,'browser.json'),JSON.stringify({browser:await browser.version(),backend:'Chromium Canvas2D + SwiftShader WebGL (CPU software rasterizer)',errors},null,2));
+}finally{await browser?.close();server.close();}
+await import('./tools/compare-parity.mjs');
+if(!JSON.parse(fs.readFileSync(path.join(out,'metrics.json'))).passed)process.exitCode=2;
+from pathlib import Path
+from PIL import Image,ImageChops,ImageStat,ImageDraw,ImageFont
+import hashlib,json,shutil
+root=Path(__file__).resolve().parents[3];out=Path(__file__).resolve().parent;base=out.parent/'b02'
+frames=[('s08_low',1),('s08_transition_01',2.3),('s08_transition_02',3.2),('s08_mid',3.8)]+[(f's08_high_s{s}',t) for s,t in zip(range(30,35),[9,15,21,27,33])]
+for name,t in frames:shutil.copyfile(out/f't_{t:06.2f}.png',out/f'{name}.png')
+rows=[]
+for name,t in frames[3:]:
+ a=Image.open(base/f'{name}.png').convert('RGB');b=Image.open(out/f'{name}.png').convert('RGB');clean=Image.open(out/f'no_leader_{t}.png').convert('RGB')
+ d=ImageChops.difference(a,b);dc=ImageChops.difference(a,clean)
+ # The only intercepted code is the new leader's path commands. All other rendering is unchanged.
+ leader=ImageChops.difference(b,clean).convert('L').point(lambda v:255 if v else 0)
+ # Use RGB union to include pixels whose luminance could round to zero.
+ bands=ImageChops.difference(b,clean).split();leader=ImageChops.lighter(ImageChops.lighter(bands[0],bands[1]),bands[2]).point(lambda v:255 if v else 0)
+ outside=Image.composite(Image.new('RGB',a.size),d,leader)
+ mae=sum(ImageStat.Stat(dc).mean)/3;outside_mae=sum(ImageStat.Stat(outside).mean)/3
+ rows.append(dict(frame=name,time=t,MAE_full=sum(ImageStat.Stat(d).mean)/3,MAE_without_leader=mae,MAE_outside_leader=outside_mae,leader_changed_pixels=leader.histogram()[255],passed=mae<.5 and outside_mae==0))
+ assert rows[-1]['passed']
+ leader.save(out/f'{name}_指引线例外遮罩.png')
+(out/'像素一致性报告.json').write_text(json.dumps(rows,ensure_ascii=False,indent=2))
+(out/'像素一致性报告.md').write_text('# b05 与 b02b 像素一致性\n\n1920×1080 RGB，MAE 范围 0–255。指引线为本轮授权例外，宽 1.6px。通过浏览器仅移除新增指引线路径命令重新渲染，其余生产代码完全相同；与 b02b 比较全部 MAE=0。另验证正式帧在指引线实际覆盖像素外差异为零，保留逐帧例外遮罩。\n\n|帧|含指引线 MAE|移除新增指引线 MAE|指引线之外 MAE|通过|\n|---|---|---|---|---|\n'+''.join(f"|{r['frame']}|{r['MAE_full']:.8f}|{r['MAE_without_leader']}|{r['MAE_outside_leader']}|{r['passed']}|\n" for r in rows))
+font=ImageFont.truetype('/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc',22)
+canvas=Image.new('RGB',(1920,580),'#111114');dr=ImageDraw.Draw(canvas)
+for j,folder in enumerate([out.parent/'b04',out]):
+ canvas.paste(Image.open(folder/'s08_low.png').convert('RGB').resize((960,540)),(j*960,40));dr.text((j*960+30,8),'b04' if j==0 else 'b05',font=font,fill='white')
+canvas.save(out/'低倍_b04_vs_b05.png')
+# Seven principal frames: low, medium and five high-power scenes. Transitions supplied separately.
+seven=[frames[0]]+frames[3:];sheet=Image.new('RGB',(1920,4*398),'#111114');dr=ImageDraw.Draw(sheet)
+for i,(name,t) in enumerate(seven):
+ x=i%2*960;y=i//2*398;sheet.paste(Image.open(out/f'{name}.png').convert('RGB').resize((640,360)),(x+160,y+34));dr.text((x+24,y+3),f'{name} · {t}s',font=font,fill='white')
+sheet.save(out/'review_sheet.png')
+files=sorted(p for p in (root/'engine/lib').rglob('*') if p.is_file())+[root/'parity_r4/chapters/04.js']
+end=''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+str(p.relative_to(root))+'\n' for p in files)
+(out/'sha256_结束.txt').write_text(end);assert end==(out/'sha256_开工.txt').read_text();assert end==(out.parent/'b04/sha256_结束.txt').read_text()
+(out/'sha256_校验.log').write_text('PASS: b04 结束 = b05 开工 = b05 结束；engine/lib 全部文件及 parity_r4/chapters/04.js sha256 一致\n')
+print(json.dumps(rows,ensure_ascii=False,indent=2))
+
+exec
+/bin/bash -lc 'cat film/lib/he.js | head -115; cat film/lib_ext/cells_ext.js | head -95; cat parity_r4/chapters/04.js | head -85; cat film/lib/wash.js | head -45; cat qa/briefs/v6_b02b_s08.md' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+// HE-stained appendix wall field (shared by 03 → 04 continuity). Field LOCAL coords: ±420 square, lumen at top, serosa at bottom.
+// drawHE(ctx, state) draws into current transform (caller translates to lens centre, scales by r/420 and clips) — or use drawLens().
+// state: { ulcer 0..1, neut 0..1 (share of infiltrating neutrophils arrived), fibrin 0..1, t (seconds, micro-motion) }
+// v2 (polish pass): organic clustered cells (~1300), margination → emigration paths, 2–5 lobed nuclei, noisy structures.
+//                  API unchanged; drawLens/fieldToScreen gained optional extras (off, blur) — old calls behave as before.
+import { chromatin, detailedNeutrophil, fibrinMesh, tissueTexture } from './he_detail.js';
+import { C } from './tokens.js';
+import { drawWash } from './wash.js';
+import { rng, noise2 } from './motion.js';
+export const HE = { eosin: '#D98BA8', eosinPale: '#EBC3D0', hema: C.vio, hemaDark: '#3F2A66', rbc: '#C9455A' };
+export const BANDS = { lumen: [-420, -290], mucosa: [-290, -150], submucosa: [-150, -10], muscularis: [-10, 230], serosa: [230, 280], fibrin: [280, 420] };
+export const ULCER = [-90, 110];
+export const VESSELS = [[-270, -80, 26], [-90, -60, 20], [130, -90, 24], [300, -70, 18], [-170, 120, 14], [220, 150, 13]];
+const R = rng(2026);
+const inUlcer = x => x > ULCER[0] && x < ULCER[1];
+const gauss = () => (R() + R() + R() - 1.5) / 1.5;
+const lobePick = () => { const u = R(); return u < .15 ? 2 : u < .6 ? 3 : u < .9 ? 4 : 5; };   // 核分 2–5 叶
+const bandOf = y => Object.keys(BANDS).find(k => y >= BANDS[k][0] && y < BANDS[k][1]) || 'fibrin';
+// noisy closed outline (hand-drawn, never a perfect circle/ellipse)
+function blobPath(ctx, cx, cy, rx, ry, seed, amp = .12, n = 22) { ctx.beginPath(); for (let i = 0; i <= n; i++) { const a = i / n * 6.283, f = 1 + amp * (noise2(Math.cos(a) * 1.3 + seed, Math.sin(a) * 1.3 + seed * .7) - .5) * 2; const x = cx + Math.cos(a) * rx * f, y = cy + Math.sin(a) * ry * f; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.closePath(); }
+// --- static cell populations (fixed seed) ---
+export const CELLS = (() => { const out = [];
+  // lumen pus: clumped sheets of neutrophils (already present)
+  for (let c = 0; c < 14; c++) { const cx = -400 + R() * 800, cy = -400 + R() * 100, n = 8 + Math.floor(R() * 12);
+    for (let i = 0; i < n; i++) out.push({ x: cx + gauss() * 45, y: Math.min(-296, cy + gauss() * 30), band: 'lumen', kind: 'pus', lobes: lobePick(), rot: R() * 6.28, sz: .85 + R() * .3 }); }
+  // infiltrating: rejection sampling on density (gradient toward mucosa/ulcer) × clumping noise
+  const dens = (x, y) => { const b = bandOf(y); let d = { mucosa: 1, submucosa: .75, muscularis: .5, serosa: .65, fibrin: .55, lumen: 0 }[b];
+    d += 1.1 * Math.exp(-(((x - 10) / 130) ** 2 + ((y + 270) / 90) ** 2)); if (b === 'fibrin' && y > 400) d = 0; return d * (.25 + .75 * noise2(x / 55 + 9, y / 55 + 3)); };
+  let guard = 0; while (out.filter(c => c.kind === 'inf').length < 1150 && guard++ < 60000) { const x = -412 + R() * 824, y = -292 + R() * 700; if (R() * 1.9 < dens(x, y)) out.push({ x, y, band: bandOf(y), kind: 'inf', lobes: lobePick(), rot: R() * 6.28, sz: .8 + R() * .35 }); }
+  let maxD = 1;
+  for (const c of out) if (c.kind === 'inf') { let best = VESSELS[0], d = 1e9; for (const v of VESSELS) { const dd = Math.hypot(c.x - v[0], c.y - v[1]); if (dd < d) { d = dd; best = v; } }
+    const a = Math.atan2(c.y - best[1], c.x - best[0]); c.vx = best[0]; c.vy = best[1]; c.d = d; maxD = Math.max(maxD, d);
+    c.mx = best[0] + Math.cos(a + gauss() * .6) * best[2] * .95; c.my = best[1] + Math.sin(a + gauss() * .6) * best[2] * .95;   // margination point on the vessel wall
+    c.cx = (c.mx + c.x) / 2 + gauss() * 50; c.cy = (c.my + c.y) / 2 + gauss() * 50; }                                        // curved emigration path
+  for (const c of out) if (c.kind === 'inf') c.order = Math.min(.999, (c.d / maxD) * .72 + R() * .28);
+  return out; })();
+const SPINDLE = Array.from({ length: 170 }, () => ({ x: -410 + R() * 820, y: -10 + R() * 240, r: (R() - .5) * .3, l: 10 + R() * 9 }));
+const CRYPTS = []; for (let x = -390; x < 410; x += 58 + R() * 12) CRYPTS.push({ x: x + (R() - .5) * 14, y: -225 + (R() - .5) * 24, h: 40 + R() * 18, w: 13 + R() * 5, s: R() * 50, tilt: (R() - .5) * .25 });
+const FIBRIN = Array.from({ length: 60 }, () => { const x = -400 + R() * 800, y = 284 + R() * 100; return { x, y, a: (R() - .5) * 1.6 + (R() < .5 ? 0 : Math.PI), l: 30 + R() * 60, b: (R() - .5) * 40 }; });
+export function bakeHE(bake) {
+  bake('he.bands', (b, P) => { const band = (y0, y1, col, a) => { const pts = []; for (let x = -520; x <= 520; x += 65) pts.push([x, y0 + Math.sin(x * .013) * 9]); for (let x = 520; x >= -520; x -= 65) pts.push([x, y1 + Math.sin(x * .011 + 1) * 9]); P.fill(b, pts, col, a, .14, [.5, .55]); };
+    band(-420, -290, HE.eosinPale, 90); band(-290, -150, HE.eosin, 110); band(-150, -10, HE.eosinPale, 120); band(-10, 230, HE.eosin, 150); band(230, 282, HE.eosinPale, 120); }, { seed: 31, scale: 2 });
+  bake('he.ulcer', (b, P) => { P.fill(b, P.blob(0, 0, 150, 24, .4, 3), HE.eosinPale, 160, .3); P.fill(b, P.blob(0, 10, 90, 20, .5, 4), HE.hema, 40, .3); }, { seed: 32 });
+  bake('he.fibrin', (b, P) => { P.fill(b, [[-520, -60], [-300, -30], [-100, -70], [120, -40], [330, -75], [520, -45], [520, 70], [200, 40], [-200, 60], [-520, 50]], HE.eosin, 120, .4, [.6, .6]); }, { seed: 33 });
+  bake('he.vessel', (b, P) => { P.fill(b, P.blob(0, 0, 300, 22, .3, 5), HE.rbc, 170, .2); }, { seed: 34 });
+}
+function neutro(ctx, x, y, c, s = 1) { s *= c.sz || 1;
+  ctx.fillStyle = 'rgba(236,178,198,.85)'; blobPath(ctx, x, y, 8.5 * s, 8 * s, c.rot * 3, .12, 10); ctx.fill();
+  ctx.fillStyle = HE.hemaDark; const n = c.lobes, sp = n === 2 ? 1.6 : 1.15; const P = [];
+  for (let i = 0; i < n; i++) { const a = c.rot + (i - (n - 1) / 2) * sp, rr = (n === 2 ? 3.6 : 4.6) * s; P.push([x + Math.cos(a) * rr, y + Math.sin(a) * rr]); }
+  ctx.beginPath(); for (const p of P) { ctx.moveTo(p[0] + 2.9 * s, p[1]); ctx.arc(p[0], p[1], (n === 2 ? 3.3 : 2.9) * s, 0, 6.283); } ctx.fill();
+  ctx.strokeStyle = HE.hemaDark; ctx.lineWidth = 1.1 * s; ctx.beginPath(); P.forEach((p, i) => i ? ctx.lineTo(...p) : ctx.moveTo(...p)); ctx.stroke(); }
+export { neutro as drawNeutrophil };
+const bez = (a, c, b, k) => { const u = 1 - k; return [u * u * a[0] + 2 * u * k * c[0] + k * k * b[0], u * u * a[1] + 2 * u * k * c[1] + k * k * b[1]]; };
+export function drawHE(ctx, { ulcer = 1, neut = 1, fibrin = 1, t = 0, detail = 0, necrosis = 0 } = {}) {
+  ctx.fillStyle = '#F6EEF0'; ctx.fillRect(-430, -430, 860, 900);
+  if(necrosis > 0) {
+    ctx.save(); ctx.globalAlpha *= necrosis; ctx.fillStyle = '#88717F'; ctx.fillRect(-430, -430, 860, 900); ctx.restore();
+    ctx.save(); ctx.globalAlpha *= 1 - necrosis * .82;
+  }
+  drawWash(ctx, 'he.bands', 0, 0, 1024);
+  drawWash(ctx, 'he.fibrin', 0, 330, 1024, { grow: fibrin, alpha: fibrin, origin: [.5, .3] });
+  if(detail) tissueTexture(ctx,detail);
+  // crypts — irregular, destroyed inside the ulcer
+  for (const g of CRYPTS) { const k = inUlcer(g.x) ? 1 - ulcer : 1; if (k <= .02) continue; ctx.save(); ctx.globalAlpha *= k; ctx.translate(g.x, g.y); ctx.rotate(g.tilt);
+    ctx.fillStyle = 'rgba(255,248,250,.9)'; blobPath(ctx, 0, 0, g.w, g.h, g.s, .18); ctx.fill();
+    ctx.fillStyle = HE.hema; for (let i = 0; i < 16; i++) { const a = i / 16 * 6.283, j = 1 + .15 * (noise2(i, g.s) - .5); ctx.beginPath(); ctx.ellipse(Math.cos(a) * (g.w + 4) * j, Math.sin(a) * (g.h + 4) * j, 3, 4.4, a, 0, 6.283); ctx.fill(); if(detail) { ctx.save(); ctx.globalAlpha *= detail; chromatin(ctx,Math.cos(a)*(g.w+4)*j,Math.sin(a)*(g.h+4)*j,3,4.4,a);ctx.restore(); } } ctx.restore(); }
+  // surface epithelium (wavy) with ulcer gap
+  ctx.strokeStyle = HE.hema; ctx.lineWidth = 7; ctx.lineCap = 'round'; const gap0 = ULCER[0] + 100 * (1 - ulcer), gap1 = ULCER[1] - 100 * (1 - ulcer);
+  const epi = (x0, x1) => { ctx.beginPath(); for (let x = x0; x <= x1; x += 10) { const y = -290 + 5 * Math.sin(x * .05) + 4 * (noise2(x / 40, 2) - .5); x === x0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } ctx.stroke(); };
+  epi(-430, gap0); epi(gap1, 430);
+  drawWash(ctx, 'he.ulcer', (ULCER[0] + ULCER[1]) / 2, -265, 330, { grow: ulcer, alpha: ulcer });
+  // congested vessels (irregular)
+  VESSELS.forEach((v, i) => { drawWash(ctx, 'he.vessel', v[0], v[1], v[2] * 3.6); ctx.strokeStyle = HE.hema; ctx.lineWidth = 2.2; blobPath(ctx, v[0], v[1], v[2] * 1.1, v[2] * .85, i * 3.1, .16); ctx.stroke(); });
+  ctx.fillStyle = 'rgba(80,52,120,.75)'; for (const m of SPINDLE) { ctx.beginPath(); ctx.ellipse(m.x, m.y, m.l, 2.4, m.r, 0, 6.283); ctx.fill(); if(detail) { ctx.save();ctx.globalAlpha *= detail;chromatin(ctx,m.x,m.y,m.l,2.4,m.r);ctx.restore(); } }
+  if(necrosis > 0) ctx.restore();
+  // fibrin strands (eosinophilic, outward from serosa)
+  ctx.strokeStyle = 'rgba(206,110,145,.95)'; ctx.lineWidth = 2.4 * (1 - detail * .85); for (let i = 0; i < FIBRIN.length; i++) { const f = FIBRIN[i], k = Math.min(1, Math.max(0, fibrin * 1.6 - i / FIBRIN.length * .6)); if (k <= 0) continue;
+    ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.quadraticCurveTo(f.x + Math.cos(f.a) * f.l * .5 * k, f.y + Math.sin(f.a) * f.l * .5 * k + f.b * k, f.x + Math.cos(f.a) * f.l * k, f.y + Math.sin(f.a) * f.l * k + 10 * k); ctx.stroke(); }
+  if(detail) fibrinMesh(ctx,fibrin*detail);
+  // neutrophils: margination along the vessel wall → emigration on a curved path → settle (jiggle)
+  for (const c of CELLS) { let x = c.x, y = c.y, s = 1;
+    if (c.kind === 'inf') { const k = Math.min(1, Math.max(0, (neut * 1.3 - c.order) / .3)); if (k <= 0) continue;
+      if (k < .25) { const q = k / .25; x = c.vx + (c.mx - c.vx) * q; y = c.vy + (c.my - c.vy) * q; s = .6; }
+      else { const q = (k - .25) / .75, e = 1 - Math.pow(1 - q, 2.2); [x, y] = bez([c.mx, c.my], [c.cx, c.cy], [c.x, c.y], e); s = .6 + .4 * Math.min(1, q * 2); } }
+    x += Math.sin(t * 1.3 + c.rot * 5) * 1.3; y += Math.cos(t * 1.1 + c.rot * 3) * .9; if(detail > 0) { ctx.save();ctx.globalAlpha *= (1-necrosis*.7); if(detail<1){ctx.save();ctx.globalAlpha *= 1-detail;neutro(ctx,x,y,c,s);ctx.restore();} ctx.globalAlpha *= detail; detailedNeutrophil(ctx,x,y,c,s);ctx.restore(); } else neutro(ctx, x, y, c, s); }
+}
+// Screen-space eyepiece: clips to a circle and draws the HE field. L = {x, y, r}; fs = field zoom (1 = full field).
+// opt (optional): { off:[fx,fy] field-units pan, blur: px defocus }
+export function drawLens(ctx, L, state, fs = 1, opt = {}) { if (L.r <= 1) return; const off = opt.off || [0, 0];
+  ctx.save(); ctx.shadowColor = 'rgba(42,42,53,.28)'; ctx.shadowBlur = 40; ctx.fillStyle = '#F6EEF0'; ctx.beginPath(); ctx.arc(L.x, L.y, L.r, 0, 6.283); ctx.fill(); ctx.restore();
+  ctx.save(); ctx.beginPath(); ctx.arc(L.x, L.y, L.r, 0, 6.283); ctx.clip();
+  ctx.translate(L.x, L.y); const k = L.r / 420 * fs; ctx.scale(k, k); ctx.translate(-off[0], -off[1]); drawHE(ctx, state); ctx.restore();
+  // defocus: canvas blur filters drop the baked wash layers in software GL, so 'blur' is a milky veil that clears as focus lands
+  if (opt.blur > .05) { ctx.save(); ctx.fillStyle = `rgba(246,238,240,${Math.min(.85, opt.blur / 9 * .85).toFixed(3)})`; ctx.beginPath(); ctx.arc(L.x, L.y, L.r, 0, 6.283); ctx.fill(); ctx.restore(); }
+  ctx.save(); const g = ctx.createRadialGradient(L.x, L.y, L.r * .78, L.x, L.y, L.r); g.addColorStop(0, 'rgba(42,42,53,0)'); g.addColorStop(1, 'rgba(42,42,53,.2)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(L.x, L.y, L.r, 0, 6.283); ctx.fill(); ctx.strokeStyle = C.ink; ctx.lineWidth = 5; ctx.stroke(); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(L.x, L.y, L.r + 9, 0, 6.283); ctx.stroke(); ctx.restore(); }
+export const fieldToScreen = (L, p, fs = 1, off = [0, 0]) => [L.x + (p[0] - off[0]) * L.r / 420 * fs, L.y + (p[1] - off[1]) * L.r / 420 * fs];
+import {rng} from '../lib/motion.js';
+import {chromatin} from '../lib/he_detail.js';
+const R=rng(40418),TAU=Math.PI*2;
+function shape(rx,ry,x=0){const p=new Path2D(),phase=R()*TAU;for(let i=0;i<=32;i++){const a=i/32*TAU,f=1+.04*Math.sin(3*a+phase)+.022*Math.cos(5*a+phase*1.3);i?p.lineTo(x+Math.cos(a)*rx*f,Math.sin(a)*ry*f):p.moveTo(x+rx*f,0);}p.closePath();return p;}
+const cache=Array.from({length:12},()=>({rim:shape(6.3,6),n:shape(5.3,5.1),pl:shape(9,8),pn:shape(4.4,4.3,-3),dot:shape(3.2,3),flat:shape(9,1.4)}));
+export function cell(c,x,y,type='lymph',s=1,rot=0,key=0){const p=cache[key%12];c.save();c.translate(x,y);c.rotate(rot);c.scale(s,s);c.fillStyle='rgba(226,170,200,.75)';if(type==='lymph'||type==='plasma')c.fill(type==='plasma'?p.pl:p.rim);c.fillStyle='#51336F';c.fill(type==='plasma'?p.pn:type==='dot'?p.dot:type==='meso'?p.flat:p.n);if(type==='plasma'){c.fillStyle='rgba(255,248,250,.85)';c.beginPath();c.ellipse(2.5,0,2.5,3.2,0,0,TAU);c.fill();c.strokeStyle='#3F2A66';c.lineWidth=.9;for(let i=0;i<7;i++){const a=i*TAU/7;c.beginPath();c.moveTo(-3+Math.cos(a)*1.9,Math.sin(a)*1.9);c.lineTo(-3+Math.cos(a)*3.8,Math.sin(a)*3.8);c.stroke();}}else if(type==='lymph'){c.fillStyle='rgba(63,42,102,.4)';c.fill(p.n);chromatin(c,0,0,4.7,4.6,0);}c.restore();}
+const pop=Array.from({length:170},(_,i)=>{const a=R()*TAU,m=i<110,r=m?.72+R()*.28:Math.sqrt(R())*.62;return [Math.cos(a)*r*65,Math.sin(a)*r*53,m?.65:1,m?1:.5,R()*TAU];});
+export function follicle(c,x,y){pop.forEach((p,i)=>{c.save();c.globalAlpha*=p[3];cell(c,x+p[0],y+p[1],'lymph',p[2],p[4],i);c.restore();});}
+import { prepareGangrene, gangrene } from '../lib/he_detail.js';
+// 04 三型演变 — sentences 10–13. Entry = 03 exit (LENS_EXIT, HE_EXIT, verdict on the right → wiped).
+// Same patch of wall evolves IN PLACE: rewind → 单纯性 (黏膜+黏膜下层) → 蜂窝织炎性 (全层弥漫) → 坏疽性 (缺血坏死发黑 → 穿孔).
+// A Manim-style vertical "stage track" on the right carries a marker through the three named types (one focus at a time).
+import { C } from '../lib/tokens.js';
+import * as A from '../lib/ann.js';
+import { drawWash } from '../lib/wash.js';
+import { drawLens, fieldToScreen as FTS, BANDS, VESSELS } from '../lib/he.js';
+import { win, fade, titleBlock } from '../lib/chapter.js';
+import { tween, ease, seg, clamp } from '../lib/motion.js';
+import { moodAt, burstShake, holdAfter } from '../lib/mood.js';
+import { drawSurround, drawPointer, offFor } from '../lib/scope.js';
+import { LENS_EXIT, HE_EXIT } from './03.js';
+prepareGangrene(VESSELS);
+const I0 = 10, s = i => I0 + i;
+const L = LENS_EXIT, lerp = (a, b, k) => a + (b - a) * k;
+const PERF = [190, 0];                                   // perforation x in field coords (away from the 03 ulcer)
+export const EXIT_04 = { lens: L, he: { ulcer: 1, neut: 1, fibrin: 1 }, necro: 1, perf: 1 };
+// HE state as a function of t: 03 end → rewind to early (few cells, intact mucosa) → full → (gangrene overlay handles the rest)
+export function heAt(t, T) {
+  const rw = win(t, T.frac(s(0), .25), T.frac(s(0), .8));           // rewind
+  const up = win(t, T.frac(s(2), .05), T.frac(s(2), .9));            // escalate to full wall
+  const detail = ease.inOutCubic(seg(t, T.at(s(0)), T.frac(s(0), .8)));
+  const early = { ulcer: .08, neut: .2, fibrin: 0 };
+  const m = k => ({ ulcer: lerp(early.ulcer, 1, k), neut: lerp(early.neut, 1, k), fibrin: lerp(early.fibrin, 1, k) });
+  const acc = win(t, T.at(s(1)), T.end(s(1)));                       // slow accumulation while still confined to mucosa/submucosa
+  const e2 = { ulcer: lerp(early.ulcer, .16, acc), neut: lerp(early.neut, .36, acc), fibrin: 0 };
+  if (up > 0) return { ulcer: lerp(e2.ulcer, 1, up), neut: lerp(e2.neut, 1, up), fibrin: lerp(0, 1, up), detail, t };
+  if (acc > 0) return { ...e2, detail, t };
+  return { ulcer: lerp(HE_EXIT.ulcer, early.ulcer, rw), neut: lerp(HE_EXIT.neut, early.neut, rw), fibrin: lerp(HE_EXIT.fibrin, early.fibrin, rw), detail, t };
+}
+// Deliberate tempo changes in SCREEN space (the lens is not drawn through the world camera).
+// Every beat follows the measured sentence axis; repeated keys are intentional rests.
+const peakAt = T => T.frac(s(3), .78);
+const heldClock = (t, T) => Math.min(holdAfter(t, peakAt(T), .45), T.end(s(3), -.55));
+// mood_v2: after the peak settles, a very slow continuous push so the 0.8 s VO gap into 05 is not a frozen frame
+export const creep04 = (t, T) => 1 + .006 * Math.max(0, t - T.end(s(3), -.55));
+export function fsAt(t, T) { return tween(t, [
+  [T.at(s(0)), 1.06], [T.end(s(0)), 1.065],
+  [T.at(s(1)), 1.065], [T.end(s(1)), 1.085, ease.inOutSine],
+  [T.at(s(2)), 1.085], [T.frac(s(2), .62), 1.15, ease.outCubic], [T.end(s(2)), 1.15],
+  [T.at(s(3)), 1.15], [T.frac(s(3), .55), 1.24, ease.inQuad],
+  [peakAt(T), 1.48, ease.inQuad], [peakAt(T) + .45, 1.48],
+  [T.end(s(3), -.55), 1.45, ease.outCubic], [T.end(s(3)), 1.45],
+]); }
+// mood_v2: stage moves so the fixed eyepiece pointer lands in the perforation channel at the peak (no move before .55).
+export function offAt(t, T) { return tween(t, [[T.at(s(0)), [0, 0]], [T.frac(s(3), .55), [0, 0]], [peakAt(T), offFor({ r: 1 }, [180, 60], 1.48), ease.inOutSine], [T.end(s(3)), offFor({ r: 1 }, [180, 60], 1.48)]]); }
+export function lensAt(t, T) { const [dx, dy] = tween(t, [
+  [T.at(s(0)), [0, 0]], [T.end(s(1)), [3, -2], ease.inOutSine],
+  [T.frac(s(2), .62), [6, -4], ease.outCubic], [T.end(s(2)), [6, -4]],
+  [T.frac(s(3), .55), [10, -6], ease.inQuad], [peakAt(T), [14, -8], ease.inQuad],
+  [peakAt(T) + .45, [14, -8]], [T.end(s(3), -.55), [0, 0], ease.outCubic], [T.end(s(3)), [0, 0]],
+]); return { x: L.x + dx, y: L.y + dy, r: L.r }; }
+export function gangAt(t, T) { return {
+  kv: win(t, T.frac(s(3), .02), T.frac(s(3), .2)),
+  kn: win(t, T.frac(s(3), .18), T.frac(s(3), .6)),
+  kp: clamp((t - T.frac(s(3), .55)) / (peakAt(T) - T.frac(s(3), .55))) ** 1.7,
+  ko: win(t, T.frac(s(3), .72), peakAt(T)),
+}; }
+export function drawLens04(ctx, Lx, st, fs, g, off = [0, 0]) {
+  drawLens(ctx, Lx, { ...st, necrosis: g.kn * (st.detail || 0) }, fs, { off }); const { kv, kn, kp, ko } = g;
+  if (kv > 0) { ctx.save(); ctx.beginPath(); ctx.arc(Lx.x, Lx.y, Lx.r, 0, 6.283); ctx.clip(); ctx.translate(Lx.x, Lx.y); const z = Lx.r / 420 * fs; ctx.scale(z, z); ctx.translate(-off[0], -off[1]);
+    for (const v of VESSELS) drawWash(ctx, 'c04.thromb', v[0], v[1], v[2] * 3.4, { alpha: kv * .9, grow: kv });
+    gangrene(ctx, g);
+    if(ko > 0) drawWash(ctx, 'c04.leak', PERF[0], BANDS.serosa[1] + 43, 145, { grow: ko, alpha: ko * .32, blend: 'source-over', origin: [.5, .2] });
+    ctx.restore(); } }
+// 05 calls this with its own (shrinking) lens; everything else is 04's exact last frame
+export function drawExit04(ctx, T, Lx, t) { const te = T.end(s(3)) - 1e-3; drawLens04(ctx, Lx, { ...heAt(te, T), t: heldClock(te, T) }, fsAt(te, T), gangAt(te, T), offAt(te, T)); }
+export const DIM = .985;   // 03 leaves the world layer dimmed by a paper veil; 04 keeps it, 05 lifts it
+export default {
+  id: '04',
+  shake: (t, T) => burstShake(t, T.frac(s(3), .76), { frames: 6, amp: 3.6, seed: 404 }),
+  drift: false, boil: false, // quiet really means quiet; no perpetual global drift/ink boil
+  bake(bake) {
+    for (let i = 0; i < 4; i++) {
+      const wash = bake(`c04.necro.${i}`, (b, P) => {
+        P.fill(b, P.blob(0, 0, 290 + i * 13, 36, .38, 460 + i), i % 2 ? C.ink : '#3A1F2A', 105 + i * 22, .42, [.65, .55]);
+        P.fill(b, P.blob(45, -25, 195, 32, .45, 470 + i), '#3A1F2A', 65 + i * 12, .5);
+      }, { seed: 460 + i, hd: true, soft: true, grain: .12, edge: .3, bleed: .5 });
+      // Soften pigment boundaries once in the cached watercolour bitmap.
+      const soft = document.createElement('canvas'); soft.width = wash.width; soft.height = wash.height;
+      const sc = soft.getContext('2d'); sc.filter = 'blur(15px)'; sc.drawImage(wash, 0, 0);
+      const wc = wash.getContext('2d'); wc.clearRect(0, 0, wash.width, wash.height);
+      wc.drawImage(soft, 0, 0);
+    }
+// p5.brush watercolour — PATHOLOGY layer only (redness, blood, exudate, pus, HE stain).
+// Washes are BAKED once at load time with a fixed seed into offscreen canvases, then composited per frame
+// (scale / alpha / radial-mask growth). This removes edge shimmer and makes frames fast + deterministic.
+import { C } from './tokens.js';
+import { fbm, hash } from './motion.js';
+const baked = new Map(); let P5 = null, SIZE = 1024;
+export function initBaker() { return new Promise(res => { new p5(p => { P5 = p; brush.instance(p);
+  p.setup = () => { p.createCanvas(SIZE, SIZE, p.WEBGL); p.pixelDensity(1); p.noLoop(); res(); }; p.draw = () => {}; }, document.createElement('div')); }); }
+// recipe(b, P): draw in local coords with origin at canvas centre, ±SIZE/2. b = brush api, P = helpers
+export function bake(key, recipe, { seed = 1, scale = 2.4, keepWhite = false, hd = false, size, grain = 0, edge = 0, bleed = 0, soft = false } = {}) {   // keepWhite: skip colour-to-alpha (pale pigments over dark washes)
+  // detail: p5.brush buffers stay bound to the original 1024 canvas; only 2D output is resized.
+  const bakeSize = size === undefined ? (hd ? 2048 : SIZE) : Math.max(1, Math.round(size));
+  const p = P5;
+  p.clear(); p.randomSeed(seed); p.noiseSeed(seed); if (brush.seed) brush.seed(seed);
+  brush.scaleBrushes(scale);
+  recipe(brush, helpers); brush.reDraw && brush.reDraw();
+  const cv = document.createElement('canvas'); cv.width = SIZE; cv.height = SIZE; const cx = cv.getContext('2d', { willReadFrequently: true }); cx.drawImage(p.canvas, 0, 0);
+  // colour-to-alpha against white: brush paper-texture speckle (near-white) becomes transparent, pigment keeps its density
+  const im = cx.getImageData(0, 0, SIZE, SIZE), d = im.data;
+  // detail: leave the legacy conversion byte-for-byte intact unless an effect is requested.
+  if (soft || grain || edge || bleed) {
+    detailWash(d, SIZE, key, { keepWhite, soft, grain: hd ? 0 : grain, edge, bleed });
+  } else if (!keepWhite) for (let i = 0; i < d.length; i += 4) { const a = d[i + 3] / 255; if (!a) continue; const m = Math.max(255 - d[i], 255 - d[i + 1], 255 - d[i + 2]) / 255; const na = m * a; if (na < .02) { d[i + 3] = 0; continue; }
+    for (let c = 0; c < 3; c++) d[i + c] = 255 - (255 - d[i + c]) * a / na; d[i + 3] = na * 255; }
+  if (!keepWhite || soft || grain || edge || bleed) cx.putImageData(im, 0, 0);
+  let output = cv;
+  if (hd || bakeSize !== SIZE) {
+    // detail: interpolate processed RGBA, never the brush canvas or its recipe coordinates.
+    output = document.createElement('canvas'); output.width = output.height = bakeSize;
+    const out = output.getContext('2d', { willReadFrequently: true });
+    out.imageSmoothingEnabled = true; out.imageSmoothingQuality = 'high';
+    out.drawImage(cv, 0, 0, bakeSize, bakeSize);
+    if (hd) {
+      const enlarged = out.getImageData(0, 0, bakeSize, bakeSize);
+      finishHD(enlarged.data, bakeSize, key, grain); out.putImageData(enlarged, 0, 0);
+    }
+  }
+  baked.set(key, output); return output;
+}
+// detail: separable scalar filters, with transparent padding; all radii use 1024-unit pixels.
+function filterPlane(src, n, radius, dilate = false) {
+  const tmp = new Float32Array(src.length), out = new Float32Array(src.length), width = 2 * radius + 1;
+  for (let axis = 0; axis < 2; axis++) {
+    const input = axis ? tmp : src, output = axis ? out : tmp;
+    for (let row = 0; row < n; row++) {
+# v6 b02b：接着 b02 做（mini 的裁定）
+
+你在 b02 按停止条件停下是对的。裁定如下：
+- 锁定文件规则不变：engine/lib 和 parity_r4/chapters/04.js 一个字节都不许改，开工和结束时各核一次 sha256。
+- 引擎里没有的细胞和结构，允许你新写在 `film/lib_ext/cells_ext.js` 里：淋巴细胞、浆细胞、滤泡的套区和生发中心、外纵行肌的圆点核、扁平的间皮。写法有硬性要求：
+  1. 必须沿用 he_detail.js 里 detailedNeutrophil 和红细胞的视觉语言，具体是同一套色板（细胞核用 #51336F/#3F2A66 这一族，比 detailedNeutrophil 略深、更饱满；胞质是半透明粉紫色）、同样的轮廓粗细与半透明叠加方式、同样的 Path2D 缓存加随机形变做法、同一个随机数来源。可以 import he_detail.js 里导出的辅助函数，复用的就不要重写。
+  2. 形态照 qa/病理验收清单.md 来画。淋巴细胞：小而圆、深染的核，胞质极少。浆细胞：偏位的车轮状核，核旁有淡染的空晕。滤泡：外圈套区的小淋巴细胞较密，中心生发中心色浅、细胞较大。外纵行肌：横切面上是圆点状的核。间皮：一层扁平细胞。
+  3. 底色、组织纹理和水彩晕染不许新写，只能调用 he.js 和 wash.js 现有的接口和烘焙参数。
+- 其余要求全部按 qa/briefs/v6_b02_s08.md 第 1、4、5、6、7 条执行，低倍按第 3 条（斜切的椭圆，在调用层里裁剪拼接）。
+- 额外要出一张 `qa/v6/b02/对比_新细胞vs样张中性粒.png`：把新细胞和样张里的中性粒细胞、红细胞按 2 倍放大并排，用来证明画风一致。
+- 出图必须用 /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs，在 film/ 目录下执行。
+
+codex
+已确认 b05 的出图脚本和锁定范围。中倍及 s30–s33 将继续使用原组织地图；低倍单独重建不规则腺体，s34 使用独立的局部缺损图层，避免改动前面各帧。细胞沿用现有画法，渗出物和充血调用现有水彩接口。
+exec
+/bin/bash -lc "mkdir -p qa/v6/b06; cp qa/v6/b05/sha256_结束.txt qa/v6/b06/sha256_开工.txt; sha256sum -c qa/v6/b06/sha256_开工.txt > qa/v6/b06/sha256_校验.log; sed -n '85,105p' parity_r4/chapters/04.js; cat /workspace/garden-skills/skills/motion-showreel/SKILL.md | head -65" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+    }
+    bake('c04.thromb', (b, P) => { P.fill(b, P.blob(0, 0, 300, 22, .2, 43), '#3A1F2A', 200, .15); }, { seed: 43, hd: true, soft: true, grain: .12, edge: .3, bleed: .5 });
+    bake('c04.leak', (b, P) => { P.fill(b, P.blob(0, 0, 330, 26, .5, 44), C.pus, 170, .3, [.6, .5]); }, { seed: 44, hd: true, soft: true, grain: .12, edge: .3, bleed: .5 });
+    bake('c04.mark', (b, P) => { P.fill(b, P.blob(0, 0, 360, 26, .3, 45), C.red, 110, .3); }, { seed: 45, hd: true, soft: true, grain: .12, edge: .3, bleed: .5 });
+  },
+  camera: T => [[T.at(s(0)), { x: 960, y: 540, zoom: 1 }], [T.end(s(3)), { x: 960, y: 520, zoom: 1 }]],
+  screen(ctx, t, T, cam, mood = moodAt(t, T)) {
+    // The global atmosphere stays behind pathology. This existing veil reads the SAME paper colour.
+    // mood_v2: still at the eyepiece → near-black surround (replaces the paper veil).
+    const Lx0 = lensAt(t, T); drawSurround(ctx, Lx0, mood.scope ?? 1);
+    const sceneT = heldClock(t, T);
+    const st = { ...heAt(t, T), t: sceneT }, fs = fsAt(t, T) * creep04(t, T);
+    const Lx = Lx0, off = offAt(t, T); drawLens04(ctx, Lx, st, fs, gangAt(t, T), off); drawPointer(ctx, Lx, 1);
+    const L = Lx, fieldToScreen = (L, p, fs) => FTS(L, p, fs, off);
+    // perforation accent lives on the LENS RIM (local object), not on the paper
+    const fr = mood.tint.flashRed; if (fr > 0) { ctx.save(); ctx.globalAlpha *= .85 * fr; ctx.strokeStyle = C.red; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(L.x, L.y, L.r + 8, 0, 6.283); ctx.stroke(); ctx.restore(); }
+    // ---- wipe 03's verdict text (it is still on screen at entry) ----
+    const kw = 1 - win(t, T.at(s(0)), T.at(s(0), .6));
+    if (kw > 0) { ctx.save(); ctx.globalAlpha = kw; A.label(ctx, '病理诊断', 1060, 330, { size: 26, alpha: .65 }); A.line(ctx, [1060, 356], [1700, 356], { w: 1.6 });
+      A.label(ctx, '急性蜂窝织炎性阑尾炎', 1060, 420, { size: 62, w: 800 }); A.label(ctx, '＝ 化脓性炎', 1060, 510, { size: 52, w: 800, col: C.red });
+      A.brace(ctx, [1060, 566], [1660, 566], { depth: 12 }); A.label(ctx, '中性粒细胞弥漫浸润全层', 1360, 612, { size: 26, align: 'center' }); ctx.restore(); }
+---
+name: motion-showreel
+description: 用代码制作图形、文字或界面动画视频，输出 MP4 和可编辑源码，最长 20 分钟。适用于动效作品集、产品片、UI 动效、动态排版、Logo 片头、生成艺术与讲解视频；支持独立选择 BGM/音效来源、用户口播，以及用用户提供的口播稿通过 TTS 合成语音。不用于实拍制作、写实人物生成或一般视频剪辑。
+---
+
+# Motion Showreel
+
+把一个想法做成以图形、文字或界面动画为主的视频，交付 MP4 和能重建的源码。保留短片的动效密度和创意自由，也支持按章节制作最长 20 分钟的内容。
+
+**原理**：页面暴露确定性的 `render(t)`，脚本逐帧截图，再用 ffmpeg 合成 MP4。画面、口播、配乐和音效共用 `timeline.js`。无口播时按内容和音乐节拍组织画面；有口播时以真实语音时间为准，再安排音乐和音效。
+
+**默认先预览，再导出**：所有类型都先打开剪辑工作区让用户查看真实画面与声音。用户点击「导出视频」或在对话中确认预览通过、可以导出后，才合成 MP4。首次要求「做一个视频」不等于预览已经通过；只有用户明确免除预览时才能直接导出。静帧、自查和音频准备可提前进行，不默认生成代理 MP4 或整片样片。
+
+**按需观看制作过程**：需求问答时识别「边做边看、实时进度、每个阶段看看」等意愿；用户表达后就提前打开进度页，从需求说明到风格帧、口播样例、镜头与混音逐步展示。按 `references/progress.md` 发布已自查的阶段成果，不直接加载半成品代码。收到用户确认后，先用 `progress.mjs <project> --stage <当前阶段> --confirm --message "已确认，正在……"` 解除等待，再进行调研、下载或制作；不等产物做完才补进度。未提出时保持默认的最终工作区预览；不改变制作标准、确认节点和成片验收。
+
+**好片子从哪来**：变化密度、运动质感、一个记忆点、音画关系，这四项通常决定观感。但具体怎么动、动多少，由**风格和内容**决定，不是每支片子都要多机位、弹簧和满屏音效。全局只守几条底线（见「底线」），其余都是给模型的起点，不是天花板。
+
+**视频感**：讲解、产品演示和叙事片要让对象的行为与关系随内容发展，保持镜头间的空间承接。不能把口播逐句变成静态标题卡，再用淡入、缩放和背景粒子包装。分镜先写清「观众要看懂什么变化、主体前后状态、如何接上一个镜头」，再选动效。Logo、动态排版、循环与刻意静止的风格仍按自身语法制作；不靠持续乱动或强制 60fps 判定好坏。具体方法见 `references/craft.md` 的「连续叙事」。
+
+---
+
+## 适用范围
+
+| 用户想要 | 用这个 Skill？ |
+|---|---|
+| 产品宣传短片、动效作品集、UI 动效、动态排版 / 卡点、Logo 演绎、片头、循环动图 | ✅ |
+| 视频模型生成的绿幕人物 + 代码做的场景、大字、动效 | ✅ 人物由用户提供（`references/formats.md` H 类） |
+| 用户提供口播稿或录音，要导出有讲解的 MP4 | ✅ 口播驱动模式；TTS 必须使用用户提供的原稿 |
+| 需要点击推进、现场演讲、交互式网页演示，或文章转口播稿 | 用 `web-video-presentation` |
+| 网页、落地页、交互原型、静态视觉稿 | ❌ 用 `web-design-engineer` |
+| 写实人物表演、实拍质感、剪辑已有素材、用视频模型直接出画面 | ❌ |
+
+**时长**：最长 20 分钟（1200 秒），以用户确认的时长为准。短片仍适合 5–60 秒，不把长片做成连续二十分钟的高密度卡点。超过 2 分钟，读 `references/long-form.md`，按章节规划、制作和审片。用户指定时长与口播实际长度或内容量冲突时，停下来确认调整方案，不擅自截断、加速口播或改变片长。
+
+## Opus 的长处和默认坑
+
+- **长处**：一个文件里能混用 Canvas、SVG/DOM、WebGL、Three.js，甚至每段换一种媒介；运动可以用公式精确计算（闭式弹簧、节拍网格、子帧运动模糊）；声音和画面读同一张时间表；能长时间自主「渲静帧 → 看图 → 修改」；审美判断力强，一句「全力以赴」就可能出很惊艳的东西。
+- **默认坑**：没有约束时，画面会落到深色背景、居中大字、所有元素一起淡入、紫蓝渐变加发光、机位不动；配乐会落到 A 小调四踩、每个重拍 impact + crash、钟声落版，几支片子听起来像同一首歌。所以要先找对标（画面和声音都要）、写清风格和禁止清单。但约束也不能写死：这个 Skill 的风格库和手法库都是起点，主题需要时随时改造、混搭或自定义。
+- **做不好的**：写实人物、复杂的手部 / 布料 / 毛发、需要真实物理精度的东西、照片级产品（除非用户提供模型或图片）。遇到这些就风格化处理，或者换成绿幕人物 + 代码场景的分工。
+
+---
+
+## 工作流
+
+```
+0 环境检查（一次）
+1 需求确认 ──────── 补齐必填项，汇总要求 → 🛑 等用户确认
+2 brief.md ──────── 对标 → 用途 + 风格 → Reel Read → 分镜 + 声音计划
+3 风格帧 ────────── 已定风格：3 张帧；未定风格：3 个方向各 1 张 → 🛑 等用户确认
+4 制作 ──────────── 有口播先准备真实音频及时间戳 → timeline → 逐镜头 → 网页自查
+5 配乐与混音 ────── BGM、音效独立选来源；有口播时人声优先
+6 工作区预览 ────── 主动打开剪辑工作区，修改后复看 → 🛑 等用户确认导出
+7 导出与验收 ────── 合成 MP4 → 技术检查（必须全过）+ 成片复核
+8 交付
+```
+
+工作目录：在用户当前目录下建 `<slug>/`，所有文件都放在里面：`brief.md`、`index.html`、`motion.js`、`timeline.js`、`score.mjs` 或 `score.tone.js`（按 scaffold 的 `--audio` 选择）、`build.sh`、`fonts/`、`assets/`、`audio/`、`qa/`、`out/`。
+
+### 第 0 步：环境
+
+第一次使用时运行 `sh <skill>/scripts/setup.sh`：它会安装 Playwright 和 Chromium，再跑 `check-env.mjs`。需要 Node 18+ 和 ffmpeg；缺了就告诉用户怎么装，不要替用户装系统软件。工具自带测试：`cd <skill>/scripts && npm test`。
+
+### 第 1 步：需求确认（停下来等用户）
+
+集中补问缺失项，已经提供的不要重复问。以下信息必须明确，不能用固定默认值代替用户决定：
+
+exec
+/bin/bash -lc "cat > /tmp/edit_b06.py <<'PY'
+from pathlib import Path
+p=Path('film/chapters/s08.js');s=p.read_text().replace(\"import {detailedNeutrophil}\",\"import {chromatin,detailedNeutrophil}\")
+s=s.replace('let map,source;','let map,source,defectMap;')
+s=s.replace(\"},draw(c,t,T){\", \"makeDefect();\\n},draw(c,t,T){\",1)
+s=s.replace('else c.drawImage(map,-1600,-1050);','else c.drawImage(id===34?defectMap:map,-1600,-1050);',1)
+# neutral lamina source: reuse baked band & original tissue texture, exclude source crypts
+s=s.replace('const row=Math.floor(fy+320)*840,q=', 'const muc=fy> -283&&fy< -153;\\n      const row=Math.floor((muc?-158:fy)+320)*840,q=')
+s=s.replace('const sx=p.x+420;', 'if(p.y> -283&&p.y< -153)continue;\\n      const sx=p.x+420;')
+s=s.replace('lowCache={k,canvas};','drawLowGlands(ctx,k);\\n    lowCache={k,canvas};')
+s+='''
+// Fixed local gland profiles: unequal lengths, curved axes, and oblique/cross cuts.
+// Nuclear colour, dimensions and chromatin match he.js crypt epithelium.
+function drawLowGlands(c,k){
+ const r=rng(60608),glands=[];
+ for(let a=-Math.PI+.035;a<Math.PI;){
+   const cross=r()<.27,y=cross?-205-r()*48:-222+(r()-.5)*27;
+   glands.push({a,y,h:cross?10+r()*12:26+r()*25,w:10+r()*6,tilt:(r()-.5)*.65,bend:(r()-.5)*13,seed:r()*50});
+   a+=.085+r()*.095;
+ }
+ for(const g of glands){
+   const x=(g.a+Math.PI/2)*620,p=lowPoint(x,g.y,k),d=lowPoint(x+.5,g.y,k),angle=Math.atan2(d[1]-p[1],d[0]-p[0]);
+   c.save();c.translate(1600+p[0],1050+p[1]);c.rotate(angle+g.tilt);
+   const h=g.h*(1.45-.45*k),w=g.w;
+   const at=a=>[Math.cos(a)*w+g.bend*Math.sin(a)*Math.sin(a),Math.sin(a)*h];
+   c.beginPath();for(let j=0;j<=40;j++){const a=j/40*TAU,p=at(a),f=1+.04*Math.sin(3*a+g.seed);j?c.lineTo(p[0]*f,p[1]*f):c.moveTo(p[0]*f,p[1]*f);}c.closePath();c.fillStyle='rgba(255,248,250,.9)';c.fill();
+   c.fillStyle='#51336F';for(let j=0;j<22;j++){const a=j/22*TAU,p=at(a);const nx=p[0]+4*Math.cos(a),ny=p[1]+4*Math.sin(a);c.beginPath();c.ellipse(nx,ny,3,4.4,a,0,TAU);c.fill();chromatin(c,nx,ny,3,4.4,a);}c.restore();
+ }
+ // Lamina propria population uses the unchanged b02b cell interface.
+ for(let i=0;i<820;i++){const a=-Math.PI+r()*TAU,y=-280+r()*124,x=(a+Math.PI/2)*620;
+  if(glands.some(g=>Math.abs(a-g.a)*620<g.w+11&&Math.abs(y-g.y)<g.h+9))continue;
+  const p=lowPoint(x,y,k);cell(c,1600+p[0],1050+p[1],i%7?'lymph':'plasma',.65+r()*.2,r()*TAU,i);
+ }
+}
+function makeDefect(){
+ // Recipes copied from 04 c04.leak / c04.thromb; only pigment changes.
+ bake('s08.exudate',(b,P)=>P.fill(b,P.blob(0,0,330,26,.5,44),'#DCA4B2',170,.3,[.6,.5]),{seed:44,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});
+ bake('s08.congestion',(b,P)=>P.fill(b,P.blob(0,0,300,22,.2,43),'#C9455A',200,.15),{seed:43,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});
+ const patch=document.createElement('canvas');patch.width=840;patch.height=620;const c=patch.getContext('2d');c.drawImage(source,0,0);c.translate(420,320);
+ // Remove a short surface segment with an irregular, shallow tissue edge.
+ c.save();c.beginPath();c.moveTo(-32,-319);c.lineTo(52,-319);c.lineTo(49,-288);c.lineTo(41,-279);c.lineTo(26,-282);c.lineTo(12,-274);c.lineTo(-3,-279);c.lineTo(-19,-276);c.lineTo(-29,-285);c.closePath();c.clip();
+ c.drawImage(source,360,4,120,20,-50,-320,120,52);c.restore();
+ // Surviving edges retain original nuclear/chromatin drawing, staggered heights.
+ for(const [x,y] of [[-37,-286],[-33,-282],[53,-290],[57,-287]]){c.fillStyle='#51336F';c.beginPath();c.ellipse(x,y,3,4.4,.1,0,TAU);c.fill();chromatin(c,x,y,3,4.4,.1);}
+ c.save();c.translate(7,-279);c.scale(1,.24);drawWash(c,'s08.exudate',0,0,125,{alpha:.65});c.restore();
+ for(const [x,y,w] of [[-8,-258,48],[33,-246,38],[-28,-244,31]]){c.save();c.translate(x,y);c.scale(1,.48);drawWash(c,'s08.congestion',0,0,w,{alpha:.75});c.restore();}
+ for(let i=0;i<7;i++)detailedNeutrophil(c,-23+i*11,-282+Math.sin(i*2.1)*4,{lobes:2+i%4,rot:i*.8,sz:.75},1);
+ const src=c.getImageData(0,0,840,620).data;defectMap=document.createElement('canvas');defectMap.width=3200;defectMap.height=2100;const mc=defectMap.getContext('2d');mc.drawImage(map,0,0);const im=mc.getImageData(0,0,3200,2100);
+ for(let j=0;j<2100;j++)for(let i=0;i<3200;i++){const u=i-1600,v=j-1050,x=(u*Math.cos(.14)+v*Math.sin(.14))/1.6,y=-u*Math.sin(.14)+v*Math.cos(.14),a=Math.atan2(y,x),fy=Math.hypot(x,y)-620-12*Math.sin(a*3)-9*Math.sin(a*5),fx=(a+Math.PI/2)*620;
+ if(fx< -55||fx>72||fy< -320||fy> -227)continue;const q=(Math.floor(fy+320)*840+Math.floor(fx+420))*4,n=(j*3200+i)*4;im.data.set(src.subarray(q,q+4),n);}
+ mc.putImageData(im,0,0);
+}
+'''
+p.write_text(s)
+PY
+python3 /tmp/edit_b06.py
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs . --still 1,2.3,3.2,3.8,9,15,21,27,33 --out ../qa/v6/b06" in /workspace/病理科普视频/v5/film
+exec
+/bin/bash -lc 'python3 /tmp/edit_b06.py' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+ exited 130 in 6077ms:
+Traceback (most recent call last):
+  File "/tmp/edit_b06.py", line 2, in <module>
+    p=Path('film/chapters/s08.js');s=p.read_text().replace("import {detailedNeutrophil}","import {chromatin,detailedNeutrophil}")
+                                     ~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/pathlib/_local.py", line 548, in read_text
+    return PathBase.read_text(self, encoding, errors, newline)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/pathlib/_abc.py", line 632, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/pathlib/_local.py", line 539, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'film/chapters/s08.js'
+
+exec
+/bin/bash -lc 'node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs . --still 1,2.3,3.2,3.8,9,15,21,27,33 --out ../qa/v6/b06' in /workspace/病理科普视频/v5/film
+exec
+/bin/bash -lc "cp qa/v6/b05/check_low_determinism.mjs qa/v6/b06/check_low_determinism.mjs; sed -i 's@qa/v6/b05/@qa/v6/b06/@g' qa/v6/b06/check_low_determinism.mjs; git diff --check; node --check film/chapters/s08.js" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+ succeeded in 15100ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5/qa/v6/b06/t_001.00.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_002.30.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_003.20.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_003.80.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_009.00.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_015.00.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_021.00.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_027.00.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_033.00.png
+
+exec
+/bin/bash -lc "cat > qa/v6/b06/verify.py <<'PY'
+from pathlib import Path
+from PIL import Image, ImageChops, ImageStat, ImageDraw, ImageFont
+import shutil,hashlib,json
+out=Path(__file__).resolve().parent;root=out.parents[2];base=out.parent/'b05'
+frames=[('s08_low',1),('s08_transition_01',2.3),('s08_transition_02',3.2),('s08_mid',3.8)]+[(f's08_high_s{s}',t) for s,t in zip(range(30,35),[9,15,21,27,33])]
+for name,t in frames:shutil.copyfile(out/f't_{t:06.2f}.png',out/f'{name}.png')
+rows=[]
+for name,t in frames[3:-1]:
+ a=Image.open(base/f'{name}.png').convert('RGB');b=Image.open(out/f'{name}.png').convert('RGB');d=ImageChops.difference(a,b);mae=sum(ImageStat.Stat(d).mean)/3
+ rows.append(dict(frame=name,RGB_MAE=mae,changed_pixels=sum(1 for p in d.getdata() if max(p)>0),passed=mae<.5));assert mae<.5
+(out/'像素一致性报告.json').write_text(json.dumps(rows,ensure_ascii=False,indent=2))
+(out/'像素一致性报告.md').write_text('# b06 / b05 像素一致性\\n\\n1920×1080，RGB 0–255；整帧比较，无遮罩、配准或颜色校正。\\n\\n|帧|MAE|变化像素|通过|\\n|---|---|---|---|\\n'+''.join(f\"|{r['frame']}|{r['RGB_MAE']}|{r['changed_pixels']}|{r['passed']}|\\n\" for r in rows))
+font=ImageFont.truetype('/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc',22)
+for title,name in [('低倍','s08_low'),('s34','s08_high_s34')]:
+ canvas=Image.new('RGB',(1920,580),'#111114');dr=ImageDraw.Draw(canvas)
+ for j,folder in enumerate([base,out]):
+  canvas.paste(Image.open(folder/f'{name}.png').convert('RGB').resize((960,540)),(j*960,40));dr.text((j*960+30,8),'b05' if j==0 else 'b06',font=font,fill='white')
+ canvas.save(out/f'{title}_b05_vs_b06.png')
+seven=[frames[0]]+frames[3:];sheet=Image.new('RGB',(1920,4*398),'#111114');dr=ImageDraw.Draw(sheet)
+for i,(name,t) in enumerate(seven):
+ x=i%2*960;y=i//2*398;sheet.paste(Image.open(out/f'{name}.png').convert('RGB').resize((640,360)),(x+160,y+34));dr.text((x+24,y+3),f'{name} · {t}s',font=font,fill='white')
+sheet.save(out/'review_sheet.png')
+files=sorted(p for p in (root/'engine/lib').rglob('*') if p.is_file())+[root/'parity_r4/chapters/04.js']
+end=''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+str(p.relative_to(root))+'\\n' for p in files)
+(out/'sha256_结束.txt').write_text(end);assert end==(out/'sha256_开工.txt').read_text();assert end==(base/'sha256_结束.txt').read_text()
+(out/'sha256_校验.log').write_text('PASS: b05 结束 = b06 开工 = b06 结束；engine/lib 全部文件及 parity_r4/chapters/04.js sha256 一致\\n')
+print(json.dumps(rows,ensure_ascii=False,indent=2))
+PY" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+exec
+/bin/bash -lc 'python3 qa/v6/b06/verify.py' in /workspace/病理科普视频/v5
+ succeeded in 1520ms:
+/workspace/病理科普视频/v5/qa/v6/b06/verify.py:10: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  rows.append(dict(frame=name,RGB_MAE=mae,changed_pixels=sum(1 for p in d.getdata() if max(p)>0),passed=mae<.5));assert mae<.5
+[
+  {
+    "frame": "s08_mid",
+    "RGB_MAE": 0.0,
+    "changed_pixels": 0,
+    "passed": true
+  },
+  {
+    "frame": "s08_high_s30",
+    "RGB_MAE": 0.0,
+    "changed_pixels": 0,
+    "passed": true
+  },
+  {
+    "frame": "s08_high_s31",
+    "RGB_MAE": 0.0,
+    "changed_pixels": 0,
+    "passed": true
+  },
+  {
+    "frame": "s08_high_s32",
+    "RGB_MAE": 0.0,
+    "changed_pixels": 0,
+    "passed": true
+  },
+  {
+    "frame": "s08_high_s33",
+    "RGB_MAE": 0.0,
+    "changed_pixels": 0,
+    "passed": true
+  }
+]
+
+codex
+首轮像素检查已通过：中倍和 s30–s33 与 b05 的整帧 MAE 均为 0。目视复核发现，低倍背景仍有放射状纹理，s34 的缺损填补也带入了不合适的细胞纹理；我会修正这两处后重新出图、复核。
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('film/chapters/s08.js');s=p.read_text().replace('import {chromatin,detailedNeutrophil}', 'import {tissueTexture,chromatin,detailedNeutrophil}')
+s=s.replace('lowSource=im;', '''// Reuse the engine's baked band wash and tissue texture without crypt contours.
+  const bg=document.createElement('canvas');bg.width=w;bg.height=h;const bc=bg.getContext('2d');
+  bc.drawImage(source,0,608,840,12,0,0,w,h);bc.translate(420,320);drawWash(bc,'he.bands',0,0,1024);tissueTexture(bc,1);
+  const clean=bc.getImageData(0,0,w,h).data;
+  for(let y=38;y<167;y++)for(let x=0;x<w;x++){const n=(y*w+x)*4;d.set(clean.subarray(n,n+4),n);}
+  lowSource=im;''')
+s=s.replace('const row=Math.floor((muc?-158:fy)+320)*840,q=', 'const row=Math.floor(fy+320)*840,q=')
+s=s.replace('c.drawImage(source,360,4,120,20,-50,-320,120,52);','c.drawImage(source,0,608,840,12,-420,-320,840,52);')
+p.write_text(s)
+PY
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs . --still 1,2.3,3.2,3.8,9,15,21,27,33 --out ../qa/v6/b06" in /workspace/病理科普视频/v5/film
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('film/chapters/s08.js');s=p.read_text().replace('import {chromatin,detailedNeutrophil}', 'import {tissueTexture,chromatin,detailedNeutrophil}')
+s=s.replace('lowSource=im;', '''// Reuse the engine's baked band wash and tissue texture without crypt contours.
+  const bg=document.createElement('canvas');bg.width=w;bg.height=h;const bc=bg.getContext('2d');
+  bc.drawImage(source,0,608,840,12,0,0,w,h);bc.translate(420,320);drawWash(bc,'he.bands',0,0,1024);tissueTexture(bc,1);
+  const clean=bc.getImageData(0,0,w,h).data;
+  for(let y=38;y<167;y++)for(let x=0;x<w;x++){const n=(y*w+x)*4;d.set(clean.subarray(n,n+4),n);}
+  lowSource=im;''')
+s=s.replace('const muc=fy> -283&&fy< -153;\\n      ', '')
+s=s.replace('const row=Math.floor((muc?-158:fy)+320)*840,q=', 'const row=Math.floor(fy+320)*840,q=')
+s=s.replace('c.drawImage(source,360,4,120,20,-50,-320,120,52);','c.drawImage(source,0,608,840,12,-420,-320,840,52);')
+p.write_text(s)
+PY" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+ exited 130 in 12424ms:
+Traceback (most recent call last):
+  File "<stdin>", line 2, in <module>
+  File "/usr/lib/python3.13/pathlib/_local.py", line 548, in read_text
+    return PathBase.read_text(self, encoding, errors, newline)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/pathlib/_abc.py", line 632, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/pathlib/_local.py", line 539, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'film/chapters/s08.js'
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5/qa/v6/b06/t_001.00.png
+
+exec
+/bin/bash -lc 'node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs . --still 1,2.3,3.2,3.8,9,15,21,27,33 --out ../qa/v6/b06' in /workspace/病理科普视频/v5/film
+exec
+/bin/bash -lc 'node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs . --determinism > ../qa/v6/b06/determinism.log 2>&1' in /workspace/病理科普视频/v5/film
+exec
+/bin/bash -lc 'node qa/v6/b06/check_low_determinism.mjs > qa/v6/b06/determinism_low_browser.log 2>&1' in /workspace/病理科普视频/v5
+exec
+/bin/bash -lc "rg -n 'function tissueTexture|function chromatin' film/lib/he_detail.js; git diff --stat -- film; git diff --check" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+9:export function chromatin(ctx,x,y,rx,ry,a){ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.scale(rx,ry);ctx.fillStyle='#38234F';ctx.fill(speck);ctx.restore();}
+21:export function tissueTexture(ctx,k){ctx.save();ctx.globalAlpha*=k;ctx.strokeStyle='rgba(177,84,124,.3)';ctx.lineWidth=.65;ctx.stroke(muscleFibres);ctx.strokeStyle='rgba(189,106,147,.4)';ctx.stroke(collagen);ctx.restore();}
+ film/chapters/s08.js | 56 +++++++++++++++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 53 insertions(+), 3 deletions(-)
+
+ succeeded in 16068ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5/qa/v6/b06/t_001.00.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_002.30.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_003.20.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_003.80.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_009.00.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_015.00.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_021.00.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_027.00.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_033.00.png
+
+exec
+/bin/bash -lc 'python3 qa/v6/b06/verify.py' in /workspace/病理科普视频/v5
+ succeeded in 1467ms:
+/workspace/病理科普视频/v5/qa/v6/b06/verify.py:10: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  rows.append(dict(frame=name,RGB_MAE=mae,changed_pixels=sum(1 for p in d.getdata() if max(p)>0),passed=mae<.5));assert mae<.5
+[
+  {
+    "frame": "s08_mid",
+    "RGB_MAE": 0.0,
+    "changed_pixels": 0,
+    "passed": true
+  },
+  {
+    "frame": "s08_high_s30",
+    "RGB_MAE": 0.0,
+    "changed_pixels": 0,
+    "passed": true
+  },
+  {
+    "frame": "s08_high_s31",
+    "RGB_MAE": 0.0,
+    "changed_pixels": 0,
+    "passed": true
+  },
+  {
+    "frame": "s08_high_s32",
+    "RGB_MAE": 0.0,
+    "changed_pixels": 0,
+    "passed": true
+  },
+  {
+    "frame": "s08_high_s33",
+    "RGB_MAE": 0.0,
+    "changed_pixels": 0,
+    "passed": true
+  }
+]
+
+ succeeded in 18498ms:
+ succeeded in 20679ms:
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('film/chapters/s08.js');s=p.read_text().replace(\"c.drawImage(source,0,608,840,12,-420,-320,840,52);c.restore();\", \"const pixels=source.getContext('2d').getImageData(0,0,840,28).data;let best=0,err=Infinity;for(let n=0;n<pixels.length;n+=4){const e=Math.abs(pixels[n]-246)+Math.abs(pixels[n+1]-238)+Math.abs(pixels[n+2]-240);if(e<err){err=e;best=n/4;}}\\n c.imageSmoothingEnabled=false;c.drawImage(source,best%840,Math.floor(best/840),1,1,-55,-320,130,56);c.restore();\")
+p.write_text(s)
+PY" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+exec
+/bin/bash -lc 'node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs . --still 1,2.3,3.2,3.8,9,15,21,27,33 --out ../qa/v6/b06' in /workspace/病理科普视频/v5/film
+exec
+/bin/bash -lc 'node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs . --determinism > ../qa/v6/b06/determinism.log 2>&1' in /workspace/病理科普视频/v5/film
+exec
+/bin/bash -lc 'node qa/v6/b06/check_low_determinism.mjs > qa/v6/b06/determinism_low_browser.log 2>&1' in /workspace/病理科普视频/v5
+exec
+/bin/bash -lc 'cat qa/v6/b06/determinism_low.log; git diff --numstat -- film/lib film/lib_ext; git diff --check' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+PASS: 1, 2.3, 3.2, 3.8 s repeated in different orders: byte-identical PNGs
+
+ succeeded in 15532ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5/qa/v6/b06/t_001.00.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_002.30.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_003.20.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_003.80.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_009.00.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_015.00.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_021.00.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_027.00.png
+/workspace/病理科普视频/v5/qa/v6/b06/t_033.00.png
+
+ succeeded in 18069ms:
+ succeeded in 20380ms:
+exec
+/bin/bash -lc "cat > qa/v6/b06/自检.md <<'EOF'
+# v6 b06 自检
+
+基于已提交 b05。生产源码仅修改 film/chapters/s08.js；没有 git commit，未改动开工已有 assembly 文件。
+
+低倍单独使用原 he.bands 水彩和 tissueTexture，去除黏膜源图的径向隐窝轮廓。腺体采用固定种子，不等角间距、不等宽度和长度，局部轴线倾斜并弯曲，混合短圆形横切及斜切剖面；核的尺寸、色板及 chromatin 沿用 he.js 的隐窝画法。腺间散布的淋巴细胞和浆细胞仍调用 b02b cell()。未修改 film/lib、film/lib_ext 或共享 RNG。其他组织层保持原低倍流程，两张过渡帧使用同一低倍重建。
+
+s34 使用独立 defectMap，仅在原地图的一小块黏膜表面替换。缺损清除表面上皮，边缘参差，保留两侧上皮核；缺损面少量渗出及原 detailedNeutrophil 中性粒细胞，下方三小处充血。用于清除的淡染背景直接取原组织源图腔内底色。渗出物配方取 04.js 的 c04.leak（blob 330,26,.5,44；fill 170,.3,[.6,.5]；seed44），充血取 c04.thromb（blob 300,22,.2,43；fill200,.15；seed43）；二者均 hd:true、soft:true、grain:.12、edge:.3、bleed:.5，仅调整为嗜酸性及红细胞色板。没有另写水彩或细胞算法。
+
+中倍及 s30–s33 继续绘制 b05 的原 map。整帧 RGB 比较无任何遮罩，五帧 MAE 全为0，变化像素数全为0，见像素一致性报告。
+
+锁定 engine/lib 全部文件和 parity_r4/chapters/04.js，b05 结束、b06 开工及结束 sha256 一致。
+
+出图沿用指定程序，在 film/ 执行：
+
+"'```sh
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs . --still 1,2.3,3.2,3.8,9,15,21,27,33 --out ../qa/v6/b06
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs . --determinism
+```
+
+附加低倍乱序重绘与 b05 相同：node qa/v6/b06/check_low_determinism.mjs。像素、拼图、结束哈希由 python3 qa/v6/b06/verify.py 生成。review_sheet.png 严格七帧（低倍、中倍、s30–s34），另有两张过渡帧及 b05/b06 两张全帧并排对照。浏览器 favicon 404 不影响出图。
+EOF' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+codex
+低倍已去掉残留的放射状纹理，加入长短、弯曲程度和间距不同的腺体及横切面；s34 已清除局部上皮，并加入少量渗出物、中性粒细胞和下方充血。最终静帧已生成，正在完成最后一轮确定性检查和七帧总览核对。
+exec
+/bin/bash -lc 'python3 qa/v6/b06/verify.py; tail -8 qa/v6/b06/determinism.log' in /workspace/病理科普视频/v5
+ succeeded in 1563ms:
+/workspace/病理科普视频/v5/qa/v6/b06/verify.py:10: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  rows.append(dict(frame=name,RGB_MAE=mae,changed_pixels=sum(1 for p in d.getdata() if max(p)>0),passed=mae<.5));assert mae<.5
+[
+  {
+    "frame": "s08_mid",
+    "RGB_MAE": 0.0,
+    "changed_pixels": 0,
+    "passed": true
+  },
+  {
+    "frame": "s08_high_s30",
+    "RGB_MAE": 0.0,
+    "changed_pixels": 0,
+    "passed": true
+  },
+  {
+    "frame": "s08_high_s31",
+    "RGB_MAE": 0.0,
+    "changed_pixels": 0,
+    "passed": true
+  },
+  {
+    "frame": "s08_high_s32",
+    "RGB_MAE": 0.0,
+    "changed_pixels": 0,
+    "passed": true
+  },
+  {
+    "frame": "s08_high_s33",
+    "RGB_MAE": 0.0,
+    "changed_pixels": 0,
+    "passed": true
+  }
+]
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+deterministic: 6 frames match across render orders (3.96, 13.32, 18, 26.28, 33.48, 35.967 s)
+
+exec
+/bin/bash -lc 'git diff --check; cat qa/v6/b06/determinism_low.log qa/v6/b06/sha256_校验.log; git status --short' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+PASS: 1, 2.3, 3.2, 3.8 s repeated in different orders: byte-identical PNGs
+PASS: b05 结束 = b06 开工 = b06 结束；engine/lib 全部文件及 parity_r4/chapters/04.js sha256 一致
+ M assembly/endcard/data/endcard.json
+ M assembly/endcard/endcard.js
+ M assembly/endcard/static-preview.py
+ M assembly/endcard/样帧_片尾.png
+ M film/chapters/s08.js
+?? assembly/.gitignore
+?? assembly/package-lock.json
+?? assembly/package.json
+?? assembly/pipeline/
+?? assembly/qa/
+?? assembly/subtitle/
+?? qa/briefs/run_v6_b06.log
+?? qa/briefs/v6_b06_mucosa.md
+?? qa/v6/b06/
+
+exec
+/bin/bash -lc "cat >> qa/v6/b06/自检.md <<'EOF'
+
+最终验证：指定 --determinism 六个时点乱序一致、退出0；附加1、2.3、3.2、3.8秒乱序重复 PNG 字节一致、退出0；git diff --check 通过。已查看低倍对照、s34 原尺寸、第二过渡帧及七帧总览。过渡保留 b05 的重映射/渐变复合方法，因此中间帧有组织叠影，并非刚性相机推镜。
+EOF" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+codex
+b06 已完成，未执行 git commit。
+
+- [七帧总览](/workspace/病理科普视频/v5/qa/v6/b06/review_sheet.png)
+- [低倍 b05 vs b06](/workspace/病理科普视频/v5/qa/v6/b06/低倍_b05_vs_b06.png)
+- [s34 b05 vs b06](/workspace/病理科普视频/v5/qa/v6/b06/s34_b05_vs_b06.png)
+
+中倍及 s30–s33 与 b05 整帧 MAE 均为 **0**。锁定文件 SHA256、默认及低倍乱序 determinism 检查全部通过。两张过渡帧和[自检报告](/workspace/病理科普视频/v5/qa/v6/b06/自检.md)已保存至同目录。
+tokens used
+57,640
+b06 已完成，未执行 git commit。
+
+- [七帧总览](/workspace/病理科普视频/v5/qa/v6/b06/review_sheet.png)
+- [低倍 b05 vs b06](/workspace/病理科普视频/v5/qa/v6/b06/低倍_b05_vs_b06.png)
+- [s34 b05 vs b06](/workspace/病理科普视频/v5/qa/v6/b06/s34_b05_vs_b06.png)
+
+中倍及 s30–s33 与 b05 整帧 MAE 均为 **0**。锁定文件 SHA256、默认及低倍乱序 determinism 检查全部通过。两张过渡帧和[自检报告](/workspace/病理科普视频/v5/qa/v6/b06/自检.md)已保存至同目录。
