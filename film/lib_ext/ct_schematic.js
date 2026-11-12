@@ -32,6 +32,15 @@ function speckle(c,cx,cy,rx,ry,seed,count,color,amin=.02,amax=.07,maxR=11){
   c.restore();
 }
 
+function mottle(c,cx,cy,rx,ry,seed,count,color,alphaMax=.055,maxR=28){
+  const r=rand(seed);c.save();ePath(c,cx,cy,rx,ry,seed,.02);c.clip();
+  for(let i=0;i<count;i++){
+    const a=r()*TAU,d=Math.sqrt(r());
+    c.globalAlpha=.02+r()*alphaMax;c.fillStyle=color;
+    c.beginPath();c.ellipse(cx+Math.cos(a)*rx*d,cy+Math.sin(a)*ry*d,8+r()*maxR,5+r()*maxR*.6,r()*TAU,0,TAU);c.fill();
+  }
+  c.globalAlpha=1;c.restore();
+}
 function ring(c,cx,cy,r0,r1,color,seed=1,amp=.012){
   const n=90;c.beginPath();
   for(let i=0;i<=n;i++){const a=i/n*TAU,r=r1*(1+amp*Math.sin(a*4+seed));const x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;i?c.lineTo(x,y):c.moveTo(x,y);}
@@ -67,11 +76,11 @@ function drawBody(c,g,seed=11){
   // skin + subcutaneous fat (lobulated, not a smooth ring)
   ePath(c,cx,cy,R,R*.86,seed,.026);c.fillStyle='#BAB5AD';c.fill();
   c.strokeStyle='#E8E2D7';c.lineWidth=1.6;c.stroke();
-  speckle(c,cx,cy,R*.97,R*.83,seed+2,900,'#8F8B84',.015,.06,9);
-  speckle(c,cx,cy,R*.97,R*.83,seed+3,720,'#E4DED3',.02,.07,8);
+  mottle(c,cx,cy,R*.97,R*.83,seed+2,80,'#8F8B84',.05,26);
+  mottle(c,cx,cy,R*.97,R*.83,seed+3,60,'#E4DED3',.05,22);
   // abdominal wall muscle
   ePath(c,cx,cy,R*.92,R*.78,seed+4,.022);c.fillStyle='#8B8882';c.fill();
-  speckle(c,cx,cy,R*.91,R*.77,seed+5,560,'#6F6C67',.02,.07,9);
+  mottle(c,cx,cy,R*.91,R*.77,seed+5,52,'#6F6C67',.05,24);
   // rectus muscles + linea alba
   for(const s of [-1,1]){
     blob(c,cx+s*R*.20,cy-R*.60,R*.085,R*.105,seed+21+s,.04,'#96928B');
@@ -81,8 +90,8 @@ function drawBody(c,g,seed=11){
   c.beginPath();c.moveTo(cx,cy-R*.70);c.lineTo(cx,cy-R*.53);c.stroke();
   // intra-abdominal fat
   ePath(c,cx,cy,R*.85,R*.70,seed+6,.02);c.fillStyle='#6D6A65';c.fill();
-  speckle(c,cx,cy,R*.84,R*.69,seed+7,1800,'#8E8A83',.02,.075,9);
-  speckle(c,cx,cy,R*.84,R*.69,seed+8,1100,'#55534F',.02,.065,7);
+  mottle(c,cx,cy,R*.84,R*.69,seed+7,110,'#8E8A83',.05,30);
+  mottle(c,cx,cy,R*.84,R*.69,seed+8,80,'#55534F',.05,26);
   // mesenteric strands
   const r=rand(seed+9);
   c.save();ePath(c,cx,cy,R*.83,R*.68,seed+6,.014);c.clip();
@@ -205,13 +214,15 @@ function drawLensBase(c,g,stage){
   c.beginPath();c.arc(x,y,r,0,TAU);c.fillStyle='#6C6963';c.fill();
   c.save();c.beginPath();c.arc(x,y,r,0,TAU);c.clip();
   // periappendiceal fat lobules and septa
-  speckle(c,x,y,r,r,701,1100,'#8C8880',.02,.08,8);
-  speckle(c,x,y,r,r,702,650,'#55534F',.03,.08,6);
+  // smooth fat gradient; the wispy strands carry the texture
+  const gr=c.createRadialGradient(x-r*.32,y-r*.28,12,x,y,r);
+  gr.addColorStop(0,'#78746D');gr.addColorStop(.62,'#6C6963');gr.addColorStop(1,'#5E5B56');
+  c.fillStyle=gr;c.beginPath();c.arc(x,y,r,0,TAU);c.fill();
   const rr=rand(703);
-  for(let i=0;i<44;i++){
+  for(let i=0;i<26;i++){
     const a=rr()*TAU,d=ar*(1.12+rr()*(r/ar-1.1));
     const x1=x+Math.cos(a)*d,y1=y+Math.sin(a)*d;
-    c.strokeStyle=`rgba(174,169,158,${.18+rr()*.24})`;c.lineWidth=.9+rr()*1.4;
+    c.strokeStyle=`rgba(174,169,158,${.14+rr()*.20})`;c.lineWidth=.8+rr()*1.1;
     c.beginPath();c.moveTo(x1,y1);c.quadraticCurveTo(x1+(rr()*2-1)*16,y1+(rr()*2-1)*12,x1+(rr()*2-1)*26,y1+(rr()*2-1)*18);c.stroke();
   }
   const rv=rand(704);
@@ -291,11 +302,15 @@ function strands(c,cx,cy,r0,r1,seed,count,alpha,width){
 }
 function haze(c,cx,cy,r0,r1,alpha){
   if(alpha<=.001)return;
-  const gr=c.createRadialGradient(cx,cy,r0,cx,cy,r1);
-  gr.addColorStop(0,'rgba(214,207,194,0)');gr.addColorStop(.45,`rgba(216,209,196,${.28*alpha})`);gr.addColorStop(1,'rgba(214,207,194,0)');
-  c.fillStyle=gr;c.beginPath();c.arc(cx,cy,r1,0,TAU);c.fill();
+  // solid translucent lobes instead of a gradient: avoids canvas gradient dithering
+  const r=rand(807);
+  c.save();c.globalAlpha=alpha*.16;c.fillStyle='#D8D1C4';c.filter='blur(7px)';
+  for(let i=0;i<7;i++){
+    const a=r()*TAU,d=r0*(.95+r()*.55);
+    c.beginPath();c.ellipse(cx+Math.cos(a)*d,cy+Math.sin(a)*d,(r1-r0)*(.55+r()*.45),(r1-r0)*(.32+r()*.30),a,0,TAU);c.fill();
+  }
+  c.restore();
 }
-
 export function drawCTChanges(c,g,{stage=1,aFat=0,aExud=0,aDefect=0,aGas=0,aAbscess=0,aEnh=0,glow=0}={}){
   const {x,y}=g.appendix,{outer}=appendixRadii(g,stage);
   // axial fat stranding (small)
@@ -316,7 +331,7 @@ export function drawCTChanges(c,g,{stage=1,aFat=0,aExud=0,aDefect=0,aGas=0,aAbsc
     c.save();c.beginPath();c.arc(L.x,L.y,L.r-7,0,TAU);c.clip();
     if(aFat>0||aExud>0){
       haze(c,L.x,L.y,ar*.9,ar*1.75,Math.max(aFat*.7,aExud));
-      strands(c,L.x,L.y,ar*1.02,ar*1.72,821,stage===1?24:38,Math.max(aFat*.9,aExud),stage===1?1.8:2.4);
+      strands(c,L.x,L.y,ar*1.08,ar*1.58,821,stage===1?14:20,Math.max(aFat*.9,aExud),stage===1?1.8:2.2);
     }
     c.restore();
     // brighter enhancing mucosa
