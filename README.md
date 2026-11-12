@@ -4,7 +4,7 @@
 
 0. 你需要什么：一台 Windows 10/11 电脑（自带 Edge 浏览器），能上网。macOS 同学可以双击下面同名的 `.command` 文件。
 1. 安装 Node.js（只做一次）：打开 https://npmmirror.com/mirrors/node/ ，进入 `latest-v20.x`（或 v20 最新版目录），Windows 下载以 `-x64.msi` 结尾的安装包，macOS 下载 `.pkg`。双击安装，一路点“下一步”。
-2. 下载项目：在 GitHub 页面点绿色 **Code → Download ZIP**，解压到一个全英文路径的文件夹，例如 `D:\pathology`。推荐不要放在桌面或带中文的路径；这些位置可以放，但遇到问题时先换成英文路径。如果会用 git，也可以用下面这一行（把地址换成当前 GitHub 页面的项目地址）：`git clone <项目地址>`。
+2. 下载项目：先接受组长发给你的 GitHub 邀请邮件并登录 GitHub（项目是私有的），然后在项目页面点绿色 **Code → Download ZIP**，解压到一个全英文路径的文件夹，例如 `D:\pathology`。推荐不要放在桌面或带中文的路径；这些位置可以放，但遇到问题时先换成英文路径。如果会用 git，也可以用下面这一行（把地址换成当前 GitHub 页面的项目地址）：`git clone <项目地址>`。
 3. 双击 `1-首次安装.bat`，等待“安装完成”。需要下载一些文件，请保持网络连接。
 4. 双击 `2-出样张.bat`，输入场景编号后回车；直接回车就是 S14（最新完成的场景）。等几分钟，文件夹自动打开，里面的 PNG 就是样张。
 5. 双击 `3-出预览视频.bat`，同样选择场景；完成后文件夹自动打开，MP4 可以直接播放。
@@ -28,7 +28,7 @@ cd <仓库目录>
 PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 FFMPEG_BINARIES_URL=https://registry.npmmirror.com/-/binary/ffmpeg-static npm install --include=optional
 ```
 
-上述安装命令适用于 macOS/Linux；Windows 推荐直接使用首次安装文件。浏览器自动检测顺序：CHROME_PATH → Microsoft Edge → Google Chrome → Playwright 自带 Chromium；最后尝试系统浏览器 channel 作为兜底。只有没有 Edge/Chrome 或其他可用 Chromium 的 Linux 服务器才需要运行 `npx playwright install chromium`。Linux 如缺系统库，可能还需执行 `npx playwright install-deps chromium`。安装步骤需要网络；渲染使用仓库内的资源。根 package-lock.json 需在安装后更新；不要在 assembly 单独安装依赖。
+上述安装命令适用于 macOS/Linux；Windows 推荐直接使用首次安装文件。浏览器自动检测顺序：CHROME_PATH → Microsoft Edge → Google Chrome → Playwright 自带 Chromium；最后尝试系统浏览器 channel 作为兜底。只有没有 Edge/Chrome 或其他可用 Chromium 的 Linux 服务器才需要运行 `npx playwright install chromium`。Linux 如缺系统库，可能还需执行 `npx playwright install-deps chromium`。安装步骤需要网络；渲染使用仓库内的资源。不要在 assembly 单独安装依赖。
 
 ## 一键渲染
 
