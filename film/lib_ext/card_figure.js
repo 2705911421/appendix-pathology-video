@@ -29,7 +29,7 @@ export function drawFigure(ctx, { alpha = 1, face = 'pain', press = 0, breath = 
   if (alpha <= 0) return; ctx.save(); ctx.globalAlpha *= alpha; const F = FIG;
   ctx.translate(sway, 0); ctx.translate(960, 830); ctx.scale(1, 1 + breath * .007); ctx.translate(-960, -830);
   ink(ctx, 'f.armL', 'curve', [F.armL], { seed: 4 }); ink(ctx, 'f.armL2', 'curve', [F.armL.map(p => [p[0] + 44, p[1] + 4])], { seed: 5 });
-  ink(ctx, 'f.handL', 'ellipse', [1170, 860, 40, 54], { fill: C.paper, fillStyle: 'solid', seed: 6 });
+  ink(ctx, 'f.handL', 'ellipse', [1198, 858, 84, 108], { fill: C.paper, fillStyle: 'solid', seed: 6 });
   { const a0 = ctx.globalAlpha; ctx.globalAlpha = a0 * hatch; ink(ctx, 'f.pants', 'polygon', [F.pants], { fill: 'rgba(42,42,53,.5)', fillStyle: 'hachure', hachureAngle: -60, hachureGap: 10, fillWeight: 1.1, roughness: .55, seed: 7 }); ctx.globalAlpha = a0;
     if (hatch < 1) ink(ctx, 'f.pantsO', 'polygon', [F.pants], { roughness: .55, seed: 7 }, { alpha: 1 - hatch }); }
   ink(ctx, 'f.neck', 'polygon', [F.neck], { fill: C.paper, fillStyle: 'solid', seed: 8 });

@@ -16,8 +16,22 @@ export function path(c,branch=0,active=2){
 let figureWash;
 export function prepareFigures(){if(figureWash)return;figureWash=document.createElement('canvas');figureWash.width=420;figureWash.height=560;const g=figureWash.getContext('2d');let seed=511;const rand=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296;};for(let i=0;i<650;i++){const x=rand()*420,y=rand()*560,r=8+rand()*32;const grad=g.createRadialGradient(x,y,0,x,y,r);grad.addColorStop(0,i%3?'rgba(177,150,185,.025)':'rgba(207,169,151,.035)');grad.addColorStop(1,'rgba(207,169,151,0)');g.fillStyle=grad;g.fillRect(x-r,y-r,r*2,r*2);}}
 export function people(c,{pain=0,alpha=1,x=1160,y=510,scale=.7}={}){c.save();c.globalAlpha*=alpha;c.translate(x,y);c.scale(scale,scale);c.translate(-960,-610);if(figureWash){c.save();c.beginPath();c.moveTo(805,372);c.lineTo(905,342);c.lineTo(1015,342);c.lineTo(1115,372);c.lineTo(1098,830);c.lineTo(822,830);c.closePath();c.clip();c.drawImage(figureWash,770,330,400,510);c.restore();}drawFigure(c,{face:pain?'pain':'calm',hatch:.6});drawArmR(c,{pose:pain?'clutch':'rest'});c.restore();}
-export function doctor(c,x=1510,y=510,scale=.7){people(c,{x,y,scale});c.save();c.translate(x,y);c.scale(scale,scale);ink(c,'card.coat','linearPath',[[[-55,-260],[-6,-145],[-55,160],[55,160],[6,-145],[55,-260]]],{stroke:'#A38AB5',seed:71},{fill:false});ink(c,'card.clipboard','polygon',[[[-170,0],[-65,0],[-65,125],[-170,125]]],{fill:'#E6DCE8',fillStyle:'solid',seed:72});c.restore();}
-export function assess(c,p=1){people(c,{x:1050,y:490,pain:0});doctor(c,1510,490);for(let i=0;i<3;i++){const x=1200+i*50,y=360+i*45;c.save();c.globalAlpha=p;ink(c,'card.form'+i,'polygon',[[[x,y],[x+62,y-2],[x+64,y+81],[x,y+79]]],{fill:'#F4EFE6',fillStyle:'solid',stroke:'#AC98B7',seed:90+i});line(c,[[x+13,y+24],[x+48,y+24]],'formline'+i);line(c,[[x+13,y+43],[x+40,y+43]],'formlineB'+i);c.restore();}line(c,[[1160,570],[1270,535],[1375,560]],'assess','#A38AB5',p);label(c,'医生评估',1390,890,1505,654);}
+// White-coat edges follow the shirt hem (local y≈210) instead of cutting across the torso.
+export function doctor(c,x=1510,y=510,scale=.7){people(c,{x,y,scale});c.save();c.translate(x,y);c.scale(scale,scale);
+ ink(c,'card.coatL','linearPath',[[[-52,-252],[-6,-152],[-58,210]]],{stroke:'#A38AB5',strokeWidth:1.7,seed:71},{fill:false});
+ ink(c,'card.coatR','linearPath',[[[52,-252],[6,-152],[58,210]]],{stroke:'#A38AB5',strokeWidth:1.7,seed:72},{fill:false});
+ ink(c,'card.clipboard','polygon',[[[-190,25],[-85,25],[-85,160],[-190,160]]],{fill:'#F9F4EC',fillStyle:'solid',stroke:'#AC98B7',strokeWidth:1.6,seed:73},{fill:true});
+ line(c,[[-172,58],[-103,58]],'cb1');line(c,[[-172,80],[-118,80]],'cb2');line(c,[[-172,102],[-130,102]],'cb3');c.restore();}
+// o: px/dx/cy/scale place patient and doctor; forms sit between them, label under the doctor's feet.
+export function assess(c,p=1,o={}){const px=o.px??1050,dx=o.dx??1510,cy=o.cy??490,sc=o.scale??.7;
+ if(o.patient!==false)people(c,{x:px,y:cy,pain:0,scale:sc});doctor(c,dx,cy,sc);
+ for(let i=0;i<3;i++){const x=px+150+i*50,y=cy-130+i*45;c.save();c.globalAlpha*=p;ink(c,'card.form'+i,'polygon',[[[x,y],[x+62,y-2],[x+64,y+81],[x,y+79]]],{fill:'#F4EFE6',fillStyle:'solid',stroke:'#AC98B7',seed:90+i});line(c,[[x+13,y+24],[x+48,y+24]],'formline'+i);line(c,[[x+13,y+43],[x+40,y+43]],'formlineB'+i);c.restore();}
+ line(c,[[px+110,cy+80],[px+220,cy+45],[dx-135,cy+70]],'assess'+px+dx,'#A38AB5',p);
+ if(o.label!==false)label(c,'医生评估',dx-60,908,dx+110,cy+358);}
+// One treatment-situation window: open paper frame + heading + figure.
+export function situation(c,{x,y,w,h,heading,pain=0,alpha=1,rise=0}){c.save();c.globalAlpha*=alpha;c.translate(0,rise);
+ ink(c,'card.win'+heading,'polygon',[[[x,y],[x+w,y],[x+w,y+h],[x,y+h]]],{fill:'#F9F4EC',fillStyle:'solid',stroke:'#D8C9D5',strokeWidth:1.6,roughness:1.2,seed:120},{fill:true});
+ text(c,heading,x+70,y+h/2+18,50,'#6B4C9A',700);people(c,{x:x+w-200,y:y+h/2+10,scale:.27,pain});c.restore();}
 // Evidence values are exact strings from the storyboard; reject unknown keys.
 export const evidence={ct:{title:'增强螺旋CT',rows:['2023','8篇、1602人','敏感度95%','特异度94%','[1]']},boundary:{title:'并非三型分型准确度',rows:['仍需结合临床']},surgery:{title:'条件性推荐',rows:['具体时机结合临床评估','[5]']},literature:{title:'文献提示',rows:['2023、2026','[3][4]']}};
 export function evidenceCard(c,key,options){if(!evidence[key])throw Error('Unknown evidence key');const d=evidence[key];card(c,d.title,d.rows,options);}
