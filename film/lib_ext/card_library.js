@@ -1,7 +1,7 @@
 // Lane card: paper cards, narrative navigation and non-probabilistic branches.
 import {ink} from '../lib/ink.js';
 // Figures come from the clinical lane's shared library (same drawing as S02/S03/S16).
-// clin_draw.js is a byte-for-byte copy; its figure geometry is not modified here.
+// Shared clinical appearance; only the opt-in painRLQ arm is added for this lane.
 import {prepare as prepareClin,person as clinPerson} from './clin_draw.js';
 export const colors=['#D6453A','#A28A53','#41343F'];
 export const ease=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
@@ -14,7 +14,7 @@ export function label(c,s,x,y,px,py){text(c,s,x,y,32,'#A38AB5');line(c,[[px,py],
 export function path(c,branch=0,active=2){
  const ys=[285,435,640];const names=[['单纯性'],['化脓性','（蜂窝织炎性）'],['坏疽性']];
  names.forEach((rows,i)=>{c.save();c.globalAlpha=i<=active?1:.3;rows.forEach((s,j)=>text(c,s,115,ys[i]+j*51,j?34:43,colors[i],700));if(i<2){const end=ys[i]+(i?130:110);line(c,[[130,ys[i]+(i?85:40)],[130,end]],'chain'+i,'#AD9BAF');line(c,[[123,end-10],[130,end],[137,end-10]],'chainTip'+i,'#AD9BAF');}c.restore();});
- if(branch>0){c.save();c.globalAlpha=branch;line(c,[[342,285],[487,325],[558,435]],'branch0');line(c,[[342,435],[478,502],[558,570]],'branch1');text(c,'…',560,454,40,'#A38AB5');text(c,'…',560,589,40,'#A38AB5');text(c,'非固定路径',115,805,36,'#6B4C9A');c.restore();}}
+ if(branch>0){c.save();c.globalAlpha=branch;line(c,[[342,285],[487,325],[558,435]],'branch0');line(c,[[342,435],[478,502],[558,570]],'branch1');text(c,'…',560,454,40,'#A38AB5');text(c,'…',560,589,40,'#A38AB5');text(c,'非固定路径',115,765,36,'#6B4C9A');c.restore();}}
 // Aligned with the clinical lane: light-wash figures with Rough outlines, full body.
 // GROUND is the shared implied floor line; every figure in a frame is placed by its feet.
 export const GROUND=780;
@@ -38,13 +38,13 @@ function doctorDetails(c,x,top,s){
  c.restore();
 }
 // One figure with both soles on `ground`. Returns anchor points for labels/arrows.
-export function personAt(c,{x=1040,ground=GROUND,scale=.92,doctor=false,face='calm',arm='rest',alpha=1}={}){
+export function personAt(c,{x=1040,ground=GROUND,scale=.92,doctor=false,face='calm',arm='rest',alpha=1,doctorOverlay=false}={}){
  const top=ground-FIG_H*scale;
- c.save();c.globalAlpha*=alpha;clinPerson(c,{x,y:top,scale,doctor,face,arm});if(doctor)doctorDetails(c,x,top,scale);c.restore();
+ c.save();c.globalAlpha*=alpha;clinPerson(c,{x,y:top,scale,doctor,face,arm});if(doctor&&doctorOverlay)doctorDetails(c,x,top,scale);c.restore();
  return {x,top,ground,scale,chest:[x,top+175*scale],handR:[x+100*scale,top+382*scale],handL:[x-100*scale,top+382*scale]};
 }
 export function people(c,{pain=0,alpha=1,x=1040,ground=GROUND,scale=.92}={}){
- return personAt(c,{x,ground,scale,face:pain?'pain':'calm',arm:pain?'pain':'rest',alpha});}
+ return personAt(c,{x,ground,scale,face:pain?'pain':'calm',arm:pain?'painRLQ':'rest',alpha});}
 export function doctor(c,x=1400,ground=GROUND,scale=.92){return personAt(c,{x,ground,scale,doctor:true,face:'calm'});}
 // Records/lab slips fly one by one from the patient's side to the doctor (sentence 64).
 function records(c,px,dx,ground,sc,p){
@@ -68,7 +68,7 @@ export function situation(c,{x,y,w,h,heading,pain=0,alpha=1,rise=0,scale=.44},
  {textSize=56}={}){c.save();c.globalAlpha*=alpha;c.translate(0,rise);
  ink(c,'card.win'+heading,'polygon',[[[x,y],[x+w,y],[x+w,y+h],[x,y+h]]],{fill:'#F9F4EC',fillStyle:'solid',stroke:'#D8C9D5',strokeWidth:1.6,roughness:1.2,seed:120},{fill:true});
  text(c,heading,x+64,y+h/2+textSize*.36,textSize,'#6B4C9A',700);
- personAt(c,{x:x+w-150,ground:y+h-26,scale,face:pain?'pain':'calm',arm:pain?'pain':'rest'});
+ personAt(c,{x:x+w-150,ground:y+h-26,scale,face:pain?'pain':'calm',arm:pain?'painRLQ':'rest'});
  c.restore();}
 // Evidence values are exact strings from the storyboard; reject unknown keys.
 export const evidence={ct:{title:'增强螺旋CT',rows:['2023','8篇、1602人','敏感度95%','特异度94%','[1]']},boundary:{title:'并非三型分型准确度',rows:['仍需结合临床']},surgery:{title:'条件性推荐',rows:['具体时机结合临床评估','[5]']},literature:{title:'文献提示',rows:['2023、2026','[3][4]']}};
