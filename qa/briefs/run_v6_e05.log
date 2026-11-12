@@ -1,0 +1,1583 @@
+OpenAI Codex v0.163.0
+--------
+workdir: /workspace/病理科普视频/v5_s19_dev
+model: gpt-6.1-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, /workspace/病理科普视频, /workspace/garden-skills] (network access enabled)
+reasoning effort: none
+reasoning summaries: none
+session id: 01a1cf8e-599e-7cf3-b0aa-bf30aedcfe2f
+--------
+user
+# v6 e05（Codex）：S19 尺度与笔触对齐样张（句 69–70）
+
+工作目录 /workspace/病理科普视频/v5_s19_dev，分支 s19-dev，基于 HEAD（e04 已提交，tag v6-s19-e04，候选未定稿）。不许 git commit。
+硬约束全部沿用 qa/briefs/v6_e01_s19.md / v6_e03_s19precision.md / v6_e04_s19stroma.md（锁定文件 sha256、S08/S10 parity MAE=0、S11 历史差异只记录、determinism、圆形视野、0.7 s 深色虹膜、按句 id 取时、dark 字幕、无数字、y<950、标签细引线+浅紫字无底框）。先读 qa/v6/e04_s19/自检.md 和 对比_e03_e04_样张.png。在现有 film/chapters/s19.js、film/lib_ext/he_chronic.js 上改。
+
+画风唯一标准：qa/ref/style_target/（细化样张），同倍率 200% 对比。e04 和样张对比后差距还很明显，这轮必须先量尺寸再画：
+
+## 要改的问题
+1. **细胞尺度**：先在样张 t_089.73.png 原生像素里量至少 10 个淋巴样圆核和 5 个梭形核的长宽，写进 cell_measurements.json。e04 句70 高倍淋巴细胞直径大约是样张的 1.5–2 倍，要缩到样张同一屏幕尺度（同倍率下误差 ±15% 以内）。浆细胞按同样比例缩小，但偏位核、车辐状染色质和核周晕在高倍仍要看得出；需要时浆细胞那一拍可以再推近一档，不要靠放大单个细胞。
+2. **淋巴细胞簇**：样张里是小核紧密成团、彼此挤压变形（略多边形、边缘不圆），团与团之间有空的间质。e04 是大圆点均匀铺满。改成成团挤压 + 稀疏区交替，核内有细染色质颗粒，不要纯平深紫圆盘。
+3. **句69 纤维化**：e04 纤维化帧是密密麻麻的小圆点，看不出纤维。要以胶原束为主：成束深粉、走向一致的短碎横纹，夹少量细长两端尖的梭形核，炎细胞只是零散点缀。
+4. **间质笔触**：纤维线条现在太长太顺滑，改成样张那种短碎、断续、深浅不一的横纹和颜料颗粒团聚。
+5. 梭形核要细长、两端尖、深浅有变化，大小和数量对照样张。
+
+## 输出
+新目录 qa/v6/e05_s19/：5 个关键帧 + 200% 局部、对比_e04_e05_样张.png（三列 e04/e05/样张，同倍率、同裁区尺寸）、cell_measurements.json、review_sheet.png、S19.mp4、自检.md（逐条说明、尺寸实测对照表、parity、determinism、sha256、仍不足之处，不要夸大）。
+
+2026-11-12T11:39:36.428245Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer realm=\"OAuth\", resource_metadata=\"https://mcp.notion.com/.well-known/oauth-protected-resource/mcp\", scope=\"default\"" })
+codex
+我会先读 e04 自检和对比图，再量样张的核尺寸；据此调整细胞尺度、簇分布与间质笔触，最后生成 e05 样张和验证结果，不提交 commit。
+
+exec
+/bin/bash -lc "pwd; rg --files -g 'AGENTS.md' -g '*s19*' qa/briefs; git status --short; cat qa/v6/e04_s19/自检.md" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+/workspace/病理科普视频/v5_s19_dev
+qa/briefs/v6_e03_s19precision_cont.md
+qa/briefs/v6_e03_s19precision.md
+qa/briefs/v6_e04_s19stroma.md
+qa/briefs/v6_e01_s19.md
+qa/briefs/v6_e02_s19fix.md
+qa/briefs/v6_e05_s19scale.md
+qa/briefs/v6_e04_s19stroma_cont.md
+?? qa/briefs/run_v6_e04_cb.log
+?? qa/briefs/run_v6_e04_cont.log
+?? qa/briefs/run_v6_e05.log
+?? qa/briefs/v6_e05_s19scale.md
+# S19 e04 间质质感轮自检
+
+## 续跑基线
+
+开工核对 git status、git diff 与输出目录：分支 s19-dev，S19 代码与 e03 HEAD 一致；没有 e04 输出目录，只有未跟踪的 brief/日志。本轮沿用 e03 现有实现，未回退、未 git commit，未改主工作区 v5。已先读 e03 自检与三列对比图。
+
+## 逐项处理
+
+1. 间质：保留原有宽胶原束、水彩洗色和壁层结构，在其上增加 21,000 个候选细纤维笔触，按弧带渐变接受；每条含双细纹及四处断续染色沉积。沿黏膜下—肌间走向排列，局部小角度扰动，深浅粉红交错。增加 1,900 个候选深紫梭形核，贝塞尔轮廓两端尖，内部有染色质颗粒。句69与句70共享这些组织坐标，不另外贴高倍背景。
+2. 分布：簇中心从22组增至85组，每簇38–102次放置尝试、半径34组织单位，减少簇外均匀撒点的占比，保留稀疏间隙。实际通过间距筛选后，淋巴细胞1422→1802（+26.7%），总炎细胞1533→1877（+22.4%）。浆细胞111→75，仍保留教学焦点与簇边散在细胞。见 cell_counts.json；不是用候选次数冒充实际细胞数。
+3. 中倍核周晕：只将原有淡粉新月的三层透明度 .30/.19/.11 调至 .42/.24/.13；仍非白色高光。其余单体细胞代码逐字校验不变，见 morphology_check.log，包括轮廓、大小、偏位核、染色质和胞质颗粒。
+4. 性能：沿用四块3倍母图缓存与重叠边，新纹理按瓦片范围裁剪；各纤维有独立随机种子，裁剪不会改变后续细节。逐帧仅画缓存，不因渲染耗时减掉细胞。首次初始化仍较慢。
+
+## 画面约束
+
+s19.js 未修改：按句69/70的 T.at/T.frac/T.end 推进，同一母图低→中→高及平移；圆心(1110,475)、半径425，深底#111114；画面只保留低倍/中倍/高倍及结构文字，无数字，元素在y<950。标签沿用细引线、浅紫字、无底框。
+
+字幕的 assembly/subtitle/sceneTheme.js 保持句69–70的 dark 配置。本次单段视频沿用e03交付方式，为无配音、无烧录字幕的画面审片版；字幕主题由现有合成管线处理。
+
+前后虹膜沿用句id计算的时间：切入从句69前0.45秒至句69后0.25秒，切出从句70末至其后0.7秒；两次均0.7秒、深色圆形开合。视频CRF16、1920×1080、30fps。
+
+## 实测验证结果
+
+- S08七帧、S10八帧：MAE全部为0。S11八帧与e02/e03历史记录完全一致：三帧非零值分别0.012789030349794239、0.01278613683127572、0.012755754886831276，其余为0，未修改历史基线。见parity.json。
+- determinism：六个时刻0.899、3.024、4.087、5.967、7.602、8.141秒，在独立页面与逆序/穿插渲染下通过现有渲染器检查，见determinism.log。
+- 七个锁定文件：开工/结束SHA256完全一致，且与e02基准相同。见sha256_开工.txt、sha256_结束.txt、sha256_校验.log。
+- 成片ffprobe实测：1920×1080，30fps，280帧，9.333333秒；CRF16，含前后虹膜。五个关键帧及对应200%局部、额外两张虹膜中间帧、三列对比和review_sheet齐全。
+- git diff --check通过。实际产品代码仅修改film/lib_ext/he_chronic.js，s19.js及其他场景未改。渲染脚本保存在本目录；S11初始化曾超180秒，采用本地副本将等待上限延至600秒后完成，视频单worker。失败与续跑日志均保留于render.log。
+
+## 比较方法及仍不足
+
+对比_e03_e04_样张.png：三列分别e03/e04/样张，三行浆细胞/淋巴细胞/纤维化；e03/e04取相同屏幕坐标300×300原像素窗，均放大至600×600，未单独缩放细胞。样张沿用e03的同一300×300局部，也放大200%。参考图无物理标尺，不能证明物镜倍率严格相同，只能维持像素倍率一致；样张分叶核细胞仅作间质和笔触参考。
+
+细纹、梭形核与簇状浸润已明显增强，但仍比样张更像程序笔触：纤维线条偏长、偏顺滑，缺少短碎横纹和颜料颗粒团聚；梭形核尖端较规整；细胞簇尚无样张中挤压变形的边缘（按要求保留已通过单体画法）。中倍核周晕有所增强，但受原尺寸与缩小采样限制，仍不及高倍清楚。未宣称已与手绘样张完全等同。
+
+## 复现
+
+```sh
+node qa/v6/e04_s19/render_all.mjs
+python3 qa/v6/e04_s19/iris_video.py
+python3 qa/v6/e04_s19/finish.py
+```
+
+exec
+/bin/bash -lc 'find .. -name AGENTS.md -print; cat qa/briefs/v6_e01_s19.md qa/briefs/v6_e03_s19precision.md qa/briefs/v6_e04_s19stroma.md; ls qa/v6/e04_s19; ls qa/ref/style_target; cat qa/v6/e04_s19/render_all.mjs' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+# v6 e01（Codex）：S19 慢性阑尾炎镜下段（句 69–70）
+
+工作目录 /workspace/病理科普视频/v5，分支 v6-fresh，基于当前 HEAD（含 d01 的 S10+S11 合并段）。不许 git commit。
+
+硬约束、画风标准、镜头规则都和 qa/briefs/v6_c01_s10.md 一样，开工前先读一遍：
+- 锁定文件 sha256 开工和收工各校验一次。
+- S08 七帧、S10 和 S11 已交付关键帧（qa/v6/c03_s10/、qa/v6/d01_s11/）的 MAE 必须为 0。
+- 必须通过 determinism 检查。
+- 深色镜下底 #111114，圆形视野（圆心 (1110,475)，r 425）。前后各一次 0.7 s 虹膜过渡，按句 id 卡点。字幕在本段用 dark 样式。
+- 低倍是斜切、被视野裁掉的椭圆。低→中→高连续推进，高倍时随句子平移。注释用完就退场，倍数标签只写低倍、中倍、高倍。所有内容放在 y<950。
+- 时间一律从 film/timeline.js 按句 id 取，不写死秒数。
+- 画面不出现任何数字，不标"全壁""大量"。
+
+## 病理内容（慢性阑尾炎）
+- 这是新的组织状态，不能复用急性的脓细胞和纤维素。阑尾壁结构仍可辨认，但黏膜下层和肌层内有成束的纤维组织增生，即纤维化：粉红色胶原束、梭形的纤维细胞核，局部可见肌层被纤维组织分隔。
+- 慢性炎细胞散在或成簇浸润：
+  - 淋巴细胞：小圆形，核深紫、圆、几乎占满细胞，胞质极少。
+  - 浆细胞：卵圆形，核偏在一侧，染色质呈车辐状或钟面状，核旁有淡染区（核周晕），胞质略嗜碱、偏紫粉。
+- 不要画成中性粒细胞（分叶核）或脓细胞。不要把正常淋巴滤泡当成慢性浸润，可以有少量滤泡，但浸润主要在壁内间质。
+
+## 逐句画面
+**69「阑尾壁纤维组织增生、纤维化」**（以全稿_v3 原文为准）
+- 低倍斜切定位到阑尾壁，推到中倍，在黏膜下层和肌层看到纤维化区。用短引线标"纤维组织增生"。
+- 左栏：先写"阑尾壁：纤维组织增生、纤维化"。
+
+**70「慢性炎细胞：淋巴细胞、浆细胞」**
+- 推到高倍，进入纤维化间质里的炎细胞浸润区。先平移到淋巴细胞为主的小区，标"淋巴细胞"；再平移到浆细胞，标"浆细胞"，可以局部再放大一档，让偏位核和核周晕看得清。保留母图定位，不要跳成孤立的细胞贴图。
+- 左栏：再加"慢性炎细胞：淋巴细胞、浆细胞"。
+- 句末切出，回到纸色。
+
+## 输出
+1. 新代码放在 film/chapters/s19.js 和 lib_ext/（如 he_chronic.js），接入多场景入口。把 S19 合成进粗剪，生成 qa/v6/animatic/粗剪_v7.mp4 和 720p 版本，CRF16。
+2. 交付到 qa/v6/e01_s19/：
+   - 句 69 低倍、中倍、纤维化标注三帧，句 70 淋巴细胞、浆细胞两帧，以及切入和切出的中间帧，每张都附 200% 局部。
+   - review_sheet.png。
+   - 自检.md，内容包括：每句的病理对应、parity、determinism、sha256，以及你认为还不够好的地方。
+# v6 e03（Codex）：S19 精度返工
+
+工作目录 /workspace/病理科普视频/v5_s19_dev（git worktree，分支 s19-dev，基于 921f7cc，即 e02 的 S19）。主工作区 /workspace/病理科普视频/v5 正在跑别的任务，不要动它。不许 git commit。
+
+Gisele 的评价："e02 精度欠佳"。e02 的成品在 qa/v6/e02_s19/。这一轮目标是把 S19 的细胞和组织画到和细化样张同一精度，不是再加东西。
+
+画风唯一标准：
+- qa/ref/style_target/Gisele指定_右侧为目标.png（右列）
+- qa/ref/style_target/sample_zoom.png
+- 已定稿的 S08/S10/S11 关键帧：/workspace/病理科普视频/v5/qa/v6/c03_s10/、/workspace/病理科普视频/v5/qa/v6/d01_s11/、b10/
+
+开工前，先把 e02 的 s70_plasma_200pct、s69_fibrosis_200pct、s70_lymph_200pct 和上面这些参考图在同一放大倍率下并排拼一张 qa/v6/e03_s19/诊断_e02_vs_样张.png，用文字逐条写出差距，再动手。
+
+硬约束同 v6_e01_s19.md：锁定文件 sha256、S08/S10 parity MAE=0、determinism、深色镜下底、圆形视野、y<950、按句 id 取时间、画面不出数字、细引线加浅紫字标签。
+
+## 我看到的精度问题（至少要全部解决）
+1. **浆细胞像贴图气泡**
+   - 现状：每个细胞大小一样，都是正圆，胞质是平涂的大圆片，彼此重叠成一串泡泡；核是正圆加一圈等距的"钟点"小块，像印章；核周晕是发光的白色软圆斑。
+   - 要求：
+     - 尺寸要和样张里中性粒细胞、淋巴细胞同一比例尺（同一倍率下，浆细胞约为淋巴细胞的 1.5–2 倍，不能比 S10 的脓细胞大一圈）。
+     - 外形是不规则卵圆，大小、长宽比、朝向都要随机变化。
+     - 核偏在一端，略扁圆。染色质块大小不一、间距不匀，贴着核膜分布，中心可有一个小块；核膜有深色细边。
+     - 核周晕是贴在核旁、靠细胞中心一侧的新月形或半月形淡染区，边缘柔和，比胞质浅一点，不发白、不发光。
+     - 胞质偏嗜碱的紫粉色，带样张那种水彩颗粒和轻微不均，有细的深色细胞边。
+     - 细胞之间大多分开散在胶原间，少量成簇，不要一串叠泡。
+2. **淋巴细胞是一样的黑圆点**
+   - 现状：大小一致、纯平涂、边缘发糊。
+   - 要求：小圆、核几乎占满，染色质致密、略带粗颗粒；只有极窄一圈胞质（部分可见）。大小有轻微变化，有样张同级的细节和清楚的边缘。
+3. **纤维化像一块贴上去的矢量条**
+   - 现状：中倍下胶原带是硬边的平行条纹板块，边缘整齐、浮在组织上，和周围不融合；条纹间距规整得像图案。
+   - 要求：
+     - 胶原束要用样张那种水彩笔触：粗细不一、波浪、分叉，束与束之间有疏松间隙，边缘逐渐过渡到周围间质。
+     - 梭形纤维细胞核细长、深紫，顺着纤维走向，数量适中。
+     - 把纤维化放进阑尾壁原有的层次里（黏膜下、肌层之间），不是一个孤立的斜条。
+     - 低倍和中倍的过渡要连续。
+4. **中倍的浆细胞**是带白芯的小泡（s69_fibrosis 右侧），要按第 1 条的缩小版画。
+5. **标签**："纤维组织增生"现在压在纤维上看不清。标签放到视野内空白处或视野外侧，用细引线连到结构上，确保可读。
+
+## 输出
+- 只改 S19 相关代码（film/chapters/s19.js、lib_ext/ 里 S19 用的模块）。
+- 交付到 qa/v6/e03_s19/：
+  - 诊断图。
+  - 同一组关键帧，每张附 200% 局部。
+  - 对比_e02_e03_样张.png：三列，分别是 e02、e03、样张，同倍率，浆细胞、淋巴细胞、纤维化各一行。
+  - review_sheet.png。
+  - S19 单段视频 S19.mp4，CRF16，无需合成整片。
+  - 自检.md：写清每条问题怎么解决的、哪些还不如样张。
+# v6 e04（WorkBuddy）：S19 间质质感轮（句 69–70）
+
+工作目录 /workspace/病理科普视频/v5_s19_dev，分支 s19-dev，基于 HEAD（e03 已提交，tag v6-s19-e03，候选未定稿）。不许 git commit。
+硬约束全部沿用 qa/briefs/v6_e01_s19.md / v6_e03_s19precision.md（锁定文件 sha256、S08/S10 parity MAE=0、S11 历史差异只记录、determinism、圆形视野、0.7 s 深色虹膜、按句 id 取时、dark 字幕、无数字、y<950、标签细引线+浅紫字无底框）。先读 qa/v6/e03_s19/自检.md 与 对比_e02_e03_样张.png。在现有 film/chapters/s19.js、film/lib_ext/he_chronic.js 上改，不要重写；e03 的浆细胞和淋巴细胞单体画法已通过，保持不变。
+
+画风标准：qa/ref/style_target/（细化样张），同倍率 200% 对比。
+
+## 要改的问题
+1. **间质太空太淡**：e03 高倍背景是一片均匀淡粉，偶有几条模糊粉带。样张间质有密集的细横纹纤维纹理、清晰的深紫梭形核（细长、两端尖）、染色深浅起伏。句69 纤维化与句70 高倍的背景都要达到样张这种纤维纹理密度和梭形核数量；纤维化区胶原束应粗、致密、走向大体一致、略嗜伊红深粉。
+2. **炎细胞分布太均匀**：淋巴细胞现在像均匀撒点。改为成簇/成片浸润与稀疏区交替（样张那种成团密集），总体密度提高；若单帧绘制量超出渲染等待上限，用预烘焙母图瓦片或缓存 canvas 解决，不要靠减少细胞。
+3. 中倍核周晕偏淡的问题顺带修。
+
+## 输出
+新目录 qa/v6/e04_s19/：5 个关键帧 + 200% 局部、对比_e03_e04_样张.png（三列 e03/e04/样张，同倍率）、review_sheet.png、S19.mp4、自检.md（逐条说明、parity、determinism、sha256、仍不足之处）。
+S19.mp4
+S19_scene.mp4
+cell_counts.json
+decode_check.log
+determinism.log
+ffprobe.json
+finish.py
+iris_enter.png
+iris_enter_200pct.png
+iris_exit.png
+iris_exit_200pct.png
+iris_video.py
+keyframes.json
+morphology_check.log
+parity.json
+render.log
+render_all.mjs
+renderer
+resume_render.mjs
+review_sheet.png
+s08_parity
+s10_parity
+s11_parity
+s69_fibrosis.png
+s69_fibrosis_200pct.png
+s69_low.png
+s69_low_200pct.png
+s69_middle.png
+s69_middle_200pct.png
+s70_lymph.png
+s70_lymph_200pct.png
+s70_plasma.png
+s70_plasma_200pct.png
+sha256_开工.txt
+sha256_校验.log
+sha256_结束.txt
+stills
+video_check.json
+对比_e03_e04_样张.png
+自检.md
+Gisele指定_右侧为目标.png
+sample_zoom.png
+src
+t_089.73.png
+t_099.22.png
+import fs from 'node:fs';import {execFileSync as run} from 'node:child_process';import {timing} from '../../../film/timing_snapshot.js';
+const P='qa/v6/e04_s19',tool='qa/v6/e04_s19/renderer/render.mjs',origin=timing.find(s=>s.n===69).start;
+const at=(n,f)=>{const s=timing.find(s=>s.n===n);return s.start-origin+(s.end-s.start)*f;};
+const picks=[{name:'s69_low',t:at(69,.1)},{name:'s69_middle',t:at(69,.65)},{name:'s69_fibrosis',t:at(69,.84)},{name:'s70_lymph',t:at(70,.4)},{name:'s70_plasma',t:at(70,.9)}];fs.writeFileSync(P+'/keyframes.json',JSON.stringify({origin,duration:at(70,1),picks},null,2));
+function render(args){run('node',[tool,'film',...args],{stdio:'inherit'});}
+render(['--q','scene=s19','--still',picks.map(p=>p.t.toFixed(6)).join(','),'--out',P+'/stills']);{const r=run('node',[tool,'film','--q','scene=s19','--determinism'],{encoding:'utf8'});fs.writeFileSync(P+'/determinism.log',r);process.stdout.write(r);}
+for(const [scene,source] of [['s08','c03_s10'],['s10','c03_s10'],['s11','d01_s11']]){const times=scene==='s08'?JSON.parse(fs.readFileSync('qa/v6/c03_s10/s08_times.json')):JSON.parse(fs.readFileSync(`qa/v6/${source}/keyframes.json`)).picks.map(p=>p.t);render(['--q','scene='+scene,'--still',times.map(t=>t.toFixed(scene==='s08'?9:6)).join(','),'--out',P+'/'+scene+'_parity']);}
+render(['--q','scene=s19','--out',P+'/S19_scene.mp4','--crf','16','--fps','30','--workers','1']);
+
+exec
+/bin/bash -lc 'cat film/chapters/s19.js; cat film/lib_ext/he_chronic.js' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+import {prepareChronic,focus} from '../lib_ext/he_chronic.js';
+let map;const clamp=x=>Math.max(0,Math.min(1,x)),ease=x=>{x=clamp(x);return x*x*(3-2*x);};
+export default {prepare(){map=prepareChronic();},draw(c,t,T){
+ c.setTransform(1,0,0,1,0,0);c.fillStyle='#111114';c.fillRect(0,0,1920,1080);
+ const keys=[[T.at(69),[0,0,.49]],[T.frac(69,.18),[0,0,.49]],[T.frac(69,.64),[...focus.fib,1.62]],[T.end(69),[...focus.fib,1.62]],[T.frac(70,.27),[...focus.lymph,4.8]],[T.frac(70,.48),[...focus.lymph,4.8]],[T.frac(70,.75),[...focus.plasma,4.8]],[T.end(70),[...focus.plasma,4.8]]];
+ let v=keys[0][1];for(let i=1;i<keys.length;i++){if(t>=keys[i][0]){v=keys[i][1];continue;}const a=keys[i-1],b=keys[i],k=ease((t-a[0])/(b[0]-a[0]));v=a[1].map((x,j)=>x+(b[1][j]-x)*k);break;}
+ const [x,y,z]=v;c.save();c.beginPath();c.arc(1110,475,425,0,Math.PI*2);c.clip();c.fillStyle='#F6EEF0';c.fill();c.translate(1110,475);c.scale(z,z);c.translate(-x,-y);map.forEach(tile=>c.drawImage(tile.canvas,tile.x,tile.y,tile.w,tile.h));c.restore();c.strokeStyle='#4C4555';c.lineWidth=1.6;c.beginPath();c.arc(1110,475,431,0,Math.PI*2);c.stroke();c.fillStyle='#E8DDE9';c.font='500 30px MixSans';c.fillText(t<T.frac(69,.32)?'低倍':t<T.frac(70,.18)?'中倍':'高倍',1030,35);
+ c.font='700 36px MixSans';c.fillText('阑尾壁',75,320);c.font='400 27px MixSans';c.fillText('纤维组织增生、纤维化',75,376);
+ if(t>=T.at(70)){c.globalAlpha=ease((t-T.at(70))/(T.frac(70,.16)-T.at(70)));c.fillText('慢性炎细胞：',75,470);c.fillText('淋巴细胞、浆细胞',75,526);c.globalAlpha=1;}
+ let label=null,target=null,a=1;
+ if(t>T.frac(69,.65)&&t<T.end(69)){label='纤维组织增生';target=focus.fib;a=Math.min(ease((t-T.frac(69,.65))/(T.frac(69,.78)-T.frac(69,.65))),ease((T.end(69)-t)/(T.end(69)-T.frac(69,.92))));}
+ if(t>T.frac(70,.28)&&t<T.frac(70,.49)){label='淋巴细胞';target=focus.lymph;a=Math.min(ease((t-T.frac(70,.28))/(T.frac(70,.34)-T.frac(70,.28))),ease((T.frac(70,.49)-t)/(T.frac(70,.49)-T.frac(70,.45))));}
+ if(t>T.frac(70,.77)){label='浆细胞';target=focus.plasma;a=ease((t-T.frac(70,.77))/(T.frac(70,.84)-T.frac(70,.77)));}
+ if(label){c.save();c.globalAlpha=a;c.font='400 27px MixSans';c.fillStyle='#D8C5E7';c.fillText(label,1555,275);c.strokeStyle='#B8A1C8';c.lineWidth=1.2;c.beginPath();c.moveTo(1550,287);c.lineTo(1488,310);c.lineTo(1110+(target[0]-x)*z,475+(target[1]-y)*z);c.stroke();c.restore();}
+}};
+import {rng} from '../lib/motion.js';
+import {columnar} from './cells_ext.js';
+import {bake,drawWash} from '../lib/wash.js';
+const TAU=Math.PI*2;
+export function point(a,r){const u=Math.cos(a)*r*1.5,v=Math.sin(a)*r;return [u*Math.cos(.3)-v*Math.sin(.3),u*Math.sin(.3)+v*Math.cos(.3)];}
+export const focus={fib:point(-1.58,688),lymph:point(-1.72,650),plasma:point(-1.43,665)};
+// S19-only morphology. Independent seeds make every cell repeatable at all powers.
+function outline(c,rx,ry,phase,x=0,y=0,amp=.045,seg=72){
+ c.beginPath();for(let j=0;j<=seg;j++){const a=j/seg*TAU,f=1+amp*Math.sin(3*a+phase)+amp*.45*Math.sin(5*a-phase)+amp*.22*Math.sin(9*a+phase*1.7);const px=x+Math.cos(a)*rx*f,py=y+Math.sin(a)*ry*f;j?c.lineTo(px,py):c.moveTo(px,py);}c.closePath();
+}
+// Ellipse minus ellipse (evenodd) — used for the perinuclear hof crescent.
+function crescent(c,cx,cy,ox,oy,ro,ro2,ri,ri2){
+ c.beginPath();c.ellipse(cx+ox,cy+oy,ro,ro2,0,0,TAU);c.ellipse(cx,cy,ri,ri2,0,0,TAU);c.fill('evenodd');
+}
+function chronicCell(c,x,y,type,s=1,rot=0,key=0){
+ const tr=c.getTransform(),px=x*tr.a+tr.e,py=y*tr.d+tr.f;if(px< -60||py< -60||px>c.canvas.width+60||py>c.canvas.height+60)return;
+ const R=rng(8719+key*7919),pl=type==='plasma',ph=R()*TAU;
+ // Plasma cells stay 1.5–1.8 x a lymphocyte on the same mother plate; both vary in size and aspect.
+ const rx=pl?7.1+R()*1.5:3.8+R()*1.1,ry=pl?rx*(.58+R()*.18):rx*(.80+R()*.16);
+ c.save();c.translate(x,y);c.rotate(rot);c.scale(s,s);
+ outline(c,rx,ry,ph,0,0,pl?.05:.03);
+ const g=c.createLinearGradient(-rx,-ry*.4,rx,ry*.5);
+ if(pl){g.addColorStop(0,'#AC7099');g.addColorStop(.5,'#BC82A8');g.addColorStop(1,'#C99BB9');}
+ else{g.addColorStop(0,'#C6A2C5');g.addColorStop(1,'#D6B8D0');}
+ c.fillStyle=g;c.fill();
+ c.save();c.clip();
+ if(pl){
+  const nx=-rx*.40,ny=(R()-.5)*.5,nrx=2.75+R()*.42,nry=nrx*(.84+R()*.12),nph=R()*TAU;
+  // Hof: a narrow crescent between the nucleus and the cell centre, pinker than the cytoplasm, never white.
+  
+  // Translucent pigment blooms: uneven basophilia, never a flat disc.
+  for(let j=0;j<10;j++){const xx=(R()-.5)*rx*1.9,yy=(R()-.5)*ry*1.9,rr=1.1+R()*3.2;const q=c.createRadialGradient(xx,yy,0,xx,yy,rr);q.addColorStop(0,j%2?'rgba(133,76,145,.28)':'rgba(224,180,206,.24)');q.addColorStop(1,'rgba(196,143,179,0)');c.fillStyle=q;c.fillRect(xx-rr,yy-rr,rr*2,rr*2);}
+  for(let j=0;j<120;j++){const a=R()*TAU,rr=Math.sqrt(R());c.fillStyle=j%3?'rgba(105,58,126,.26)':'rgba(232,194,216,.26)';c.beginPath();c.ellipse(Math.cos(a)*rx*rr,Math.sin(a)*ry*rr,.13+R()*.34,.1+R()*.26,R()*TAU,0,TAU);c.fill();}
+  // Hof drawn last so it reads as a distinct pale crescent beside the nucleus.
+  for(let k=0;k<3;k++){const o=.6+k*.3;c.fillStyle=['rgba(228,197,213,.42)','rgba(230,201,216,.24)','rgba(233,206,219,.13)'][k];crescent(c,nx,ny,1.6,0,nrx+o,nry+o,nrx-.2,nry-.16);}
+  // Slightly deeper basophilia at the periphery, inside a fine dark membrane.
+  outline(c,rx*.9,ry*.9,ph,0,0,pl?.05:.03);c.strokeStyle='rgba(118,66,124,.22)';c.lineWidth=1.3;c.stroke();
+  c.restore();
+  // Eccentric, slightly flattened nucleus.
+  outline(c,nrx,nry,nph,nx,ny,.04);
+  c.fillStyle='#573870';c.fill();c.save();c.clip();
+  // Dense chromatin: unequal peripheral clumps hugging the membrane, gaps, interior mottling, one central clump.
+  for(let j=0;j<9;j++){const a=j*.7+R()*.62,rad=.68+R()*.12,t=R()*TAU;c.fillStyle=j%2?'#3E2459':'#472B62';c.beginPath();c.ellipse(nx+Math.cos(a)*nrx*rad,ny+Math.sin(a)*nry*rad,.5+R()*.62,.3+R()*.34,t,0,TAU);c.fill();}
+  for(let j=0;j<30;j++){const a=R()*TAU,rr=.2+R()*.72;c.fillStyle=j%5?'rgba(52,31,76,.55)':'rgba(139,104,158,.42)';c.beginPath();c.ellipse(nx+Math.cos(a)*nrx*rr,ny+Math.sin(a)*nry*rr,.1+R()*.3,.08+R()*.24,R()*TAU,0,TAU);c.fill();}
+  c.fillStyle='#4A2C67';c.beginPath();c.ellipse(nx+.25,ny-.15,.5,.62,.35,0,TAU);c.fill();
+  c.restore();
+  outline(c,nrx,nry,nph,nx,ny,.04);c.strokeStyle='#3B2353';c.lineWidth=.3;c.stroke();
+  outline(c,rx,ry,ph,0,0,pl?.05:.03);c.strokeStyle='rgba(104,58,112,.92)';c.lineWidth=.34;c.stroke();
+ }else{
+  // Lymphocyte: nucleus fills the cell, narrow rim of cytoplasm shows on one side.
+  for(let j=0;j<44;j++){const a=R()*TAU,rr=Math.sqrt(R());c.fillStyle=j%3?'rgba(104,64,126,.25)':'rgba(236,203,222,.3)';c.beginPath();c.ellipse(Math.cos(a)*rx*rr,Math.sin(a)*ry*rr,.08+R()*.17,.08+R()*.15,R()*TAU,0,TAU);c.fill();}
+  c.restore();
+  const nx=(R()-.5)*.5,ny=(R()-.5)*.4,nrx=rx*(.84+R()*.06),nry=ry*(.84+R()*.05),nph=R()*TAU;
+  outline(c,nrx,nry,nph,nx,ny,.05,56);
+  c.fillStyle='#452A66';c.fill();c.save();c.clip();
+  // Coarse, dense chromatin; the interior is mottled, not a flat dot.
+  for(let j=0;j<12;j++){const a=(j*.62+R()*.5),rad=.72+R()*.1;c.fillStyle='rgba(37,22,63,.82)';c.beginPath();c.ellipse(nx+Math.cos(a)*nrx*rad,ny+Math.sin(a)*nry*rad,.3+R()*.42,.26+R()*.36,a,0,TAU);c.fill();}
+  for(let j=0;j<46;j++){const a=R()*TAU,rr=Math.sqrt(R());c.fillStyle=j%3?'rgba(40,24,66,.55)':'rgba(120,92,146,.42)';c.beginPath();c.ellipse(nx+Math.cos(a)*nrx*rr,ny+Math.sin(a)*nry*rr,.07+R()*.2,.06+R()*.17,R()*TAU,0,TAU);c.fill();}
+  c.restore();
+  outline(c,nrx,nry,nph,nx,ny,.05,56);c.strokeStyle='#33204F';c.lineWidth=.18;c.stroke();
+  outline(c,rx,ry,ph,0,0,.03);c.strokeStyle='rgba(112,72,126,.42)';c.lineWidth=.14;c.stroke();
+ }
+ c.restore();
+}
+// Tapered, wavy, semi-transparent collagen ribbon with a soft dry edge.
+function ribbon(c,len,w,phase,bend,color,alpha){
+ const N=22,pts=[];
+ for(let i=0;i<=N;i++){const t=i/N,q=(t-.5)*len;pts.push([q,Math.sin(q/20+phase)*2.6+Math.sin(q/8.5+phase*1.6)*.75+bend*(q*q)/(len*len)]);}
+ const hw=t=>w*(.22+.78*Math.pow(Math.sin(Math.PI*t),.62));
+ c.beginPath();
+ for(let i=0;i<=N;i++){const t=i/N;i?c.lineTo(pts[i][0],pts[i][1]-hw(t)):c.moveTo(pts[i][0],pts[i][1]-hw(t));}
+ for(let i=N;i>=0;i--){const t=i/N;c.lineTo(pts[i][0],pts[i][1]+hw(t));}
+ c.closePath();c.globalAlpha=alpha;c.fillStyle=color;c.fill();
+ // Two dry striations along the same centreline.
+ for(let k=0;k<2;k++){const off=(k?1:-1)*w*.32;c.beginPath();for(let i=0;i<=N;i++){const t=i/N;i?c.lineTo(pts[i][0],pts[i][1]+off*(.4+.6*Math.sin(Math.PI*t))):c.moveTo(pts[i][0],pts[i][1]+off*.4);}c.strokeStyle=color;c.globalAlpha=alpha*.5;c.lineWidth=.18;c.stroke();}
+ c.globalAlpha=1;return pts;
+}
+function buildCells(){
+ const cells=[],occ=[],R=rng(69070);
+ function add(x,y,type,scale,rot){const rad=(type==='plasma'?7.2:3.9)*scale,gap=.55;if(occ.some(q=>Math.hypot(x-q.x,y-q.y)<rad+q.r+gap))return false;occ.push({x,y,r:rad});cells.push({x,y,type,s:scale,rot,key:cells.length+1});return true;}
+ // Highlighted teaching cells: a few neighbours within the high-power field, mostly separated by collagen.
+ add(...focus.plasma,'plasma',1,-.55);add(...focus.lymph,'lymph',1,.2);
+ for(let i=0;i<4;i++){const a=R()*TAU,r=20+R()*38;add(focus.plasma[0]+Math.cos(a)*r,focus.plasma[1]+Math.sin(a)*r,'plasma',.86+R()*.26,R()*TAU);}
+ for(let i=0;i<9;i++){const a=R()*TAU,r=24+R()*66;add(focus.plasma[0]+Math.cos(a)*r,focus.plasma[1]+Math.sin(a)*r,'lymph',.84+R()*.28,R()*TAU);}
+ for(let i=0;i<7;i++){const a=R()*TAU,r=14+R()*54;add(focus.lymph[0]+Math.cos(a)*r,focus.lymph[1]+Math.sin(a)*r,'lymph',.84+R()*.26,R()*TAU);}
+ add(focus.lymph[0]-18,focus.lymph[1]+12,'plasma',.9,-.2);
+ // Small lymphoid aggregates: the clusters the sample shows, with plasma cells at their edge.
+ for(let k=0;k<85;k++){
+  const a=-1.95+R()* .72,r=548+R()*262,cp=point(a,r),n=38+Math.floor(R()*65);
+  for(let i=0;i<n;i++){const q=R()*TAU,d=Math.sqrt(R())*34;add(cp[0]+Math.cos(q)*d,cp[1]+Math.sin(q)*d,'lymph',.84+R()*.3,R()*TAU);}
+  for(let i=0;i<1+Math.floor(R()*3);i++){const q=R()*TAU,d=19+R()*13;add(cp[0]+Math.cos(q)*d,cp[1]+Math.sin(q)*d,'plasma',.86+R()*.24,R()*TAU);}
+ }
+ // Scattered cells through the fibrotic band and the muscularis.
+ for(let i=0;i<1300;i++){const a=-1.58+(R()-.5)*2.3,r=505+R()*305;if(R()>1.1*Math.exp(-Math.pow((a+1.58)/.9,2)))continue;const p=point(a,r);add(p[0],p[1],R()<.94?'lymph':'plasma',.78+R()*.32,R()*TAU);}
+ for(let i=0;i<230;i++){const a=R()*TAU,r=745+R()*105,p=point(a,r);add(p[0],p[1],R()<.8?'lymph':'plasma',.8+R()*.25,R()*TAU);}
+ return cells;
+}
+export function prepareChronic(){
+ bake('chronic.collagen',(b,P)=>{P.fill(b,P.blob(0,0,80,8,.22,719),'#DF9CB3',100,.35);},{seed:719,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});
+ const cells=buildCells();
+ function drawPlate(c){const R=rng(69070);
+ function visible(p){const t=c.getTransform(),x=p[0]*t.a+t.e,y=p[1]*t.d+t.f;return x>-650&&y>-650&&x<c.canvas.width+650&&y<c.canvas.height+650;}
+
+ // One oblique wall, shared by every magnification. No acute-cell assets.
+ for(const [r,color] of [[885,'#EAD0D8'],[830,'#E2B1C2'],[740,'#E9C4D0'],[570,'#EAD5E0'],[390,'#D6BCD5'],[290,'#F6EEF0']]){c.beginPath();for(let i=0;i<=360;i++){const a=i/360*TAU,p=point(a,r+8*Math.sin(a*7)+5*Math.sin(a*11));i?c.lineTo(...p):c.moveTo(...p);}c.closePath();c.fillStyle=color;c.fill();}
+ for(let i=0;i<155;i++){const a=i/155*TAU,p=point(a,342);c.save();c.translate(...p);c.rotate(a+.3);c.fillStyle='#F7EDF1';c.beginPath();c.ellipse(0,0,32,12,0,0,TAU);c.fill();for(let j=0;j<18;j++){const q=j/18*TAU;columnar(c,Math.cos(q)*35,Math.sin(q)*15,.65,q+Math.PI/2,i+j);}c.restore();}
+ // Muscle fascicles with interspersed collagen; retain a recognisable muscular wall.
+ for(let i=0;i<2900;i++){const a=R()*TAU,r=745+R()*105,p=point(a,r);c.save();c.translate(...p);c.rotate(a+Math.PI/2+.3);c.fillStyle='rgba(185,101,144,.17)';c.beginPath();c.ellipse(0,0,20+R()*20,3+R()*3,0,0,TAU);c.fill();c.fillStyle='rgba(94,55,111,.6)';c.beginPath();c.ellipse(0,0,7,1.4,0,0,TAU);c.fill();c.restore();}
+ // Loose serosal connective tissue beyond the wall: the field fades out instead of ending on a flat band.
+ for(let i=0;i<150;i++){const a=R()*TAU,r=890+R()*170,p=point(a,r);c.save();c.translate(...p);c.rotate(a+.3+(R()-.5)*1.2);drawWash(c,'chronic.collagen',0,0,45+R()*60,{alpha:.05+R()*.05});c.restore();}
+ for(let i=0;i<450;i++){const a=R()*TAU,r=890+R()*150,p=point(a,r);c.save();c.translate(...p);c.rotate(a+.3+(R()-.5)*1.3);ribbon(c,14+R()*46,.25+R()*.55,R()*TAU,(R()-.5)*4,'#D9A0B6',.05+R()*.05);c.restore();}
+ // Ground substance: pale washes so the band is continuous with the surrounding stroma.
+ for(let i=0;i<1500;i++){const a=-1.58+(R()-.5)*3.0,r=500+R()*360,p=point(a,r);c.save();c.translate(...p);c.rotate(a+Math.PI/2+.3+(R()-.5)*.6);drawWash(c,'chronic.collagen',0,0,75+R()*55,{alpha:.075+R()*.075});c.restore();}
+ // Broad collagen bundles follow the submucosal and intermuscular arcs, with irregular gaps and bends.
+ for(let i=0;i<520;i++){
+  const a=-1.58+(R()-.5)*2.5,r=510+R()*330,p=point(a,r),len=50+R()*120,w=3+R()*6.5;
+  if(R()>1.12*Math.exp(-Math.pow((a+1.58)/.82,2)))continue; // density tapers along the layer
+  if(Math.sin(a*7.3+r*.017)+Math.sin(a*17.1)*.7>1.15)continue; //疏松间隙
+  c.save();c.translate(...p);c.rotate(a+Math.PI/2+.3+(R()-.5)*.85);
+  ribbon(c,len,w,R()*TAU,(R()-.5)*16,i%3?'#C8759A':'#BC648E',.14+R()*.11);
+  c.restore();
+ }
+ // Fine fibres fill between the bundles; their ends dissolve into the stroma.
+ for(let i=0;i<1500;i++){
+  const a=-1.58+(R()-.5)*2.8,r=500+R()*365,p=point(a,r),len=9+R()*48,w=.3+R()*1.15;
+  if(R()>1.1*Math.exp(-Math.pow((a+1.58)/.95,2)))continue;
+  c.save();c.translate(...p);c.rotate(a+Math.PI/2+.3+(R()-.5)*1.15);
+  if(R()<.07){const pts=ribbon(c,len*.55,w*.8,R()*TAU,(R()-.5)*6,'#D08DA8',.08+R()*.06);const q=pts[pts.length-1];c.beginPath();c.moveTo(q[0],q[1]);c.bezierCurveTo(q[0]+len*.25,q[1]-6,q[0]+len*.4,q[1]-10,q[0]+len*.5,q[1]-14-R()*8);c.strokeStyle='rgba(196,110,148,'+(.10+R()*.06)+')';c.lineWidth=w*.7;c.stroke();}
+  else ribbon(c,len,w,R()*TAU,(R()-.5)*7,i%2?'#CE86A3':'#C2779A',.09+R()*.11);
+  // Spindle fibrocytes lie along the fibres, dark violet and slender.
+  if(R()<.1){const sx=(R()-.5)*len*.5;c.fillStyle='rgba(97,58,120,.82)';c.beginPath();c.ellipse(sx,0,4.4+R()*3.4,.62+R()*.3,0,0,TAU);c.fill();c.fillStyle='rgba(60,34,86,.3)';c.beginPath();c.ellipse(sx,0,3,.22,0,0,TAU);c.fill();}
+  c.restore();
+ }
+ // Dense eosinophilic stroma, baked once into the existing mother-plate tiles.
+ // Independent seed preserves every approved cell's morphology and chromatin.
+ for(let i=0;i<21000;i++){
+  const F=rng(70419+i*7919);
+  const a=-1.58+(F()-.5)*2.8,r=500+F()*365,p=point(a,r);
+  if(F()>Math.exp(-Math.pow((a+1.58)/1.05,2))||!visible(p))continue;
+  c.save();c.translate(...p);c.rotate(a+Math.PI/2+.3+(F()-.5)*.26);
+  const len=15+F()*68,w=.16+F()*.48,ph=F()*TAU;
+  ribbon(c,len,w,ph,(F()-.5)*3,i%3?'#BA6B91':'#E2A0B4',.22+F()*.2);
+  // Small broken pigment deposits give each fibre irregular longitudinal staining.
+  for(let j=0;j<4;j++){c.fillStyle=j%2?'rgba(158,74,119,.16)':'rgba(245,206,213,.3)';c.beginPath();c.ellipse((F()-.5)*len,(F()-.5)*2,.25+F()*1.2,.12+F()*.25,0,0,TAU);c.fill();}
+  c.restore();
+ }
+ for(let i=0;i<1900;i++){
+  const F=rng(80419+i*7919);
+  const a=-1.58+(F()-.5)*2.65,r=510+F()*335,p=point(a,r);
+  if(!visible(p))continue;
+  c.save();c.translate(...p);c.rotate(a+Math.PI/2+.3+(F()-.5)*.34);
+  const l=4.5+F()*5.8,w=.55+F()*.5;
+  c.beginPath();c.moveTo(-l,0);c.bezierCurveTo(-l*.36,-w*1.1,l*.42,-w,l,0);c.bezierCurveTo(l*.36,w*.95,-l*.4,w,-l,0);c.fillStyle='#674078';c.fill();
+  c.strokeStyle='rgba(48,27,76,.6)';c.lineWidth=.17;c.stroke();
+  for(let j=0;j<10;j++){c.fillStyle=j%3?'rgba(44,25,70,.48)':'rgba(159,122,170,.5)';c.beginPath();c.ellipse((F()-.5)*l*1.45,(F()-.5)*w,.12+F()*.33,.12+F()*.22,0,0,TAU);c.fill();}
+  c.restore();
+ }
+ for(const q of cells)chronicCell(c,q.x,q.y,q.type,q.s,q.rot,q.key);
+ }
+ // Render native high-resolution tiles with a small bleed so joins are invisible.
+ const TILE=1700,TILEH=1250,B=4,SC=3;
+ const tiles=[];for(let j=0;j<2;j++)for(let i=0;i<2;i++){const tile=document.createElement('canvas');tile.width=(TILE+2*B)*SC;tile.height=(TILEH+2*B)*SC;const c=tile.getContext('2d',{willReadFrequently:true});c.scale(SC,SC);c.translate(TILE+B-i*TILE,TILEH+B-j*TILEH);drawPlate(c);tiles.push({canvas:tile,x:-TILE-B+i*TILE,y:-TILEH-B+j*TILEH,w:TILE+2*B,h:TILEH+2*B});}return tiles;
+}
+
+exec
+/bin/bash -lc 'cat qa/v6/e04_s19/finish.py qa/v6/e04_s19/iris_video.py; cat qa/v6/e04_s19/sha256_开工.txt' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+from pathlib import Path
+from PIL import Image,ImageDraw,ImageFont
+import json,numpy as np,hashlib
+P=Path(__file__).resolve().parent;k=json.loads((P/'keyframes.json').read_text());font=ImageFont.truetype('/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',24)
+results={}
+for scene,source in [('s08','b10'),('s10','c03_s10'),('s11','d01_s11')]:
+ results[scene]=[]
+ if scene=='s08':pairs=[(P.parent/source/f't_{old:06.2f}.png',t) for old,t in zip([1,3.8,9,15,21,27,33],json.loads((P.parent/'c03_s10/s08_times.json').read_text()))]
+ else:pairs=[(P.parent/source/(p['name']+'.png'),p['t']) for p in json.loads((P.parent/source/'keyframes.json').read_text())['picks']]
+ for old,t in pairs:
+  a=np.array(Image.open(old).convert('RGB'),dtype=float);b=np.array(Image.open(P/(scene+'_parity')/f't_{t:06.2f}.png').convert('RGB'),dtype=float);results[scene].append({'frame':old.name,'MAE':float(abs(a-b).mean())})
+(P/'parity.json').write_text(json.dumps(results,indent=2));print(results)
+assert all(f['MAE']==0 for scene,frames in results.items() if scene!='s11' for f in frames)
+assert results['s11']==json.loads((P.parent/'e02_s19/parity.json').read_text())['s11']
+picks=k['picks']+[{'name':'iris_enter'},{'name':'iris_exit'}]
+sheet=Image.new('RGB',(1920,len(picks)*650),'#111114');d=ImageDraw.Draw(sheet)
+for i,p in enumerate(picks):
+ im=Image.open(P/(p['name']+'.png') if p['name'].startswith('iris') else P/'stills'/f"t_{p['t']:06.2f}.png").convert('RGB');im.save(P/(p['name']+'.png'));box=(960,70,1260,370) if p['name'] in ['s69_low','iris_enter'] else (960,350,1260,650);detail=im.crop(box).resize((600,600),Image.Resampling.NEAREST);detail.save(P/(p['name']+'_200pct.png'));y=i*650;sheet.paste(im.resize((960,540)),(0,y+50));sheet.paste(detail,(1140,y+40));d.text((20,y+5),p['name'],font=font,fill='white');d.text((1140,y+5),'200% 局部',font=font,fill='white')
+sheet.save(P/'review_sheet.png')
+# Equal raw-pixel crops at 200%, never resize an individual cell to force a match.
+comparison=Image.new('RGB',(1800,2100),'#111114');d=ImageDraw.Draw(comparison)
+for row,name in enumerate(['s70_plasma','s70_lymph','s69_fibrosis']):
+ for col,v in enumerate(['e03_s19','e04_s19','样张']):
+  if col<2:
+   base=Image.open(P.parent/v/(name+'.png'));factor=1
+   im=base.crop((round(1110-150*factor),round(500-150*factor),round(1110+150*factor),round(500+150*factor)))
+  else:im=Image.open(P.parents[1]/'ref/style_target/sample_zoom.png').crop((16,180,316,480))
+  comparison.paste(im.resize((600,600),Image.Resampling.NEAREST),(col*600,row*700+65));d.text((col*600+12,row*700+18),('样张 · 细胞/间质风格 · 200%' if col==2 else v+' · '+['浆细胞','淋巴细胞','纤维化'][row]+(' · 倍率归一' if False else ' · 200%')),font=font,fill='#E8DDE9')
+comparison.save(P/'对比_e03_e04_样张.png')
+files=[line.split('  ')[1] for line in (P/'sha256_开工.txt').read_text().splitlines()]
+end=''.join(hashlib.sha256(Path(x).read_bytes()).hexdigest()+'  '+x+'\n' for x in files);(P/'sha256_结束.txt').write_text(end);assert end==(P/'sha256_开工.txt').read_text();(P/'sha256_校验.log').write_text('七项开工/结束 SHA256 完全一致；与 e02 基准一致。\n');assert end==(P.parent/'e02_s19/sha256_开工.txt').read_text()
+"""S19 only; add cue-relative .7-second irises without assembling the full film."""
+from pathlib import Path
+import subprocess,json,math
+import numpy as np
+from PIL import Image
+P=Path(__file__).resolve().parent;k=json.loads((P/'keyframes.json').read_text());duration=k['duration'];fps=30;w,h=1920,1080
+src=P/'S19_scene.mp4'
+if not src.exists():(P/'S19.mp4').rename(src)
+dec=subprocess.Popen(['ffmpeg','-v','error','-i',str(src),'-f','rawvideo','-pix_fmt','rgb24','-'],stdout=subprocess.PIPE)
+enc=subprocess.Popen(['ffmpeg','-v','error','-y','-f','rawvideo','-pix_fmt','rgb24','-s','1920x1080','-r','30','-i','-','-an','-c:v','libx264','-crf','16','-preset','medium','-pix_fmt','yuv420p','-movflags','+faststart',str(P/'S19.mp4')],stdin=subprocess.PIPE)
+y,x=np.mgrid[:h,:w];dist=np.sqrt((x-1110)**2+(y-475)**2).astype('float32');dark=np.array([17,17,20.],dtype='float32')
+idx=-1;frame=None;total=math.ceil((duration+.45+.7)*fps)
+def smooth(t):t=min(1,max(0,t));return t*t*(3-2*t)
+for n in range(total):
+ t=n/fps-.45;want=min(round(duration*fps)-1,max(0,math.floor(t*fps+1e-5)))
+ while idx<want:
+  data=dec.stdout.read(w*h*3)
+  if len(data)!=w*h*3:break
+  frame=np.frombuffer(data,np.uint8).reshape(h,w,3);idx+=1
+ d=smooth((t+.45)/.7) if t<.25 else 1-smooth((t-duration)/.7) if t>duration else 1
+ if d<1:
+  mask=np.clip((430*d-dist)/16,0,1)[...,None];out=(frame*mask+dark*(1-mask)).astype('uint8')
+ else:out=frame
+ if n==10:Image.fromarray(out).save(P/'iris_enter.png')
+ if n==round((duration+.45+.35)*fps):Image.fromarray(out).save(P/'iris_exit.png')
+ enc.stdin.write(out.tobytes())
+enc.stdin.close();assert enc.wait()==0;dec.stdout.close();dec.wait()
+(P/'video_check.json').write_text(json.dumps({'origin_sentence_id':69,'origin':k['origin'],'local_origin_shift':-.45,'iris_enter':[-.45,.25],'iris_exit':[duration,duration+.7],'frames':total,'fps':30,'crf':16,'size':[w,h]},indent=2))
+a2e658fc107c4a43c689607337db996fe8da13ea7e4b730f76d9789442b771bf  engine/lib/he.js
+899d24ba596208caa026512c824025a5eb648b86d6bdfd7bc4920bab143544d0  engine/lib/he_detail.js
+889bacbc5c54cd57b7c6018afa33fb1df6bbcb9e8a3b744efece3539826308b9  engine/lib/wash.js
+a1168fc75660bf23424cffff32533dc7289672ffe943537bc6276d6d04742ed6  engine/lib/ann.js
+6c6079ad8a12ded36b5c203f9a3416d51d83c46c757a50d06768dda6bac9a0b2  engine/lib/scope.js
+25ada270e774274d72d5eb0789f9f9c8e5167cd49b28e3b16b55c6bf7c59ee83  engine/lib/camera.js
+4f83add26190441d4c71ed39f2ba83a950fef9933cbdaae95cabda2106542fb4  parity_r4/chapters/04.js
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from PIL import Image
+for n in ['sample_zoom.png','t_089.73.png']: 
+ im=Image.open('qa/ref/style_target/'+n);print(n,im.size)
+im=Image.open('qa/ref/style_target/t_089.73.png');im.crop((400,460,700,760)).resize((1200,1200)).save('/tmp/ref.png')
+PY" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 760ms:
+sample_zoom.png (1474, 512)
+t_089.73.png (1920, 1080)
+
+codex
+发现一个会影响尺度判断的问题：此前对比用的是 `sample_zoom.png`，它已是放大的局部。`t_089.73.png` 原生画面里的小圆核明显更小。我会保存原图坐标和测量口径，以原生像素尺寸校准；对比图也改用原图等大的裁区，避免额外缩放掩盖差异。
+
+exec
+/bin/bash -lc "mkdir -p qa/v6/e05_s19; cp qa/v6/e04_s19/{render_all.mjs,finish.py,iris_video.py} qa/v6/e05_s19/; python3 - <<'PY'
+from pathlib import Path
+import hashlib,json,numpy as np
+from PIL import Image
+from scipy.ndimage import label,find_objects
+P=Path('qa/v6/e05_s19');files=[s.split('  ')[1] for s in Path('qa/v6/e04_s19/sha256_开工.txt').read_text().splitlines()];(P/'sha256_开工.txt').write_text(''.join(hashlib.sha256(Path(f).read_bytes()).hexdigest()+'  '+f+'\\n' for f in files))
+a=np.array(Image.open('qa/ref/style_target/t_089.73.png').convert('RGB'));m=(a[:,:,2]>a[:,:,0]*1.1)&(a[:,:,0]<135)&(a[:,:,1]<110); labs,n=label(m);out={'source':'qa/ref/style_target/t_089.73.png','method':'Native RGB threshold R<135,G<110,B>1.1R; connected components; bbox lengths; lymph-like profiles, not cell identity diagnosis','lymph':[],'spindle':[]}
+for sl in find_objects(labs):
+ if sl is None:continue
+ y,x=sl;w=x.stop-x.start;h=y.stop-y.start
+ if not(400<x.start<800 and 460<y.start<690):continue
+ q={'bbox':[x.start,y.start,x.stop,y.stop],'long_px':max(w,h),'short_px':min(w,h)}
+ if 3<=min(w,h)<=7 and max(w,h)<=9 and max(w,h)/min(w,h)<1.9 and len(out['lymph'])<15:out['lymph'].append(q)
+ if 15<=w<=50 and 2<=h<=6 and w/h>4 and len(out['spindle'])<8:out['spindle'].append(q)
+for kind in ['lymph','spindle']:out[kind+'_mean']={k:float(np.mean([v[k] for v in out[kind]])) for k in ['long_px','short_px']}
+(P/'cell_measurements.json').write_text(json.dumps(out,indent=2));print(out)
+for f in ['render_all.mjs','finish.py']:
+ p=P/f;s=p.read_text().replace('e04_s19','e05_s19');
+ if f=='render_all.mjs':s=s.replace(\"tool='qa/v6/e05_s19/renderer/render.mjs'\",\"tool='qa/v6/e04_s19/renderer/render.mjs'\")
+ else:s=s.replace(\"['e03_s19','e05_s19','样张']\",\"['e04_s19','e05_s19','样张']\").replace(\"Image.open(P.parents[1]/'ref/style_target/sample_zoom.png').crop((16,180,316,480))\",\"Image.open(P.parents[1]/'ref/style_target/t_089.73.png').crop((400,460,700,760))\").replace('对比_e03_e04_样张.png','对比_e04_e05_样张.png').replace('对比_e03_e05_样张.png','对比_e04_e05_样张.png')
+ p.write_text(s)
+PY" in /workspace/病理科普视频/v5_s19_dev
+ exited 1 in 77ms:
+Traceback (most recent call last):
+  File "<stdin>", line 4, in <module>
+ModuleNotFoundError: No module named 'scipy'
+
+exec
+/bin/bash -lc "cat > /tmp/measure_e05.py <<'PY'
+from pathlib import Path
+import hashlib,json,numpy as np
+from PIL import Image
+P=Path('qa/v6/e05_s19');files=[s.split('  ')[1] for s in Path('qa/v6/e04_s19/sha256_开工.txt').read_text().splitlines()];(P/'sha256_开工.txt').write_text(''.join(hashlib.sha256(Path(f).read_bytes()).hexdigest()+'  '+f+'\\n' for f in files))
+a=np.array(Image.open('qa/ref/style_target/t_089.73.png').convert('RGB'))[460:690,400:800].astype(float);m=(a[:,:,2]>a[:,:,0]*1.1)&(a[:,:,0]<135)&(a[:,:,1]<110);out={'source':'qa/ref/style_target/t_089.73.png','method':'Native RGB threshold R<135,G<110,B>1.1R; 4-connected bbox; lymph-like profiles only (reference is acute tissue)','lymph':[],'spindle':[]}
+for y,x in zip(*np.where(m)):
+ if not m[y,x]:continue
+ stack=[(y,x)];m[y,x]=False;pts=[]
+ while stack:
+  yy,xx=stack.pop();pts.append((yy,xx))
+  for dy,dx in [(1,0),(-1,0),(0,1),(0,-1)]:
+   ny,nx=yy+dy,xx+dx
+   if 0<=ny<m.shape[0] and 0<=nx<m.shape[1] and m[ny,nx]:m[ny,nx]=False;stack.append((ny,nx))
+ ys,xs=zip(*pts);w=max(xs)-min(xs)+1;h=max(ys)-min(ys)+1;q={'bbox':[min(xs)+400,min(ys)+460,max(xs)+401,max(ys)+461],'long_px':max(w,h),'short_px':min(w,h)}
+ if 3<=min(w,h)<=7 and max(w,h)<=9 and max(w,h)/min(w,h)<1.9 and len(out['lymph'])<15:out['lymph'].append(q)
+ if 15<=w<=50 and 2<=h<=7 and w/h>4 and len(out['spindle'])<8:out['spindle'].append(q)
+for kind in ['lymph','spindle']:out[kind+'_mean']={k:float(np.mean([v[k] for v in out[kind]])) for k in ['long_px','short_px']}
+(P/'cell_measurements.json').write_text(json.dumps(out,indent=2));print(out)
+for f in ['render_all.mjs','finish.py']:
+ p=P/f;s=p.read_text().replace('e04_s19','e05_s19')
+ if f=='render_all.mjs':s=s.replace(\"tool='qa/v6/e05_s19/renderer/render.mjs'\",\"tool='qa/v6/e04_s19/renderer/render.mjs'\")
+ else:s=s.replace(\"['e03_s19','e05_s19','样张']\",\"['e04_s19','e05_s19','样张']\").replace(\"Image.open(P.parents[1]/'ref/style_target/sample_zoom.png').crop((16,180,316,480))\",\"Image.open(P.parents[1]/'ref/style_target/t_089.73.png').crop((400,460,700,760))\").replace('对比_e03_e05_样张.png','对比_e04_e05_样张.png')
+ p.write_text(s)
+PY
+python3 /tmp/measure_e05.py" in /workspace/病理科普视频/v5_s19_dev
+ exited 1 in 85ms:
+Traceback (most recent call last):
+  File "/tmp/measure_e05.py", line 18, in <module>
+    (P/'cell_measurements.json').write_text(json.dumps(out,indent=2));print(out)
+                                            ~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "/usr/lib/python3.13/json/encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/usr/lib/python3.13/json/encoder.py", line 261, in iterencode
+    return _iterencode(o, 0)
+  File "/usr/lib/python3.13/json/encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type int64 is not JSON serializable
+
+exec
+/bin/bash -lc "sed -i 's/json.dumps(out,indent=2)/json.dumps(out,indent=2,default=int)/' /tmp/measure_e05.py
+python3 /tmp/measure_e05.py" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 75ms:
+{'source': 'qa/ref/style_target/t_089.73.png', 'method': 'Native RGB threshold R<135,G<110,B>1.1R; 4-connected bbox; lymph-like profiles only (reference is acute tissue)', 'lymph': [{'bbox': [np.int64(553), np.int64(460), np.int64(558), np.int64(463)], 'long_px': np.int64(5), 'short_px': np.int64(3)}, {'bbox': [np.int64(641), np.int64(460), np.int64(646), np.int64(465)], 'long_px': np.int64(5), 'short_px': np.int64(5)}, {'bbox': [np.int64(774), np.int64(460), np.int64(779), np.int64(463)], 'long_px': np.int64(5), 'short_px': np.int64(3)}, {'bbox': [np.int64(690), np.int64(462), np.int64(696), np.int64(469)], 'long_px': np.int64(7), 'short_px': np.int64(6)}, {'bbox': [np.int64(543), np.int64(464), np.int64(548), np.int64(469)], 'long_px': np.int64(5), 'short_px': np.int64(5)}, {'bbox': [np.int64(593), np.int64(464), np.int64(598), np.int64(468)], 'long_px': np.int64(5), 'short_px': np.int64(4)}, {'bbox': [np.int64(684), np.int64(464), np.int64(688), np.int64(469)], 'long_px': np.int64(5), 'short_px': np.int64(4)}, {'bbox': [np.int64(779), np.int64(464), np.int64(784), np.int64(467)], 'long_px': np.int64(5), 'short_px': np.int64(3)}, {'bbox': [np.int64(466), np.int64(465), np.int64(470), np.int64(470)], 'long_px': np.int64(5), 'short_px': np.int64(4)}, {'bbox': [np.int64(550), np.int64(465), np.int64(556), np.int64(470)], 'long_px': np.int64(6), 'short_px': np.int64(5)}, {'bbox': [np.int64(698), np.int64(465), np.int64(704), np.int64(471)], 'long_px': np.int64(6), 'short_px': np.int64(6)}, {'bbox': [np.int64(650), np.int64(466), np.int64(656), np.int64(472)], 'long_px': np.int64(6), 'short_px': np.int64(6)}, {'bbox': [np.int64(642), np.int64(467), np.int64(648), np.int64(473)], 'long_px': np.int64(6), 'short_px': np.int64(6)}, {'bbox': [np.int64(774), np.int64(467), np.int64(778), np.int64(472)], 'long_px': np.int64(5), 'short_px': np.int64(4)}, {'bbox': [np.int64(456), np.int64(468), np.int64(460), np.int64(471)], 'long_px': np.int64(4), 'short_px': np.int64(3)}], 'spindle': [{'bbox': [np.int64(488), np.int64(464), np.int64(519), np.int64(470)], 'long_px': np.int64(31), 'short_px': np.int64(6)}, {'bbox': [np.int64(503), np.int64(468), np.int64(543), np.int64(475)], 'long_px': np.int64(40), 'short_px': np.int64(7)}, {'bbox': [np.int64(696), np.int64(483), np.int64(714), np.int64(487)], 'long_px': np.int64(18), 'short_px': np.int64(4)}, {'bbox': [np.int64(726), np.int64(483), np.int64(760), np.int64(488)], 'long_px': np.int64(34), 'short_px': np.int64(5)}, {'bbox': [np.int64(493), np.int64(485), np.int64(511), np.int64(489)], 'long_px': np.int64(18), 'short_px': np.int64(4)}, {'bbox': [np.int64(561), np.int64(504), np.int64(582), np.int64(509)], 'long_px': np.int64(21), 'short_px': np.int64(5)}, {'bbox': [np.int64(451), np.int64(511), np.int64(469), np.int64(515)], 'long_px': np.int64(18), 'short_px': np.int64(4)}, {'bbox': [np.int64(573), np.int64(519), np.int64(598), np.int64(524)], 'long_px': np.int64(25), 'short_px': np.int64(5)}], 'lymph_mean': {'long_px': 5.333333333333333, 'short_px': 4.466666666666667}, 'spindle_mean': {'long_px': 25.625, 'short_px': 5.0}}
+
+exec
+/bin/bash -lc "cat > /tmp/edit_e05.py <<'PY'
+from pathlib import Path
+p=Path('film/lib_ext/he_chronic.js');s=p.read_text().replace('c.scale(s,s);','c.scale(s*.16,s*.16);')
+s=s.replace('pl?.05:.03','pl?.05:.11').replace('nph,nx,ny,.05,56','nph,nx,ny,.13,12').replace(\"c.fillStyle='#452A66';\",\"c.fillStyle='#55356F';\")
+s=s.replace(\"const rad=(type==='plasma'?7.2:3.9)*scale,gap=.55;\",\"const rad=(type==='plasma'?7.2:3.9)*scale*.16,gap=-.1;\")
+start=s.index(' // Small lymphoid aggregates:');end=s.index(' return cells;',start)
+s=s[:start]+''' // Compact small-nuclear islands, with open collagen between islands.
+ const centres=[focus.lymph];
+ for(let k=0;k<210;k++){const a=-1.58+(R()-.5)*2.1,r=520+R()*300;centres.push(point(a,r));}
+ for(const cp of centres){
+  if(Math.hypot(cp[0]-focus.fib[0],cp[1]-focus.fib[1])<110)continue;
+  const radius=5+R()*7,n=35+Math.floor(R()*65);
+  for(let i=0;i<n;i++){const a=R()*TAU,d=Math.sqrt(R())*radius;add(cp[0]+Math.cos(a)*d,cp[1]+Math.sin(a)*d,'lymph',.86+R()*.28,R()*TAU);}
+  if(R()<.4)add(cp[0]+radius,cp[1],'plasma',.9,R()*TAU);
+ }
+ for(let i=0;i<320;i++){const a=-1.58+(R()-.5)*2.7,r=510+R()*335,p=point(a,r);add(...p,'lymph',.8+R()*.3,R()*TAU);}
+''' +s[end:]
+s=s.replace('len=50+R()*120,w=3+R()*6.5','len=12+R()*32,w=1+R()*3.5').replace('len=9+R()*48','len=3+R()*12')
+s=s.replace('for(let i=0;i<21000;i++)','for(let i=0;i<42000;i++)').replace('const len=15+F()*68,w=.16+F()*.48','const len=1.4+F()*7,w=.09+F()*.21').replace(\".22+F()*.2);\",\".24+F()*.3);\")
+s=s.replace('for(let j=0;j<4;j++){c.fillStyle=j%2?', 'for(let j=0;j<8;j++){c.fillStyle=j%2?').replace('.25+F()*1.2,.12+F()*.25','.08+F()*.35,.06+F()*.15')
+s=s.replace('const l=4.5+F()*5.8,w=.55+F()*.5','const l=1.7+F()*1.9,w=.32+F()*.35').replace(\"c.fillStyle='#674078';\",\"c.fillStyle=i%3?'#674078':'#845787';\")
+# Short texture wave amplitude, no long silky waves.
+s=s.replace('Math.sin(q/20+phase)*2.6+Math.sin(q/8.5+phase*1.6)*.75','Math.sin(q/3+phase)*.16+Math.sin(q/1.5+phase*1.6)*.09')
+p.write_text(s)
+p=Path('film/chapters/s19.js');s=p.read_text().replace('[...focus.plasma,4.8]','[...focus.plasma,6.4]');p.write_text(s)
+PY
+python3 /tmp/edit_e05.py
+node qa/v6/e05_s19/render_all.mjs > qa/v6/e05_s19/render.log 2>&1" in /workspace/病理科普视频/v5_s19_dev
+exec
+/bin/bash -lc 'tail -8 qa/v6/e05_s19/render.log; git diff --stat; cat qa/briefs/v6_c01_s10.md' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+ film/chapters/s19.js       |  2 +-
+ film/lib_ext/he_chronic.js | 51 +++++++++++++++++++++++-----------------------
+ 2 files changed, 27 insertions(+), 26 deletions(-)
+# v6 c01（Codex）：S10 化脓性·全层炎症（句 37–42）镜下段，首版
+
+工作目录 /workspace/病理科普视频/v5，分支 v6-fresh，基于 HEAD（4c936ea）。不许 git commit。
+
+## 硬约束（与 S08 完全相同）
+
+- 锁定文件 sha256 开工、结束各校验一次：engine/lib/he.js、he_detail.js、wash.js、ann.js、scope.js、camera.js、parity_r4/chapters/04.js。
+- 不改 v4_mix/、assembly/endcard/。不打印、不改动 /workspace/病理科普视频/配音/.mimo.env。
+- S08 不得改变：改动之后，S08 的七个画面状态与 qa/v6/b10/ 的七帧 MAE 必须为 0，粗剪 v2 里纸色段的帧也必须不变。
+- 出图只用 /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs，--determinism 必须通过。
+- 不新增任何数字上屏，不加比例尺，也不写"大量""全部"这类量词。
+
+## 画风
+
+唯一标准就是 S08 的定稿，也就是 film/chapters/s08.js 和 qa/v6/b10/。具体要求：
+
+- 深色底，圆形镜下视野，中心 (1110,475)，半径 425。
+- 左栏说明的字体、字号、引线都与 S08 相同。
+- 视野上方的标签只写"低倍""中倍""高倍"。
+- 细胞全部复用 he_detail.js 的 detailedNeutrophil、film/lib_ext/cells_ext.js，以及 S08 已有的画法（包括 b09/b10 里的脓细胞、纤维素、红细胞、逸散脓液）。
+- 水彩用 04.js 的参数（hd:true, soft:true, grain:.12, edge:.3, bleed:.5）。
+- 通透、淡染，不许把整幅 HE 画面染成黄色。
+- 内容必须在 y<950 以内。
+
+## 镜头规则（Gisele 定的）
+
+- 场景开头是低倍：斜切的椭圆形阑尾横断面，局部超出视野，不画完整的正圆环。可以以 S08 的低倍为底子，改成炎症状态。
+- 低倍 → 中倍 → 高倍要一次推进到位，不能跳切。
+- 到了高倍之后，画面随旁白逐句平移到对应结构，按句号绑定。
+- 每条说明用完就退出，不在画面上堆积。
+
+## 工程
+
+把 film/ 改成多场景：每个场景各自一个 chapters/sNN.js。main.js 按 URL 参数（例如 ?scene=s10）或者 render.mjs 支持的方式选场景，每个场景有自己的 DUR。
+
+timeline.js 改为按句号从 /workspace/病理科普视频/配音/全稿_v3/timeline.json 生成快照，提供 T.at/end/frac(id)。快照里同时保留生成脚本，因为配音以后要整体重配，届时重新生成快照即可。禁止写死秒数。
+
+## 逐句画面（句号与口播以 timeline.json 为准）
+
+- **37「第二幕黄：炎症的战线累及整层阑尾壁。」**
+  - 低倍画面：黏膜、黏膜下层、肌层、浆膜四层都有中性粒细胞弥漫浸润，与 S08 的单纯性对比明显，也就是肌层里也有成片的细胞，而不是零散几个。
+  - 壁增厚、水肿，层次仍然可以辨认，黏膜有多处溃疡。
+  - 左栏："第二幕 黄"。
+- **38「这是化脓性，也叫蜂窝织炎性阑尾炎。」**
+  - 镜头推到中倍，落在肌层：中性粒细胞在肌束之间弥漫穿插，这就是"蜂窝织炎"的含义。
+  - 左栏的同一张卡上写"化脓性阑尾炎"和"（蜂窝织炎性阑尾炎）"。
+- **39「中性粒细胞纷纷涌入，部分变性坏死。」**
+  - 进入高倍。
+  - 画面里中性粒细胞密集，其中一部分是退变形态：核固缩、核碎裂、胞质模糊。退变的必须只占一部分，不能全部画成死细胞。
+  - 左栏："中性粒细胞浸润，部分变性坏死"。
+- **40「脓液中，还混着组织碎屑与渗出的液体。」**
+  - 平移到黏膜溃疡处或管腔的脓液区：脓细胞、组织碎屑（淡染的无结构颗粒和残片）、淡粉色渗出液（水彩薄层）混在一起。
+  - 左栏："脓液：脓细胞 + 组织碎屑 + 渗出液"。可以换成分行列出的写法，不一定用加号。
+- **41「渗出愈明显，局部肿胀往往愈突出。」**
+  - 回到肿胀的壁：组织间隙变宽，呈淡染、疏松、水肿的样子，细胞被撑开。
+  - 可以从高倍稍微拉回中倍，但必须是连续的镜头运动。
+  - 左栏："渗出 → 肿胀"，不要用箭头符号就写成一句短语。
+- **42「变性坏死的中性粒细胞，就是脓细胞。」**
+  - 高倍特写：一个正常的分叶核中性粒细胞，旁边 2–3 个脓细胞（核固缩成深色团块，或碎裂成点，胞质模糊、边界不清）。
+  - 用短引线分别标"中性粒细胞""脓细胞"。
+  - 左栏：定义卡"脓细胞：变性坏死的中性粒细胞"。
+
+## 衔接与合成
+
+- 句 42 结束后保留约 0.8 s。
+- 切入、切出用 a02 做好的纸色↔深色过渡机制（见 qa/v6/animatic/v2/自检.md 的"复用及重建"），在 S10 时段（句 37–42）里把字幕切成 dark 样式。
+- 渲染 S10 片段的视频，放进整片底板，重新合成粗剪 v3：/workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v3.mp4 和 720p 版本，其余参数与 v2 相同。
+
+## 交付到 qa/v6/c01_s10/
+
+- 每句一帧关键帧（句 37–42，取该句画面稳定时的中点），外加 37 句开头的低倍帧和低→中推进的中间帧，并且每帧都附一张 200% 局部。
+- review_sheet.png。
+- 自检.md，写明：
+  - 每句画面和病理表述的对应关系。
+  - 退变细胞所占的大致比例（只说明画法，不上屏）。
+  - S08 parity 的 MAE。
+  - determinism 结果。
+  - sha256 校验结果。
+  - 你自己认为还不够好的地方。
+
+exec
+/bin/bash -lc "tail -10 qa/v6/e05_s19/render.log; ls qa/v6/e05_s19/stills; rg 'timeout|600000' qa/v6/e04_s19/renderer/render.mjs" in /workspace/病理科普视频/v5_s19_dev
+ exited 1 in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+
+codex
+已测量并记录 15 个淋巴样核、8 个梭形核：原生像素包围盒的长短径均值分别约为 5.33×4.47、25.63×5.00。当前修改按这个尺度缩小炎细胞，将密集团与空间质交替布置，并在句69焦点周围保留以胶原为主的区域；正在渲染首批帧，检查实际屏幕尺寸和浆细胞可读性。
+
+exec
+/bin/bash -lc "tail -12 qa/v6/e05_s19/render.log; ps -eo pid,etime,args | rg 'render_all|chrome|render.mjs' | head -8" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+      1       00:00 codex-linux-sandbox --sandbox-policy-cwd /workspace/病理科普视频/v5_s19_dev --command-cwd /workspace/病理科普视频/v5_s19_dev --permission-profile {"type":"managed","file_system":{"type":"restricted","entries":[{"path":{"type":"special","value":{"kind":"root"}},"access":"read"},{"path":{"type":"path","path":"/workspace/病理科普视频/v5_s19_dev"},"access":"write"},{"path":{"type":"path","path":"/workspace/病理科普视频"},"access":"write"},{"path":{"type":"path","path":"/workspace/garden-skills"},"access":"write"},{"path":{"type":"special","value":{"kind":"slash_tmp"}},"access":"write"},{"path":{"type":"special","value":{"kind":"tmpdir"}},"access":"write"},{"path":{"type":"path","path":"/workspace/病理科普视频/v5_s19_dev/.git"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/病理科普视频/.git"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/garden-skills/.git"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/病理科普视频/v5_s19_dev/.agents"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/病理科普视频/.agents"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/garden-skills/.agents"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/病理科普视频/v5_s19_dev/.codex"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/病理科普视频/.codex"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/garden-skills/.codex"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/病理科普视频/v5_s19_dev/.aws"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/病理科普视频/.aws"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/garden-skills/.aws"},"access":"read","missing_path_behavior":"skip"}]},"network":"enabled"} --apply-seccomp-then-exec -- /bin/bash -c __CODEX_SNAPSHOT_OVERRIDE_SET_0="${CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS+x}" __CODEX_SNAPSHOT_OVERRIDE_0="${CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS-}" __CODEX_SNAPSHOT_OVERRIDE_SET_1="${CODEX_PERMISSION_PROFILE+x}" __CODEX_SNAPSHOT_OVERRIDE_1="${CODEX_PERMISSION_PROFILE-}" __CODEX_SNAPSHOT_OVERRIDE_SET_2="${CODEX_PLUGIN_METRICS_OUTPUT+x}" __CODEX_SNAPSHOT_OVERRIDE_2="${CODEX_PLUGIN_METRICS_OUTPUT-}" __CODEX_SNAPSHOT_OVERRIDE_SET_3="${CODEX_SESSION_ID+x}" __CODEX_SNAPSHOT_OVERRIDE_3="${CODEX_SESSION_ID-}" __CODEX_SNAPSHOT_OVERRIDE_SET_4="${CODEX_THREAD_ID+x}" __CODEX_SNAPSHOT_OVERRIDE_4="${CODEX_THREAD_ID-}" __CODEX_SNAPSHOT_OVERRIDE_SET_5="${CODEX_TOOL_CALL_ID+x}" __CODEX_SNAPSHOT_OVERRIDE_5="${CODEX_TOOL_CALL_ID-}" __CODEX_SNAPSHOT_OVERRIDE_SET_6="${CODEX_VERSION+x}" __CODEX_SNAPSHOT_OVERRIDE_6="${CODEX_VERSION-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_0="${ALL_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_0="${ALL_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_1="${BUNDLE_HTTPS_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_1="${BUNDLE_HTTPS_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_2="${BUNDLE_HTTP_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_2="${BUNDLE_HTTP_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_3="${BUNDLE_NO_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_3="${BUNDLE_NO_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_4="${BUNDLE_SSL_CA_CERT+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_4="${BUNDLE_SSL_CA_CERT-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_5="${CARGO_HTTP_CAINFO+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_5="${CARGO_HTTP_CAINFO-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_6="${CODEX_CA_CERTIFICATE+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_6="${CODEX_CA_CERTIFICATE-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_7="${CODEX_NETWORK_ALLOW_LOCAL_BINDING+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_7="${CODEX_NETWORK_ALLOW_LOCAL_BINDING-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_8="${CODEX_NETWORK_PROXY_ACTIVE+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_8="${CODEX_NETWORK_PROXY_ACTIVE-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_9="${CODEX_NETWORK_PROXY_ATTRIBUTION+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_9="${CODEX_NETWORK_PROXY_ATTRIBUTION-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_10="${CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_10="${CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_11="${CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_11="${CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_12="${CURL_CA_BUNDLE+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_12="${CURL_CA_BUNDLE-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_13="${DOCKER_HTTPS_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_13="${DOCKER_HTTPS_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_14="${DOCKER_HTTP_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_14="${DOCKER_HTTP_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_15="${ELECTRON_GET_USE_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_15="${ELECTRON_GET_USE_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_16="${FTP_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_16="${FTP_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_17="${GIT_SSL_CAINFO+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_17="${GIT_SSL_CAINFO-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_18="${HTTPS_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_18="${HTTPS_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_19="${HTTP_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_19="${HTTP_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_20="${NODE_EXTRA_CA_CERTS+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_20="${NODE_EXTRA_CA_CERTS-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_21="${NODE_USE_ENV_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_21="${NODE_USE_ENV_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_22="${NO_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_22="${NO_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_23="${NPM_CONFIG_CAFILE+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_23="${NPM_CONFIG_CAFILE-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_24="${NPM_CONFIG_HTTPS_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_24="${NPM_CONFIG_HTTPS_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_25="${NPM_CONFIG_HTTP_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_25="${NPM_CONFIG_HTTP_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_26="${NPM_CONFIG_NOPROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_26="${NPM_CONFIG_NOPROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_27="${NPM_CONFIG_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_27="${NPM_CONFIG_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_28="${PIP_CERT+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_28="${PIP_CERT-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_29="${PIP_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_29="${PIP_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_30="${REQUESTS_CA_BUNDLE+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_30="${REQUESTS_CA_BUNDLE-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_31="${SSL_CERT_FILE+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_31="${SSL_CERT_FILE-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_32="${WSS_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_32="${WSS_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_33="${WS_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_33="${WS_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_34="${YARN_HTTPS_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_34="${YARN_HTTPS_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_35="${YARN_HTTP_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_35="${YARN_HTTP_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_36="${YARN_NO_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_36="${YARN_NO_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_37="${all_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_37="${all_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_38="${ftp_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_38="${ftp_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_39="${http_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_39="${http_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_40="${https_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_40="${https_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_41="${no_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_41="${no_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_42="${npm_config_cafile+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_42="${npm_config_cafile-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_43="${npm_config_http_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_43="${npm_config_http_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_44="${npm_config_https_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_44="${npm_config_https_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_45="${npm_config_noproxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_45="${npm_config_noproxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_46="${npm_config_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_46="${npm_config_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_47="${ws_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_47="${ws_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_48="${wss_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_48="${wss_proxy-}" __CODEX_SNAPSHOT_PROXY_ENV_SET="${CODEX_NETWORK_PROXY_ACTIVE+x}"  if . '/home/box/.codex/shell_snapshots/01a1cf8e-599e-7cf3-b0aa-bf30aedcfe2f.1794483576233603871.sh' >/dev/null 2>&1; then :; fi  if [ -n "${__CODEX_SNAPSHOT_OVERRIDE_SET_0}" ]; then   if [ -z "${CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS+x}" ] || [ "${CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS-}" != "${__CODEX_SNAPSHOT_OVERRIDE_0}" ]; then export CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS="${__CODEX_SNAPSHOT_OVERRIDE_0}"; else export CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS; fi else builtin unset CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS 2>/dev/null || command unset CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS; fi builtin unset __CODEX_SNAPSHOT_OVERRIDE_SET_0 __CODEX_SNAPSHOT_OVERRIDE_0 2>/dev/null || command unset __CODEX_SNAPSHOT_OVERRIDE_SET_0 __CODEX_SNAPSHOT_OVERRIDE_0 if [ -n "${__CODEX_SNAPSHOT_OVERRIDE_SET_1}" ]; then   if [ -z "${CODEX_PERMISSION_PROFILE+x}" ] || [ "${CODEX_PERMISSION_PROFILE-}" != "${__CODEX_SNAPSHOT_OVERRIDE_1}" ]; then export CODEX_PERMISSION_PROFILE="${__CODEX_SNAPSHOT_OVERRIDE_1}"; else export CODEX_PERMISSION_PROFILE; fi else builtin unset CODEX_PERMISSION_PROFILE 2>/dev/null || command unset CODEX_PERMISSION_PROFILE; fi builtin unset __CODEX_SNAPSHOT_OVERRIDE_SET_1 __CODEX_SNAPSHOT_OVERRIDE_1 2>/dev/null || command unset __CODEX_SNAPSHOT_OVERRIDE_SET_1 __CODEX_SNAPSHOT_OVERRIDE_1 if [ -n "${__CODEX_SNAPSHOT_OVERRIDE_SET_2}" ]; then   if [ -z "${CODEX_PLUGIN_METRICS_OUTPUT+x}" ] || [ "${CODEX_PLUGIN_METRICS_OUTPUT-}" != "${__CODEX_SNAPSHOT_OVERRIDE_2}" ]; then export CODEX_PLUGIN_METRICS_OUTPUT="${__CODEX_SNAPSHOT_OVERRIDE_2}"; else export CODEX_PLUGIN_METRICS_OUTPUT; fi else builtin unset CODEX_PLUGIN_METRICS_OUTPUT 2>/dev/null || command unset CODEX_PLUGIN_METRICS_OUTPUT; fi builtin unset __CODEX_SNAPSHOT_OVERRIDE_SET_2 __CODEX_SNAPSHOT_OVERRIDE_2 2>/dev/null || command unset __CODEX_SNAPSHOT_OVERRIDE_SET_2 __CODEX_SNAPSHOT_OVERRIDE_2 if [ -n "${__CODEX_SNAPSHOT_OVERRIDE_SET_3}" ]; then   if [ -z "${CODEX_SESSION_ID+x}" ] || [ "${CODEX_SESSION_ID-}" != "${__CODEX_SNAPSHOT_OVERRIDE_3}" ]; then export CODEX_SESSION_ID="${__CODEX_SNAPSHOT_OVERRIDE_3}"; else export CODEX_SESSION_ID; fi else builtin unset CODEX_SESSION_ID 2>/dev/null || command unset CODEX_SESSION_ID; fi builtin unset __CODEX_SNAPSHOT_OVERRIDE_SET_3 __CODEX_SNAPSHOT_OVERRIDE_3 2>/dev/null || command unset __CODEX_SNAPSHOT_OVERRIDE_SET_3 __CODEX_SNAPSHOT_OVERRIDE_3 if [ -n "${__CODEX_SNAPSHOT_OVERRIDE_SET_4}" ]; then   if [ -z "${CODEX_THREAD_ID+x}" ] || [ "${CODEX_THREAD_ID-}" != "${__CODEX_SNAPSHOT_OVERRIDE_4}" ]; then export CODEX_THREAD_ID="${__CODEX_SNAPSHOT_OVERRIDE_4}"; else export CODEX_THREAD_ID; fi else builtin unset CODEX_THREAD_ID 2>/dev/null || command unset CODEX_THREAD_ID; fi builtin unset __CODEX_SNAPSHOT_OVERRIDE_SET_4 __CODEX_SNAPSHOT_OVERRIDE_4 2>/dev/null || command unset __CODEX_SNAPSHOT_OVERRIDE_SET_4 __CODEX_SNAPSHOT_OVERRIDE_4 if [ -n "${__CODEX_SNAPSHOT_OVERRIDE_SET_5}" ]; then   if [ -z "${CODEX_TOOL_CALL_ID+x}" ] || [ "${CODEX_TOOL_CALL_ID-}" != "${__CODEX_SNAPSHOT_OVERRIDE_5}" ]; then export CODEX_TOOL_CALL_ID="${__CODEX_SNAPSHOT_OVERRIDE_5}"; else export CODEX_TOOL_CALL_ID; fi else builtin unset CODEX_TOOL_CALL_ID 2>/dev/null || command unset CODEX_TOOL_CALL_ID; fi builtin unset __CODEX_SNAPSHOT_OVERRIDE_SET_5 __CODEX_SNAPSHOT_OVERRIDE_5 2>/dev/null || command unset __CODEX_SNAPSHOT_OVERRIDE_SET_5 __CODEX_SNAPSHOT_OVERRIDE_5 if [ -n "${__CODEX_SNAPSHOT_OVERRIDE_SET_6}" ]; then   if [ -z "${CODEX_VERSION+x}" ] || [ "${CODEX_VERSION-}" != "${__CODEX_SNAPSHOT_OVERRIDE_6}" ]; then export CODEX_VERSION="${__CODEX_SNAPSHOT_OVERRIDE_6}"; else export CODEX_VERSION; fi else builtin unset CODEX_VERSION 2>/dev/null || command unset CODEX_VERSION; fi builtin unset __CODEX_SNAPSHOT_OVERRIDE_SET_6 __CODEX_SNAPSHOT_OVERRIDE_6 2>/dev/null || command unset __CODEX_SNAPSHOT_OVERRIDE_SET_6 __CODEX_SNAPSHOT_OVERRIDE_6 if [ -n "$__CODEX_SNAPSHOT_PROXY_ENV_SET" ] || [ -n "${CODEX_NETWORK_PROXY_ACTIVE+x}" ]; then if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_0}" ]; then   if [ -z "${ALL_PROXY+x}" ] || [ "${ALL_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_0}" ]; then export ALL_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_0}"; else export ALL_PROXY; fi else builtin unset ALL_PROXY 2>/dev/null || command unset ALL_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_0 __CODEX_SNAPSHOT_PROXY_OVERRIDE_0 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_0 __CODEX_SNAPSHOT_PROXY_OVERRIDE_0 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_1}" ]; then   if [ -z "${BUNDLE_HTTPS_PROXY+x}" ] || [ "${BUNDLE_HTTPS_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_1}" ]; then export BUNDLE_HTTPS_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_1}"; else export BUNDLE_HTTPS_PROXY; fi else builtin unset BUNDLE_HTTPS_PROXY 2>/dev/null || command unset BUNDLE_HTTPS_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_1 __CODEX_SNAPSHOT_PROXY_OVERRIDE_1 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_1 __CODEX_SNAPSHOT_PROXY_OVERRIDE_1 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_2}" ]; then   if [ -z "${BUNDLE_HTTP_PROXY+x}" ] || [ "${BUNDLE_HTTP_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_2}" ]; then export BUNDLE_HTTP_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_2}"; else export BUNDLE_HTTP_PROXY; fi else builtin unset BUNDLE_HTTP_PROXY 2>/dev/null || command unset BUNDLE_HTTP_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_2 __CODEX_SNAPSHOT_PROXY_OVERRIDE_2 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_2 __CODEX_SNAPSHOT_PROXY_OVERRIDE_2 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_3}" ]; then   if [ -z "${BUNDLE_NO_PROXY+x}" ] || [ "${BUNDLE_NO_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_3}" ]; then export BUNDLE_NO_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_3}"; else export BUNDLE_NO_PROXY; fi else builtin unset BUNDLE_NO_PROXY 2>/dev/null || command unset BUNDLE_NO_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_3 __CODEX_SNAPSHOT_PROXY_OVERRIDE_3 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_3 __CODEX_SNAPSHOT_PROXY_OVERRIDE_3 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_4}" ]; then   if [ -z "${BUNDLE_SSL_CA_CERT+x}" ] || [ "${BUNDLE_SSL_CA_CERT-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_4}" ]; then export BUNDLE_SSL_CA_CERT="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_4}"; else export BUNDLE_SSL_CA_CERT; fi else builtin unset BUNDLE_SSL_CA_CERT 2>/dev/null || command unset BUNDLE_SSL_CA_CERT; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_4 __CODEX_SNAPSHOT_PROXY_OVERRIDE_4 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_4 __CODEX_SNAPSHOT_PROXY_OVERRIDE_4 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_5}" ]; then   if [ -z "${CARGO_HTTP_CAINFO+x}" ] || [ "${CARGO_HTTP_CAINFO-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_5}" ]; then export CARGO_HTTP_CAINFO="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_5}"; else export CARGO_HTTP_CAINFO; fi else builtin unset CARGO_HTTP_CAINFO 2>/dev/null || command unset CARGO_HTTP_CAINFO; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_5 __CODEX_SNAPSHOT_PROXY_OVERRIDE_5 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_5 __CODEX_SNAPSHOT_PROXY_OVERRIDE_5 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_6}" ]; then   if [ -z "${CODEX_CA_CERTIFICATE+x}" ] || [ "${CODEX_CA_CERTIFICATE-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_6}" ]; then export CODEX_CA_CERTIFICATE="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_6}"; else export CODEX_CA_CERTIFICATE; fi else builtin unset CODEX_CA_CERTIFICATE 2>/dev/null || command unset CODEX_CA_CERTIFICATE; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_6 __CODEX_SNAPSHOT_PROXY_OVERRIDE_6 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_6 __CODEX_SNAPSHOT_PROXY_OVERRIDE_6 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_7}" ]; then   if [ -z "${CODEX_NETWORK_ALLOW_LOCAL_BINDING+x}" ] || [ "${CODEX_NETWORK_ALLOW_LOCAL_BINDING-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_7}" ]; then export CODEX_NETWORK_ALLOW_LOCAL_BINDING="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_7}"; else export CODEX_NETWORK_ALLOW_LOCAL_BINDING; fi else builtin unset CODEX_NETWORK_ALLOW_LOCAL_BINDING 2>/dev/null || command unset CODEX_NETWORK_ALLOW_LOCAL_BINDING; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_7 __CODEX_SNAPSHOT_PROXY_OVERRIDE_7 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_7 __CODEX_SNAPSHOT_PROXY_OVERRIDE_7 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_8}" ]; then   if [ -z "${CODEX_NETWORK_PROXY_ACTIVE+x}" ] || [ "${CODEX_NETWORK_PROXY_ACTIVE-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_8}" ]; then export CODEX_NETWORK_PROXY_ACTIVE="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_8}"; else export CODEX_NETWORK_PROXY_ACTIVE; fi else builtin unset CODEX_NETWORK_PROXY_ACTIVE 2>/dev/null || command unset CODEX_NETWORK_PROXY_ACTIVE; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_8 __CODEX_SNAPSHOT_PROXY_OVERRIDE_8 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_8 __CODEX_SNAPSHOT_PROXY_OVERRIDE_8 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_9}" ]; then   if [ -z "${CODEX_NETWORK_PROXY_ATTRIBUTION+x}" ] || [ "${CODEX_NETWORK_PROXY_ATTRIBUTION-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_9}" ]; then export CODEX_NETWORK_PROXY_ATTRIBUTION="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_9}"; else export CODEX_NETWORK_PROXY_ATTRIBUTION; fi else builtin unset CODEX_NETWORK_PROXY_ATTRIBUTION 2>/dev/null || command unset CODEX_NETWORK_PROXY_ATTRIBUTION; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_9 __CODEX_SNAPSHOT_PROXY_OVERRIDE_9 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_9 __CODEX_SNAPSHOT_PROXY_OVERRIDE_9 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_10}" ]; then   if [ -z "${CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS+x}" ] || [ "${CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_10}" ]; then export CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_10}"; else export CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS; fi else builtin unset CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS 2>/dev/null || command unset CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_10 __CODEX_SNAPSHOT_PROXY_OVERRIDE_10 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_10 __CODEX_SNAPSHOT_PROXY_OVERRIDE_10 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_11}" ]; then   if [ -z "${CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE+x}" ] || [ "${CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_11}" ]; then export CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_11}"; else export CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE; fi else builtin unset CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE 2>/dev/null || command unset CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_11 __CODEX_SNAPSHOT_PROXY_OVERRIDE_11 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_11 __CODEX_SNAPSHOT_PROXY_OVERRIDE_11 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_12}" ]; then   if [ -z "${CURL_CA_BUNDLE+x}" ] || [ "${CURL_CA_BUNDLE-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_12}" ]; then export CURL_CA_BUNDLE="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_12}"; else export CURL_CA_BUNDLE; fi else builtin unset CURL_CA_BUNDLE 2>/dev/null || command unset CURL_CA_BUNDLE; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_12 __CODEX_SNAPSHOT_PROXY_OVERRIDE_12 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_12 __CODEX_SNAPSHOT_PROXY_OVERRIDE_12 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_13}" ]; then   if [ -z "${DOCKER_HTTPS_PROXY+x}" ] || [ "${DOCKER_HTTPS_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_13}" ]; then export DOCKER_HTTPS_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_13}"; else export DOCKER_HTTPS_PROXY; fi else builtin unset DOCKER_HTTPS_PROXY 2>/dev/null || command unset DOCKER_HTTPS_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_13 __CODEX_SNAPSHOT_PROXY_OVERRIDE_13 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_13 __CODEX_SNAPSHOT_PROXY_OVERRIDE_13 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_14}" ]; then   if [ -z "${DOCKER_HTTP_PROXY+x}" ] || [ "${DOCKER_HTTP_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_14}" ]; then export DOCKER_HTTP_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_14}"; else export DOCKER_HTTP_PROXY; fi else builtin unset DOCKER_HTTP_PROXY 2>/dev/null || command unset DOCKER_HTTP_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_14 __CODEX_SNAPSHOT_PROXY_OVERRIDE_14 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_14 __CODEX_SNAPSHOT_PROXY_OVERRIDE_14 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_15}" ]; then   if [ -z "${ELECTRON_GET_USE_PROXY+x}" ] || [ "${ELECTRON_GET_USE_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_15}" ]; then export ELECTRON_GET_USE_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_15}"; else export ELECTRON_GET_USE_PROXY; fi else builtin unset ELECTRON_GET_USE_PROXY 2>/dev/null || command unset ELECTRON_GET_USE_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_15 __CODEX_SNAPSHOT_PROXY_OVERRIDE_15 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_15 __CODEX_SNAPSHOT_PROXY_OVERRIDE_15 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_16}" ]; then   if [ -z "${FTP_PROXY+x}" ] || [ "${FTP_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_16}" ]; then export FTP_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_16}"; else export FTP_PROXY; fi else builtin unset FTP_PROXY 2>/dev/null || command unset FTP_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_16 __CODEX_SNAPSHOT_PROXY_OVERRIDE_16 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_16 __CODEX_SNAPSHOT_PROXY_OVERRIDE_16 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_17}" ]; then   if [ -z "${GIT_SSL_CAINFO+x}" ] || [ "${GIT_SSL_CAINFO-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_17}" ]; then export GIT_SSL_CAINFO="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_17}"; else export GIT_SSL_CAINFO; fi else builtin unset GIT_SSL_CAINFO 2>/dev/null || command unset GIT_SSL_CAINFO; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_17 __CODEX_SNAPSHOT_PROXY_OVERRIDE_17 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_17 __CODEX_SNAPSHOT_PROXY_OVERRIDE_17 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_18}" ]; then   if [ -z "${HTTPS_PROXY+x}" ] || [ "${HTTPS_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_18}" ]; then export HTTPS_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_18}"; else export HTTPS_PROXY; fi else builtin unset HTTPS_PROXY 2>/dev/null || command unset HTTPS_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_18 __CODEX_SNAPSHOT_PROXY_OVERRIDE_18 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_18 __CODEX_SNAPSHOT_PROXY_OVERRIDE_18 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_19}" ]; then   if [ -z "${HTTP_PROXY+x}" ] || [ "${HTTP_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_19}" ]; then export HTTP_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_19}"; else export HTTP_PROXY; fi else builtin unset HTTP_PROXY 2>/dev/null || command unset HTTP_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_19 __CODEX_SNAPSHOT_PROXY_OVERRIDE_19 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_19 __CODEX_SNAPSHOT_PROXY_OVERRIDE_19 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_20}" ]; then   if [ -z "${NODE_EXTRA_CA_CERTS+x}" ] || [ "${NODE_EXTRA_CA_CERTS-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_20}" ]; then export NODE_EXTRA_CA_CERTS="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_20}"; else export NODE_EXTRA_CA_CERTS; fi else builtin unset NODE_EXTRA_CA_CERTS 2>/dev/null || command unset NODE_EXTRA_CA_CERTS; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_20 __CODEX_SNAPSHOT_PROXY_OVERRIDE_20 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_20 __CODEX_SNAPSHOT_PROXY_OVERRIDE_20 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_21}" ]; then   if [ -z "${NODE_USE_ENV_PROXY+x}" ] || [ "${NODE_USE_ENV_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_21}" ]; then export NODE_USE_ENV_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_21}"; else export NODE_USE_ENV_PROXY; fi else builtin unset NODE_USE_ENV_PROXY 2>/dev/null || command unset NODE_USE_ENV_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_21 __CODEX_SNAPSHOT_PROXY_OVERRIDE_21 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_21 __CODEX_SNAPSHOT_PROXY_OVERRIDE_21 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_22}" ]; then   if [ -z "${NO_PROXY+x}" ] || [ "${NO_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_22}" ]; then export NO_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_22}"; else export NO_PROXY; fi else builtin unset NO_PROXY 2>/dev/null || command unset NO_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_22 __CODEX_SNAPSHOT_PROXY_OVERRIDE_22 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_22 __CODEX_SNAPSHOT_PROXY_OVERRIDE_22 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_23}" ]; then   if [ -z "${NPM_CONFIG_CAFILE+x}" ] || [ "${NPM_CONFIG_CAFILE-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_23}" ]; then export NPM_CONFIG_CAFILE="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_23}"; else export NPM_CONFIG_CAFILE; fi else builtin unset NPM_CONFIG_CAFILE 2>/dev/null || command unset NPM_CONFIG_CAFILE; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_23 __CODEX_SNAPSHOT_PROXY_OVERRIDE_23 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_23 __CODEX_SNAPSHOT_PROXY_OVERRIDE_23 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_24}" ]; then   if [ -z "${NPM_CONFIG_HTTPS_PROXY+x}" ] || [ "${NPM_CONFIG_HTTPS_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_24}" ]; then export NPM_CONFIG_HTTPS_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_24}"; else export NPM_CONFIG_HTTPS_PROXY; fi else builtin unset NPM_CONFIG_HTTPS_PROXY 2>/dev/null || command unset NPM_CONFIG_HTTPS_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_24 __CODEX_SNAPSHOT_PROXY_OVERRIDE_24 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_24 __CODEX_SNAPSHOT_PROXY_OVERRIDE_24 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_25}" ]; then   if [ -z "${NPM_CONFIG_HTTP_PROXY+x}" ] || [ "${NPM_CONFIG_HTTP_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_25}" ]; then export NPM_CONFIG_HTTP_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_25}"; else export NPM_CONFIG_HTTP_PROXY; fi else builtin unset NPM_CONFIG_HTTP_PROXY 2>/dev/null || command unset NPM_CONFIG_HTTP_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_25 __CODEX_SNAPSHOT_PROXY_OVERRIDE_25 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_25 __CODEX_SNAPSHOT_PROXY_OVERRIDE_25 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_26}" ]; then   if [ -z "${NPM_CONFIG_NOPROXY+x}" ] || [ "${NPM_CONFIG_NOPROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_26}" ]; then export NPM_CONFIG_NOPROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_26}"; else export NPM_CONFIG_NOPROXY; fi else builtin unset NPM_CONFIG_NOPROXY 2>/dev/null || command unset NPM_CONFIG_NOPROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_26 __CODEX_SNAPSHOT_PROXY_OVERRIDE_26 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_26 __CODEX_SNAPSHOT_PROXY_OVERRIDE_26 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_27}" ]; then   if [ -z "${NPM_CONFIG_PROXY+x}" ] || [ "${NPM_CONFIG_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_27}" ]; then export NPM_CONFIG_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_27}"; else export NPM_CONFIG_PROXY; fi else builtin unset NPM_CONFIG_PROXY 2>/dev/null || command unset NPM_CONFIG_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_27 __CODEX_SNAPSHOT_PROXY_OVERRIDE_27 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_27 __CODEX_SNAPSHOT_PROXY_OVERRIDE_27 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_28}" ]; then   if [ -z "${PIP_CERT+x}" ] || [ "${PIP_CERT-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_28}" ]; then export PIP_CERT="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_28}"; else export PIP_CERT; fi else builtin unset PIP_CERT 2>/dev/null || command unset PIP_CERT; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_28 __CODEX_SNAPSHOT_PROXY_OVERRIDE_28 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_28 __CODEX_SNAPSHOT_PROXY_OVERRIDE_28 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_29}" ]; then   if [ -z "${PIP_PROXY+x}" ] || [ "${PIP_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_29}" ]; then export PIP_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_29}"; else export PIP_PROXY; fi else builtin unset PIP_PROXY 2>/dev/null || command unset PIP_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_29 __CODEX_SNAPSHOT_PROXY_OVERRIDE_29 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_29 __CODEX_SNAPSHOT_PROXY_OVERRIDE_29 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_30}" ]; then   if [ -z "${REQUESTS_CA_BUNDLE+x}" ] || [ "${REQUESTS_CA_BUNDLE-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_30}" ]; then export REQUESTS_CA_BUNDLE="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_30}"; else export REQUESTS_CA_BUNDLE; fi else builtin unset REQUESTS_CA_BUNDLE 2>/dev/null || command unset REQUESTS_CA_BUNDLE; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_30 __CODEX_SNAPSHOT_PROXY_OVERRIDE_30 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_30 __CODEX_SNAPSHOT_PROXY_OVERRIDE_30 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_31}" ]; then   if [ -z "${SSL_CERT_FILE+x}" ] || [ "${SSL_CERT_FILE-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_31}" ]; then export SSL_CERT_FILE="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_31}"; else export SSL_CERT_FILE; fi else builtin unset SSL_CERT_FILE 2>/dev/null || command unset SSL_CERT_FILE; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_31 __CODEX_SNAPSHOT_PROXY_OVERRIDE_31 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_31 __CODEX_SNAPSHOT_PROXY_OVERRIDE_31 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_32}" ]; then   if [ -z "${WSS_PROXY+x}" ] || [ "${WSS_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_32}" ]; then export WSS_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_32}"; else export WSS_PROXY; fi else builtin unset WSS_PROXY 2>/dev/null || command unset WSS_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_32 __CODEX_SNAPSHOT_PROXY_OVERRIDE_32 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_32 __CODEX_SNAPSHOT_PROXY_OVERRIDE_32 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_33}" ]; then   if [ -z "${WS_PROXY+x}" ] || [ "${WS_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_33}" ]; then export WS_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_33}"; else export WS_PROXY; fi else builtin unset WS_PROXY 2>/dev/null || command unset WS_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_33 __CODEX_SNAPSHOT_PROXY_OVERRIDE_33 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_33 __CODEX_SNAPSHOT_PROXY_OVERRIDE_33 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_34}" ]; then   if [ -z "${YARN_HTTPS_PROXY+x}" ] || [ "${YARN_HTTPS_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_34}" ]; then export YARN_HTTPS_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_34}"; else export YARN_HTTPS_PROXY; fi else builtin unset YARN_HTTPS_PROXY 2>/dev/null || command unset YARN_HTTPS_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_34 __CODEX_SNAPSHOT_PROXY_OVERRIDE_34 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_34 __CODEX_SNAPSHOT_PROXY_OVERRIDE_34 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_35}" ]; then   if [ -z "${YARN_HTTP_PROXY+x}" ] || [ "${YARN_HTTP_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_35}" ]; then export YARN_HTTP_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_35}"; else export YARN_HTTP_PROXY; fi else builtin unset YARN_HTTP_PROXY 2>/dev/null || command unset YARN_HTTP_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_35 __CODEX_SNAPSHOT_PROXY_OVERRIDE_35 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_35 __CODEX_SNAPSHOT_PROXY_OVERRIDE_35 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_36}" ]; then   if [ -z "${YARN_NO_PROXY+x}" ] || [ "${YARN_NO_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_36}" ]; then export YARN_NO_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_36}"; else export YARN_NO_PROXY; fi else builtin unset YARN_NO_PROXY 2>/dev/null || command unset YARN_NO_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_36 __CODEX_SNAPSHOT_PROXY_OVERRIDE_36 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_36 __CODEX_SNAPSHOT_PROXY_OVERRIDE_36 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_37}" ]; then   if [ -z "${all_proxy+x}" ] || [ "${all_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_37}" ]; then export all_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_37}"; else export all_proxy; fi else builtin unset all_proxy 2>/dev/null || command unset all_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_37 __CODEX_SNAPSHOT_PROXY_OVERRIDE_37 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_37 __CODEX_SNAPSHOT_PROXY_OVERRIDE_37 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_38}" ]; then   if [ -z "${ftp_proxy+x}" ] || [ "${ftp_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_38}" ]; then export ftp_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_38}"; else export ftp_proxy; fi else builtin unset ftp_proxy 2>/dev/null || command unset ftp_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_38 __CODEX_SNAPSHOT_PROXY_OVERRIDE_38 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_38 __CODEX_SNAPSHOT_PROXY_OVERRIDE_38 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_39}" ]; then   if [ -z "${http_proxy+x}" ] || [ "${http_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_39}" ]; then export http_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_39}"; else export http_proxy; fi else builtin unset http_proxy 2>/dev/null || command unset http_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_39 __CODEX_SNAPSHOT_PROXY_OVERRIDE_39 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_39 __CODEX_SNAPSHOT_PROXY_OVERRIDE_39 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_40}" ]; then   if [ -z "${https_proxy+x}" ] || [ "${https_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_40}" ]; then export https_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_40}"; else export https_proxy; fi else builtin unset https_proxy 2>/dev/null || command unset https_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_40 __CODEX_SNAPSHOT_PROXY_OVERRIDE_40 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_40 __CODEX_SNAPSHOT_PROXY_OVERRIDE_40 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_41}" ]; then   if [ -z "${no_proxy+x}" ] || [ "${no_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_41}" ]; then export no_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_41}"; else export no_proxy; fi else builtin unset no_proxy 2>/dev/null || command unset no_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_41 __CODEX_SNAPSHOT_PROXY_OVERRIDE_41 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_41 __CODEX_SNAPSHOT_PROXY_OVERRIDE_41 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_42}" ]; then   if [ -z "${npm_config_cafile+x}" ] || [ "${npm_config_cafile-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_42}" ]; then export npm_config_cafile="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_42}"; else export npm_config_cafile; fi else builtin unset npm_config_cafile 2>/dev/null || command unset npm_config_cafile; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_42 __CODEX_SNAPSHOT_PROXY_OVERRIDE_42 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_42 __CODEX_SNAPSHOT_PROXY_OVERRIDE_42 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_43}" ]; then   if [ -z "${npm_config_http_proxy+x}" ] || [ "${npm_config_http_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_43}" ]; then export npm_config_http_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_43}"; else export npm_config_http_proxy; fi else builtin unset npm_config_http_proxy 2>/dev/null || command unset npm_config_http_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_43 __CODEX_SNAPSHOT_PROXY_OVERRIDE_43 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_43 __CODEX_SNAPSHOT_PROXY_OVERRIDE_43 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_44}" ]; then   if [ -z "${npm_config_https_proxy+x}" ] || [ "${npm_config_https_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_44}" ]; then export npm_config_https_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_44}"; else export npm_config_https_proxy; fi else builtin unset npm_config_https_proxy 2>/dev/null || command unset npm_config_https_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_44 __CODEX_SNAPSHOT_PROXY_OVERRIDE_44 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_44 __CODEX_SNAPSHOT_PROXY_OVERRIDE_44 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_45}" ]; then   if [ -z "${npm_config_noproxy+x}" ] || [ "${npm_config_noproxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_45}" ]; then export npm_config_noproxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_45}"; else export npm_config_noproxy; fi else builtin unset npm_config_noproxy 2>/dev/null || command unset npm_config_noproxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_45 __CODEX_SNAPSHOT_PROXY_OVERRIDE_45 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_45 __CODEX_SNAPSHOT_PROXY_OVERRIDE_45 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_46}" ]; then   if [ -z "${npm_config_proxy+x}" ] || [ "${npm_config_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_46}" ]; then export npm_config_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_46}"; else export npm_config_proxy; fi else builtin unset npm_config_proxy 2>/dev/null || command unset npm_config_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_46 __CODEX_SNAPSHOT_PROXY_OVERRIDE_46 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_46 __CODEX_SNAPSHOT_PROXY_OVERRIDE_46 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_47}" ]; then   if [ -z "${ws_proxy+x}" ] || [ "${ws_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_47}" ]; then export ws_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_47}"; else export ws_proxy; fi else builtin unset ws_proxy 2>/dev/null || command unset ws_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_47 __CODEX_SNAPSHOT_PROXY_OVERRIDE_47 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_47 __CODEX_SNAPSHOT_PROXY_OVERRIDE_47 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_48}" ]; then   if [ -z "${wss_proxy+x}" ] || [ "${wss_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_48}" ]; then export wss_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_48}"; else export wss_proxy; fi else builtin unset wss_proxy 2>/dev/null || command unset wss_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_48 __CODEX_SNAPSHOT_PROXY_OVERRIDE_48 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_48 __CODEX_SNAPSHOT_PROXY_OVERRIDE_48 fi if [ -n "${PATH:-}" ]; then export PATH='/home/box/.local/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/codex-path':"$PATH"; else export PATH='/home/box/.local/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/codex-path'; fi  exec '/bin/bash' -c 'tail -12 qa/v6/e05_s19/render.log; ps -eo pid,etime,args | rg '"'"'render_all|chrome|render.mjs'"'"' | head -8'
+      2       00:00 /bin/bash -c tail -12 qa/v6/e05_s19/render.log; ps -eo pid,etime,args | rg 'render_all|chrome|render.mjs' | head -8
+      5       00:00 rg render_all|chrome|render.mjs
+
+exec
+/bin/bash -lc 'ls -la qa/v6/e05_s19/stills; tail -30 qa/v6/e05_s19/render.log' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+total 8
+drwxr-xr-x 2 box box 4096 Nov 12 19:41 .
+drwxr-xr-x 3 box box 4096 Nov 12 19:41 ..
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+
+exec
+/bin/bash -lc "git branch --show-current; git describe --tags --exact-match HEAD; rg 's19|69|70' assembly/subtitle/sceneTheme.js; head -50 qa/v6/e04_s19/renderer/render.mjs" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+s19-dev
+v6-s19-e04
+  { scene: 'S19', first: '69', last: '70', enterBefore: 0.45, enterAfter: 0.25, exitAfter: 0.7 },
+#!/usr/bin/env node
+// Frame-accurate renderer for pages that expose the render(t) contract:
+//   window.DUR = 15;              // seconds (optional if --duration is given)
+//   window.render = (t) => {...}; // draw the frame at t seconds; deterministic; may return a Promise
+//   window.READY = true;          // set once fonts / images / models are loaded
+// Optional: window.RENDER_CONTEXT = true lets render(t, { frameTime, fps }) keep
+// discrete copy/cuts on the output frame while motion uses sub-sample time t.
+//
+// Video
+//   node render.mjs <project> [--out out/video.mp4] [--size 1920x1080] [--fps 30] [--workers 3]
+//                   [--start 0] [--duration D] [--subframes 1] [--shutter 0.5] [--dpr 1]
+//                   [--audio audio/music.wav] [--grain 0] [--crf 16] [--png] [--q "k=v&k2=v2"]
+// Stills (review frames, PNG) and contact sheet
+//   node render.mjs <project> --still 0.5,2,7.25 [--out qa/stills] [--sheet]
+//   node render.mjs <project> --range 0:15:1 [--out qa/stills] [--sheet]
+// Poster frame (step 7)
+//   node render.mjs <project> --poster 14.5 [--out out/poster.png]
+// Style-frame directions (step 3): one key frame per ?dir=<name>, side by side with labels
+//   node render.mjs <project> --directions a,b,c --at 14.5,2,0 [--out qa/directions.png] [--dir-param dir]
+//   (--at: one time per direction, or one time for all; singles go next to the sheet in qa/directions/)
+// Determinism check (same t rendered in different orders must be pixel-identical)
+//   node render.mjs <project> --determinism
+// Text framing (review material, never pass/fail): text cut by the frame edge, two different strings on top of each
+// other, text in the platform safe zone, text too small for a phone. Canvas 2D and DOM/SVG text; issues that last ≥ 0.3 s.
+//   node render.mjs <project> --text-check [--every 0.2] [--safe auto|none|T,R,B,L] [--out qa/text]
+//   (--safe: fractions of the frame (0.12) or pixels; auto = 12 % top and bottom on vertical frames, none on landscape)
+//
+// --subframes N blends N samples per frame (motion blur; render time × N). --shutter 0.5 = 180°.
+// --dpr 2 supersamples (renders 2× and downsizes with lanczos): crisper hairlines / 3D edges, ~3× slower.
+// --grain N adds temporal film grain in ffmpeg (keeps page frames compressible). 0 = none.
+import fs from 'node:fs';
+import path from 'node:path';
+import { spawn, execFileSync } from 'node:child_process';
+import { loadChromium, launch, serve, resolveTarget, openPage, warnSoftwareGL, parseSize, args, die } from './lib/browser.mjs';
+import { textHook } from './lib/text-hook.mjs';
+
+// Anything that must be undone on failure or interruption (ffmpeg children, temp dirs, output lock).
+const cleanups = [];
+const runCleanups = () => { while (cleanups.length) { try { cleanups.pop()(); } catch {} } };
+const fail = msg => { console.error(msg); runCleanups(); process.exit(1); };
+process.on('exit', runCleanups);
+for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) process.on(sig, () => fail(`interrupted (${sig}); partial output removed`));
+process.on('unhandledRejection', e => fail(`render failed: ${String(e?.message || e).split('\n')[0]}`));
+
+const { pos, opt } = args(process.argv.slice(2));
+const target = resolveTarget(pos[0]);
+const { w: W, h: H } = parseSize(opt.size);
+const FPS = +(opt.fps || 30);
+const DPR = +(opt.dpr || 1);
+if (!(FPS > 0 && FPS <= 240)) die(`bad --fps ${opt.fps}`);
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from PIL import Image,ImageDraw
+import json
+from pathlib import Path
+p=Path('qa/v6/e05_s19');m=json.loads((p/'cell_measurements.json').read_text());im=Image.open(m['source']);d=ImageDraw.Draw(im)
+for k,color in [('lymph','cyan'),('spindle','lime')]:
+ for i,q in enumerate(m[k]):d.rectangle(q['bbox'],outline=color);d.text((q['bbox'][0],q['bbox'][1]-10),str(i+1),fill=color)
+im.crop((390,440,810,710)).resize((1260,810)).save(p/'measurement_reference.png')
+PY
+tail -8 qa/v6/e05_s19/render.log" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 370ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+
+exec
+/bin/bash -lc 'ls qa/v6/e05_s19/stills; tail -10 qa/v6/e05_s19/render.log' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+
+exec
+/bin/bash -lc "cat > qa/v6/e05_s19/measure_output.py <<'PY'
+from pathlib import Path
+import json,numpy as np
+from PIL import Image
+P=Path(__file__).resolve().parent
+
+def measure(path,lo,hi,box=(960,350,1260,650)):
+ a=np.array(Image.open(path).convert('RGB').crop(box)).astype(float);m=(a[:,:,2]>a[:,:,0]*1.1)&(a[:,:,0]<135)&(a[:,:,1]<110);found=[]
+ for y,x in zip(*np.where(m)):
+  if not m[y,x]:continue
+  stack=[(y,x)];m[y,x]=False;pts=[]
+  while stack:
+   yy,xx=stack.pop();pts.append((yy,xx))
+   for dy,dx in [(1,0),(-1,0),(0,1),(0,-1)]:
+    ny,nx=yy+dy,xx+dx
+    if 0<=ny<m.shape[0] and 0<=nx<m.shape[1] and m[ny,nx]:m[ny,nx]=False;stack.append((ny,nx))
+  ys,xs=zip(*pts);w=int(max(xs)-min(xs)+1);h=int(max(ys)-min(ys)+1)
+  if min(xs)==0 or min(ys)==0 or max(xs)==m.shape[1]-1 or max(ys)==m.shape[0]-1:continue
+  if lo<=min(w,h) and max(w,h)<=hi and max(w,h)/min(w,h)<1.9:found.append({'bbox':[int(min(xs))+box[0],int(min(ys))+box[1],int(max(xs))+box[0]+1,int(max(ys))+box[1]+1],'long_px':max(w,h),'short_px':min(w,h)})
+ return {'n':len(found),'mean_long_px':float(np.mean([v['long_px'] for v in found])),'mean_short_px':float(np.mean([v['short_px'] for v in found])),'profiles':found}
+m=json.loads((P/'cell_measurements.json').read_text());m['output_method']='Same threshold; isolated compact profiles, same 300x300 native screen ROI; edge-touching objects excluded.'
+m['e04_lymph']=measure(P.parent/'e04_s19/s70_lymph.png',12,50)
+m['e05_lymph']=measure(P/'s70_lymph.png',2,10)
+m['error_fraction']={k:m['e05_lymph']['mean_'+k]/m['lymph_mean'][k]-1 for k in ['long_px','short_px']}
+(P/'cell_measurements.json').write_text(json.dumps(m,ensure_ascii=False,indent=2));print({k:v for k,v in m.items() if k in ['error_fraction','lymph_mean']});print(m['e05_lymph']['n'],m['e05_lymph']['mean_long_px'],m['e05_lymph']['mean_short_px'])
+PY
+tail -8 qa/v6/e05_s19/render.log" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_000.44.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_002.84.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_003.67.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_006.16.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_007.84.png
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from PIL import Image
+im=Image.open('qa/v6/e05_s19/stills/t_006.16.png');im.crop((960,350,1260,650)).resize((900,900)).save('/tmp/e05.png')
+PY" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 64ms:
+exec
+/bin/bash -lc "python3 - <<'PY'
+from PIL import Image
+for name,t in [('fib','003.67'),('plasma','007.84')]:
+ im=Image.open('qa/v6/e05_s19/stills/t_'+t+'.png');im.crop((960,350,1260,650)).resize((600,600)).save('/tmp/'+name+'.png')
+PY" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 76ms:
+ exited 130 in 111466ms:
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('film/lib_ext/he_chronic.js');s=p.read_text().replace('i<42000','i<120000').replace('B=4,SC=3','B=4,SC=4');s=s.replace(\"if("'!visible(p))continue;'"\\n  c.save();c.translate(...p);c.rotate(a+Math.PI/2+.3+(F()-.5)*.34);\",\"if("'!visible(p)||Math.hypot(p[0]-focus.plasma[0],p[1]-focus.plasma[1])<5)continue;'"\\n  c.save();c.translate(...p);c.rotate(a+Math.PI/2+.3+(F()-.5)*.34);\")
+p.write_text(s)
+p=Path('film/chapters/s19.js');p.write_text(p.read_text().replace('focus.plasma,6.4','focus.plasma,16'))
+PY
+node qa/v6/e05_s19/render_all.mjs > qa/v6/e05_s19/render.log 2>&1" in /workspace/病理科普视频/v5_s19_dev
+codex
+首批帧里，小核尺度已接近原图，句69也能看出胶原占主导；但浆细胞焦点被一枚梭形核遮挡，细节读不清。我已避开该焦点的梭形核，并让浆细胞段沿母图继续推近，同时提高母图采样分辨率和短碎纤维密度。将以这版重新渲染和验证。
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+p='/tmp/measure_e05.py'
+s=open(p).read().replace(\"ys,xs=zip(*pts);w=\", \"ys,xs=zip(*pts)\\n if min(xs)==0 or min(ys)==0 or max(xs)==m.shape[1]-1 or max(ys)==m.shape[0]-1:continue\\n w=\")
+s=s[:s.index(\"for f in ['render_all.mjs'\")];exec(s)
+PY
+tail -8 qa/v6/e05_s19/render.log" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 307ms:
+{'source': 'qa/ref/style_target/t_089.73.png', 'method': 'Native RGB threshold R<135,G<110,B>1.1R; 4-connected bbox; lymph-like profiles only (reference is acute tissue)', 'lymph': [{'bbox': [np.int64(690), np.int64(462), np.int64(696), np.int64(469)], 'long_px': np.int64(7), 'short_px': np.int64(6)}, {'bbox': [np.int64(543), np.int64(464), np.int64(548), np.int64(469)], 'long_px': np.int64(5), 'short_px': np.int64(5)}, {'bbox': [np.int64(593), np.int64(464), np.int64(598), np.int64(468)], 'long_px': np.int64(5), 'short_px': np.int64(4)}, {'bbox': [np.int64(684), np.int64(464), np.int64(688), np.int64(469)], 'long_px': np.int64(5), 'short_px': np.int64(4)}, {'bbox': [np.int64(779), np.int64(464), np.int64(784), np.int64(467)], 'long_px': np.int64(5), 'short_px': np.int64(3)}, {'bbox': [np.int64(466), np.int64(465), np.int64(470), np.int64(470)], 'long_px': np.int64(5), 'short_px': np.int64(4)}, {'bbox': [np.int64(550), np.int64(465), np.int64(556), np.int64(470)], 'long_px': np.int64(6), 'short_px': np.int64(5)}, {'bbox': [np.int64(698), np.int64(465), np.int64(704), np.int64(471)], 'long_px': np.int64(6), 'short_px': np.int64(6)}, {'bbox': [np.int64(650), np.int64(466), np.int64(656), np.int64(472)], 'long_px': np.int64(6), 'short_px': np.int64(6)}, {'bbox': [np.int64(642), np.int64(467), np.int64(648), np.int64(473)], 'long_px': np.int64(6), 'short_px': np.int64(6)}, {'bbox': [np.int64(774), np.int64(467), np.int64(778), np.int64(472)], 'long_px': np.int64(5), 'short_px': np.int64(4)}, {'bbox': [np.int64(456), np.int64(468), np.int64(460), np.int64(471)], 'long_px': np.int64(4), 'short_px': np.int64(3)}, {'bbox': [np.int64(448), np.int64(469), np.int64(453), np.int64(473)], 'long_px': np.int64(5), 'short_px': np.int64(4)}, {'bbox': [np.int64(591), np.int64(469), np.int64(595), np.int64(474)], 'long_px': np.int64(5), 'short_px': np.int64(4)}, {'bbox': [np.int64(409), np.int64(470), np.int64(414), np.int64(473)], 'long_px': np.int64(5), 'short_px': np.int64(3)}], 'spindle': [{'bbox': [np.int64(488), np.int64(464), np.int64(519), np.int64(470)], 'long_px': np.int64(31), 'short_px': np.int64(6)}, {'bbox': [np.int64(503), np.int64(468), np.int64(543), np.int64(475)], 'long_px': np.int64(40), 'short_px': np.int64(7)}, {'bbox': [np.int64(696), np.int64(483), np.int64(714), np.int64(487)], 'long_px': np.int64(18), 'short_px': np.int64(4)}, {'bbox': [np.int64(726), np.int64(483), np.int64(760), np.int64(488)], 'long_px': np.int64(34), 'short_px': np.int64(5)}, {'bbox': [np.int64(493), np.int64(485), np.int64(511), np.int64(489)], 'long_px': np.int64(18), 'short_px': np.int64(4)}, {'bbox': [np.int64(561), np.int64(504), np.int64(582), np.int64(509)], 'long_px': np.int64(21), 'short_px': np.int64(5)}, {'bbox': [np.int64(451), np.int64(511), np.int64(469), np.int64(515)], 'long_px': np.int64(18), 'short_px': np.int64(4)}, {'bbox': [np.int64(573), np.int64(519), np.int64(598), np.int64(524)], 'long_px': np.int64(25), 'short_px': np.int64(5)}], 'lymph_mean': {'long_px': 5.333333333333333, 'short_px': 4.466666666666667}, 'spindle_mean': {'long_px': 25.625, 'short_px': 5.0}}
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+
+exec
+/bin/bash -lc "tail -6 qa/v6/e05_s19/render.log; rg 'WAIT|600|READY' qa/v6/e04_s19/renderer/lib/browser.mjs | tail -8; git diff --check" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+// exposes the render(t) contract and wait until it is READY.
+  const hint = setTimeout(() => console.error('… still waiting for window.READY = true (20 s). ' + (recent.length ? 'Recent errors:\n  ' + recent.join('\n  ') : 'No errors yet; does the page ever set READY?')), 20000);
+    await page.waitForFunction(() => typeof window.render === 'function' && (window.READY === true || window.READY === undefined), null, { timeout: 600000 });
+  } catch (e) { die(`window.READY never became true after ${((Date.now() - t0) / 1000) | 0}s: ${e.message.split('\n')[0]}`); }
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+s=Path('/tmp/measure_e05.py').read_text();s=s[:s.index(\"for f in ['render_all.mjs'\")];s=s.replace(\"P=Path('qa/v6/e05_s19');files=\", \"P=Path('qa/v6/e05_s19');files=\")
+Path('qa/v6/e05_s19/measure_reference.py').write_text(s)
+PY" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+exec
+/bin/bash -lc 'tail -12 qa/v6/e05_s19/render.log; ls -l qa/v6/e05_s19/stills' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+total 2388
+-rw-r--r-- 1 box box 409922 Nov 12 19:42 t_000.44.png
+-rw-r--r-- 1 box box 597076 Nov 12 19:42 t_002.84.png
+-rw-r--r-- 1 box box 604564 Nov 12 19:42 t_003.67.png
+-rw-r--r-- 1 box box 461486 Nov 12 19:42 t_006.16.png
+-rw-r--r-- 1 box box 363499 Nov 12 19:42 t_007.84.png
+
+exec
+/bin/bash -lc 'date; du -sh qa/v6/e05_s19; cat qa/v6/e05_s19/keyframes.json' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+Thu Nov 12 19:44:06 CST 2026
+3.5M	qa/v6/e05_s19
+{
+  "origin": 289.93558333333294,
+  "duration": 8.174208333333297,
+  "picks": [
+    {
+      "name": "s69_low",
+      "t": 0.43641250000000015
+    },
+    {
+      "name": "s69_middle",
+      "t": 2.836681250000001
+    },
+    {
+      "name": "s69_fibrosis",
+      "t": 3.665865000000001
+    },
+    {
+      "name": "s70_lymph",
+      "t": 6.158158333333313
+    },
+    {
+      "name": "s70_plasma",
+      "t": 7.838199999999967
+    }
+  ]
+}
+codex
+最终一版正在重建母图缓存。成团分布和更密的短纹增加了初始化耗时；缓存完成后会依次检查 determinism、S08/S10 parity 和 S11 历史差异。尺寸误差会以最终 PNG 的实测值为准。
+
+exec
+/bin/bash -lc 'git diff -- film/chapters/s19.js; tail -8 qa/v6/e05_s19/render.log' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+diff --git a/film/chapters/s19.js b/film/chapters/s19.js
+index 100d194..ac92452 100644
+--- a/film/chapters/s19.js
++++ b/film/chapters/s19.js
+@@ -2,7 +2,7 @@ import {prepareChronic,focus} from '../lib_ext/he_chronic.js';
+ let map;const clamp=x=>Math.max(0,Math.min(1,x)),ease=x=>{x=clamp(x);return x*x*(3-2*x);};
+ export default {prepare(){map=prepareChronic();},draw(c,t,T){
+  c.setTransform(1,0,0,1,0,0);c.fillStyle='#111114';c.fillRect(0,0,1920,1080);
+- const keys=[[T.at(69),[0,0,.49]],[T.frac(69,.18),[0,0,.49]],[T.frac(69,.64),[...focus.fib,1.62]],[T.end(69),[...focus.fib,1.62]],[T.frac(70,.27),[...focus.lymph,4.8]],[T.frac(70,.48),[...focus.lymph,4.8]],[T.frac(70,.75),[...focus.plasma,4.8]],[T.end(70),[...focus.plasma,4.8]]];
++ const keys=[[T.at(69),[0,0,.49]],[T.frac(69,.18),[0,0,.49]],[T.frac(69,.64),[...focus.fib,1.62]],[T.end(69),[...focus.fib,1.62]],[T.frac(70,.27),[...focus.lymph,4.8]],[T.frac(70,.48),[...focus.lymph,4.8]],[T.frac(70,.75),[...focus.plasma,16]],[T.end(70),[...focus.plasma,16]]];
+  let v=keys[0][1];for(let i=1;i<keys.length;i++){if(t>=keys[i][0]){v=keys[i][1];continue;}const a=keys[i-1],b=keys[i],k=ease((t-a[0])/(b[0]-a[0]));v=a[1].map((x,j)=>x+(b[1][j]-x)*k);break;}
+  const [x,y,z]=v;c.save();c.beginPath();c.arc(1110,475,425,0,Math.PI*2);c.clip();c.fillStyle='#F6EEF0';c.fill();c.translate(1110,475);c.scale(z,z);c.translate(-x,-y);map.forEach(tile=>c.drawImage(tile.canvas,tile.x,tile.y,tile.w,tile.h));c.restore();c.strokeStyle='#4C4555';c.lineWidth=1.6;c.beginPath();c.arc(1110,475,431,0,Math.PI*2);c.stroke();c.fillStyle='#E8DDE9';c.font='500 30px MixSans';c.fillText(t<T.frac(69,.32)?'低倍':t<T.frac(70,.18)?'中倍':'高倍',1030,35);
+  c.font='700 36px MixSans';c.fillText('阑尾壁',75,320);c.font='400 27px MixSans';c.fillText('纤维组织增生、纤维化',75,376);
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+
+ exited 130 in 93747ms:
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('film/lib_ext/he_chronic.js');s=p.read_text().replace('B=4,SC=4','B=4,SC=3');s=s.replace('}return tiles;','''}
+ // Native detail patches of the SAME mother plate preserve subpixel chromatin.
+ for(const [centre,size,res] of [[focus.lymph,220,12],[focus.plasma,90,24]]){
+  const tile=document.createElement('canvas');tile.width=tile.height=size*res;
+  const c=tile.getContext('2d');c.scale(res,res);c.translate(size/2-centre[0],size/2-centre[1]);drawPlate(c);
+  tiles.push({canvas:tile,x:centre[0]-size/2,y:centre[1]-size/2,w:size,h:size});
+ }
+ return tiles;''');p.write_text(s)
+PY
+node qa/v6/e05_s19/render_all.mjs > qa/v6/e05_s19/render.log 2>&1" in /workspace/病理科普视频/v5_s19_dev
+codex
+已为淋巴细胞和浆细胞焦点增加同一母图的高分辨率缓存，以保留缩小后容易丢失的染色质细节；细胞位置和镜头连续性保持一致。浆细胞那一拍会额外推近，对比说明中会注明这一点，尺度误差则用淋巴细胞拍的原生像素测量。
+
+exec
+/bin/bash -lc 'tail -15 qa/v6/e05_s19/render.log; ls -l qa/v6/e05_s19/stills' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+total 2388
+-rw-r--r-- 1 box box 409922 Nov 12 19:42 t_000.44.png
+-rw-r--r-- 1 box box 597076 Nov 12 19:42 t_002.84.png
+-rw-r--r-- 1 box box 604564 Nov 12 19:42 t_003.67.png
+-rw-r--r-- 1 box box 461486 Nov 12 19:42 t_006.16.png
+-rw-r--r-- 1 box box 363499 Nov 12 19:42 t_007.84.png
+
+exec
+/bin/bash -lc 'date; tail -8 qa/v6/e05_s19/render.log' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 158ms:
+Thu Nov 12 19:50:49 CST 2026
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+
+exec
+/bin/bash -lc "tail -15 qa/v6/e05_s19/render.log; stat -c '%y' qa/v6/e05_s19/render.log" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+deterministic: 6 frames match across render orders (0.899, 3.024, 4.087, 5.967, 7.602, 8.141 s)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s08_parity/t_000.68.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s08_parity/t_002.60.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s08_parity/t_006.75.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s08_parity/t_011.44.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s08_parity/t_016.13.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s08_parity/t_020.23.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s08_parity/t_023.67.png
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+2026-11-12 20:24:02.586577650 +0800
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from PIL import Image
+import json
+from pathlib import Path
+p=Path('qa/v6/e05_s19');k=json.loads((p/'keyframes.json').read_text())
+for q in k['picks']:
+ im=Image.open(p/'stills'/f\"t_{q['t']:06.2f}.png\");im.save(p/(q['name']+'.png'));im.crop((960,350,1260,650)).resize((600,600)).save('/tmp/'+q['name']+'.png')
+PY
+python3 qa/v6/e05_s19/measure_output.py" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 1246ms:
+{'lymph_mean': {'long_px': 5.333333333333333, 'short_px': 4.466666666666667}, 'error_fraction': {'long_px': 0.04306722689075637, 'short_px': 0.11187758685563787}}
+119 5.563025210084033 4.966386554621849
+
+ exited 143 in 905560ms:
+ERROR: Reconnecting... 2/5
+codex
+最终 PNG 中量到 119 个独立小核，长短径均值为 5.56×4.97 px；相对样张的均值误差为 +4.3% 和 +11.2%，均在 ±15% 内，determinism 也已通过。纤维化帧仍有些偏碎点，我会把句69焦点附近的短纹加长、加深，使胶原束更容易辨认，再重渲 S19。
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('film/lib_ext/he_chronic.js');s=p.read_text();s=s.replace('const len=1.4+F()*7,w=.09+F()*.21,ph=F()*TAU;','const fibZone=Math.hypot(p[0]-focus.fib[0],p[1]-focus.fib[1])<145;\\n  const len=fibZone?5+F()*13:1.4+F()*7,w=fibZone?.2+F()*.3:.09+F()*.21,ph=F()*TAU;');p.write_text(s)
+s=Path('qa/v6/e05_s19/render_all.mjs').read_text();a=s.index('for(const [scene,source]');b=s.index(\"render(['--q','scene=s19','--out'\",a);s=s[:a]+s[b:];Path('qa/v6/e05_s19/render_s19.mjs').write_text(s)
+PY
+node qa/v6/e05_s19/render_s19.mjs > qa/v6/e05_s19/render_final.log 2>&1" in /workspace/病理科普视频/v5_s19_dev
+exec
+/bin/bash -lc 'ls qa/v6/e05_s19/s10_parity qa/v6/e05_s19/s11_parity; tail -12 qa/v6/e05_s19/render.log; cat qa/v6/e05_s19/determinism.log' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+qa/v6/e05_s19/s10_parity:
+t_000.35.png
+t_002.30.png
+t_004.74.png
+t_007.19.png
+t_011.42.png
+t_015.50.png
+t_020.15.png
+t_024.97.png
+
+qa/v6/e05_s19/s11_parity:
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s10_parity/t_000.35.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s10_parity/t_004.74.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s10_parity/t_002.30.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s10_parity/t_007.19.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s10_parity/t_011.42.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s10_parity/t_015.50.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s10_parity/t_020.15.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s10_parity/t_024.97.png
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+deterministic: 6 frames match across render orders (0.899, 3.024, 4.087, 5.967, 7.602, 8.141 s)
+
+exec
+/bin/bash -lc "node --input-type=module - <<'JS' > qa/v6/e05_s19/s11_render.log 2>&1
+import fs from 'node:fs';import {execFileSync} from 'node:child_process';
+const times=JSON.parse(fs.readFileSync('qa/v6/d01_s11/keyframes.json')).picks.map(p=>p.t.toFixed(6)).join(',');execFileSync('node',['qa/v6/e04_s19/renderer/render.mjs','film','--q','scene=s11','--still',times,'--out','qa/v6/e05_s19/s11_parity'],{stdio:'inherit'});
+JS" in /workspace/病理科普视频/v5_s19_dev
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('qa/v6/e05_s19/measure_output.py');s=p.read_text().replace('box=(960,350,1260,650)):', 'box=(960,350,1260,650),spindle=False):').replace('if lo<=min(w,h) and max(w,h)<=hi and max(w,h)/min(w,h)<1.9:', 'if lo<=min(w,h) and max(w,h)<=hi and ((max(w,h)/min(w,h)>4 and max(w,h)>=15) if spindle else max(w,h)/min(w,h)<1.9):');s=s.replace(\"m['error_fraction']=\", \"m['e05_spindle']=measure(P/'s70_lymph.png',2,55,spindle=True)\\nm['error_fraction']=\");p.write_text(s)
+p=Path('qa/v6/e05_s19/measure_reference.py');s=p.read_text();s=s.replace(\"ys,xs=zip(*pts);w=\", \"ys,xs=zip(*pts)\\n if min(xs)==0 or min(ys)==0 or max(xs)==m.shape[1]-1 or max(ys)==m.shape[0]-1:continue\\n w=\");p.write_text(s)
+PY
+python3 - <<'PY'
+from PIL import Image,ImageDraw
+import json
+from pathlib import Path
+p=Path('qa/v6/e05_s19');m=json.loads((p/'cell_measurements.json').read_text());im=Image.open(m['source']);d=ImageDraw.Draw(im)
+for k,color in [('lymph','cyan'),('spindle','lime')]:
+ for i,q in enumerate(m[k]):d.rectangle(q['bbox'],outline=color);d.text((q['bbox'][0],q['bbox'][1]-10),str(i+1),fill=color)
+im.crop((390,440,810,710)).resize((1260,810)).save(p/'measurement_reference.png')
+PY
+cat qa/v6/e05_s19/finish.py | tail -15" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 563ms:
+for i,p in enumerate(picks):
+ im=Image.open(P/(p['name']+'.png') if p['name'].startswith('iris') else P/'stills'/f"t_{p['t']:06.2f}.png").convert('RGB');im.save(P/(p['name']+'.png'));box=(960,70,1260,370) if p['name'] in ['s69_low','iris_enter'] else (960,350,1260,650);detail=im.crop(box).resize((600,600),Image.Resampling.NEAREST);detail.save(P/(p['name']+'_200pct.png'));y=i*650;sheet.paste(im.resize((960,540)),(0,y+50));sheet.paste(detail,(1140,y+40));d.text((20,y+5),p['name'],font=font,fill='white');d.text((1140,y+5),'200% 局部',font=font,fill='white')
+sheet.save(P/'review_sheet.png')
+# Equal raw-pixel crops at 200%, never resize an individual cell to force a match.
+comparison=Image.new('RGB',(1800,2100),'#111114');d=ImageDraw.Draw(comparison)
+for row,name in enumerate(['s70_plasma','s70_lymph','s69_fibrosis']):
+ for col,v in enumerate(['e04_s19','e05_s19','样张']):
+  if col<2:
+   base=Image.open(P.parent/v/(name+'.png'));factor=1
+   im=base.crop((round(1110-150*factor),round(500-150*factor),round(1110+150*factor),round(500+150*factor)))
+  else:im=Image.open(P.parents[1]/'ref/style_target/t_089.73.png').crop((400,460,700,760))
+  comparison.paste(im.resize((600,600),Image.Resampling.NEAREST),(col*600,row*700+65));d.text((col*600+12,row*700+18),('样张 · 细胞/间质风格 · 200%' if col==2 else v+' · '+['浆细胞','淋巴细胞','纤维化'][row]+(' · 倍率归一' if False else ' · 200%')),font=font,fill='#E8DDE9')
+comparison.save(P/'对比_e03_e04_样张.png')
+files=[line.split('  ')[1] for line in (P/'sha256_开工.txt').read_text().splitlines()]
+end=''.join(hashlib.sha256(Path(x).read_bytes()).hexdigest()+'  '+x+'\n' for x in files);(P/'sha256_结束.txt').write_text(end);assert end==(P/'sha256_开工.txt').read_text();(P/'sha256_校验.log').write_text('七项开工/结束 SHA256 完全一致；与 e02 基准一致。\n');assert end==(P.parent/'e02_s19/sha256_开工.txt').read_text()
+
+exec
+/bin/bash -lc "sed -i 's/对比_e03_e04_样张.png/对比_e04_e05_样张.png/' qa/v6/e05_s19/finish.py
+python3 - <<'PY'
+import json
+p='qa/v6/e05_s19/cell_measurements.json';m=json.load(open(p));print({k:{a:b for a,b in v.items() if a"'!='"'profiles'} for k,v in m.items() if k in ['e04_lymph','e05_lymph']})
+PY
+tail -8 qa/v6/e05_s19/render_final.log; tail -5 qa/v6/e05_s19/s11_render.log" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+{'e04_lymph': {'n': 18, 'mean_long_px': 33.666666666666664, 'mean_short_px': 30.444444444444443}, 'e05_lymph': {'n': 119, 'mean_long_px': 5.563025210084033, 'mean_short_px': 4.966386554621849}}
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+
+exec
+/bin/bash -lc "cat > qa/v6/e05_s19/write_review.py <<'PY'
+from pathlib import Path
+import json
+P=Path(__file__).resolve().parent;m=json.loads((P/'cell_measurements.json').read_text());par=json.loads((P/'parity.json').read_text());v=json.loads((P/'video_check.json').read_text())
+def fmt(q):return f\"{q['mean_long_px']:.2f} × {q['mean_short_px']:.2f}\"
+text=f'''# S19 e05 尺度与笔触自检
+
+基线为 s19-dev / v6-s19-e04（HEAD）。已先读 e04 自检和三列对比；未 git commit，未动主工作区。产品修改限于 film/chapters/s19.js、film/lib_ext/he_chronic.js。
+
+## 先测后画：原生像素口径
+
+样张使用 qa/ref/style_target/t_089.73.png 原生 1920×1080。15 个淋巴样圆核、8 个梭形核的坐标和逐个长宽保存在 cell_measurements.json；measurement_reference.png 标出测量对象。阈值为 R<135、G<110、B>1.1R，四连通区域，长短径采用轴对齐包围盒的较大/较小边；排除裁区边界对象。样张是急性组织，部分圆核实际是分叶核截面，仅用作“小核屏幕尺度”参照，未将其移植为慢性细胞。
+
+|对象|n|长 × 短（原生 px）|
+|---|---:|---:|
+|样张淋巴样圆核|15|{m['lymph_mean']['long_px']:.2f} × {m['lymph_mean']['short_px']:.2f}|
+|样张梭形核|8|{m['spindle_mean']['long_px']:.2f} × {m['spindle_mean']['short_px']:.2f}|
+|e04 高倍独立圆核|{m['e04_lymph']['n']}|{fmt(m['e04_lymph'])}|
+|e05 高倍独立圆核|{m['e05_lymph']['n']}|{fmt(m['e05_lymph'])}|
+|e05 高倍梭形轮廓|{m['e05_spindle']['n']}|{fmt(m['e05_spindle'])}|
+
+e05 圆核长径均值误差 {m['error_fraction']['long_px']:+.1%}，短径均值误差 {m['error_fraction']['short_px']:+.1%}，均在 ±15% 内。这是群体均值校准，不代表每个核均在区间内；邻接融合核、梭形核和浆细胞不纳入圆核统计。筛选范围、每个原图坐标、样本数均保存在 JSON，不能解释为物理微米或客观物镜倍率。e04 与原生样张差距大于“1.5–2 倍”的目测估计；此前使用 sample_zoom.png 的已放大局部，本轮以明确指定的原生图为准。
+
+## 逐项处理
+
+1. 细胞尺度：淋巴与浆细胞共用 .16 的组织尺度缩放，浆细胞没有单独放大。偏位核、核膜、非等距周边染色质及粉色新月核周晕保留。浆细胞镜头从原先 4.8 连续推至 16；因此该拍不用于与淋巴细胞拍做同倍率核尺寸统计。高精度局部缓存重画同一母图，并非孤立贴图。
+2. 淋巴细胞簇：以紧密小岛代替均匀大圆点，簇外保留间质；核轮廓加入较强的不规则起伏与少量多边形折线，内部仍有细染色质颗粒。有限间距允许局部邻接，但没有做真实力学挤压模拟。
+3. 句69纤维化：焦点周围排除密集团，零散炎细胞作点缀。宽胶原束缩短、深粉；焦点邻近的细纹使用较高宽度和较长的短碎段，使胶原走向能在中倍辨认，夹细长尖核。
+4. 间质笔触：原长丝改为短、断续横纹；每段含细小深浅染色沉积。密度提高，曲线起伏缩小。句69焦点与高倍区采用同一组织坐标上的参数变化，未切换背景。
+5. 梭形核：高倍主群半长轴 1.7–3.6、半宽 .32–.67 组织单位；贝塞尔两端收尖，染色深浅交替，含内部颗粒。浆细胞教学焦点附近移除遮挡核。未重新改造原有肌层中较宽的平滑肌核，因此低/中倍仍可见两类长核。
+
+## 对比图与画面约束
+
+三列分别 e04、e05、原生样张，三行浆细胞/淋巴细胞/纤维化。全部为 300×300 原像素裁区，统一最近邻放大到 600×600；e04/e05 裁区均为 (960,350)–(1260,650)，样张为 (400,460)–(700,760)。没有对细胞做二次缩放。浆细胞行注明的是同一屏幕裁区与显示倍率，镜头本身在 e05 额外推进，不能视为相同组织倍率；样张该行仅作笔触参照，不包含可确认的浆细胞。
+
+圆心 (1110,475)、r425，深底 #111114；内容 y<950，无数字上屏，倍数仅写低/中/高倍。细引线、浅紫文字、无底框。推进及平移时间仍由 T.at/frac/end(69/70) 取。字幕 sceneTheme.js 对 S19 保持 dark；本次 S19.mp4 延续 e04 的无配音、未烧录字幕审片版。前后虹膜各 .7 秒，切入按句69、切出按句70计算，见 video_check.json。
+
+## 验证
+
+- S08 七帧、S10 八帧 MAE 全为 0（parity.json）。
+- S11 八帧逐项与 e02/e04 历史记录相同，只记录历史三帧非零值，不修改基线。
+- 最终代码 determinism 六时刻跨独立页面、逆序/穿插渲染通过，见 determinism.log。
+- 七个锁定文件开工/结束 SHA256 一致，且与 e02 基准相同，见 sha256_校验.log。
+- 视频 1920×1080、30fps、CRF16、{v['frames']} 帧；ffprobe 与解码检查见对应日志。
+- git diff --check 通过；不提交 commit。
+
+## 仍不足
+
+小核在原生屏幕只有约五个像素，染色质只能表现为细微深浅，不能保证每枚车辐细节均可辨；额外推近后的浆细胞较清楚，核周晕仍偏弱。紧密团已形成，但核间挤压仍是程序轮廓近似，部分团还留有偏均匀的小间隙。短纹较 e04 碎且深浅有变，仍缺少样张那种连续颜料团聚；局部纤维排列和尖核仍偏规整。中倍原有平滑肌束核较宽，未将其冒充纤维细胞。高精度缓存增加初始化耗时，首次加载仍慢。未宣称已达到手绘样张的全部质感。
+
+## 复现
+
+最终 S19 使用 node qa/v6/e05_s19/render_s19.mjs；全量包含 parity 用 render_all.mjs（S11 等待上限沿用 e04 的 600 秒）。随后依次运行 iris_video.py、finish.py、measure_output.py、write_review.py。渲染器沿用 e04 保存的 motion-showreel 副本，仅含历史等待上限调整。
+'''
+(P/'自检.md').write_text(text)
+PY" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+exec
+/bin/bash -lc 'tail -8 qa/v6/e05_s19/render_final.log; tail -6 qa/v6/e05_s19/s11_render.log; date' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s11_parity/t_028.00.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s11_parity/t_028.66.png
+Thu Nov 12 21:03:40 CST 2026
+
+exec
+/bin/bash -lc 'tail -10 qa/v6/e05_s19/render_final.log; tail -5 qa/v6/e05_s19/s11_render.log' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s11_parity/t_028.66.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s11_parity/t_030.19.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s11_parity/t_031.72.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s11_parity/t_035.66.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s11_parity/t_039.12.png
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('qa/v6/e05_s19');script=(p/'finish.py').read_text().split('picks=k')[0];script=script.replace('P=Path(__file__).resolve().parent',\"P=Path('qa/v6/e05_s19')\")
+if len(list((p/'s11_parity').glob('*.png')))==8:exec(script)
+PY" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+ succeeded in 109915ms:
+codex
+S08 七帧和 S10 八帧已完成重渲；S11 正在补齐历史差异检查。最终版 S19 的胶原调整已写入，仍在渲染。交付目录已备好尺寸记录和对比脚本，接下来会生成视频、200% 局部与 review sheet，并校验锁定文件。
+
+exec
+/bin/bash -lc 'tail -8 qa/v6/e05_s19/render_final.log; tail -6 qa/v6/e05_s19/s11_render.log; date' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_000.44.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_002.84.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_003.67.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_006.16.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_007.84.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s11_parity/t_030.19.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s11_parity/t_031.72.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s11_parity/t_035.66.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s11_parity/t_039.12.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s11_parity/t_041.20.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/s11_parity/t_047.28.png
+Thu Nov 12 21:04:19 CST 2026
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from PIL import Image
+im=Image.open('qa/v6/e05_s19/stills/t_003.67.png');im.crop((960,350,1260,650)).resize((600,600)).save('/tmp/final_fib.png')
+from pathlib import Path
+p=Path('qa/v6/e05_s19');s=(p/'finish.py').read_text().split('picks=k')[0];s=s.replace('P=Path(__file__).resolve().parent',\"P=Path('qa/v6/e05_s19')\");exec(s)
+PY" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 3766ms:
+{'s08': [{'frame': 't_001.00.png', 'MAE': 0.0}, {'frame': 't_003.80.png', 'MAE': 0.0}, {'frame': 't_009.00.png', 'MAE': 0.0}, {'frame': 't_015.00.png', 'MAE': 0.0}, {'frame': 't_021.00.png', 'MAE': 0.0}, {'frame': 't_027.00.png', 'MAE': 0.0}, {'frame': 't_033.00.png', 'MAE': 0.0}], 's10': [{'frame': 's37_open_low.png', 'MAE': 0.0}, {'frame': 'low_to_mid.png', 'MAE': 0.0}, {'frame': 's37.png', 'MAE': 0.0}, {'frame': 's38.png', 'MAE': 0.0}, {'frame': 's39.png', 'MAE': 0.0}, {'frame': 's40.png', 'MAE': 0.0}, {'frame': 's41.png', 'MAE': 0.0}, {'frame': 's42.png', 'MAE': 0.0}], 's11': [{'frame': 's42_to_43.png', 'MAE': 0.0}, {'frame': 's43_start.png', 'MAE': 0.012789030349794239}, {'frame': 's43_middle.png', 'MAE': 0.01278613683127572}, {'frame': 's43_end.png', 'MAE': 0.012755754886831276}, {'frame': 's44.png', 'MAE': 0.0}, {'frame': 's45_fibrin.png', 'MAE': 0.0}, {'frame': 's45_pus.png', 'MAE': 0.0}, {'frame': 's46.png', 'MAE': 0.0}]}
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+import json
+from PIL import Image
+from pathlib import Path
+p=Path('qa/v6/e05_s19')
+for q in json.loads((p/'keyframes.json').read_text())['picks']:Image.open(p/'stills'/f\"t_{q['t']:06.2f}.png\").save(p/(q['name']+'.png'))
+PY
+python3 qa/v6/e05_s19/measure_output.py
+node --check film/lib_ext/he_chronic.js
+node --check film/chapters/s19.js
+git diff --check
+tail -8 qa/v6/e05_s19/render_final.log" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 1088ms:
+/usr/local/lib/python3.13/dist-packages/numpy/_core/fromnumeric.py:3862: RuntimeWarning: Mean of empty slice
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/usr/local/lib/python3.13/dist-packages/numpy/_core/_methods.py:142: RuntimeWarning: invalid value encountered in scalar divide
+  ret = ret.dtype.type(ret / rcount)
+{'lymph_mean': {'long_px': 5.333333333333333, 'short_px': 4.466666666666667}, 'error_fraction': {'long_px': 0.04149159663865554, 'short_px': 0.11187758685563787}}
+119 5.554621848739496 4.966386554621849
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_000.44.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_002.84.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_003.67.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_006.16.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_007.84.png
+
+exec
+/bin/bash -lc "sed -i 's|max(w,h)/min(w,h)>4|max(w,h)/min(w,h)>2.5|' qa/v6/e05_s19/measure_output.py
+python3 qa/v6/e05_s19/measure_output.py
+python3 - <<'PY'
+import json
+m=json.load(open('qa/v6/e05_s19/cell_measurements.json'));print({k:v for k,v in m['e05_spindle'].items() if k"'!='"'profiles'})
+PY" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 280ms:
+{'lymph_mean': {'long_px': 5.333333333333333, 'short_px': 4.466666666666667}, 'error_fraction': {'long_px': 0.04149159663865554, 'short_px': 0.11187758685563787}}
+119 5.554621848739496 4.966386554621849
+{'n': 3, 'mean_long_px': 22.666666666666668, 'mean_short_px': 7.333333333333333}
+
+exec
+/bin/bash -lc "sed -i 's|max(w,h)/min(w,h)>2.5|max(w,h)/min(w,h)>2|' qa/v6/e05_s19/measure_output.py
+python3 qa/v6/e05_s19/measure_output.py
+python3 - <<'PY'
+import json
+m=json.load(open('qa/v6/e05_s19/cell_measurements.json'));print({k:v for k,v in m['e05_spindle'].items() if k"'!='"'profiles'})
+PY
+tail -6 qa/v6/e05_s19/render_final.log" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 206ms:
+{'lymph_mean': {'long_px': 5.333333333333333, 'short_px': 4.466666666666667}, 'error_fraction': {'long_px': 0.04149159663865554, 'short_px': 0.11187758685563787}}
+119 5.554621848739496 4.966386554621849
+{'n': 4, 'mean_long_px': 24.5, 'mean_short_px': 8.5}
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_000.44.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_002.84.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_003.67.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_006.16.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_007.84.png
+
+exec
+/bin/bash -lc 'tail -10 qa/v6/e05_s19/render_final.log; ls -lh qa/v6/e05_s19/S19*' in /workspace/病理科普视频/v5_s19_dev
+ exited 2 in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_000.44.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_002.84.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_003.67.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_006.16.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_007.84.png
+ls: cannot access 'qa/v6/e05_s19/S19*': No such file or directory
+
+exec
+/bin/bash -lc 'tail -12 qa/v6/e05_s19/render_final.log; date' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_000.44.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_002.84.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_003.67.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_006.16.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_007.84.png
+Thu Nov 12 21:06:24 CST 2026
+
+codex
+Parity 已核对：S08/S10 的 MAE 全为 0，S11 三个非零值与历史记录完全一致。最终纤维化帧中的深粉短束已比前一版清楚。仍不足的是梭形核角度偏整齐，程序化笔触也仍可见；这些会写进自检，不把这版称为定稿。
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+from PIL import Image,ImageDraw,ImageFont
+P=Path('qa/v6/e05_s19');font=ImageFont.truetype('/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',24)
+s=(P/'finish.py').read_text();exec(s[s.index('comparison='):s.index('files=[line')])
+PY" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 659ms:
+exec
+/bin/bash -lc 'tail -12 qa/v6/e05_s19/render_final.log; date' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_000.44.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_002.84.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_003.67.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_006.16.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_007.84.png
+Thu Nov 12 21:06:48 CST 2026
+
+exec
+/bin/bash -lc 'tail -12 qa/v6/e05_s19/render_final.log; ls -lh qa/v6/e05_s19/S19*; date' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_000.44.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_002.84.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_003.67.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_006.16.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_007.84.png
+ls: cannot access 'qa/v6/e05_s19/S19*': No such file or directory
+Thu Nov 12 21:07:49 CST 2026
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('qa/v6/e05_s19/measure_reference.py');s=p.read_text();a=s.index(\"P=Path('qa/v6/e05_s19');files=\");b=s.index('\\na=np.array',a);s=s[:a]+\"P=Path(__file__).resolve().parent\"+s[b:];s=s.replace(\"'Native RGB threshold R<135,G<110,B>1.1R; 4-connected bbox; lymph-like profiles only (reference is acute tissue)'\",\"'Native RGB threshold R<135,G<110,B>1.1R; 4-connected bbox; boundary-touching profiles excluded; lymph-like profiles only (reference is acute tissue)'\");p.write_text(s)
+p=Path('qa/v6/e05_s19/write_review.py');s=p.read_text().replace('未将其冒充纤维细胞。高精度缓存','未将其冒充纤维细胞。梭形核的屏幕包围盒短边仍偏大（受倾斜影响），数量和真实横径尚未严格匹配样张。高精度缓存');p.write_text(s)
+PY" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+codex
+三列对比图已生成并检查：e05 小核尺度接近原生样张，句69已从满屏圆点改为以胶原短束为主。浆细胞额外推近后，偏位核可以辨认，核周晕仍偏弱。最终版 determinism 和视频渲染尚未结束。
+
+exec
+/bin/bash -lc 'tail -12 qa/v6/e05_s19/render_final.log; date' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_002.84.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_003.67.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_006.16.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/stills/t_007.84.png
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+deterministic: 6 frames match across render orders (0.899, 3.024, 4.087, 5.967, 7.602, 8.141 s)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+Thu Nov 12 21:14:44 CST 2026
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+import hashlib
+P=Path('qa/v6/e05_s19');s=(P/'finish.py').read_text();exec(s[s.index('files=[line'):]);print((P/'sha256_校验.log').read_text())
+PY
+git diff --check
+cat qa/v6/e05_s19/determinism.log" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+七项开工/结束 SHA256 完全一致；与 e02 基准一致。
+
+deterministic: 6 frames match across render orders (0.899, 3.024, 4.087, 5.967, 7.602, 8.141 s)
+
+codex
+最终代码的 determinism 六个时刻均通过；七个锁定文件的 SHA256 与开工及历史基准一致。代码语法检查和 `git diff --check` 也通过了。现在剩视频渲染、虹膜处理、解码检查，以及最后的交付整理。
+
+exec
+/bin/bash -lc 'tail -8 qa/v6/e05_s19/render_final.log; ls -lh qa/v6/e05_s19/S19*' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+deterministic: 6 frames match across render orders (0.899, 3.024, 4.087, 5.967, 7.602, 8.141 s)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+rendering 245 frames × 1 sample(s) @ 1920x1080 30fps with 1 worker(s)…
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+-rw-r--r-- 1 box box 3 Nov 12 21:15 qa/v6/e05_s19/S19_scene.mp4.lock
+
+exec
+/bin/bash -lc 'git status --short; ls qa/v6/e05_s19 | wc -l; tail -6 qa/v6/e05_s19/render_final.log' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+ M film/chapters/s19.js
+ M film/lib_ext/he_chronic.js
+?? qa/briefs/run_v6_e04_cb.log
+?? qa/briefs/run_v6_e04_cont.log
+?? qa/briefs/run_v6_e05.log
+?? qa/briefs/v6_e05_s19scale.md
+?? qa/v6/e05_s19/
+29
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+rendering 245 frames × 1 sample(s) @ 1920x1080 30fps with 1 worker(s)…
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+
+ succeeded in 912567ms:
+exec
+/bin/bash -lc 'tail -8 qa/v6/e05_s19/render_final.log; ls -lh qa/v6/e05_s19/S19*; date' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+  100/245 frames  118s
+  125/245 frames  120s
+  150/245 frames  122s
+  175/245 frames  124s
+  200/245 frames  126s
+  225/245 frames  128s
+done /workspace/病理科普视频/v5_s19_dev/qa/v6/e05_s19/S19_scene.mp4
+  245 frames, 8.17s, 129.7s wall (529 ms/sample)
+-rw-r--r-- 1 box box 8.4M Nov 12 21:17 qa/v6/e05_s19/S19_scene.mp4
+Thu Nov 12 21:17:19 CST 2026
+
+exec
+/bin/bash -lc 'python3 qa/v6/e05_s19/iris_video.py > qa/v6/e05_s19/iris.log 2>&1
+python3 qa/v6/e05_s19/finish.py > qa/v6/e05_s19/finish.log 2>&1
+python3 qa/v6/e05_s19/measure_output.py > qa/v6/e05_s19/measurement_check.log 2>&1
+ffprobe -v error -show_streams -show_format -of json qa/v6/e05_s19/S19.mp4 > qa/v6/e05_s19/ffprobe.json
+ffmpeg -v error -i qa/v6/e05_s19/S19.mp4 -f null - > qa/v6/e05_s19/decode_check.log 2>&1
+python3 qa/v6/e05_s19/write_review.py
+git diff --check' in /workspace/病理科普视频/v5_s19_dev
+codex
+S19 原段已渲染完成，共 245 帧。正在加入前后各 0.7 秒的深色虹膜，并生成 review sheet 和自检；之后会核对视频编码参数、完整解码结果及交付文件清单。
+
+ succeeded in 10652ms:
+exec
+/bin/bash -lc 'tail -5 qa/v6/e05_s19/iris.log; ls -lh qa/v6/e05_s19/S19.mp4; ls qa/v6/e05_s19/*200pct*' in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+-rw-r--r-- 1 box box 8.1M Nov 12 21:17 qa/v6/e05_s19/S19.mp4
+qa/v6/e05_s19/iris_enter_200pct.png
+qa/v6/e05_s19/iris_exit_200pct.png
+qa/v6/e05_s19/s69_fibrosis_200pct.png
+qa/v6/e05_s19/s69_low_200pct.png
+qa/v6/e05_s19/s69_middle_200pct.png
+qa/v6/e05_s19/s70_lymph_200pct.png
+qa/v6/e05_s19/s70_plasma_200pct.png
+
+exec
+/bin/bash -lc "cat qa/v6/e05_s19/自检.md; cat qa/v6/e05_s19/measurement_check.log; python3 - <<'PY'
+import json
+from pathlib import Path
+p=Path('qa/v6/e05_s19');v=json.loads((p/'ffprobe.json').read_text());s=v['streams'][0];print({k:s.get(k) for k in ['width','height','r_frame_rate','nb_frames','duration','codec_name','pix_fmt']})
+required=['s69_low','s69_middle','s69_fibrosis','s70_lymph','s70_plasma'];assert all((p/(n+ext)).is_file() for n in required for ext in ['.png','_200pct.png']);assert all((p/n).stat().st_size>0 for n in ['cell_measurements.json','review_sheet.png','S19.mp4','自检.md','对比_e04_e05_样张.png']);assert (p/'decode_check.log').read_text()=='';assert s['width']==1920 and s['height']==1080 and s['nb_frames']=='280';print('delivery checks passed')
+PY" in /workspace/病理科普视频/v5_s19_dev
+ succeeded in 0ms:
+# S19 e05 尺度与笔触自检
+
+基线为 s19-dev / v6-s19-e04（HEAD）。已先读 e04 自检和三列对比；未 git commit，未动主工作区。产品修改限于 film/chapters/s19.js、film/lib_ext/he_chronic.js。
+
+## 先测后画：原生像素口径
+
+样张使用 qa/ref/style_target/t_089.73.png 原生 1920×1080。15 个淋巴样圆核、8 个梭形核的坐标和逐个长宽保存在 cell_measurements.json；measurement_reference.png 标出测量对象。阈值为 R<135、G<110、B>1.1R，四连通区域，长短径采用轴对齐包围盒的较大/较小边；排除裁区边界对象。样张是急性组织，部分圆核实际是分叶核截面，仅用作“小核屏幕尺度”参照，未将其移植为慢性细胞。
+
+|对象|n|长 × 短（原生 px）|
+|---|---:|---:|
+|样张淋巴样圆核|15|5.33 × 4.47|
+|样张梭形核|8|25.62 × 5.00|
+|e04 高倍独立圆核|18|33.67 × 30.44|
+|e05 高倍独立圆核|119|5.55 × 4.97|
+|e05 高倍梭形轮廓|4|24.50 × 8.50|
+
+e05 圆核长径均值误差 +4.1%，短径均值误差 +11.2%，均在 ±15% 内。这是群体均值校准，不代表每个核均在区间内；邻接融合核、梭形核和浆细胞不纳入圆核统计。筛选范围、每个原图坐标、样本数均保存在 JSON，不能解释为物理微米或客观物镜倍率。e04 与原生样张差距大于“1.5–2 倍”的目测估计；此前使用 sample_zoom.png 的已放大局部，本轮以明确指定的原生图为准。
+
+## 逐项处理
+
+1. 细胞尺度：淋巴与浆细胞共用 .16 的组织尺度缩放，浆细胞没有单独放大。偏位核、核膜、非等距周边染色质及粉色新月核周晕保留。浆细胞镜头从原先 4.8 连续推至 16；因此该拍不用于与淋巴细胞拍做同倍率核尺寸统计。高精度局部缓存重画同一母图，并非孤立贴图。
+2. 淋巴细胞簇：以紧密小岛代替均匀大圆点，簇外保留间质；核轮廓加入较强的不规则起伏与少量多边形折线，内部仍有细染色质颗粒。有限间距允许局部邻接，但没有做真实力学挤压模拟。
+3. 句69纤维化：焦点周围排除密集团，零散炎细胞作点缀。宽胶原束缩短、深粉；焦点邻近的细纹使用较高宽度和较长的短碎段，使胶原走向能在中倍辨认，夹细长尖核。
+4. 间质笔触：原长丝改为短、断续横纹；每段含细小深浅染色沉积。密度提高，曲线起伏缩小。句69焦点与高倍区采用同一组织坐标上的参数变化，未切换背景。
+5. 梭形核：高倍主群半长轴 1.7–3.6、半宽 .32–.67 组织单位；贝塞尔两端收尖，染色深浅交替，含内部颗粒。浆细胞教学焦点附近移除遮挡核。未重新改造原有肌层中较宽的平滑肌核，因此低/中倍仍可见两类长核。
+
+## 对比图与画面约束
+
+三列分别 e04、e05、原生样张，三行浆细胞/淋巴细胞/纤维化。全部为 300×300 原像素裁区，统一最近邻放大到 600×600；e04/e05 裁区均为 (960,350)–(1260,650)，样张为 (400,460)–(700,760)。没有对细胞做二次缩放。浆细胞行注明的是同一屏幕裁区与显示倍率，镜头本身在 e05 额外推进，不能视为相同组织倍率；样张该行仅作笔触参照，不包含可确认的浆细胞。
+
+圆心 (1110,475)、r425，深底 #111114；内容 y<950，无数字上屏，倍数仅写低/中/高倍。细引线、浅紫文字、无底框。推进及平移时间仍由 T.at/frac/end(69/70) 取。字幕 sceneTheme.js 对 S19 保持 dark；本次 S19.mp4 延续 e04 的无配音、未烧录字幕审片版。前后虹膜各 .7 秒，切入按句69、切出按句70计算，见 video_check.json。
+
+## 验证
+
+- S08 七帧、S10 八帧 MAE 全为 0（parity.json）。
+- S11 八帧逐项与 e02/e04 历史记录相同，只记录历史三帧非零值，不修改基线。
+- 最终代码 determinism 六时刻跨独立页面、逆序/穿插渲染通过，见 determinism.log。
+- 七个锁定文件开工/结束 SHA256 一致，且与 e02 基准相同，见 sha256_校验.log。
+- 视频 1920×1080、30fps、CRF16、280 帧；ffprobe 与解码检查见对应日志。
+- git diff --check 通过；不提交 commit。
+
+## 仍不足
+
+小核在原生屏幕只有约五个像素，染色质只能表现为细微深浅，不能保证每枚车辐细节均可辨；额外推近后的浆细胞较清楚，核周晕仍偏弱。紧密团已形成，但核间挤压仍是程序轮廓近似，部分团还留有偏均匀的小间隙。短纹较 e04 碎且深浅有变，仍缺少样张那种连续颜料团聚；局部纤维排列和尖核仍偏规整。中倍原有平滑肌束核较宽，未将其冒充纤维细胞。梭形核的屏幕包围盒短边仍偏大（受倾斜影响），数量和真实横径尚未严格匹配样张。高精度缓存增加初始化耗时，首次加载仍慢。未宣称已达到手绘样张的全部质感。
+
+## 复现
+
+最终 S19 使用 node qa/v6/e05_s19/render_s19.mjs；全量包含 parity 用 render_all.mjs（S11 等待上限沿用 e04 的 600 秒）。随后依次运行 iris_video.py、finish.py、measure_output.py、write_review.py。渲染器沿用 e04 保存的 motion-showreel 副本，仅含历史等待上限调整。
+{'lymph_mean': {'long_px': 5.333333333333333, 'short_px': 4.466666666666667}, 'error_fraction': {'long_px': 0.04149159663865554, 'short_px': 0.11187758685563787}}
+119 5.554621848739496 4.966386554621849
+{'width': 1920, 'height': 1080, 'r_frame_rate': '30/1', 'nb_frames': '280', 'duration': '9.333333', 'codec_name': 'h264', 'pix_fmt': 'yuv420p'}
+delivery checks passed
+
+codex
+e05 样张已完成，未提交 commit。
+
+- [三列对比图](qa/v6/e05_s19/对比_e04_e05_样张.png)
+- [Review sheet](qa/v6/e05_s19/review_sheet.png)
+- [S19 视频](qa/v6/e05_s19/S19.mp4)
+- [尺寸记录](qa/v6/e05_s19/cell_measurements.json) · [自检](qa/v6/e05_s19/自检.md)
+
+小核长短径均值误差为 +4.1%／+11.2%。S08/S10 parity、determinism、锁定文件 SHA256 均通过；S11 历史差异一致。
+
+梭形核横径与数量、核周晕和颜料团聚质感仍有不足，已如实记录。
+tokens used
+114,606
+e05 样张已完成，未提交 commit。
+
+- [三列对比图](qa/v6/e05_s19/对比_e04_e05_样张.png)
+- [Review sheet](qa/v6/e05_s19/review_sheet.png)
+- [S19 视频](qa/v6/e05_s19/S19.mp4)
+- [尺寸记录](qa/v6/e05_s19/cell_measurements.json) · [自检](qa/v6/e05_s19/自检.md)
+
+小核长短径均值误差为 +4.1%／+11.2%。S08/S10 parity、determinism、锁定文件 SHA256 均通过；S11 历史差异一致。
+
+梭形核横径与数量、核周晕和颜料团聚质感仍有不足，已如实记录。
