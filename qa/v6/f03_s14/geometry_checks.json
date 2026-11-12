@@ -1,0 +1,9 @@
+{
+  "const keys=\\[\\[.*?;": true,
+  "c\\.arc\\(1110,475,425,0,Math.PI\\*2\\)": true,
+  "const TILT=.*?;": true,
+  "export function point.*?\\n": true,
+  "const A0=.*?;": true,
+  "const A1=.*?;": true,
+  "const dead=.*?;": true
+}
