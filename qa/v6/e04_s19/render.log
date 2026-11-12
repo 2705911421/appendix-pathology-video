@@ -1,0 +1,91 @@
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/stills/t_000.44.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/stills/t_002.84.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/stills/t_003.67.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/stills/t_006.16.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/stills/t_007.84.png
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+deterministic: 6 frames match across render orders (0.899, 3.024, 4.087, 5.967, 7.602, 8.141 s)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s08_parity/t_000.68.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s08_parity/t_002.60.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s08_parity/t_006.75.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s08_parity/t_011.44.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s08_parity/t_016.13.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s08_parity/t_020.23.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s08_parity/t_023.67.png
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s10_parity/t_000.35.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s10_parity/t_004.74.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s10_parity/t_002.30.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s10_parity/t_007.19.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s10_parity/t_011.42.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s10_parity/t_015.50.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s10_parity/t_020.15.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s10_parity/t_024.97.png
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+window.READY never became true after 277s: page.waitForFunction: Timeout 180000ms exceeded.
+node:internal/errors:986
+  const err = new Error(message);
+              ^
+
+Error: Command failed: node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --q scene=s11 --still 28.002654,28.659198,30.191133,31.723069,35.664829,39.116937,41.197979,47.278510 --out qa/v6/e04_s19/s11_parity
+    at genericNodeError (node:internal/errors:986:15)
+    at wrappedFn (node:internal/errors:540:14)
+    at checkExecSyncError (node:child_process:943:11)
+    at execFileSync (node:child_process:979:15)
+    at render (file:///workspace/%E7%97%85%E7%90%86%E7%A7%91%E6%99%AE%E8%A7%86%E9%A2%91/v5_s19_dev/qa/v6/e04_s19/resume_render.mjs:5:23)
+    at file:///workspace/%E7%97%85%E7%90%86%E7%A7%91%E6%99%AE%E8%A7%86%E9%A2%91/v5_s19_dev/qa/v6/e04_s19/resume_render.mjs:6:252
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  status: 1,
+  signal: null,
+  output: [ null, null, null ],
+  pid: 322,
+  stdout: null,
+  stderr: null
+}
+
+Node.js v24.22.1
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s11_parity/t_028.00.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s11_parity/t_028.66.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s11_parity/t_030.19.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s11_parity/t_031.72.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s11_parity/t_035.66.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s11_parity/t_039.12.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s11_parity/t_041.20.png
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/s11_parity/t_047.28.png
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+rendering 245 frames × 1 sample(s) @ 1920x1080 30fps with 1 worker(s)…
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+  25/245 frames  39s
+  50/245 frames  41s
+  75/245 frames  42s
+  100/245 frames  45s
+  125/245 frames  47s
+  150/245 frames  49s
+  175/245 frames  51s
+  200/245 frames  104s
+  225/245 frames  106s
+done /workspace/病理科普视频/v5_s19_dev/qa/v6/e04_s19/S19_scene.mp4
+  245 frames, 8.17s, 107.3s wall (438 ms/sample)
