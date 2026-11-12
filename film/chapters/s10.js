@@ -29,25 +29,49 @@ detailedNeutrophil(c,75,55,{lobes:3,rot:.4,sz:1},1);[[105,42],[124,65],[92,80]].
 // Targeted atlas variants keep unrelated sentence views unchanged.
 if(mode==='low'){
  c.fillStyle='#F4E6EC';c.fillRect(-420,-295,840,145);
- c.fillStyle='#F9F0F3';c.fillRect(-420,-150,840,140);
+ c.fillStyle='#FBF3F6';c.fillRect(-420,-150,840,140);
+ const inGap=x=>x>-110&&x<110;
+ // Excavate mucosa before drawing crypts and surface: no epithelial overpainting.
+ c.fillStyle='#F6EEF0';c.beginPath();c.moveTo(-110,-310);c.bezierCurveTo(-100,-235,-65,-202,0,-200);c.bezierCurveTo(65,-202,100,-235,110,-310);c.closePath();c.fill();
  const Q=rng(4421);
  // Non-periodic crypts, with interrupted epithelial rings at destroyed glands.
- for(let xx=-410;xx<420;xx+=30+Q()*58){const yy=-224+(Q()-.5)*35,w=9+Q()*13,h=23+Q()*35,tilt=(Q()-.5)*.95,broken=Q()<.32;
+ for(let xx=-410;xx<420;xx+=30+Q()*58){const yy=-224+(Q()-.5)*35,w=9+Q()*13,h=23+Q()*35,tilt=(Q()-.5)*.95,broken=Q()<.32;if(inGap(xx))continue;
  c.save();c.translate(xx,yy);c.rotate(tilt);c.fillStyle='rgba(251,243,246,.9)';c.beginPath();c.ellipse(0,0,w,h,0,0,TAU);c.fill();
  for(let j=0;j<19;j++){if(broken&&j>4&&j<11)continue;const a=j/19*TAU;cell(c,Math.cos(a)*(w+2),Math.sin(a)*(h+2),'dot',.65, a,j);}c.restore();}
  c.strokeStyle='rgba(107,65,121,.8)';c.lineWidth=5;c.lineCap='round';
- for(const [a,b] of [[-420,-328],[-240,-55],[55,245],[330,420]]){c.beginPath();for(let xx=a;xx<=b;xx+=4){const yy=-290+3*Math.sin(xx*.045);xx===a?c.moveTo(xx,yy):c.lineTo(xx,yy);}c.stroke();}
+ for(const [a,b] of [[-420,-112],[112,420]]){c.beginPath();for(let xx=a;xx<=b;xx+=4){const yy=-290+3*Math.sin(xx*.045);xx===a?c.moveTo(xx,yy):c.lineTo(xx,yy);}c.stroke();}
  for(const yy of [-151,-10,230]){c.strokeStyle='rgba(163,110,141,.38)';c.lineWidth=1.4;c.beginPath();for(let xx=-420;xx<=420;xx+=8){const y=yy+3*Math.sin(xx*.025);xx===-420?c.moveTo(xx,y):c.lineTo(xx,y);}c.stroke();}
- for(let i=0;i<225;i++){const xx=-415+Q()*830,yy=-280+Q()*270;detailedNeutrophil(c,xx,yy,{lobes:3,rot:Q()*TAU,sz:.6+Q()*.2},1);}
+ for(let i=0;i<150;i++){const xx=-415+Q()*830,yy=-280+Q()*270;if(inGap(xx)&&yy<-202)continue;detailedNeutrophil(c,xx,yy,{lobes:3,rot:Q()*TAU,sz:.6+Q()*.2},1);}
+ // Soft luminal exudate projects out of each repeated ulcer in the polar atlas.
+ drawWash(c,'s10.exudate',0,-307,145,{alpha:.76});
+ c.save();c.filter='blur(4px)';c.fillStyle='rgba(194,139,167,.35)';c.beginPath();c.ellipse(0,-292,91,51,0,0,TAU);c.fill();c.restore();
+ for(let i=0;i<70;i++){const xx=(Q()-.5)*155,yy=-340+Q()*125;if(yy>-308&&Math.abs(xx)>55)continue;pus(c,xx,yy,.55,Q()*TAU,i);}
  for(let i=0;i<38;i++){const xx=-410+Q()*820,yy=278+Q()*16;c.strokeStyle='rgba(204,123,153,.5)';c.lineWidth=.8;c.beginPath();c.moveTo(xx,yy);c.quadraticCurveTo(xx+12,yy-5,xx+25,yy+4);c.stroke();if(i%3===0)pus(c,xx,yy,.65,Q()*TAU,i);}
 }
 if(mode==='pus'){
- // Soft transparent fluid replaces the hard ulcer ellipse throughout this close-up.
- c.save();c.beginPath();c.rect(-270,-500,540,340);c.clip();
- const g=c.createRadialGradient(0,-318,8,0,-318,300);g.addColorStop(0,'#F7E6EC');g.addColorStop(.8,'rgba(247,230,236,.98)');g.addColorStop(1,'rgba(247,230,236,0)');c.fillStyle=g;c.fillRect(-270,-500,540,340);
- drawWash(c,'s10.fluid',0,-335,330,{alpha:.55});const Q=rng(4040);
- for(let i=0;i<100;i++){const xx=(Q()-.5)*480,yy=-470+Q()*290,sz=.6+Q()*.35;if(i%3)pus(c,xx,yy,sz,Q()*TAU,i);else detailedNeutrophil(c,xx,yy,{lobes:3,rot:Q()*TAU,sz},1);}
- for(let i=0;i<150;i++){const xx=(Q()-.5)*480,yy=-468+Q()*290,r=1+Q()*5;c.save();c.translate(xx,yy);c.rotate(Q()*TAU);c.fillStyle=i%9===0?'rgba(102,62,116,.65)':'rgba(206,133,157,.48)';c.beginPath();c.moveTo(-r,-r*.3);c.lineTo(-r*.25,-r*.75);c.lineTo(r*.9,-r*.2);c.lineTo(r*.45,r*.6);c.lineTo(-r*.6,r*.4);c.closePath();c.fill();c.restore();}c.restore();
+ // Dense, uneven cellular islands in a debris-filled eosinophilic liquid bed.
+ c.save();c.beginPath();c.rect(-275,-500,550,340);c.clip();
+ c.fillStyle='#F1DCE5';c.fillRect(-275,-500,550,340);
+ const Q=rng(4040);
+ for(let i=0;i<1500;i++){
+ const xx=(Q()-.5)*550,yy=-500+Q()*340,r=.8+Q()*4.2;
+ c.save();c.translate(xx,yy);c.rotate(Q()*TAU);c.fillStyle=i%17===0?'rgba(109,65,123,.46)':'rgba(201,128,155,.38)';
+ c.beginPath();c.moveTo(-r,-r*.2);c.quadraticCurveTo(-r*.4,-r,r*.8,-r*.35);c.lineTo(r*.45,r*.65);c.lineTo(-r*.7,r*.4);c.closePath();c.fill();c.restore();
+ }
+ // Several irregular bright pink fluid pools, feathered without white cutouts.
+ for(const [xx,yy,rr] of [[-64,-314,38],[66,-365,29],[12,-245,24]]){
+ c.save();c.translate(xx,yy);c.scale(1.5,.72);const g=c.createRadialGradient(0,0,2,0,0,rr);g.addColorStop(0,'rgba(250,232,239,.93)');g.addColorStop(.55,'rgba(249,230,237,.7)');g.addColorStop(1,'rgba(249,230,237,0)');c.fillStyle=g;c.beginPath();for(let j=0;j<=36;j++){const a=j/36*TAU,r=rr*(1+.12*Math.sin(a*3)+.08*Math.cos(a*5));j?c.lineTo(Math.cos(a)*r,Math.sin(a)*r):c.moveTo(Math.cos(a)*r,Math.sin(a)*r);}c.closePath();c.fill();c.restore();
+ }
+ // Jittered packed islands: one third degenerating, two thirds intact lobulated nuclei.
+ let k=0;
+ for(let yy=-490;yy<-165;yy+=17)for(let xx=-267;xx<270;xx+=19){
+ const px=xx+(Q()-.5)*10,py=yy+(Q()-.5)*9;
+ if((Math.hypot((px+64)/1.5,(py+314)/.72)<30)||(Math.hypot((px-66)/1.5,(py+365)/.72)<22)||(Math.hypot((px-12)/1.5,(py+245)/.72)<17))continue;
+ if(Q()<.13+.12*Math.sin(px*.045+py*.027))continue;
+ const sz=.74+Q()*.20,rot=Q()*TAU;
+ if(k%3===0)pus(c,px,py,sz,rot,k);else detailedNeutrophil(c,px,py,{lobes:2+k%3,rot,sz},1);k++;
+ }
+ c.restore();
 }
 if(mode==='compare'){
  c.save();c.beginPath();c.ellipse(103,60,120,100,0,0,TAU);c.clip();const g=c.createRadialGradient(103,60,50,103,60,120);g.addColorStop(0,'#F8ECF1');g.addColorStop(.7,'#F8ECF1');g.addColorStop(1,'rgba(248,236,241,0)');c.fillStyle=g;c.fillRect(-20,-50,250,220);
