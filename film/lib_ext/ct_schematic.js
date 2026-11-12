@@ -22,7 +22,7 @@ export function drawCT(c,x,y,w,h,{stage=0,around=false,complication=false,highli
  if(stage===3){c.strokeStyle='#65625D';c.lineWidth=14;c.beginPath();c.ellipse(ax,ay,25,21,0,-.6,.35);c.stroke();}
  if(complication){ellipse(c,ax+70,ay+28,34,29,'#CEC7B6');ellipse(c,ax+70,ay+28,26,21,'#77756F');for(const [a,b,r] of [[-107,54,6],[-91,89,5],[-73,98,4]])ellipse(c,a,b,r,r,'#191B1E');}
  grain(c,ax,ay,rr,rr,42,100);
- if(highlight)focus(c,ax,ay,around?69:40);
+ if(highlight){if(stage===3&&!complication)focus(c,ax+25,ay-3,16);else focus(c,ax,ay,around?69:40);}
  c.restore();c.restore();return [x+w*.5-145*w/620,y+h*.5+20+72*h/600];
 }
 export function drawTissue(c,x,y,w,h,{stage=1,around=false,complication=false}={}){
