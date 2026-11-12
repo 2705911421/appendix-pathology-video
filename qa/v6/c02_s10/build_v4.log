@@ -1,0 +1,23 @@
+cues 77 source=全稿_v3/timeline.json real start/end duration=327.8315
+content 327.8333333333333s (9835 frames) + endcard 12s → 339.8333333333333s
+still t01=2.0604583333333335 t03=10.364729166666667 endcardLocal=3 file=330.8333333333333
+audio two-pass 
+scene /workspace/病理科普视频/v5/qa/v6/c02_s10/scene_plate.mp4
+subtitle unique frames 1173 / 9835
+still /workspace/病理科普视频/v5/qa/v6/c02_s10/assembled/frames/帧_01_句01中点.png
+still /workspace/病理科普视频/v5/qa/v6/c02_s10/assembled/frames/帧_02_最长英文_s03.png
+qa /workspace/病理科普视频/v5/qa/v6/c02_s10/assembled/frames/对比_字幕字号.png
+qa /workspace/病理科普视频/v5/qa/v6/c02_s10/assembled/frames/预览_手机竖屏.png
+qa /workspace/病理科普视频/v5/qa/v6/c02_s10/assembled/frames/预览_手机竖屏_条.png
+overlay alpha check { above: 0, minAbove: null, opaque: 11353 }
+subtitle frames 3360/9835
+subtitle frames 4920/9835
+subtitle frames 9240/9835
+subtitle frames 9720/9835
+subtitle frames 9835/9835
+overlay encode
+endcard render
+mux /workspace/病理科普视频/v5/qa/v6/c02_s10/assembled/粗剪_v4.mp4
+720p
+report /workspace/病理科普视频/v5/qa/v6/c02_s10/assembled/dryrun_report.md
+dry run OK
