@@ -4,15 +4,11 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 const root=path.dirname(fileURLToPath(import.meta.url));
-let chromium;
-for(const name of ['playwright','playwright-core']){try{chromium=(await import(name)).chromium;break;}catch{}}
-if(!chromium)throw new Error('Install Playwright: npm install playwright && npx playwright install chromium');
+import { launchBrowser } from '../../tools/browser.mjs';
 const mime={'.html':'text/html','.js':'text/javascript','.json':'application/json','.woff2':'font/woff2'};
 let browser;
 try{
- const options={headless:true,args:['--no-sandbox','--font-render-hinting=none','--force-color-profile=srgb']};
- if(process.env.CHROME_PATH)browser=await chromium.launch({...options,executablePath:process.env.CHROME_PATH});
- else{try{browser=await chromium.launch(options);}catch{browser=await chromium.launch({...options,channel:'chrome'});}}
+ browser=await launchBrowser();
  const page=await browser.newPage({viewport:{width:1920,height:1080},deviceScaleFactor:1});
  await page.route('http://endcard.local/**',async route=>{try{const rel=decodeURIComponent(new URL(route.request().url()).pathname);const file=path.resolve(root,'.'+(rel==='/'?'/index.html':rel));if(!file.startsWith(root+path.sep))throw new Error('outside root');await route.fulfill({status:200,contentType:mime[path.extname(file)]||'application/octet-stream',body:await fs.readFile(file)});}catch{await route.fulfill({status:404,body:''});}});
  const errors=[];page.on('pageerror',e=>errors.push(e.message));

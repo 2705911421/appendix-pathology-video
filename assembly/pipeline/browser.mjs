@@ -1,7 +1,7 @@
 // Shared headless Chrome for subtitle and endcard frame renders.
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { chromium } from 'playwright';
+import { launchBrowser } from '../../tools/browser.mjs';
 
 export const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -13,17 +13,7 @@ export const MIME = {
   '.css': 'text/css',
 };
 
-export function chromePath() {
-  return process.env.CHROME_PATH || '/usr/bin/google-chrome';
-}
-
-export async function launchChrome() {
-  return chromium.launch({
-    headless: true,
-    executablePath: chromePath(),
-    args: ['--no-sandbox', '--disable-dev-shm-usage', '--font-render-hinting=none', '--force-color-profile=srgb'],
-  });
-}
+export const launchChrome = launchBrowser;
 
 export async function routeRoot(page, origin, root) {
   const rootResolved = path.resolve(root);

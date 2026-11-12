@@ -1,3 +1,4 @@
+import { ffmpegPath, ffprobePath } from '../../tools/bin.mjs';
 // Render the approved endcard to a 12 s 1080p30 mp4 without modifying endcard/.
 // Loads endcard/index.html the same way endcard/render.mjs does.
 import fs from 'node:fs/promises';
@@ -5,11 +6,13 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { canvasPng, withPage } from './browser.mjs';
 
-function run(cmd, args) {
+async function run(cmd, args) {
+  cmd = cmd === 'ffmpeg' ? await ffmpegPath() : cmd === 'ffprobe' ? await ffprobePath() : cmd;
   return new Promise((resolve, reject) => {
     const p = spawn(cmd, args, { stdio: ['ignore', 'ignore', 'pipe'] });
     let err = '';
     p.stderr.on('data', (d) => { err += d; });
+    p.on('error', reject);
     p.on('close', (code) => (code === 0 ? resolve(err) : reject(new Error(`${cmd} ${args.join(' ')}\n${err.slice(-2500)}`))));
   });
 }

@@ -7,7 +7,5 @@
     "stills": "node subtitle/render.mjs",
     "assemble": "node pipeline/assemble.mjs"
   },
-  "dependencies": {
-    "playwright": "^1.65.0"
-  }
+  "dependencies": {}
 }

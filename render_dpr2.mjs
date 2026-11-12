@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import http from 'node:http';
 import {fileURLToPath} from 'node:url';
-import {chromium} from 'playwright';
+import { launchBrowser } from './tools/browser.mjs';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const parity=process.argv.includes('--parity');
 if(!parity && !process.argv.includes('--samples')) throw Error('Use --parity or --samples');
@@ -17,7 +17,7 @@ const server=http.createServer((req,res)=>{let rel=decodeURIComponent(new URL(re
 await new Promise(r=>server.listen(0,'127.0.0.1',r));
 let browser;
 try{
- browser=await chromium.launch({executablePath:process.env.CHROME_PATH||'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--use-angle=swiftshader','--enable-unsafe-swiftshader','--font-render-hinting=none','--force-color-profile=srgb','--hide-scrollbars']});
+ browser=await launchBrowser();
  const page=await browser.newPage({viewport:{width:1920,height:1080},deviceScaleFactor:2});const errors=[];page.on('pageerror',e=>errors.push(String(e)));page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
  await page.goto(`http://127.0.0.1:${server.address().port}/`);
  await page.waitForFunction(()=>window.READY===true,null,{timeout:240000});
