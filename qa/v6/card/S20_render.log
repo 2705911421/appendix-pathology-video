@@ -54,3 +54,11 @@ Error: Command failed: node /workspace/garden-skills/skills/motion-showreel/scri
 }
 
 Node.js v24.22.1
+
+--- card_fix01 重渲 S20（clin 人物库版）---
+说明：本机 DISPLAY 指向已消失的 :3，Chrome 的 ANGLE 走 Vulkan/XCB 初始化失败，
+表现为 "[pageerror] Error creating webgl context"（initBaker 需要 WebGL）。
+改用现存的 Xvfb :1 后恢复正常：DISPLAY=:1 node qa/v6/card/render_scene.mjs s20
+关键帧 8 张于 DISPLAY=:1 下重出（含 200% 局部，裁切 620,150-1820,940）。
+视频：503 frames, 16.77s, 56.4s wall (112 ms/sample)
+determinism: 6 frames match across render orders (1.844, 6.202, 8.381, 12.237, 15.589, 16.729 s)

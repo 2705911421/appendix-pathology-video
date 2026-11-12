@@ -23,3 +23,9 @@ rendering 334 frames × 1 sample(s) @ 1920x1080 30fps with 1 worker(s)…
   330/334 frames  42s
 done /workspace/病理科普视频/v5_card_dev/qa/v6/card/S17/S17_verified.mp4
   334 frames, 11.13s, 43.3s wall (130 ms/sample)
+
+--- card_fix01 重渲 S17（clin 人物库版）---
+node qa/v6/card/render_scene.mjs s17
+  334 frames, 11.13s, 54.8s wall (164 ms/sample)
+determinism: 6 frames match across render orders (1.224, 4.117, 5.564, 8.124, 10.349, 11.095 s)
+关键帧/200%局部按新裁切区 620,150-1820,940 重出；verify.py 通过。

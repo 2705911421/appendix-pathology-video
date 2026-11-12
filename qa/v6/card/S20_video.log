@@ -1,15 +1,28 @@
 [page] Failed to load resource: the server responded with a status of 404 (Not Found)
-[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
-rendering 503 frames × 1 sample(s) @ 1920x1080 30fps with 1 worker(s)…
-  50/503 frames  20s
-  100/503 frames  23s
-  150/503 frames  28s
-  200/503 frames  33s
-  250/503 frames  38s
-  300/503 frames  45s
-  350/503 frames  50s
-  400/503 frames  55s
-  450/503 frames  61s
-  500/503 frames  66s
-done /workspace/病理科普视频/v5_card_dev/qa/v6/card/S20/S20_verified.mp4
-  503 frames, 16.77s, 67.0s wall (133 ms/sample)
+[pageerror] Error creating webgl context
+(render(t) threw or a module failed; fix the page and retry)
+node:internal/errors:986
+  const err = new Error(message);
+              ^
+
+Error: Command failed: node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --q scene=s20 --out qa/v6/card/S20/S20_verified.mp4 --crf 16 --fps 30 --workers 1
+    at genericNodeError (node:internal/errors:986:15)
+    at wrappedFn (node:internal/errors:540:14)
+    at checkExecSyncError (node:child_process:943:11)
+    at execFileSync (node:child_process:979:15)
+    at render (file:///workspace/%E7%97%85%E7%90%86%E7%A7%91%E6%99%AE%E8%A7%86%E9%A2%91/v5_card_dev/qa/v6/card/render_scene.mjs:9:23)
+    at file:///workspace/%E7%97%85%E7%90%86%E7%A7%91%E6%99%AE%E8%A7%86%E9%A2%91/v5_card_dev/qa/v6/card/render_scene.mjs:14:1
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  status: 1,
+  signal: null,
+  output: [ null, null, null ],
+  pid: 1010918,
+  stdout: null,
+  stderr: null
+}
+
+Node.js v24.22.1
+
+[2026-11-13] 首次两版尝试失败于 WebGL 上下文（DISPLAY=:3 无 X server）；改用 DISPLAY=:1 后成功渲染 503 帧。
