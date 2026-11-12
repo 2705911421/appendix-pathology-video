@@ -2,7 +2,7 @@ import {prepareChronic,focus} from '../lib_ext/he_chronic.js';
 let map;const clamp=x=>Math.max(0,Math.min(1,x)),ease=x=>{x=clamp(x);return x*x*(3-2*x);};
 export default {prepare(){map=prepareChronic();},draw(c,t,T){
  c.setTransform(1,0,0,1,0,0);c.fillStyle='#111114';c.fillRect(0,0,1920,1080);
- const keys=[[T.at(69),[0,0,.49]],[T.frac(69,.18),[0,0,.49]],[T.frac(69,.64),[...focus.fib,1.62]],[T.end(69),[...focus.fib,1.62]],[T.frac(70,.27),[...focus.lymph,4.8]],[T.frac(70,.48),[...focus.lymph,4.8]],[T.frac(70,.75),[...focus.plasma,4.8]],[T.end(70),[...focus.plasma,4.8]]];
+ const keys=[[T.at(69),[0,0,.49]],[T.frac(69,.18),[0,0,.49]],[T.frac(69,.64),[...focus.fib,1.62]],[T.end(69),[...focus.fib,1.62]],[T.frac(70,.27),[...focus.lymph,4.8]],[T.frac(70,.48),[...focus.lymph,4.8]],[T.frac(70,.75),[...focus.plasma,16]],[T.end(70),[...focus.plasma,16]]];
  let v=keys[0][1];for(let i=1;i<keys.length;i++){if(t>=keys[i][0]){v=keys[i][1];continue;}const a=keys[i-1],b=keys[i],k=ease((t-a[0])/(b[0]-a[0]));v=a[1].map((x,j)=>x+(b[1][j]-x)*k);break;}
  const [x,y,z]=v;c.save();c.beginPath();c.arc(1110,475,425,0,Math.PI*2);c.clip();c.fillStyle='#F6EEF0';c.fill();c.translate(1110,475);c.scale(z,z);c.translate(-x,-y);map.forEach(tile=>c.drawImage(tile.canvas,tile.x,tile.y,tile.w,tile.h));c.restore();c.strokeStyle='#4C4555';c.lineWidth=1.6;c.beginPath();c.arc(1110,475,431,0,Math.PI*2);c.stroke();c.fillStyle='#E8DDE9';c.font='500 30px MixSans';c.fillText(t<T.frac(69,.32)?'低倍':t<T.frac(70,.18)?'中倍':'高倍',1030,35);
  c.font='700 36px MixSans';c.fillText('阑尾壁',75,320);c.font='400 27px MixSans';c.fillText('纤维组织增生、纤维化',75,376);
