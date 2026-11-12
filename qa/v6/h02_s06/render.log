@@ -1,0 +1,46 @@
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5/qa/v6/h02_s06/stills/t_000.17.png
+/workspace/病理科普视频/v5/qa/v6/h02_s06/stills/t_002.32.png
+/workspace/病理科普视频/v5/qa/v6/h02_s06/stills/t_004.87.png
+/workspace/病理科普视频/v5/qa/v6/h02_s06/stills/t_007.02.png
+/workspace/病理科普视频/v5/qa/v6/h02_s06/stills/t_007.31.png
+/workspace/病理科普视频/v5/qa/v6/h02_s06/stills/t_009.64.png
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.screenshot: Timeout 30000ms exceeded.
+Call log:
+  - taking page screenshot
+  - waiting for fonts to load...
+  - fonts loaded
+
+    at shoot (/workspace/garden-skills/skills/motion-showreel/scripts/render.mjs:66:21)
+    at async determinism (/workspace/garden-skills/skills/motion-showreel/scripts/render.mjs:265:12)
+    at async file:///workspace/garden-skills/skills/motion-showreel/scripts/render.mjs:72:27 {
+  name: 'TimeoutError'
+}
+
+Node.js v24.22.1
+node:internal/errors:986
+  const err = new Error(message);
+              ^
+
+Error: Command failed: node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --q scene=s06 --determinism
+    at genericNodeError (node:internal/errors:986:15)
+    at wrappedFn (node:internal/errors:540:14)
+    at checkExecSyncError (node:child_process:943:11)
+    at execFileSync (node:child_process:979:15)
+    at render (file:///workspace/%E7%97%85%E7%90%86%E7%A7%91%E6%99%AE%E8%A7%86%E9%A2%91/v5/qa/v6/h02_s06/render_all.mjs:7:23)
+    at file:///workspace/%E7%97%85%E7%90%86%E7%A7%91%E6%99%AE%E8%A7%86%E9%A2%91/v5/qa/v6/h02_s06/render_all.mjs:9:1 {
+  status: 1,
+  signal: null,
+  output: [ null, null, null ],
+  pid: 194,
+  stdout: null,
+  stderr: null
+}
+
+Node.js v24.22.1

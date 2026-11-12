@@ -1,0 +1,47 @@
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5/qa/v6/h02_s06/s08_parity/t_000.68.png
+/workspace/病理科普视频/v5/qa/v6/h02_s06/s08_parity/t_002.60.png
+/workspace/病理科普视频/v5/qa/v6/h02_s06/s08_parity/t_006.75.png
+/workspace/病理科普视频/v5/qa/v6/h02_s06/s08_parity/t_011.44.png
+/workspace/病理科普视频/v5/qa/v6/h02_s06/s08_parity/t_016.13.png
+/workspace/病理科普视频/v5/qa/v6/h02_s06/s08_parity/t_020.23.png
+/workspace/病理科普视频/v5/qa/v6/h02_s06/s08_parity/t_023.67.png
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5/qa/v6/h02_s06/s10_parity/t_000.35.png
+/workspace/病理科普视频/v5/qa/v6/h02_s06/s10_parity/t_004.74.png
+/workspace/病理科普视频/v5/qa/v6/h02_s06/s10_parity/t_002.30.png
+/workspace/病理科普视频/v5/qa/v6/h02_s06/s10_parity/t_007.19.png
+/workspace/病理科普视频/v5/qa/v6/h02_s06/s10_parity/t_011.42.png
+/workspace/病理科普视频/v5/qa/v6/h02_s06/s10_parity/t_015.50.png
+/workspace/病理科普视频/v5/qa/v6/h02_s06/s10_parity/t_020.15.png
+/workspace/病理科普视频/v5/qa/v6/h02_s06/s10_parity/t_024.97.png
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+window.READY never became true after 387s: page.waitForFunction: Timeout 180000ms exceeded.
+node:internal/errors:986
+  const err = new Error(message);
+              ^
+
+Error: Command failed: node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --q scene=s11 --still 28.002654,28.659198,30.191133,31.723069,35.664829,39.116937,41.197979,47.278510 --out qa/v6/h02_s06/s11_parity
+    at genericNodeError (node:internal/errors:986:15)
+    at wrappedFn (node:internal/errors:540:14)
+    at checkExecSyncError (node:child_process:943:11)
+    at execFileSync (node:child_process:979:15)
+    at file:///workspace/%E7%97%85%E7%90%86%E7%A7%91%E6%99%AE%E8%A7%86%E9%A2%91/v5/qa/v6/h02_s06/parity.mjs:5:2
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  status: 1,
+  signal: null,
+  output: [ null, null, null ],
+  pid: 337,
+  stdout: null,
+  stderr: null
+}
+
+Node.js v24.22.1
