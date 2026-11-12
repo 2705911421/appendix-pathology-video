@@ -1,0 +1,68 @@
+from pathlib import Path
+import json, subprocess
+P=Path(__file__).resolve().parent
+locked=['engine/lib/'+n+'.js' for n in ['he','he_detail','wash','ann','scope','camera']]+['parity_r4/chapters/04.js']
+(P/'sha256_结束.txt').write_bytes(subprocess.check_output(['sha256sum',*locked]))
+check=subprocess.check_output(['sha256sum','-c',str(P/'sha256_开工.txt')]).decode();(P/'sha256_校验.log').write_text(check)
+assert (P/'sha256_开工.txt').read_bytes()==(P/'sha256_结束.txt').read_bytes()
+assert (P/'sha256_开工.txt').read_bytes()==(P.parent/'f01_s14/sha256_结束.txt').read_bytes()
+par=json.loads((P/'parity.json').read_text());v=json.loads((P/'video_check.json').read_text())
+det='\n'.join(x for x in (P/'determinism.log').read_text().splitlines() if 'frames match across render orders' in x)
+assert det;(P/'determinism.log').write_text(det+'\n')
+s='''# v6 f02 · S14 修正自检
+
+基于 v6-fresh / 136aa82（f01 首版），在现有 s14.js / he_gangrene.js 上修改，未执行 git commit。f01 目录保留，修正交付位于本目录。
+
+## 四项修改
+
+1. 句54低倍：保留斜切椭圆母图，将起始镜头从居中0.49调整为偏心1.08起、1.15衔接（母图中心123,-516至130,-526）。下壁和部分侧壁超出圆形视野，管腔轮廓也被下缘裁断，不再展示闭合整环。低倍随后连续推进原有交界位置。
+2. 句54坏死：坏死角域从约0.88弧度扩大到1.46弧度（约四分之一周径），贯穿黏膜至外壁。该区不再绘制完整腺体上皮，黏膜紫色层带被不规则淡染溃疡床替代；保留鬼影轮廓、碎核及淡染肌束。出血红细胞扩展为大片聚集，右侧交界保留密集中性粒细胞带，尚存壁仍有肌束和梭形核，避免全视野死灰。低倍可见大范围淡染、黏膜中断和出血；中倍展示同一坏死区及炎症交界。
+3. 句57穿孔：保留局部全层缺损的路径，在两侧增加糜烂的鬼影轮廓、核碎屑、红细胞、脓细胞；缺口内部和壁外仅少量脓细胞、小深紫细菌团及纤维素。取消旧的连续描边，边缘由不规则残壁和颗粒组织构成；外缘浆膜随缺损一起中断。母图外壁局部补充1700个组织细节元素，其他壁区肌束细节从4600增至12500，以减少平涂。所有位置用固定种子，随缺损显现，不模拟喷射。引线从右上落在右侧糜烂边缘，未横穿缺口；保留“可能”虚线提示。
+4. 句55、56：保留原有句内时点、交界平移、高倍及中倍回拉，仍使用同一张母图。新增组织细节随母图共享，仅低倍镜头和坏死/外壁细节有必要修正。原有两行左栏、命名和退场顺序保留。所有注释统一浅紫字、细引线、无底框。
+
+## 同倍率细化样张对照
+
+review_sheet.png 每行依次为整帧、S14局部、细化样张局部。两列局部均从原始1920×1080图中取300×300像素，用最近邻放大到600×600，即200%；没有为追平细胞尺寸单独缩放样张。参照为 qa/ref/style_target/t_089.73.png 的(480,340)-(780,640)，避开黑底及文字；style_target_200pct.png 保存了同一裁图。比较的是输出像素尺度，低/中/高倍自身的细胞尺度差异仍保留。
+
+| 关键帧 | 细胞尺寸、密度、细节对照 |
+| --- | --- |
+| 句54低倍 | 细胞明显小于样张，这是低倍定位画面。右侧尚存壁核密集，左上坏死区核减少但保留鬼影、红细胞群和碎屑；可辨大范围坏死与完整黏膜的中断。肌束纹理较样张规整。 |
+| 句54中倍 | 炎细胞尺寸接近样张，所取局部以出血和鬼影为主，整帧右侧交界带密集；淡染坏死区刻意减少完整核，出血及细碎颗粒填补结构。鬼影轮廓较真实切片更显眼，样张的胞质颗粒和背景微纹理更细。 |
+| 句55高倍 | 炎细胞比样张大，分叶核、淡染胞质、纤维素可辨，密集程度与样张相近；保留原有推进，未为贴合参照重做镜头。部分肌束排列仍过于平行。 |
+| 句56中倍 | 细胞略小于样张，炎症边缘较密、坏死中央较疏；红细胞群、鬼影及碎屑都与句54中倍来自同一位置。样张的微小染色起伏更丰富。 |
+| 句57高倍 | 两侧壁的炎细胞大于样张，密度明显高于f01，并可同时看到分叶核、红细胞、碎核与鬼影；缺口处密度降低、外侧少量渗出，避免把空腔填实。纤维素和鬼影线条仍较规则，背景微纹理弱于样张。 |
+| 切入中间帧 | 虹膜只显示局部低倍组织，细胞比样张小；圆外为过渡底色，不能把空白计作组织密度。 |
+| 切出中间帧 | 残留高倍穿孔局部，细胞尺度沿用句57，受虹膜遮挡的部分不作密度比较。 |
+
+## 硬约束与检查
+
+深色底、圆心(1110,475)、半径425、y<950、无数字、倍数只写低/中/高倍。句内时点仍由T.at/end/frac按句id54–57取得。dark字幕复用已交付v8字幕区域；入/出各一次名义0.7秒虹膜，沿用30fps外取整边界，详见 iris/resolved.json。
+
+'''
+for scene,rows in par.items():s+='- '+scene.upper()+'：'+', '.join('{}={:.12g}'.format(x['frame'],x['MAE']) for x in rows)+'。\n'
+s+='\nS08/S10/S19全部MAE=0；S11三张约0.0128与历史记录逐项一致，仅记录，不算本次失败。\n\nDeterminism：'+det+'。\n\n七个锁定文件开工/结束sha256完全一致，并与f01收工记录一致；逐项OK，见sha256_校验.log。\n'
+s+='''
+## 视频与局限
+
+S14.mp4为1080p/30fps、CRF16；粗剪_v9及720p版仅重编码S14所在关键帧窗口（CRF16），窗口外视频包及v8音轨保留；原有dark字幕区域复用v8。没有重复生成未变更的全片字幕。S14带配音720p从最终v9按完整虹膜窗口截取。窗口外抽样MAE与音轨hash验证见video_check.json；最终视频五张关键帧抽回比对见insert_check.json，压缩视频不声称像素一致。
+
+仍不足：低倍黏膜溃疡边缘与壁层仍偏示意，淡染鬼影可见规则椭圆；穿孔边缘虽有颗粒和糜烂组织，但纤维素曲线、背景层带还不如细化样张自然。高倍细胞偏大，200%可见栅格插值；本轮未重做句55/56镜头去追齐样张尺寸。大片坏死覆盖约四分之一周径，不能据此当作所有病例的坏死范围或穿孔必然性。标题沿用f01的浅色字/墨色下划线。
+
+本次接续先检查未提交diff，重新试渲染确认可运行；回归检查中出现Playwright截图30秒超时（回归帧和视频各一次），采用同一指定渲染器重试，最终结果见render.log。
+
+## 复现
+
+```
+node qa/v6/f02_s14/render_all.mjs > qa/v6/f02_s14/render.log 2>&1
+python3 qa/v6/f02_s14/build_v9.py --plate-only
+python3 qa/v6/f02_s14/finish.py
+python3 qa/v6/f02_s14/check_insert.py
+python3 qa/v6/f02_s14/write_report.py
+```
+
+视频验证结果：
+
+```json
+'''+json.dumps(v,ensure_ascii=False,indent=2)+'\n```\n'
+(P/'自检.md').write_text(s)
+files=sorted([f for f in P.iterdir() if f.suffix in ['.png','.mp4']]);(P/'outputs.sha256').write_bytes(subprocess.check_output(['sha256sum',*[str(x) for x in files]]))
