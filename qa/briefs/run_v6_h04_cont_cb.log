@@ -1,0 +1,34 @@
+两个场景的产物和检查都已对齐并通过，已在本分支提交。
+
+## 完成情况
+
+**S06（h04，血管窗修正）**
+- 修复了 `qa/v6/h04_s06/` 收尾链：s10 `low_to_mid` 因采样精度产生的 0.0009 假差异已归零；parity 中 S08/S10/S19/S14 全为 MAE=0，S11 只保留 f03 已记录的历史差异。
+- 交付齐全：`s24_before/after` 及 200%、`对比_h02_h04.png`、`S06.mp4`、`S06_带配音_720p.mp4`、`review_sheet.png`、`自检.md`（逐条对应 1–8）、`outputs.sha256`。
+
+**S07（h03，渗出）**
+- 修复了粗剪 v13 的实际错误：原先用 CRF0/High 4:4:4 重建边界 GOP，拼回旧流后尾部约 20 帧解码成块状花屏；改为 CRF1/High profile/level 4.0 后消失。
+- 修正覆盖窗口比句窗提前 1 帧的问题（现为 3037–3766，句 25 起点）。
+- 修正检查脚本的浮点 seek 取帧问题；边界 GOP 外改为逐包哈希，GOP 内按帧采样。
+- 补齐 `S07_带配音_720p`、`video_check.json`、`safe_area.json`、`audio_timing.json`、`parity.json`、`outputs.sha256`、`自检.md`；200% 局部改为按内容裁切。
+
+## 提交
+
+| 提交 | 内容 |
+|---|---|
+| `7fabcfd` | `h04: S06 vessel window RBC variety/flow, marginating WBCs, endothelium, interstitium; animatic v12_h04 (WorkBuddy)` |
+| `0c94789` | `h03: S07 exudation (fluid, protein, leukocyte diapedesis), animatic v13; fix boundary decode profile/offset; checks pass (WorkBuddy)` |
+
+未 push、未合并；两版粗剪 `qa/v6/animatic/粗剪_v12_h04.mp4`、`粗剪_v13.mp4` 及 720p 都在（被 .gitignore 忽略，未入库）。
+
+## 关键帧
+
+- S06：`qa/v6/h04_s06/s23_start.png`、`s23_red.png`、`s24_anchor.png`、`s24_before.png`、`s24_after.png`（各带 `_200pct`）
+- S07：`qa/v6/h03_s07/handoff_start.png`、`handoff_mid.png`、`s25_fluid.png`、`s26_protein.png`、`s27_adhesion.png`、`s27_crossing.png`、`s27_exited.png`、`s28_defense.png`、`s29_injury.png`、`s30_exudation.png`（各带 `_200pct`）
+
+## 仍存在的不足
+
+- S06 红细胞中央淡染在水彩渐变下偏弱，接近球形高光；细胞挤压是示意形变，未做接触力学。
+- S07 水肿蓝晕偏淡，蛋白质颗粒偏少；穿壁白细胞的核被拉成窄带，分叶感不足；受损组织成组细胞偏“气球”。
+- v12 遗留：句 24 与 25 之间仍有 13 帧占位/故障卡（3024–3036），粗剪整体衔接不是无缝；已在自检和 `handoff_check.json` 记录，未擅自改窗口外帧。
+- v13 边界 GOP 是 CRF1 重编码（GOP 外 9431 个视频包逐包一致，字幕带最大 MAE 0.16），不是逐帧无损。
