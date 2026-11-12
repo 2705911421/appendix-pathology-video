@@ -1,0 +1,2 @@
+import {paper,nav,path,card,evidenceCard,text} from '../lib_ext/card_library.js';
+export default {prepare(){},draw(c){paper(c);nav(c,75,95);c.save();c.scale(.68,.68);c.translate(0,85);path(c,1);c.restore();card(c,'症状缓解期',['择期切除'],{x:500,y:220,w:380});card(c,'急性发作期',['视情况急诊手术'],{x:500,y:560,w:380});evidenceCard(c,'ct',{x:990,y:220,w:350});evidenceCard(c,'surgery',{x:990,y:650,w:350});evidenceCard(c,'boundary',{x:1450,y:220,w:380});evidenceCard(c,'literature',{x:1450,y:560,w:380});}};

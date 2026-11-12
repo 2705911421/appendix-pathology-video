@@ -1,0 +1,4 @@
+import fs from 'node:fs';import path from 'node:path';
+import {loadChromium,launch,serve,openPage} from '/workspace/garden-skills/skills/motion-showreel/scripts/lib/browser.mjs';
+const root=path.resolve('film'),{server,port}=await serve(root),browser=await launch(await loadChromium(root));
+try{const p=await openPage(browser,{port,rel:'index.html',w:1920,h:1080,query:'scene=s05&bake_card=1'});const images=await p.evaluate(async()=>{const m=await import('./lib_ext/card_gross_cache.js');return m.grossPlates().map(c=>c.toDataURL('image/png').split(',')[1]);});fs.mkdirSync('film/lib_ext/card_assets',{recursive:true});images.forEach((s,i)=>fs.writeFileSync(`film/lib_ext/card_assets/gross_${i+1}.png`,Buffer.from(s,'base64')));console.log('Gross plates saved');await p.close();}finally{await browser.close();server.close();}
