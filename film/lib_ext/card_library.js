@@ -68,7 +68,9 @@ export function situation(c,{x,y,w,h,heading,pain=0,alpha=1,rise=0,scale=.44},
  {textSize=56}={}){c.save();c.globalAlpha*=alpha;c.translate(0,rise);
  ink(c,'card.win'+heading,'polygon',[[[x,y],[x+w,y],[x+w,y+h],[x,y+h]]],{fill:'#F9F4EC',fillStyle:'solid',stroke:'#D8C9D5',strokeWidth:1.6,roughness:1.2,seed:120},{fill:true});
  text(c,heading,x+64,y+h/2+textSize*.36,textSize,'#6B4C9A',700);
- personAt(c,{x:x+w-150,ground:y+h-26,scale,face:pain?'pain':'calm',arm:pain?'painRLQ':'rest'});
+ // Paired clinical assessment uses existing storyboard figures, without a time icon.
+ doctor(c,x+w-310,y+h-18,scale);
+ personAt(c,{x:x+w-110,ground:y+h-18,scale,face:pain?'pain':'calm',arm:pain?'painRLQ':'rest'});
  c.restore();}
 // Evidence values are exact strings from the storyboard; reject unknown keys.
 export const evidence={ct:{title:'增强螺旋CT',rows:['2023','8篇、1602人','敏感度95%','特异度94%','[1]']},boundary:{title:'并非三型分型准确度',rows:['仍需结合临床']},surgery:{title:'条件性推荐',rows:['具体时机结合临床评估','[5]']},literature:{title:'文献提示',rows:['2023、2026','[3][4]']}};
