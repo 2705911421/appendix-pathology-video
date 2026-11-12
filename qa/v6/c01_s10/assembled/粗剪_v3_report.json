@@ -1,0 +1,2547 @@
+{
+  "source": "全稿_v3/timeline.json real start/end",
+  "formula": null,
+  "finalAudioTiming": true,
+  "note": null,
+  "cueCount": 77,
+  "first": "这根形似小香肠的盲管，就是阑尾。",
+  "last": "持续右下腹痛、发热，请及时就诊。",
+  "mismatches": [],
+  "contentDuration": 327.8333333333333,
+  "lastCueEnd": 327.8314999999995,
+  "endcardDuration": 12,
+  "totalDurationExpected": 339.8333333333333,
+  "duration1080": 339.833333,
+  "duration720": 339.833333,
+  "video": {
+    "width": 1920,
+    "height": 1080,
+    "pix_fmt": "yuv420p",
+    "codec": "h264"
+  },
+  "audio": {
+    "codec": "aac",
+    "sampleRate": "48000",
+    "channels": 2
+  },
+  "files": {
+    "master": {
+      "file": "/workspace/病理科普视频/v5/qa/v6/c01_s10/assembled/粗剪_v3.mp4",
+      "bytes": 42198446,
+      "size": "40.24 MB"
+    },
+    "p720": {
+      "file": "/workspace/病理科普视频/v5/qa/v6/c01_s10/assembled/粗剪_v3_720p.mp4",
+      "bytes": 17318967,
+      "size": "16.52 MB"
+    },
+    "blind": null
+  },
+  "audioReport": {
+    "voice": "/workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav",
+    "music": null,
+    "voiceSilent": false,
+    "musicSilent": true,
+    "loudnorm": "two-pass",
+    "integratedLufs": -14,
+    "truePeak": -2.24,
+    "target": {
+      "integratedLufs": -14,
+      "truePeakMax": -1
+    }
+  },
+  "typography": {
+    "CN_SIZE": 52,
+    "EN_SIZE": 30,
+    "EN_FLOOR": 24,
+    "EN_MAX_W": 1840,
+    "MAX": 18,
+    "weightCn": 500,
+    "weightEn": 400,
+    "halo": {
+      "stroke": 6,
+      "blur": 10,
+      "shadowAlpha": 0.9,
+      "strokeAlpha": 0.82
+    },
+    "fade": {
+      "extend": "ease",
+      "stops": [
+        {
+          "t": 0,
+          "a": 0
+        },
+        {
+          "t": 0.0846,
+          "a": 0.16
+        },
+        {
+          "t": 0.8154,
+          "a": 0.05
+        },
+        {
+          "t": 1,
+          "a": 0
+        }
+      ]
+    }
+  },
+  "BAND": {
+    "fadeTop": 950,
+    "fadeEnd": 961,
+    "cnY": 1010,
+    "enY": 1050,
+    "safeTop": 950
+  },
+  "pictureSafeTop": 950,
+  "xfade": false,
+  "scene": "/workspace/病理科普视频/v5/qa/v6/c01_s10/scene_plate.mp4",
+  "english": {
+    "cards": 136,
+    "shrinks": [],
+    "overflows": [],
+    "widest": {
+      "id": "52",
+      "i": 51,
+      "card": 0,
+      "text": "Necrosis and hemoglobin breakdown products",
+      "chars": 42,
+      "size": 30,
+      "width": 652.3,
+      "overflow": false
+    }
+  },
+  "stills": {
+    "t1": 2.0604583333333335,
+    "t3": 10.364729166666667,
+    "endcardT": 3,
+    "fileTime": 330.8333333333333,
+    "state1": {
+      "id": "01",
+      "cn": "这根形似小香肠的盲管，就是阑尾",
+      "en": "This small sausage-shaped tube is the",
+      "cnA": 1,
+      "enA": 1
+    },
+    "state3": {
+      "id": "03",
+      "cn": "每一次颜色流转，都记录着组织的伤痕",
+      "en": "These colors reveal how tissue is injured.",
+      "cnA": 1,
+      "enA": 1
+    },
+    "inkReports": [
+      {
+        "file": "/workspace/病理科普视频/v5/qa/v6/c01_s10/assembled/frames/帧_01_句01中点.png",
+        "w": 1920,
+        "h": 1080,
+        "t": 2.0604583333333335,
+        "above": 0,
+        "minAbove": null,
+        "ink": 18463,
+        "minInk": 965,
+        "pass": true
+      },
+      {
+        "file": "/workspace/病理科普视频/v5/qa/v6/c01_s10/assembled/frames/帧_02_最长英文_s03.png",
+        "w": 1920,
+        "h": 1080,
+        "t": 10.364729166666667,
+        "above": 0,
+        "minAbove": null,
+        "ink": 19693,
+        "minInk": 965,
+        "pass": true
+      }
+    ],
+    "endSize": {
+      "w": 1920,
+      "h": 1080
+    },
+    "overlayCheck": {
+      "above": 0,
+      "minAbove": null,
+      "opaque": 11353
+    },
+    "qaPaths": {
+      "compare": "/workspace/病理科普视频/v5/qa/v6/c01_s10/assembled/frames/对比_字幕字号.png",
+      "phone": "/workspace/病理科普视频/v5/qa/v6/c01_s10/assembled/frames/预览_手机竖屏.png",
+      "strip": "/workspace/病理科普视频/v5/qa/v6/c01_s10/assembled/frames/预览_手机竖屏_条.png"
+    },
+    "qaMeta": {
+      "phone": {
+        "w": 390,
+        "h": 219
+      },
+      "strip": {
+        "w": 390,
+        "h": 26
+      },
+      "compare": {
+        "w": 1920,
+        "h": 2320
+      },
+      "labels": {
+        "old": "「原 68 / 42，安全区 810」",
+        "current": "「新 52 / 30，安全区 950」"
+      },
+      "safeTop": 950
+    },
+    "qaSize": {
+      "compare": {
+        "w": 1920,
+        "h": 2320
+      },
+      "phone": {
+        "w": 390,
+        "h": 219
+      },
+      "strip": {
+        "w": 390,
+        "h": 26
+      }
+    }
+  },
+  "window": [
+    {
+      "id": "01",
+      "ch": "开场",
+      "start": 0,
+      "end": 4.121,
+      "text": "这根形似小香肠的盲管，就是阑尾。",
+      "en": "This small sausage-shaped tube is the | appendix.",
+      "englishCards": [
+        "This small sausage-shaped tube is the",
+        "appendix."
+      ],
+      "lines": [
+        {
+          "text": "这根形似小香肠的盲管，就是阑尾",
+          "start": 0,
+          "end": 4.121
+        }
+      ],
+      "cards": [
+        {
+          "text": "This small sausage-shaped tube is the",
+          "start": 0,
+          "end": 3.315
+        },
+        {
+          "text": "appendix.",
+          "start": 3.315,
+          "end": 4.121
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "ch": "开场",
+      "start": 4.571,
+      "end": 7.951,
+      "text": "发起炎来，它可能染上红、黄、黑。",
+      "en": "When inflamed, it may turn red, yellow, | then black.",
+      "englishCards": [
+        "When inflamed, it may turn red, yellow,",
+        "then black."
+      ],
+      "lines": [
+        {
+          "text": "发起炎来，它可能染上红、黄、黑",
+          "start": 4.571,
+          "end": 7.951
+        }
+      ],
+      "cards": [
+        {
+          "text": "When inflamed, it may turn red, yellow,",
+          "start": 4.571,
+          "end": 7.207
+        },
+        {
+          "text": "then black.",
+          "start": 7.207,
+          "end": 7.951
+        }
+      ]
+    },
+    {
+      "id": "03",
+      "ch": "开场",
+      "start": 8.401,
+      "end": 12.328,
+      "text": "每一次颜色流转，都记录着组织的伤痕。",
+      "en": "These colors reveal how tissue is injured.",
+      "englishCards": [
+        "These colors reveal how tissue is injured."
+      ],
+      "lines": [
+        {
+          "text": "每一次颜色流转，都记录着组织的伤痕",
+          "start": 8.401,
+          "end": 12.328
+        }
+      ],
+      "cards": [
+        {
+          "text": "These colors reveal how tissue is injured.",
+          "start": 8.401,
+          "end": 12.328
+        }
+      ]
+    },
+    {
+      "id": "04",
+      "ch": "开场",
+      "start": 12.778,
+      "end": 16.451,
+      "text": "循着这抹色彩，我们走进炎症的现场。",
+      "en": "Follow the colors to understand | inflammation.",
+      "englishCards": [
+        "Follow the colors to understand",
+        "inflammation."
+      ],
+      "lines": [
+        {
+          "text": "循着这抹色彩，我们走进炎症的现场",
+          "start": 12.778,
+          "end": 16.451
+        }
+      ],
+      "cards": [
+        {
+          "text": "Follow the colors to understand",
+          "start": 12.778,
+          "end": 15.366
+        },
+        {
+          "text": "inflammation.",
+          "start": 15.366,
+          "end": 16.451
+        }
+      ]
+    },
+    {
+      "id": "05",
+      "ch": "开场",
+      "start": 16.901,
+      "end": 20.867,
+      "text": "病理学里的“变质”，不是食物变坏。",
+      "en": "In pathology, alteration has a specific | meaning.",
+      "englishCards": [
+        "In pathology, alteration has a specific",
+        "meaning."
+      ],
+      "lines": [
+        {
+          "text": "病理学里的“变质”，不是食物变坏",
+          "start": 16.901,
+          "end": 20.867
+        }
+      ],
+      "cards": [
+        {
+          "text": "In pathology, alteration has a specific",
+          "start": 16.901,
+          "end": 20.192
+        },
+        {
+          "text": "meaning.",
+          "start": 20.192,
+          "end": 20.867
+        }
+      ]
+    },
+    {
+      "id": "06",
+      "ch": "就诊",
+      "start": 21.667,
+      "end": 24.113,
+      "text": "先听听身体发出的求救信号。",
+      "en": "Start with the body's warning signs.",
+      "englishCards": [
+        "Start with the body's warning signs."
+      ],
+      "lines": [
+        {
+          "text": "先听听身体发出的求救信号",
+          "start": 21.667,
+          "end": 24.113
+        }
+      ],
+      "cards": [
+        {
+          "text": "Start with the body's warning signs.",
+          "start": 21.667,
+          "end": 24.113
+        }
+      ]
+    },
+    {
+      "id": "07",
+      "ch": "就诊",
+      "start": 24.563,
+      "end": 28.749,
+      "text": "疼痛可能从肚脐周围，移向右下腹。",
+      "en": "Pain may move from around the navel to the | lower right abdomen.",
+      "englishCards": [
+        "Pain may move from around the navel to the",
+        "lower right abdomen."
+      ],
+      "lines": [
+        {
+          "text": "疼痛可能从肚脐周围，移向右下腹",
+          "start": 24.563,
+          "end": 28.749
+        }
+      ],
+      "cards": [
+        {
+          "text": "Pain may move from around the navel to the",
+          "start": 24.563,
+          "end": 27.399
+        },
+        {
+          "text": "lower right abdomen.",
+          "start": 27.399,
+          "end": 28.749
+        }
+      ]
+    },
+    {
+      "id": "08",
+      "ch": "就诊",
+      "start": 29.199,
+      "end": 33.38,
+      "text": "还可能恶心、发热，右下腹明显压痛。",
+      "en": "Nausea, fever, and marked lower right | abdominal tenderness may occur.",
+      "englishCards": [
+        "Nausea, fever, and marked lower right",
+        "abdominal tenderness may occur."
+      ],
+      "lines": [
+        {
+          "text": "还可能恶心、发热，右下腹明显压痛",
+          "start": 29.199,
+          "end": 33.38
+        }
+      ],
+      "cards": [
+        {
+          "text": "Nausea, fever, and marked lower right",
+          "start": 29.199,
+          "end": 31.474
+        },
+        {
+          "text": "abdominal tenderness may occur.",
+          "start": 31.474,
+          "end": 33.38
+        }
+      ]
+    },
+    {
+      "id": "09",
+      "ch": "就诊",
+      "start": 33.83,
+      "end": 37.842,
+      "text": "疼痛若持续加重，别抱着侥幸硬扛。",
+      "en": "Do not ignore persistent or worsening | pain.",
+      "englishCards": [
+        "Do not ignore persistent or worsening",
+        "pain."
+      ],
+      "lines": [
+        {
+          "text": "疼痛若持续加重，别抱着侥幸硬扛",
+          "start": 33.83,
+          "end": 37.842
+        }
+      ],
+      "cards": [
+        {
+          "text": "Do not ignore persistent or worsening",
+          "start": 33.83,
+          "end": 37.364
+        },
+        {
+          "text": "pain.",
+          "start": 37.364,
+          "end": 37.842
+        }
+      ]
+    },
+    {
+      "id": "10",
+      "ch": "就诊",
+      "start": 38.292,
+      "end": 42.614,
+      "text": "相似的求救声，也可能来自其他腹部疾病。",
+      "en": "Other abdominal conditions can cause | similar symptoms.",
+      "englishCards": [
+        "Other abdominal conditions can cause",
+        "similar symptoms."
+      ],
+      "lines": [
+        {
+          "text": "相似的求救声",
+          "start": 38.292,
+          "end": 39.817
+        },
+        {
+          "text": "也可能来自其他腹部疾病",
+          "start": 39.817,
+          "end": 42.614
+        }
+      ],
+      "cards": [
+        {
+          "text": "Other abdominal conditions can cause",
+          "start": 38.292,
+          "end": 41.228
+        },
+        {
+          "text": "similar symptoms.",
+          "start": 41.228,
+          "end": 42.614
+        }
+      ]
+    },
+    {
+      "id": "11",
+      "ch": "就诊",
+      "start": 43.064,
+      "end": 45.937,
+      "text": "有些人的信号，却并不典型。",
+      "en": "Some people have atypical symptoms.",
+      "englishCards": [
+        "Some people have atypical symptoms."
+      ],
+      "lines": [
+        {
+          "text": "有些人的信号，却并不典型",
+          "start": 43.064,
+          "end": 45.937
+        }
+      ],
+      "cards": [
+        {
+          "text": "Some people have atypical symptoms.",
+          "start": 43.064,
+          "end": 45.937
+        }
+      ]
+    },
+    {
+      "id": "12",
+      "ch": "就诊",
+      "start": 46.387,
+      "end": 49.687,
+      "text": "医生先循着症状和体格检查寻找线索，",
+      "en": "Doctors begin with symptoms and physical | examination,",
+      "englishCards": [
+        "Doctors begin with symptoms and physical",
+        "examination,"
+      ],
+      "lines": [
+        {
+          "text": "医生先循着症状和体格检查寻找线索",
+          "start": 46.387,
+          "end": 49.687
+        }
+      ],
+      "cards": [
+        {
+          "text": "Doctors begin with symptoms and physical",
+          "start": 46.387,
+          "end": 48.926
+        },
+        {
+          "text": "examination,",
+          "start": 48.926,
+          "end": 49.687
+        }
+      ]
+    },
+    {
+      "id": "13",
+      "ch": "就诊",
+      "start": 50.137,
+      "end": 53.451,
+      "text": "再参考化验，判断是否阑尾炎。",
+      "en": "then use laboratory results to help assess | appendicitis.",
+      "englishCards": [
+        "then use laboratory results to help assess",
+        "appendicitis."
+      ],
+      "lines": [
+        {
+          "text": "再参考化验，判断是否阑尾炎",
+          "start": 50.137,
+          "end": 53.451
+        }
+      ],
+      "cards": [
+        {
+          "text": "then use laboratory results to help assess",
+          "start": 50.137,
+          "end": 52.668
+        },
+        {
+          "text": "appendicitis.",
+          "start": 52.668,
+          "end": 53.451
+        }
+      ]
+    },
+    {
+      "id": "14",
+      "ch": "就诊",
+      "start": 53.901,
+      "end": 56.507,
+      "text": "CT是重要的辅助确诊工具，",
+      "en": "CT is an important diagnostic aid.",
+      "englishCards": [
+        "CT is an important diagnostic aid."
+      ],
+      "lines": [
+        {
+          "text": "CT是重要的辅助确诊工具",
+          "start": 53.901,
+          "end": 56.507
+        }
+      ],
+      "cards": [
+        {
+          "text": "CT is an important diagnostic aid.",
+          "start": 53.901,
+          "end": 56.507
+        }
+      ]
+    },
+    {
+      "id": "15",
+      "ch": "就诊",
+      "start": 56.957,
+      "end": 59.336,
+      "text": "但并非人人都必须做CT。",
+      "en": "But not everyone needs a CT scan.",
+      "englishCards": [
+        "But not everyone needs a CT scan."
+      ],
+      "lines": [
+        {
+          "text": "但并非人人都必须做CT",
+          "start": 56.957,
+          "end": 59.336
+        }
+      ],
+      "cards": [
+        {
+          "text": "But not everyone needs a CT scan.",
+          "start": 56.957,
+          "end": 59.336
+        }
+      ]
+    },
+    {
+      "id": "16",
+      "ch": "就诊",
+      "start": 59.786,
+      "end": 62.477,
+      "text": "汇总8项研究的荟萃分析显示，",
+      "en": "A meta-analysis pooling 8 studies found:",
+      "englishCards": [
+        "A meta-analysis pooling 8 studies found:"
+      ],
+      "lines": [
+        {
+          "text": "汇总8项研究的荟萃分析显示",
+          "start": 59.786,
+          "end": 62.477
+        }
+      ],
+      "cards": [
+        {
+          "text": "A meta-analysis pooling 8 studies found:",
+          "start": 59.786,
+          "end": 62.477
+        }
+      ]
+    },
+    {
+      "id": "17",
+      "ch": "就诊",
+      "start": 62.927,
+      "end": 69.007,
+      "text": "增强螺旋CT敏感度95%、特异度94%。[1]",
+      "en": "For contrast-enhanced helical CT, | sensitivity: 95%; specificity: 94%.",
+      "englishCards": [
+        "For contrast-enhanced helical CT,",
+        "sensitivity: 95%; specificity: 94%."
+      ],
+      "lines": [
+        {
+          "text": "增强螺旋CT敏感度95%",
+          "start": 62.927,
+          "end": 66.98
+        },
+        {
+          "text": "特异度94%",
+          "start": 66.98,
+          "end": 69.007
+        }
+      ],
+      "cards": [
+        {
+          "text": "For contrast-enhanced helical CT,",
+          "start": 62.927,
+          "end": 65.877
+        },
+        {
+          "text": "sensitivity: 95%; specificity: 94%.",
+          "start": 65.877,
+          "end": 69.007
+        }
+      ]
+    },
+    {
+      "id": "18",
+      "ch": "就诊",
+      "start": 69.457,
+      "end": 72.739,
+      "text": "这束影像之光，能帮助发现病变，",
+      "en": "It can help detect appendicitis.",
+      "englishCards": [
+        "It can help detect appendicitis."
+      ],
+      "lines": [
+        {
+          "text": "这束影像之光，能帮助发现病变",
+          "start": 69.457,
+          "end": 72.739
+        }
+      ],
+      "cards": [
+        {
+          "text": "It can help detect appendicitis.",
+          "start": 69.457,
+          "end": 72.739
+        }
+      ]
+    },
+    {
+      "id": "19",
+      "ch": "就诊",
+      "start": 73.189,
+      "end": 77.125,
+      "text": "却仍需结合临床，判断病情轻重。",
+      "en": "Severity still requires an overall | assessment.",
+      "englishCards": [
+        "Severity still requires an overall",
+        "assessment."
+      ],
+      "lines": [
+        {
+          "text": "却仍需结合临床，判断病情轻重",
+          "start": 73.189,
+          "end": 77.125
+        }
+      ],
+      "cards": [
+        {
+          "text": "Severity still requires an overall",
+          "start": 73.189,
+          "end": 76.163
+        },
+        {
+          "text": "assessment.",
+          "start": 76.163,
+          "end": 77.125
+        }
+      ]
+    },
+    {
+      "id": "20",
+      "ch": "路径前提",
+      "start": 77.925,
+      "end": 82.764,
+      "text": "单纯性→化脓性（蜂窝织炎性）→坏疽性",
+      "en": "Simple → suppurative (phlegmonous) → | gangrenous",
+      "englishCards": [
+        "Simple → suppurative (phlegmonous) →",
+        "gangrenous"
+      ],
+      "lines": [
+        {
+          "text": "单纯性→化脓性（蜂窝织炎性）→坏疽性",
+          "start": 77.925,
+          "end": 82.764
+        }
+      ],
+      "cards": [
+        {
+          "text": "Simple → suppurative (phlegmonous) →",
+          "start": 77.925,
+          "end": 81.712
+        },
+        {
+          "text": "gangrenous",
+          "start": 81.712,
+          "end": 82.764
+        }
+      ]
+    },
+    {
+      "id": "21",
+      "ch": "路径前提",
+      "start": 83.014,
+      "end": 85.702,
+      "text": "是最常见的典型演变，",
+      "en": "is the most common typical progression,",
+      "englishCards": [
+        "is the most common typical progression,"
+      ],
+      "lines": [
+        {
+          "text": "是最常见的典型演变",
+          "start": 83.014,
+          "end": 85.702
+        }
+      ],
+      "cards": [
+        {
+          "text": "is the most common typical progression,",
+          "start": 83.014,
+          "end": 85.702
+        }
+      ]
+    },
+    {
+      "id": "22",
+      "ch": "路径前提",
+      "start": 85.952,
+      "end": 89.837,
+      "text": "但并不是每个患者都必经的固定流程。",
+      "en": "but not every patient follows this fixed | sequence.",
+      "englishCards": [
+        "but not every patient follows this fixed",
+        "sequence."
+      ],
+      "lines": [
+        {
+          "text": "但并不是每个患者都必经的固定流程",
+          "start": 85.952,
+          "end": 89.837
+        }
+      ],
+      "cards": [
+        {
+          "text": "but not every patient follows this fixed",
+          "start": 85.952,
+          "end": 89.123
+        },
+        {
+          "text": "sequence.",
+          "start": 89.123,
+          "end": 89.837
+        }
+      ]
+    },
+    {
+      "id": "23",
+      "ch": "红·单纯性",
+      "start": 90.637,
+      "end": 96.172,
+      "text": "第一幕红：单纯性阑尾炎，充血、轻度肿胀。",
+      "en": "Act I, red: simple appendicitis, | with congestion and mild swelling.",
+      "englishCards": [
+        "Act I, red: simple appendicitis,",
+        "with congestion and mild swelling."
+      ],
+      "lines": [
+        {
+          "text": "第一幕红：单纯性阑尾炎，充血",
+          "start": 90.637,
+          "end": 94.942
+        },
+        {
+          "text": "轻度肿胀",
+          "start": 94.942,
+          "end": 96.172
+        }
+      ],
+      "cards": [
+        {
+          "text": "Act I, red: simple appendicitis,",
+          "start": 90.637,
+          "end": 93.321
+        },
+        {
+          "text": "with congestion and mild swelling.",
+          "start": 93.321,
+          "end": 96.172
+        }
+      ]
+    },
+    {
+      "id": "24",
+      "ch": "红·单纯性",
+      "start": 96.622,
+      "end": 100.772,
+      "text": "局部血管扩张，血流增多，染出这抹红。",
+      "en": "Dilated vessels and increased blood flow | cause redness.",
+      "englishCards": [
+        "Dilated vessels and increased blood flow",
+        "cause redness."
+      ],
+      "lines": [
+        {
+          "text": "局部血管扩张，血流增多，染出这抹红",
+          "start": 96.622,
+          "end": 100.772
+        }
+      ],
+      "cards": [
+        {
+          "text": "Dilated vessels and increased blood flow",
+          "start": 96.622,
+          "end": 99.696
+        },
+        {
+          "text": "cause redness.",
+          "start": 99.696,
+          "end": 100.772
+        }
+      ]
+    },
+    {
+      "id": "25",
+      "ch": "红·单纯性",
+      "start": 101.222,
+      "end": 103.656,
+      "text": "血管里的液体和蛋白质渗出，",
+      "en": "Fluid and proteins leak out of blood | vessels,",
+      "englishCards": [
+        "Fluid and proteins leak out of blood",
+        "vessels,"
+      ],
+      "lines": [
+        {
+          "text": "血管里的液体和蛋白质渗出",
+          "start": 101.222,
+          "end": 103.656
+        }
+      ],
+      "cards": [
+        {
+          "text": "Fluid and proteins leak out of blood",
+          "start": 101.222,
+          "end": 103.214
+        },
+        {
+          "text": "vessels,",
+          "start": 103.214,
+          "end": 103.656
+        }
+      ]
+    },
+    {
+      "id": "26",
+      "ch": "红·单纯性",
+      "start": 104.106,
+      "end": 107.331,
+      "text": "积在组织间隙，形成水肿。",
+      "en": "causing tissue edema and swelling.",
+      "englishCards": [
+        "causing tissue edema and swelling."
+      ],
+      "lines": [
+        {
+          "text": "积在组织间隙，形成水肿",
+          "start": 104.106,
+          "end": 107.331
+        }
+      ],
+      "cards": [
+        {
+          "text": "causing tissue edema and swelling.",
+          "start": 104.106,
+          "end": 107.331
+        }
+      ]
+    },
+    {
+      "id": "27",
+      "ch": "红·单纯性",
+      "start": 107.781,
+      "end": 111.997,
+      "text": "巡逻的白细胞游出血管，挺进受损组织。",
+      "en": "Patrolling white blood cells leave vessels | and advance into injured tissue.",
+      "englishCards": [
+        "Patrolling white blood cells leave vessels",
+        "and advance into injured tissue."
+      ],
+      "lines": [
+        {
+          "text": "巡逻的白细胞游出血管，挺进受损组织",
+          "start": 107.781,
+          "end": 111.997
+        }
+      ],
+      "cards": [
+        {
+          "text": "Patrolling white blood cells leave vessels",
+          "start": 107.781,
+          "end": 110.174
+        },
+        {
+          "text": "and advance into injured tissue.",
+          "start": 110.174,
+          "end": 111.997
+        }
+      ]
+    },
+    {
+      "id": "28",
+      "ch": "红·单纯性",
+      "start": 112.447,
+      "end": 116.165,
+      "text": "这是身体为抵御损伤，调动的防御。",
+      "en": "Inflammation is the body's protective | response to injury.",
+      "englishCards": [
+        "Inflammation is the body's protective",
+        "response to injury."
+      ],
+      "lines": [
+        {
+          "text": "这是身体为抵御损伤，调动的防御",
+          "start": 112.447,
+          "end": 116.165
+        }
+      ],
+      "cards": [
+        {
+          "text": "Inflammation is the body's protective",
+          "start": 112.447,
+          "end": 114.903
+        },
+        {
+          "text": "response to injury.",
+          "start": 114.903,
+          "end": 116.165
+        }
+      ]
+    },
+    {
+      "id": "29",
+      "ch": "红·单纯性",
+      "start": 116.615,
+      "end": 120.712,
+      "text": "然而战况一旦失控，也可能伤及自身组织。",
+      "en": "An excessive response can also damage the | body's own tissue.",
+      "englishCards": [
+        "An excessive response can also damage the",
+        "body's own tissue."
+      ],
+      "lines": [
+        {
+          "text": "然而战况一旦失控",
+          "start": 116.615,
+          "end": 118.543
+        },
+        {
+          "text": "也可能伤及自身组织",
+          "start": 118.543,
+          "end": 120.712
+        }
+      ],
+      "cards": [
+        {
+          "text": "An excessive response can also damage the",
+          "start": 116.615,
+          "end": 119.462
+        },
+        {
+          "text": "body's own tissue.",
+          "start": 119.462,
+          "end": 120.712
+        }
+      ]
+    },
+    {
+      "id": "30",
+      "ch": "红·单纯性",
+      "start": 121.162,
+      "end": 125.557,
+      "text": "液体、蛋白质和白细胞外出，叫渗出。",
+      "en": "These changes are called exudation.",
+      "englishCards": [
+        "These changes are called exudation."
+      ],
+      "lines": [
+        {
+          "text": "液体、蛋白质和白细胞外出，叫渗出",
+          "start": 121.162,
+          "end": 125.557
+        }
+      ],
+      "cards": [
+        {
+          "text": "These changes are called exudation.",
+          "start": 121.162,
+          "end": 125.557
+        }
+      ]
+    },
+    {
+      "id": "31",
+      "ch": "红·单纯性",
+      "start": 126.007,
+      "end": 130.094,
+      "text": "单纯性时，中性粒细胞主要驻守在",
+      "en": "In simple appendicitis, neutrophils are | mainly found",
+      "englishCards": [
+        "In simple appendicitis, neutrophils are",
+        "mainly found"
+      ],
+      "lines": [
+        {
+          "text": "单纯性时，中性粒细胞主要驻守在",
+          "start": 126.007,
+          "end": 130.094
+        }
+      ],
+      "cards": [
+        {
+          "text": "In simple appendicitis, neutrophils are",
+          "start": 126.007,
+          "end": 129.133
+        },
+        {
+          "text": "mainly found",
+          "start": 129.133,
+          "end": 130.094
+        }
+      ]
+    },
+    {
+      "id": "32",
+      "ch": "红·单纯性",
+      "start": 130.544,
+      "end": 134.936,
+      "text": "黏膜及黏膜下层，组织损伤相对较轻。",
+      "en": "in the mucosa and submucosa, with | relatively mild damage.",
+      "englishCards": [
+        "in the mucosa and submucosa, with",
+        "relatively mild damage."
+      ],
+      "lines": [
+        {
+          "text": "黏膜及黏膜下层，组织损伤相对较轻",
+          "start": 130.544,
+          "end": 134.936
+        }
+      ],
+      "cards": [
+        {
+          "text": "in the mucosa and submucosa, with",
+          "start": 130.544,
+          "end": 133.132
+        },
+        {
+          "text": "relatively mild damage.",
+          "start": 133.132,
+          "end": 134.936
+        }
+      ]
+    },
+    {
+      "id": "33",
+      "ch": "红·单纯性",
+      "start": 135.386,
+      "end": 138.301,
+      "text": "变质，就是细胞组织的变性、坏死。",
+      "en": "Alteration means cell degeneration and | necrosis.",
+      "englishCards": [
+        "Alteration means cell degeneration and",
+        "necrosis."
+      ],
+      "lines": [
+        {
+          "text": "变质，就是细胞组织的变性、坏死",
+          "start": 135.386,
+          "end": 138.301
+        }
+      ],
+      "cards": [
+        {
+          "text": "Alteration means cell degeneration and",
+          "start": 135.386,
+          "end": 137.743
+        },
+        {
+          "text": "necrosis.",
+          "start": 137.743,
+          "end": 138.301
+        }
+      ]
+    },
+    {
+      "id": "34",
+      "ch": "红·单纯性",
+      "start": 138.751,
+      "end": 141.816,
+      "text": "此时，黏膜上皮已局部受损脱落。[2]",
+      "en": "Mucosal epithelium is locally injured | and shed.",
+      "englishCards": [
+        "Mucosal epithelium is locally injured",
+        "and shed."
+      ],
+      "lines": [
+        {
+          "text": "此时，黏膜上皮已局部受损脱落",
+          "start": 138.751,
+          "end": 141.816
+        }
+      ],
+      "cards": [
+        {
+          "text": "Mucosal epithelium is locally injured",
+          "start": 138.751,
+          "end": 141.217
+        },
+        {
+          "text": "and shed.",
+          "start": 141.217,
+          "end": 141.816
+        }
+      ]
+    },
+    {
+      "id": "35",
+      "ch": "红·单纯性",
+      "start": 142.266,
+      "end": 145.015,
+      "text": "CT可见管径增粗、壁增厚，",
+      "en": "CT may show a wider appendix and a | thickened wall,",
+      "englishCards": [
+        "CT may show a wider appendix and a",
+        "thickened wall,"
+      ],
+      "lines": [
+        {
+          "text": "CT可见管径增粗、壁增厚",
+          "start": 142.266,
+          "end": 145.015
+        }
+      ],
+      "cards": [
+        {
+          "text": "CT may show a wider appendix and a",
+          "start": 142.266,
+          "end": 144.174
+        },
+        {
+          "text": "thickened wall,",
+          "start": 144.174,
+          "end": 145.015
+        }
+      ]
+    },
+    {
+      "id": "36",
+      "ch": "红·单纯性",
+      "start": 145.465,
+      "end": 149.543,
+      "text": "周围脂肪轻度模糊，呼应早期的炎症。",
+      "en": "with mild surrounding fat stranding, | matching early inflammation.",
+      "englishCards": [
+        "with mild surrounding fat stranding,",
+        "matching early inflammation."
+      ],
+      "lines": [
+        {
+          "text": "周围脂肪轻度模糊，呼应早期的炎症",
+          "start": 145.465,
+          "end": 149.543
+        }
+      ],
+      "cards": [
+        {
+          "text": "with mild surrounding fat stranding,",
+          "start": 145.465,
+          "end": 147.759
+        },
+        {
+          "text": "matching early inflammation.",
+          "start": 147.759,
+          "end": 149.543
+        }
+      ]
+    },
+    {
+      "id": "37",
+      "ch": "黄·化脓性",
+      "start": 150.343,
+      "end": 154.948,
+      "text": "第二幕黄：炎症的战线累及整层阑尾壁。",
+      "en": "Act II, yellow: inflammation involves | the full appendiceal wall.",
+      "englishCards": [
+        "Act II, yellow: inflammation involves",
+        "the full appendiceal wall."
+      ],
+      "lines": [
+        {
+          "text": "第二幕黄：炎症的战线累及整层阑尾壁",
+          "start": 150.343,
+          "end": 154.948
+        }
+      ],
+      "cards": [
+        {
+          "text": "Act II, yellow: inflammation involves",
+          "start": 150.343,
+          "end": 153.048
+        },
+        {
+          "text": "the full appendiceal wall.",
+          "start": 153.048,
+          "end": 154.948
+        }
+      ]
+    },
+    {
+      "id": "38",
+      "ch": "黄·化脓性",
+      "start": 155.398,
+      "end": 159.668,
+      "text": "这是化脓性，也叫蜂窝织炎性阑尾炎。",
+      "en": "Suppurative (phlegmonous) appendicitis.",
+      "englishCards": [
+        "Suppurative (phlegmonous) appendicitis."
+      ],
+      "lines": [
+        {
+          "text": "这是化脓性，也叫蜂窝织炎性阑尾炎",
+          "start": 155.398,
+          "end": 159.668
+        }
+      ],
+      "cards": [
+        {
+          "text": "Suppurative (phlegmonous) appendicitis.",
+          "start": 155.398,
+          "end": 159.668
+        }
+      ]
+    },
+    {
+      "id": "39",
+      "ch": "黄·化脓性",
+      "start": 160.118,
+      "end": 163.405,
+      "text": "中性粒细胞纷纷涌入，部分变性坏死。",
+      "en": "Many neutrophils enter; some degenerate | and die.",
+      "englishCards": [
+        "Many neutrophils enter; some degenerate",
+        "and die."
+      ],
+      "lines": [
+        {
+          "text": "中性粒细胞纷纷涌入，部分变性坏死",
+          "start": 160.118,
+          "end": 163.405
+        }
+      ],
+      "cards": [
+        {
+          "text": "Many neutrophils enter; some degenerate",
+          "start": 160.118,
+          "end": 162.846
+        },
+        {
+          "text": "and die.",
+          "start": 162.846,
+          "end": 163.405
+        }
+      ]
+    },
+    {
+      "id": "40",
+      "ch": "黄·化脓性",
+      "start": 163.855,
+      "end": 167.824,
+      "text": "脓液中，还混着组织碎屑与渗出的液体。",
+      "en": "Pus also contains tissue debris and exuded | fluid.",
+      "englishCards": [
+        "Pus also contains tissue debris and exuded",
+        "fluid."
+      ],
+      "lines": [
+        {
+          "text": "脓液中，还混着组织碎屑与渗出的液体",
+          "start": 163.855,
+          "end": 167.824
+        }
+      ],
+      "cards": [
+        {
+          "text": "Pus also contains tissue debris and exuded",
+          "start": 163.855,
+          "end": 167.328
+        },
+        {
+          "text": "fluid.",
+          "start": 167.328,
+          "end": 167.824
+        }
+      ]
+    },
+    {
+      "id": "41",
+      "ch": "黄·化脓性",
+      "start": 168.274,
+      "end": 172.714,
+      "text": "渗出愈明显，局部肿胀往往愈突出。",
+      "en": "More pronounced exudation often means | greater swelling.",
+      "englishCards": [
+        "More pronounced exudation often means",
+        "greater swelling."
+      ],
+      "lines": [
+        {
+          "text": "渗出愈明显，局部肿胀往往愈突出",
+          "start": 168.274,
+          "end": 172.714
+        }
+      ],
+      "cards": [
+        {
+          "text": "More pronounced exudation often means",
+          "start": 168.274,
+          "end": 171.317
+        },
+        {
+          "text": "greater swelling.",
+          "start": 171.317,
+          "end": 172.714
+        }
+      ]
+    },
+    {
+      "id": "42",
+      "ch": "黄·化脓性",
+      "start": 173.164,
+      "end": 177.458,
+      "text": "变性坏死的中性粒细胞，就是脓细胞。",
+      "en": "These degenerated, necrotic neutrophils | are pus cells.",
+      "englishCards": [
+        "These degenerated, necrotic neutrophils",
+        "are pus cells."
+      ],
+      "lines": [
+        {
+          "text": "变性坏死的中性粒细胞，就是脓细胞",
+          "start": 173.164,
+          "end": 177.458
+        }
+      ],
+      "cards": [
+        {
+          "text": "These degenerated, necrotic neutrophils",
+          "start": 173.164,
+          "end": 176.324
+        },
+        {
+          "text": "are pus cells.",
+          "start": 176.324,
+          "end": 177.458
+        }
+      ]
+    },
+    {
+      "id": "43",
+      "ch": "黄·化脓性",
+      "start": 177.908,
+      "end": 182.285,
+      "text": "渗出的纤维蛋白原凝成纤维素网。",
+      "en": "Exuded fibrinogen forms a fibrin mesh.",
+      "englishCards": [
+        "Exuded fibrinogen forms a fibrin mesh."
+      ],
+      "lines": [
+        {
+          "text": "渗出的纤维蛋白原凝成纤维素网",
+          "start": 177.908,
+          "end": 182.285
+        }
+      ],
+      "cards": [
+        {
+          "text": "Exuded fibrinogen forms a fibrin mesh.",
+          "start": 177.908,
+          "end": 182.285
+        }
+      ]
+    },
+    {
+      "id": "44",
+      "ch": "黄·化脓性",
+      "start": 182.735,
+      "end": 187.77,
+      "text": "网与脓细胞等交织，形成纤维脓性渗出物。",
+      "en": "The mesh mixes with pus cells and debris | to form fibrinopurulent exudate.",
+      "englishCards": [
+        "The mesh mixes with pus cells and debris",
+        "to form fibrinopurulent exudate."
+      ],
+      "lines": [
+        {
+          "text": "网与脓细胞等交织",
+          "start": 182.735,
+          "end": 185.104
+        },
+        {
+          "text": "形成纤维脓性渗出物",
+          "start": 185.104,
+          "end": 187.77
+        }
+      ],
+      "cards": [
+        {
+          "text": "The mesh mixes with pus cells and debris",
+          "start": 182.735,
+          "end": 185.532
+        },
+        {
+          "text": "to form fibrinopurulent exudate.",
+          "start": 185.532,
+          "end": 187.77
+        }
+      ]
+    },
+    {
+      "id": "45",
+      "ch": "黄·化脓性",
+      "start": 188.22,
+      "end": 192.648,
+      "text": "黄色并非只来自纤维素，更来自大量脓细胞。",
+      "en": "Yellow comes not only from fibrin, | but also from many pus cells.",
+      "englishCards": [
+        "Yellow comes not only from fibrin,",
+        "but also from many pus cells."
+      ],
+      "lines": [
+        {
+          "text": "黄色并非只来自纤维素",
+          "start": 188.22,
+          "end": 190.68
+        },
+        {
+          "text": "更来自大量脓细胞",
+          "start": 190.68,
+          "end": 192.648
+        }
+      ],
+      "cards": [
+        {
+          "text": "Yellow comes not only from fibrin,",
+          "start": 188.22,
+          "end": 190.61
+        },
+        {
+          "text": "but also from many pus cells.",
+          "start": 190.61,
+          "end": 192.648
+        }
+      ]
+    },
+    {
+      "id": "46",
+      "ch": "黄·化脓性",
+      "start": 193.098,
+      "end": 198.42,
+      "text": "浆膜面可见纤维素性脓性渗出（含脓细胞）。",
+      "en": "Fibrinopurulent exudate with pus cells | coats the serosa.",
+      "englishCards": [
+        "Fibrinopurulent exudate with pus cells",
+        "coats the serosa."
+      ],
+      "lines": [
+        {
+          "text": "浆膜面可见纤维素性脓性渗出（含脓细胞",
+          "start": 193.098,
+          "end": 198.139
+        },
+        {
+          "text": "）",
+          "start": 198.139,
+          "end": 198.42
+        }
+      ],
+      "cards": [
+        {
+          "text": "Fibrinopurulent exudate with pus cells",
+          "start": 193.098,
+          "end": 196.775
+        },
+        {
+          "text": "coats the serosa.",
+          "start": 196.775,
+          "end": 198.42
+        }
+      ]
+    },
+    {
+      "id": "47",
+      "ch": "黄·化脓性",
+      "start": 198.87,
+      "end": 202.764,
+      "text": "CT常见壁增厚强化、周围渗出明显，",
+      "en": "CT: thickened, enhancing wall; marked | surrounding exudation.",
+      "englishCards": [
+        "CT: thickened, enhancing wall; marked",
+        "surrounding exudation."
+      ],
+      "lines": [
+        {
+          "text": "CT常见壁增厚强化、周围渗出明显",
+          "start": 198.87,
+          "end": 202.764
+        }
+      ],
+      "cards": [
+        {
+          "text": "CT: thickened, enhancing wall; marked",
+          "start": 198.87,
+          "end": 201.312
+        },
+        {
+          "text": "surrounding exudation.",
+          "start": 201.312,
+          "end": 202.764
+        }
+      ]
+    },
+    {
+      "id": "48",
+      "ch": "黄·化脓性",
+      "start": 203.214,
+      "end": 206.314,
+      "text": "与管壁内外的炎症相互映照。",
+      "en": "matching inflammation in and around the | appendix.",
+      "englishCards": [
+        "matching inflammation in and around the",
+        "appendix."
+      ],
+      "lines": [
+        {
+          "text": "与管壁内外的炎症相互映照",
+          "start": 203.214,
+          "end": 206.314
+        }
+      ],
+      "cards": [
+        {
+          "text": "matching inflammation in and around the",
+          "start": 203.214,
+          "end": 205.732
+        },
+        {
+          "text": "appendix.",
+          "start": 205.732,
+          "end": 206.314
+        }
+      ]
+    },
+    {
+      "id": "49",
+      "ch": "黑·坏疽性",
+      "start": 207.114,
+      "end": 211.703,
+      "text": "终局黑：腔内压力升高，危机步步逼近。",
+      "en": "Final act, black: pressure inside rises.",
+      "englishCards": [
+        "Final act, black: pressure inside rises."
+      ],
+      "lines": [
+        {
+          "text": "终局黑：腔内压力升高，危机步步逼近",
+          "start": 207.114,
+          "end": 211.703
+        }
+      ],
+      "cards": [
+        {
+          "text": "Final act, black: pressure inside rises.",
+          "start": 207.114,
+          "end": 211.703
+        }
+      ]
+    },
+    {
+      "id": "50",
+      "ch": "黑·坏疽性",
+      "start": 212.153,
+      "end": 216.624,
+      "text": "血管受压或形成血栓，阑尾壁陷入缺血。",
+      "en": "Vessel compression or clots cause ischemia | of the appendiceal wall.",
+      "englishCards": [
+        "Vessel compression or clots cause ischemia",
+        "of the appendiceal wall."
+      ],
+      "lines": [
+        {
+          "text": "血管受压或形成血栓，阑尾壁陷入缺血",
+          "start": 212.153,
+          "end": 216.624
+        }
+      ],
+      "cards": [
+        {
+          "text": "Vessel compression or clots cause ischemia",
+          "start": 212.153,
+          "end": 214.998
+        },
+        {
+          "text": "of the appendiceal wall.",
+          "start": 214.998,
+          "end": 216.624
+        }
+      ]
+    },
+    {
+      "id": "51",
+      "ch": "黑·坏疽性",
+      "start": 217.074,
+      "end": 221.307,
+      "text": "血流受阻，组织坏死，还伴有出血。",
+      "en": "Tissue dies, often with bleeding.",
+      "englishCards": [
+        "Tissue dies, often with bleeding."
+      ],
+      "lines": [
+        {
+          "text": "血流受阻，组织坏死，还伴有出血",
+          "start": 217.074,
+          "end": 221.307
+        }
+      ],
+      "cards": [
+        {
+          "text": "Tissue dies, often with bleeding.",
+          "start": 217.074,
+          "end": 221.307
+        }
+      ]
+    },
+    {
+      "id": "52",
+      "ch": "黑·坏疽性",
+      "start": 221.757,
+      "end": 224.995,
+      "text": "坏死与血红蛋白分解产物，",
+      "en": "Necrosis and hemoglobin breakdown products",
+      "englishCards": [
+        "Necrosis and hemoglobin breakdown products"
+      ],
+      "lines": [
+        {
+          "text": "坏死与血红蛋白分解产物",
+          "start": 221.757,
+          "end": 224.995
+        }
+      ],
+      "cards": [
+        {
+          "text": "Necrosis and hemoglobin breakdown products",
+          "start": 221.757,
+          "end": 224.995
+        }
+      ]
+    },
+    {
+      "id": "53",
+      "ch": "黑·坏疽性",
+      "start": 225.445,
+      "end": 228.111,
+      "text": "让局部暗红，甚至发黑。",
+      "en": "can make the tissue dark red or black.",
+      "englishCards": [
+        "can make the tissue dark red or black."
+      ],
+      "lines": [
+        {
+          "text": "让局部暗红，甚至发黑",
+          "start": 225.445,
+          "end": 228.111
+        }
+      ],
+      "cards": [
+        {
+          "text": "can make the tissue dark red or black.",
+          "start": 225.445,
+          "end": 228.111
+        }
+      ]
+    },
+    {
+      "id": "54",
+      "ch": "黑·坏疽性",
+      "start": 228.561,
+      "end": 233.361,
+      "text": "变质在这里走向重处：大片组织坏死。",
+      "en": "Alteration becomes severe: | extensive tissue necrosis.",
+      "englishCards": [
+        "Alteration becomes severe:",
+        "extensive tissue necrosis."
+      ],
+      "lines": [
+        {
+          "text": "变质在这里走向重处：大片组织坏死",
+          "start": 228.561,
+          "end": 233.361
+        }
+      ],
+      "cards": [
+        {
+          "text": "Alteration becomes severe:",
+          "start": 228.561,
+          "end": 230.961
+        },
+        {
+          "text": "extensive tissue necrosis.",
+          "start": 230.961,
+          "end": 233.361
+        }
+      ]
+    },
+    {
+      "id": "55",
+      "ch": "黑·坏疽性",
+      "start": 233.811,
+      "end": 237.69,
+      "text": "它与渗出，共同写下急性期的病变。",
+      "en": "Alteration and exudation together mark | the acute phase.",
+      "englishCards": [
+        "Alteration and exudation together mark",
+        "the acute phase."
+      ],
+      "lines": [
+        {
+          "text": "它与渗出，共同写下急性期的病变",
+          "start": 233.811,
+          "end": 237.69
+        }
+      ],
+      "cards": [
+        {
+          "text": "Alteration and exudation together mark",
+          "start": 233.811,
+          "end": 236.54
+        },
+        {
+          "text": "the acute phase.",
+          "start": 236.54,
+          "end": 237.69
+        }
+      ]
+    },
+    {
+      "id": "56",
+      "ch": "黑·坏疽性",
+      "start": 238.14,
+      "end": 240.569,
+      "text": "这便是坏疽性阑尾炎。",
+      "en": "This is gangrenous appendicitis.",
+      "englishCards": [
+        "This is gangrenous appendicitis."
+      ],
+      "lines": [
+        {
+          "text": "这便是坏疽性阑尾炎",
+          "start": 238.14,
+          "end": 240.569
+        }
+      ],
+      "cards": [
+        {
+          "text": "This is gangrenous appendicitis.",
+          "start": 238.14,
+          "end": 240.569
+        }
+      ]
+    },
+    {
+      "id": "57",
+      "ch": "黑·坏疽性",
+      "start": 241.019,
+      "end": 245.745,
+      "text": "脆弱的管壁可能穿孔，让感染扩散至腹腔。",
+      "en": "The wall may perforate, spreading | infection into the abdomen.",
+      "englishCards": [
+        "The wall may perforate, spreading",
+        "infection into the abdomen."
+      ],
+      "lines": [
+        {
+          "text": "脆弱的管壁可能穿孔",
+          "start": 241.019,
+          "end": 243.521
+        },
+        {
+          "text": "让感染扩散至腹腔",
+          "start": 243.521,
+          "end": 245.745
+        }
+      ],
+      "cards": [
+        {
+          "text": "The wall may perforate, spreading",
+          "start": 241.019,
+          "end": 243.618
+        },
+        {
+          "text": "infection into the abdomen.",
+          "start": 243.618,
+          "end": 245.745
+        }
+      ]
+    },
+    {
+      "id": "58",
+      "ch": "黑·坏疽性",
+      "start": 246.195,
+      "end": 250.515,
+      "text": "CT若见壁强化缺损，要警惕坏死；",
+      "en": "A wall enhancement defect on CT raises | concern for necrosis.",
+      "englishCards": [
+        "A wall enhancement defect on CT raises",
+        "concern for necrosis."
+      ],
+      "lines": [
+        {
+          "text": "CT若见壁强化缺损，要警惕坏死",
+          "start": 246.195,
+          "end": 250.515
+        }
+      ],
+      "cards": [
+        {
+          "text": "A wall enhancement defect on CT raises",
+          "start": 246.195,
+          "end": 248.978
+        },
+        {
+          "text": "concern for necrosis.",
+          "start": 248.978,
+          "end": 250.515
+        }
+      ]
+    },
+    {
+      "id": "59",
+      "ch": "黑·坏疽性",
+      "start": 250.965,
+      "end": 255.427,
+      "text": "若见腔外气体、脓肿，更要警惕穿孔。[3]",
+      "en": "Extraluminal gas or an abscess raises | concern for perforation.",
+      "englishCards": [
+        "Extraluminal gas or an abscess raises",
+        "concern for perforation."
+      ],
+      "lines": [
+        {
+          "text": "若见腔外气体、脓肿，更要警惕穿孔",
+          "start": 250.965,
+          "end": 255.427
+        }
+      ],
+      "cards": [
+        {
+          "text": "Extraluminal gas or an abscess raises",
+          "start": 250.965,
+          "end": 253.672
+        },
+        {
+          "text": "concern for perforation.",
+          "start": 253.672,
+          "end": 255.427
+        }
+      ]
+    },
+    {
+      "id": "60",
+      "ch": "治疗落点",
+      "start": 256.227,
+      "end": 259.759,
+      "text": "读懂分型，是为了把握治疗的紧迫性。",
+      "en": "Classification helps determine treatment | urgency.",
+      "englishCards": [
+        "Classification helps determine treatment",
+        "urgency."
+      ],
+      "lines": [
+        {
+          "text": "读懂分型，是为了把握治疗的紧迫性",
+          "start": 256.227,
+          "end": 259.759
+        }
+      ],
+      "cards": [
+        {
+          "text": "Classification helps determine treatment",
+          "start": 256.227,
+          "end": 259.171
+        },
+        {
+          "text": "urgency.",
+          "start": 259.171,
+          "end": 259.759
+        }
+      ]
+    },
+    {
+      "id": "61",
+      "ch": "治疗落点",
+      "start": 260.209,
+      "end": 264.344,
+      "text": "最终分型，仍靠切除后的病理切片确认。",
+      "en": "The final type is confirmed by pathology | after removal.",
+      "englishCards": [
+        "The final type is confirmed by pathology",
+        "after removal."
+      ],
+      "lines": [
+        {
+          "text": "最终分型，仍靠切除后的病理切片确认",
+          "start": 260.209,
+          "end": 264.344
+        }
+      ],
+      "cards": [
+        {
+          "text": "The final type is confirmed by pathology",
+          "start": 260.209,
+          "end": 263.272
+        },
+        {
+          "text": "after removal.",
+          "start": 263.272,
+          "end": 264.344
+        }
+      ]
+    },
+    {
+      "id": "62",
+      "ch": "治疗落点",
+      "start": 264.794,
+      "end": 268.7,
+      "text": "CT也帮助发现坏疽、穿孔、脓肿等并发症。[3][4]",
+      "en": "CT also helps detect gangrene, | perforation, and abscesses.",
+      "englishCards": [
+        "CT also helps detect gangrene,",
+        "perforation, and abscesses."
+      ],
+      "lines": [
+        {
+          "text": "CT也帮助发现坏疽、穿孔",
+          "start": 264.794,
+          "end": 267.398
+        },
+        {
+          "text": "脓肿等并发症",
+          "start": 267.398,
+          "end": 268.7
+        }
+      ],
+      "cards": [
+        {
+          "text": "CT also helps detect gangrene,",
+          "start": 264.794,
+          "end": 266.849
+        },
+        {
+          "text": "perforation, and abscesses.",
+          "start": 266.849,
+          "end": 268.7
+        }
+      ]
+    },
+    {
+      "id": "63",
+      "ch": "治疗落点",
+      "start": 269.15,
+      "end": 272.804,
+      "text": "蜂窝织炎性、坏疽性需手术切除。[5]",
+      "en": "Suppurative (phlegmonous) and gangrenous | types require appendectomy.",
+      "englishCards": [
+        "Suppurative (phlegmonous) and gangrenous",
+        "types require appendectomy."
+      ],
+      "lines": [
+        {
+          "text": "蜂窝织炎性、坏疽性需手术切除",
+          "start": 269.15,
+          "end": 272.804
+        }
+      ],
+      "cards": [
+        {
+          "text": "Suppurative (phlegmonous) and gangrenous",
+          "start": 269.15,
+          "end": 271.331
+        },
+        {
+          "text": "types require appendectomy.",
+          "start": 271.331,
+          "end": 272.804
+        }
+      ]
+    },
+    {
+      "id": "64",
+      "ch": "治疗落点",
+      "start": 273.254,
+      "end": 276.326,
+      "text": "面对病变，治疗要结合患者的具体情况。",
+      "en": "Treatment depends on the patient's | individual condition.",
+      "englishCards": [
+        "Treatment depends on the patient's",
+        "individual condition."
+      ],
+      "lines": [
+        {
+          "text": "面对病变，治疗要结合患者的具体情况",
+          "start": 273.254,
+          "end": 276.326
+        }
+      ],
+      "cards": [
+        {
+          "text": "Treatment depends on the patient's",
+          "start": 273.254,
+          "end": 275.153
+        },
+        {
+          "text": "individual condition.",
+          "start": 275.153,
+          "end": 276.326
+        }
+      ]
+    },
+    {
+      "id": "65",
+      "ch": "治疗落点",
+      "start": 276.776,
+      "end": 280.278,
+      "text": "是否马上手术，由医生评估决定。",
+      "en": "Doctors assess how urgently surgery is | needed.",
+      "englishCards": [
+        "Doctors assess how urgently surgery is",
+        "needed."
+      ],
+      "lines": [
+        {
+          "text": "是否马上手术，由医生评估决定",
+          "start": 276.776,
+          "end": 280.278
+        }
+      ],
+      "cards": [
+        {
+          "text": "Doctors assess how urgently surgery is",
+          "start": 276.776,
+          "end": 279.733
+        },
+        {
+          "text": "needed.",
+          "start": 279.733,
+          "end": 280.278
+        }
+      ]
+    },
+    {
+      "id": "66",
+      "ch": "慢性与收束",
+      "start": 281.078,
+      "end": 284.192,
+      "text": "反复发作，可转为慢性阑尾炎。",
+      "en": "Repeated episodes may lead to chronic | appendicitis.",
+      "englishCards": [
+        "Repeated episodes may lead to chronic",
+        "appendicitis."
+      ],
+      "lines": [
+        {
+          "text": "反复发作，可转为慢性阑尾炎",
+          "start": 281.078,
+          "end": 284.192
+        }
+      ],
+      "cards": [
+        {
+          "text": "Repeated episodes may lead to chronic",
+          "start": 281.078,
+          "end": 283.382
+        },
+        {
+          "text": "appendicitis.",
+          "start": 283.382,
+          "end": 284.192
+        }
+      ]
+    },
+    {
+      "id": "67",
+      "ch": "慢性与收束",
+      "start": 284.642,
+      "end": 287.249,
+      "text": "急性期以变质、渗出为主，",
+      "en": "The acute phase mainly involves | alteration and exudation;",
+      "englishCards": [
+        "The acute phase mainly involves",
+        "alteration and exudation;"
+      ],
+      "lines": [
+        {
+          "text": "急性期以变质、渗出为主",
+          "start": 284.642,
+          "end": 287.249
+        }
+      ],
+      "cards": [
+        {
+          "text": "The acute phase mainly involves",
+          "start": 284.642,
+          "end": 286.085
+        },
+        {
+          "text": "alteration and exudation;",
+          "start": 286.085,
+          "end": 287.249
+        }
+      ]
+    },
+    {
+      "id": "68",
+      "ch": "慢性与收束",
+      "start": 287.499,
+      "end": 289.486,
+      "text": "转为慢性才出现增生。",
+      "en": "proliferation appears in the | chronic phase.",
+      "englishCards": [
+        "proliferation appears in the",
+        "chronic phase."
+      ],
+      "lines": [
+        {
+          "text": "转为慢性才出现增生",
+          "start": 287.499,
+          "end": 289.486
+        }
+      ],
+      "cards": [
+        {
+          "text": "proliferation appears in the",
+          "start": 287.499,
+          "end": 288.823
+        },
+        {
+          "text": "chronic phase.",
+          "start": 288.823,
+          "end": 289.486
+        }
+      ]
+    },
+    {
+      "id": "69",
+      "ch": "慢性与收束",
+      "start": 289.936,
+      "end": 294.3,
+      "text": "镜下可见阑尾壁纤维组织增生、纤维化，",
+      "en": "Microscopy shows fibrous tissue growth | and fibrosis in the appendiceal wall,",
+      "englishCards": [
+        "Microscopy shows fibrous tissue growth",
+        "and fibrosis in the appendiceal wall,"
+      ],
+      "lines": [
+        {
+          "text": "镜下可见阑尾壁纤维组织增生、纤维化",
+          "start": 289.936,
+          "end": 294.3
+        }
+      ],
+      "cards": [
+        {
+          "text": "Microscopy shows fibrous tissue growth",
+          "start": 289.936,
+          "end": 292.147
+        },
+        {
+          "text": "and fibrosis in the appendiceal wall,",
+          "start": 292.147,
+          "end": 294.3
+        }
+      ]
+    },
+    {
+      "id": "70",
+      "ch": "慢性与收束",
+      "start": 294.75,
+      "end": 298.11,
+      "text": "伴淋巴细胞、浆细胞等慢性炎细胞浸润。[2]",
+      "en": "with chronic inflammatory cells such as | lymphocytes and plasma cells.",
+      "englishCards": [
+        "with chronic inflammatory cells such as",
+        "lymphocytes and plasma cells."
+      ],
+      "lines": [
+        {
+          "text": "伴淋巴细胞、浆细胞等慢性炎细胞浸润",
+          "start": 294.75,
+          "end": 298.11
+        }
+      ],
+      "cards": [
+        {
+          "text": "with chronic inflammatory cells such as",
+          "start": 294.75,
+          "end": 296.677
+        },
+        {
+          "text": "lymphocytes and plasma cells.",
+          "start": 296.677,
+          "end": 298.11
+        }
+      ]
+    },
+    {
+      "id": "71",
+      "ch": "慢性与收束",
+      "start": 298.56,
+      "end": 301.837,
+      "text": "转入慢性，并不意味着从此风平浪静。",
+      "en": "Chronic disease still carries risks.",
+      "englishCards": [
+        "Chronic disease still carries risks."
+      ],
+      "lines": [
+        {
+          "text": "转入慢性，并不意味着从此风平浪静",
+          "start": 298.56,
+          "end": 301.837
+        }
+      ],
+      "cards": [
+        {
+          "text": "Chronic disease still carries risks.",
+          "start": 298.56,
+          "end": 301.837
+        }
+      ]
+    },
+    {
+      "id": "72",
+      "ch": "慢性与收束",
+      "start": 302.287,
+      "end": 306.798,
+      "text": "疼痛即便时轻时重，也应接受正规评估。",
+      "en": "Even intermittent pain deserves proper | medical assessment.",
+      "englishCards": [
+        "Even intermittent pain deserves proper",
+        "medical assessment."
+      ],
+      "lines": [
+        {
+          "text": "疼痛即便时轻时重，也应接受正规评估",
+          "start": 302.287,
+          "end": 306.798
+        }
+      ],
+      "cards": [
+        {
+          "text": "Even intermittent pain deserves proper",
+          "start": 302.287,
+          "end": 305.294
+        },
+        {
+          "text": "medical assessment.",
+          "start": 305.294,
+          "end": 306.798
+        }
+      ]
+    },
+    {
+      "id": "73",
+      "ch": "慢性与收束",
+      "start": 307.248,
+      "end": 310.736,
+      "text": "一旦确诊，通常建议症状缓解期择期切除；",
+      "en": "Once diagnosed, elective appendectomy is | usually advised when symptoms settle;",
+      "englishCards": [
+        "Once diagnosed, elective appendectomy is",
+        "usually advised when symptoms settle;"
+      ],
+      "lines": [
+        {
+          "text": "一旦确诊",
+          "start": 307.248,
+          "end": 308.069
+        },
+        {
+          "text": "通常建议症状缓解期择期切除",
+          "start": 308.069,
+          "end": 310.736
+        }
+      ],
+      "cards": [
+        {
+          "text": "Once diagnosed, elective appendectomy is",
+          "start": 307.248,
+          "end": 309.06
+        },
+        {
+          "text": "usually advised when symptoms settle;",
+          "start": 309.06,
+          "end": 310.736
+        }
+      ]
+    },
+    {
+      "id": "74",
+      "ch": "慢性与收束",
+      "start": 310.986,
+      "end": 315.322,
+      "text": "若正处急性发作期，则视情况急诊手术。",
+      "en": "during an acute episode, emergency surgery | depends on the situation.",
+      "englishCards": [
+        "during an acute episode, emergency surgery",
+        "depends on the situation."
+      ],
+      "lines": [
+        {
+          "text": "若正处急性发作期，则视情况急诊手术",
+          "start": 310.986,
+          "end": 315.322
+        }
+      ],
+      "cards": [
+        {
+          "text": "during an acute episode, emergency surgery",
+          "start": 310.986,
+          "end": 313.704
+        },
+        {
+          "text": "depends on the situation.",
+          "start": 313.704,
+          "end": 315.322
+        }
+      ]
+    },
+    {
+      "id": "75",
+      "ch": "慢性与收束",
+      "start": 315.772,
+      "end": 318.908,
+      "text": "红、黄、黑，是洞察微观病变的罗盘，",
+      "en": "Red, yellow, and black are a compass | for understanding microscopic changes,",
+      "englishCards": [
+        "Red, yellow, and black are a compass",
+        "for understanding microscopic changes,"
+      ],
+      "lines": [
+        {
+          "text": "红、黄、黑，是洞察微观病变的罗盘",
+          "start": 315.772,
+          "end": 318.908
+        }
+      ],
+      "cards": [
+        {
+          "text": "Red, yellow, and black are a compass",
+          "start": 315.772,
+          "end": 317.298
+        },
+        {
+          "text": "for understanding microscopic changes,",
+          "start": 317.298,
+          "end": 318.908
+        }
+      ]
+    },
+    {
+      "id": "76",
+      "ch": "慢性与收束",
+      "start": 319.358,
+      "end": 323.432,
+      "text": "不是等待病情演进的时钟。别等病情加重，",
+      "en": "not a clock to wait by. | Do not wait for disease to worsen.",
+      "englishCards": [
+        "not a clock to wait by.",
+        "Do not wait for disease to worsen."
+      ],
+      "lines": [
+        {
+          "text": "不是等待病情演进的时钟",
+          "start": 319.358,
+          "end": 321.994
+        },
+        {
+          "text": "别等病情加重",
+          "start": 321.994,
+          "end": 323.432
+        }
+      ],
+      "cards": [
+        {
+          "text": "not a clock to wait by.",
+          "start": 319.358,
+          "end": 321.002
+        },
+        {
+          "text": "Do not wait for disease to worsen.",
+          "start": 321.002,
+          "end": 323.432
+        }
+      ]
+    },
+    {
+      "id": "77",
+      "ch": "慢性与收束",
+      "start": 323.882,
+      "end": 327.831,
+      "text": "持续右下腹痛、发热，请及时就诊。",
+      "en": "Seek medical care for persistent lower | right abdominal pain or fever.",
+      "englishCards": [
+        "Seek medical care for persistent lower",
+        "right abdominal pain or fever."
+      ],
+      "lines": [
+        {
+          "text": "持续右下腹痛、发热，请及时就诊",
+          "start": 323.882,
+          "end": 327.831
+        }
+      ],
+      "cards": [
+        {
+          "text": "Seek medical care for persistent lower",
+          "start": 323.882,
+          "end": 326.089
+        },
+        {
+          "text": "right abdominal pain or fever.",
+          "start": 326.089,
+          "end": 327.831
+        }
+      ]
+    }
+  ],
+  "endcardUntouched": true,
+  "pendingStill": true,
+  "blind": {
+    "skipped": true
+  },
+  "blockers": []
+}
