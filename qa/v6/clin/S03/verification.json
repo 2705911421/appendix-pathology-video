@@ -7,6 +7,16 @@
   "origin": 43.06395833333333,
   "duration": 10.38687500000001,
   "blankBelow810": true,
+  "earlyLateMeanDiff": {
+    "s11": 3.37,
+    "s12": 1,
+    "s13": 0.17
+  },
+  "earlyLateCropDiff": {
+    "s11": 10.29,
+    "s12": 4.83,
+    "s13": 1.14
+  },
   "video": {
     "streams": [
       {
@@ -43,7 +53,7 @@
         "start_time": "0.000000",
         "duration_ts": 159744,
         "duration": "10.400000",
-        "bit_rate": "89431",
+        "bit_rate": "199593",
         "bits_per_raw_sample": "8",
         "nb_frames": "312",
         "extradata_size": 51,
@@ -142,8 +152,8 @@
       "format_long_name": "QuickTime / MOV",
       "start_time": "0.000000",
       "duration": "10.400000",
-      "size": "349145",
-      "bit_rate": "268573",
+      "size": "492356",
+      "bit_rate": "378735",
       "probe_score": 100,
       "tags": {
         "major_brand": "isom",
