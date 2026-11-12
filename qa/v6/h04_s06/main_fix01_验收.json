@@ -1,0 +1,10 @@
+{
+  "scene": "S06",
+  "verification": {
+    "frames": 318,
+    "below_y950_max_error": 2
+  },
+  "evidence": "../h05/verification.json",
+  "locked_sha256": "../h05/locked_end.sha256",
+  "render": "Canvas lossless PNG, CRF16, 30fps, one browser"
+}

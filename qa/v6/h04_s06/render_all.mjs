@@ -1,6 +1,8 @@
 import fs from 'node:fs';import {execFileSync as run} from 'node:child_process';import {createCanvas,Path2D} from '@napi-rs/canvas';
 globalThis.Path2D=Path2D;globalThis.document={createElement:()=>createCanvas(1,1)};
-const {forScene}=await import('../../../film/timeline.js');const clock=forScene(23,24,0),T=clock.T;
+const {forScene}=await import('../../../film/timeline.js');const {timing}=await import('../../../film/timing_snapshot.js');
+const gi=timing.findIndex(s=>s.n===24),gap=timing[gi+1].start-timing[gi].end;
+const clock=forScene(23,24,gap),T=clock.T;
 const P='qa/v6/h04_s06',tool='/workspace/garden-skills/skills/motion-showreel/scripts/render.mjs';
 const picks=[['s23_start',T.frac(23,.03)],['s23_transition',T.frac(23,.42)],['s23_red',T.frac(23,.88)],['s24_anchor',T.frac(24,.25)],['s24_before',T.frac(24,.32)],['s24_after',T.frac(24,.88)]].map(([name,t])=>({name,t}));
 fs.writeFileSync(P+'/keyframes.json',JSON.stringify({origin:clock.origin,duration:clock.duration,picks},null,2));
