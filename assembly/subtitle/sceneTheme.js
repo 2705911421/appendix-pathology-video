@@ -1,6 +1,6 @@
 // Add microscope ranges here; all anchors resolve against the supplied real cues.
 export const MICROSCOPE_RANGES = [
-  { scene: 'S10', first: '37', last: '42', enterBefore: 0.45, enterAfter: 0.25, exitHold: 0.8, exitAfter: 1.5 },
+  { scene: 'S10', first: '37', last: '46', enterBefore: 0.45, enterAfter: 0.25, exitHold: 0.8, exitAfter: 1.5 },
   { scene: 'S08', first: '29', last: '34', enterBefore: 0.45, enterAfter: 0.25, exitAfter: 0.7 },
 ];
 export function resolveRanges(cues, ranges = MICROSCOPE_RANGES) {

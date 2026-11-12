@@ -85,16 +85,36 @@ for(let j=0;j<4800;j++)for(let i=0;i<6800;i++){const u=i/2-1700,v=j/2-1200,x=(u*
 }
 const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
 export default {prepare(){for(const [key,col] of [['s10.fluid','#F5DFE8'],['s10.exudate','#E9B4B7']])bake(key,(b,P)=>P.fill(b,P.blob(0,0,230,24,.3,83),col,85,.65),{seed:83,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});atlas=build();const base=atlas;lowAtlas=build("low");pusAtlas=build("pus");compareAtlas=build("compare");atlas=base;},draw(c,t,T){
-const ids=[37,38,39,40,41,42],id=ids.find(n=>t<T.end(n))||42;
+const extended=typeof T.has==='function'&&T.has(46);const ids=extended?[37,38,39,40,41,42,43,44,45,46]:[37,38,39,40,41,42],id=ids.find(n=>t<T.end(n))||ids.at(-1);
 const muscle=point(-160,95),dense=point(-180,60),lumen=point(0,-305),edema=point(280,100),compare=point(102,60);
-const keys=[[0,[120,120,.50]],[T.frac(37,.7),[120,120,.50]],[T.frac(38,.28),[...muscle,1.15]],[T.end(38),[...muscle,1.15]],[T.frac(39,.3),[...dense,2.7]],[T.end(39),[...dense,2.7]],[T.frac(40,.3),[...lumen,2.7]],[T.end(40),[...lumen,2.7]],[T.frac(41,.3),[...edema,1.8]],[T.end(41),[...edema,1.8]],[T.frac(42,.3),[...compare,3.4]],[T.end(42)+.8,[...compare,3.4]]];let v=keys[0][1];for(let i=1;i<keys.length;i++){if(t>=keys[i][0]){v=keys[i][1];continue;}const a=keys[i-1],b=keys[i],f=smooth((t-a[0])/(b[0]-a[0]));v=a[1].map((q,j)=>q+(b[1][j]-q)*f);break;}const [x,y,z]=v;
+const keys=[[0,[120,120,.50]],[T.frac(37,.7),[120,120,.50]],[T.frac(38,.28),[...muscle,1.15]],[T.end(38),[...muscle,1.15]],[T.frac(39,.3),[...dense,2.7]],[T.end(39),[...dense,2.7]],[T.frac(40,.3),[...lumen,2.7]],[T.end(40),[...lumen,2.7]],[T.frac(41,.3),[...edema,1.8]],[T.end(41),[...edema,1.8]],[T.frac(42,.3),[...compare,3.4]],[T.end(42)+.8,[...compare,3.4]]];if(extended){keys.pop();keys.push([T.end(42),[...compare,3.4]],[T.frac(43,.23),[...point(80,341),3.4]],[T.end(45),[...point(80,341),3.4]],[T.frac(46,.7),[...point(80,265),1.25]],[T.end(46)+.8,[...point(80,265),1.25]]);}let v=keys[0][1];for(let i=1;i<keys.length;i++){if(t>=keys[i][0]){v=keys[i][1];continue;}const a=keys[i-1],b=keys[i],f=smooth((t-a[0])/(b[0]-a[0]));v=a[1].map((q,j)=>q+(b[1][j]-q)*f);break;}const [x,y,z]=v;
 c.setTransform(1,0,0,1,0,0);c.fillStyle='#111114';c.fillRect(0,0,1920,1080);c.save();c.beginPath();c.arc(1110,475,425,0,TAU);c.clip();c.fillStyle='#F6EEF0';c.fill();c.translate(1110,475);c.scale(z,z);c.translate(-x,-y);c.drawImage(atlas,-1700,-1200,3400,2400);
-const variant=z<.65?lowAtlas:id===40?pusAtlas:id===42?compareAtlas:null;
-if(variant){c.globalAlpha=z<.65?Math.max(0,Math.min(1,(.65-z)/.1)):smooth((t-T.at(id))/(T.frac(id,.3)-T.at(id)));c.drawImage(variant,-1700,-1200,3400,2400);c.globalAlpha=1;}c.restore();c.strokeStyle='#4C4555';c.lineWidth=1.6;c.beginPath();c.arc(1110,475,431,0,TAU);c.stroke();c.fillStyle='#E8DDE9';c.font='500 30px MixSans';c.fillText(z<.65?'低倍':z<2.2?'中倍':'高倍',1030,35);
-const text={37:['第二幕 黄'],38:['化脓性阑尾炎','（蜂窝织炎性阑尾炎）'],39:['中性粒细胞浸润','部分变性坏死'],40:['脓液','脓细胞','组织碎屑','渗出液'],41:['渗出伴随局部肿胀'],42:['脓细胞','变性坏死的中性粒细胞']};const phase=(t-T.at(id))/(T.end(id)-T.at(id)),alpha=Math.max(0,Math.min(1,phase/.10,id===42?1:(1-phase)/.10));c.save();c.globalAlpha=alpha;text[id].forEach((s,i)=>{c.font=`${i?400:700} ${i?27:36}px MixSans`;c.fillText(s,75,320+i*56);});c.strokeStyle='#BFA9CB';c.lineWidth=1.6;c.beginPath();c.moveTo(475,410);c.lineTo(630,410);c.lineTo(id===42?720:900,id===42?350:475);c.stroke();
+const variant=z<.65?lowAtlas:id===40?pusAtlas:(id===42||(extended&&id===43))?compareAtlas:null;
+if(variant){c.globalAlpha=extended&&id===43?1:z<.65?Math.max(0,Math.min(1,(.65-z)/.1)):smooth((t-T.at(id))/(T.frac(id,.3)-T.at(id)));c.drawImage(variant,-1700,-1200,3400,2400);c.globalAlpha=1;}
+if(extended&&t>=T.end(42))drawExudate(c,t,T,id);
+c.restore();c.strokeStyle='#4C4555';c.lineWidth=1.6;c.beginPath();c.arc(1110,475,431,0,TAU);c.stroke();c.fillStyle='#E8DDE9';c.font='500 30px MixSans';c.fillText(z<.65?'低倍':z<2.2?'中倍':'高倍',1030,35);
+const text={37:['第二幕 黄'],38:['化脓性阑尾炎','（蜂窝织炎性阑尾炎）'],39:['中性粒细胞浸润','部分变性坏死'],40:['脓液','脓细胞','组织碎屑','渗出液'],41:['渗出伴随局部肿胀'],42:['脓细胞','变性坏死的中性粒细胞'],43:['纤维蛋白原','凝成纤维素网'],44:['纤维脓性渗出物'],45:['纤维素：部分','脓细胞：主要'],46:['浆膜面：','纤维素性脓性渗出','（含脓细胞）']};const phase=(t-T.at(id))/(T.end(id)-T.at(id)),alpha=Math.max(0,Math.min(1,phase/.10,id===42||id===46?1:(1-phase)/.10));c.save();c.globalAlpha=alpha;text[id].forEach((s,i)=>{c.font=`${i?400:700} ${i?27:36}px MixSans`;c.fillText(s,75,320+i*56);});c.strokeStyle='#BFA9CB';c.lineWidth=1.6;c.beginPath();c.moveTo(475,410);c.lineTo(630,410);c.lineTo(id===42?720:900,id===42?350:475);c.stroke();
+if(id===46){const lead=(label,a,b,tx,ty)=>{const p=point(a,b);c.fillStyle='#51336F';c.font='400 27px MixSans';c.fillText(label,tx,ty);c.beginPath();c.moveTo(tx+35,ty+8);c.lineTo(1110+(p[0]-x)*z,475+(p[1]-y)*z);c.stroke();};lead('浆膜',80,275,960,580);lead('纤维素性脓性渗出',80,325,1100,300);}
 if(id===42&&t>=T.frac(42,.3)){
  const screen=(a,b)=>{const p=point(a,b);return [1110+(p[0]-x)*z,475+(p[1]-y)*z];};
  const lead=(a,b,tx,ty)=>{const [sx,sy]=screen(a,b);c.beginPath();c.moveTo(tx,ty);c.lineTo(sx,sy);c.stroke();};
  c.fillStyle='#51336F';c.font='400 27px MixSans';c.fillText('中性粒细胞',835,270);lead(65,55,990,285);
  c.fillText('脓细胞',1230,700);for(const p of [[105,36],[132,60],[104,88]])lead(...p,1240,665);
 }c.restore();}};
+
+// Deterministic irregular serosal exudate, attached to the same polar wall.
+function drawExudate(c,t,T,id){
+ const Q=rng(114346),growth=smooth((t-T.frac(43,.23))/(T.end(43)-T.frac(43,.23))),cells=smooth((t-T.at(44))/(T.frac(44,.35)-T.at(44))),second=id===45&&t>=T.frac(45,.5);
+ const netAlpha=id===45?(second?.25:1):.75,cellAlpha=id===45?(second?1:.22):cells;
+ c.save();
+ for(let i=0;i<580;i++){
+  const xx=-260+Q()*680,yy=284+Q()*(95+22*Math.sin(xx*.025)),p=point(xx,yy),len=(Q()-.5)*62;
+  c.globalAlpha=netAlpha;c.strokeStyle=i%4?'#D78EA8':'#E9B4C5';c.lineWidth=.35+Q()*1.3;c.lineCap='round';
+  const bend=(Q()-.5)*65,bendMid=(Q()-.5)*18;
+  if(growth>i/580){const g=Math.min(1,(growth-i/580)*12),p2=point(xx+len*g,yy+bend*g),pm=point(xx+len*g*.5,yy+bendMid);c.beginPath();c.moveTo(...p);c.quadraticCurveTo(...pm,...p2);c.stroke();}
+  c.globalAlpha=.35;c.fillStyle='#DCA3BB';c.beginPath();c.ellipse(...p,.5+Q()*1.4,.4+Q(),Q()*TAU,0,TAU);c.fill();
+ }
+ c.globalAlpha=cellAlpha;
+ for(let i=0;i<560;i++){const xx=-250+Q()*650,yy=285+Q()*(75+20*Math.sin(xx*.025)),p=point(xx,yy),sz=.65+Q()*.25,rot=Q()*TAU;if(i%3!==0)pus(c,...p,sz,rot,i);else detailedNeutrophil(c,...p,{lobes:2+i%3,rot,sz},1);}
+ c.globalAlpha=.3*cells;c.fillStyle='#BC8AAB';for(let i=0;i<260;i++){const p=point(-250+Q()*650,287+Q()*94);c.beginPath();c.ellipse(...p,1+Q()*3,.5+Q(),Q()*TAU,0,TAU);c.fill();}c.restore();
+}

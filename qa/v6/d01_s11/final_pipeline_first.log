@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/workspace/病理科普视频/v5/qa/v6/d01_s11/check_video.py", line 15, in <module>
+    mae=float(abs(frame(A/('粗剪_v2'+suf+'.mp4'),t,w,h)-frame(new,t,w,h)).mean());v2tests.append({'time':t,'MAE':mae});assert mae==0
+                                                                                                                              ^^^^^^
+AssertionError
