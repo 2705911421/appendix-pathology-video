@@ -17,6 +17,8 @@ import {
   PRESETS, ACTIVE, BAND, FONT, PAPER, INK,
 } from './subtitle.js';
 
+import { darkAt } from './sceneTheme.js';
+window.AUTO_THEME = false;
 window.READY = false;
 window.CUES = [];
 window.DARK = 0;
@@ -44,8 +46,8 @@ if (!document.fonts.check(`${ACTIVE.weightCn} ${ACTIVE.cnSize}px MixSans`) || !d
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d', { alpha: true });
 
-function opts(preset) {
-  return { dark: window.DARK || 0, xfade: !!window.XFADE, paper: PAPER, preset };
+function opts(preset, t = 0) {
+  return { dark: window.AUTO_THEME ? darkAt(t, window.CUES) : (window.DARK || 0), xfade: !!window.XFADE, paper: PAPER, preset };
 }
 
 function reset() {
@@ -62,13 +64,13 @@ window.render = (t) => {
   ctx.fillStyle = PAPER;
   ctx.fillRect(0, 0, 1920, 1080);
   safeFade(ctx, PAPER, window.DARK || 0);
-  drawSubtitles(ctx, Number(t), window.CUES || [], opts());
+  drawSubtitles(ctx, Number(t), window.CUES || [], opts(undefined, t));
 };
 
 window.renderOverlay = (t) => {
   reset();
   ctx.clearRect(0, 0, 1920, 1080);
-  drawSubtitles(ctx, Number(t), window.CUES || [], opts());
+  drawSubtitles(ctx, Number(t), window.CUES || [], opts(undefined, t));
 };
 
 window.renderPreset = (t, presetId) => {
@@ -76,7 +78,7 @@ window.renderPreset = (t, presetId) => {
   ctx.clearRect(0, 0, 1920, 1080);
   ctx.fillStyle = PAPER;
   ctx.fillRect(0, 0, 1920, 1080);
-  drawSubtitles(ctx, Number(t), window.CUES || [], opts(PRESETS[presetId] || ACTIVE));
+  drawSubtitles(ctx, Number(t), window.CUES || [], opts(PRESETS[presetId] || ACTIVE, t));
 };
 
 window.measureCards = (cues) => {

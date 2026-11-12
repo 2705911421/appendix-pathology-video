@@ -12,7 +12,8 @@ export const COLOURS = Object.freeze({
   paperRgb: '244,239,230',
   ink: '#2A2A35',
   accent: '#D6453A',
-  darkInk: '#EFE8DC',
+  darkInk: '#F4EFE6',
+  darkAccent: '#EE7465',
   darkRgb: '17,17,20',
 });
 

@@ -124,3 +124,14 @@ start_{i+1} = end_i
 `hanzi` is the 定稿 字数 column when present: Chinese characters in the spoken sentence (U+4E00–U+9FFF), excluding ASCII letters and digits, punctuation, and citation marks `[n]`. The loader evaluates that formula in whole milliseconds (`hanzi * 220 + 400`).
 
 `source` is `定稿+estimate`.
+
+## Scene themes (v6)
+
+`sceneTheme.js` holds microscope cue ranges. Add `{scene, first, last,
+enterBefore, enterAfter, exitAfter}`; IDs are strings from the actual cue snapshot.
+`resolveRanges(cues)` supplies picture anchor times; `darkAt(t,cues)` supplies the
+same smoothstep progress for subtitle colours. The assembler enables AUTO_THEME,
+and includes this progress in its frame reuse key. Layout, cue alpha, wrapping,
+and English card timing stay identical. Paper (dark=0) preserves the original
+pixel path. Dark (dark=1) uses #F4EFE6, dark halo, #EE7465 accents, and no scrim.
+Intermediate values interpolate one glyph pass and fade the paper scrim away.

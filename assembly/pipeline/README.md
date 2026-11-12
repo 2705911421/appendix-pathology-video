@@ -45,3 +45,21 @@ Frames are written under `qa/tmp/sub/` and `qa/tmp/endcard/` and deleted after t
 ```
 
 That keeps sentences 01–05 (estimate end 17.40 s), holds paper until 18.00 s, then appends the 12 s endcard (30 s total).
+
+## Microscope iris transitions
+
+Resolve `subtitle/sceneTheme.js::resolveRanges` with the current cue snapshot to a
+JSON file (never store absolute edit times as configuration). Then:
+
+```
+python3 assembly/pipeline/iris_plate.py --ranges resolved_ranges.json --scene S08 \
+  --scene-video S08.mp4 --base scene_plate.mp4 --out transitioned_plate.mp4 \
+  --work qa/iris_S08 --tail 0.8 --cx 1110 --cy 475
+```
+
+The scene input's first frame is held during entry; its final held state is used
+for exit. The paper dims while a feathered circular mask expands about the
+specified eyepiece centre; exit reverses it. Tail must match the scene hold in
+the base plate. For S10/S11/S14/S19 add a cue range, supply that scene's local clip,
+and invoke again using the previous transitioned plate as `--base` (distinct
+output). Regenerate resolved ranges and the plate whenever narration changes.

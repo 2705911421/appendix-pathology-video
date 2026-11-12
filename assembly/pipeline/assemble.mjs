@@ -11,6 +11,8 @@ import { subtitleState, linesFor, cardsFor, BAND, CN_SIZE, EN_SIZE, EN_FLOOR, EN
 import { canvasPng, withPage } from './browser.mjs';
 import { renderEndcard } from './render_endcard.mjs';
 
+import { darkAt } from '../subtitle/sceneTheme.js';
+
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DEFAULT_VOICE = '/workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav';
 const ENDCARD_SECONDS = 12;
@@ -375,7 +377,7 @@ async function main() {
   const runs = [];
   for (let i = 0; i < contentFrames; i++) {
     const t = i / opt.fps;
-    const key = visualKey(subtitleState(t, clip, { xfade: opt.xfade }));
+    const key = visualKey(subtitleState(t, clip, { xfade: opt.xfade })) + '\t' + darkAt(t, clip);
     const last = runs[runs.length - 1];
     if (last && last.key === key) last.count += 1;
     else runs.push({ key, t, index: i, count: 1 });
@@ -389,7 +391,7 @@ async function main() {
   let qaMeta = null;
   await withPage(path.join(root, 'subtitle'), 'http://subtitle.local', async (page) => {
     measured = await page.evaluate((cues) => window.measureCards(cues), loaded.cues);
-    await page.evaluate(({ cues, xfade }) => { window.CUES = cues; window.XFADE = xfade; }, { cues: clip, xfade: opt.xfade });
+    await page.evaluate(({ cues, xfade }) => { window.CUES = cues; window.XFADE = xfade; window.AUTO_THEME = true; }, { cues: clip, xfade: opt.xfade });
     for (const still of stills) {
       const png = await canvasPng(page, still.t, 'full');
       await fsp.writeFile(still.file, png);

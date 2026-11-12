@@ -1,0 +1,3038 @@
+OpenAI Codex v0.163.0
+--------
+workdir: /workspace/病理科普视频/v5
+model: gpt-6.1-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, /workspace/病理科普视频, /workspace/garden-skills] (network access enabled)
+reasoning effort: none
+reasoning summaries: none
+session id: 01a1cd80-af19-7120-9d5a-2bfb8b0feb3a
+--------
+user
+# v6 a02（Codex）：镜下段深色底的切入切出过渡 + 深色底字幕样式 → 粗剪 v2
+
+工作目录 /workspace/病理科普视频/v5，分支 v6-fresh，基于 HEAD（a11a43a）。不许 git commit。锁定文件的 sha256 照旧在开工和结束各校验一次。不改片尾（assembly/endcard/），不改 S08 的绘制代码；不打印、不改动 /workspace/病理科普视频/配音/.mimo.env。
+
+Gisele 的决定：镜下段保留深色底，切入和切出加过渡，字幕在深色底上改用适配的样式。
+
+1. 过渡：在纸色底和镜下深色底之间做切换，切入和切出各一次，时长约 0.6–0.8 s，并且要做成通用机制，以后 S10、S11、S14、S19 等镜下段都能复用。
+   - 推荐做法：纸色先压暗成深色，同时镜下圆视野由小到大展开，像把眼睛凑到目镜上；切出时反过来。做成全画面的硬溶解或者突然一黑都不行。
+   - 过渡不能吃掉句子的内容：要放在句间空隙或者场景的首尾，S08 的第一个画面状态（低倍）必须在句 29 开始后 0.3 s 内完整可见。
+   - 过渡的时刻要按句号定义，比如"句 29 起点前 x 秒"，不能写死绝对秒数，因为配音之后会整体重新生成。
+2. 深色底字幕：在 assembly/subtitle 里加一套 dark 样式。
+   - 文字用暖白色或纸色（#F4EFE6 一类），描边或阴影用深色，去掉现在那条浅灰色的渐变带和白色光晕；关键词的朱红高亮在深色底上要可读。
+   - 字号、基线、换行和英文续卡都与纸色样式完全一致。
+   - 按场景的时间范围切换样式（由句号定义的镜下段 = dark，其余 = paper）。过渡期间字幕样式要跟着底色平滑过渡；同一句字幕跨越过渡时，不能出现闪一下或者两套样式叠在一起。
+   - 纸色段的字幕帧必须与粗剪 v1 逐像素一致（抽 3 帧算 MAE<0.5）。
+3. 重新合成，输出 /workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v2.mp4 和 720p 版本，其余参数与 v1 相同（真实 cues_real.json、旁白_v3.wav、无音乐、保留片尾）。
+4. 交付到 qa/v6/animatic/v2/：
+   - `过渡_切入.png`：从句 29 前到句 29 后，等间隔取 6 帧拼成一张。
+   - `过渡_切出.png`：同样方法，取切出前后的 6 帧。
+   - `字幕_v1_vs_v2.png`：句 31、句 34 这两帧在 v1 和 v2 中的字幕区并排对比。
+   - 自检.md：写明过渡时长及按句号的定义方式、低倍画面完整可见的时刻、纸色段 MAE、sha256，并说明以后其他镜下段怎样复用。
+
+2026-11-12T02:05:25.899526Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer realm=\"OAuth\", resource_metadata=\"https://mcp.notion.com/.well-known/oauth-protected-resource/mcp\", scope=\"default\"" })
+codex
+我先检查项目约束、锁定文件和 v1 合成流程，再实现可复用的镜下过渡与深色字幕，输出粗剪 v2 和自检材料。
+exec
+/bin/bash -lc "pwd; git status --short; git branch --show-current; rg --files -g 'AGENTS.md' -g '*锁*' -g '*sha*' -g '*animatic*' -g '*subtitle*' -g '*cues*' -g '*自检*' -g '*README*'" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+/workspace/病理科普视频/v5
+?? qa/briefs/run_v6_a02.log
+?? qa/briefs/v6_a02_dark_transition.md
+?? qa/v6/animatic/S08.mp4
+?? qa/v6/animatic/alignment_frames/
+?? qa/v6/animatic/contact_frames/
+?? qa/v6/animatic/frames/
+?? qa/v6/animatic/s08_states/
+?? qa/v6/animatic/scene_plate.mp4
+?? qa/v6/animatic/粗剪_v1.mp4
+?? qa/v6/animatic/粗剪_v1_720p.mp4
+v6-fresh
+assembly/pipeline/README.md
+assembly/endcard/README.md
+assembly/qa/cues_estimate.json
+assembly/qa/cues_dryrun.json
+assembly/qa/v3check/cues_dryrun.json
+assembly/qa/v3check/cues_loaded.json
+assembly/qa/prompts/build_subtitle_pipeline.md
+assembly/qa/prompts/log_gb_subtitle_pipeline.txt
+assembly/subtitle/subtitle.js
+assembly/subtitle/README.md
+qa/v6/animatic/cues_real.json
+qa/v6/animatic/cues_dryrun.json
+qa/v6/animatic/sha256_开工.txt
+qa/v6/animatic/sha256_校验.log
+qa/v6/animatic/cues_loaded.json
+qa/v6/animatic/自检.md
+qa/v6/animatic/sha256_结束.txt
+qa/v6/g02/sha256_开工.txt
+qa/v6/g01/sha256_开工.txt
+qa/v6/g01/sha256_校验.log
+qa/v6/g01/自检.md
+qa/v6/g01/sha256_结束.txt
+qa/v6/b05/sha256_开工.txt
+qa/v6/b05/sha256_校验.log
+qa/v6/b05/自检.md
+qa/v6/b05/sha256_结束.txt
+engine/lib/subtitle.js
+qa/v6/b07/sha256_开工.txt
+qa/v6/b07/sha256_校验.log
+qa/v6/b07/自检.md
+qa/v6/b07/sha256_结束.txt
+qa/v6/b04/sha256_开工.txt
+qa/v6/b04/sha256_校验.log
+qa/v6/b04/自检.md
+qa/v6/b04/sha256_结束.txt
+qa/v6/b06/sha256_开工.txt
+qa/v6/b06/sha256_校验.log
+qa/v6/b06/自检.md
+qa/v6/b06/sha256_结束.txt
+qa/v6/samples/README.md
+qa/v6/b10/sha256_开工.txt
+qa/v6/b10/sha256_校验.log
+qa/v6/b10/自检.md
+qa/v6/b10/sha256_结束.txt
+qa/v6/b02/sha256_结束.txt
+qa/v6/b02/sha256_b02b_校验.log
+qa/v6/b02/sha256_b02b_结束.txt
+qa/briefs/run_v6_a01_animatic.log
+qa/briefs/v6_a01_animatic.md
+qa/v6/自检.md
+qa/v6/b08/sha256_结束.txt
+qa/v6/b02/自检.md
+qa/v6/b08/自检.md
+qa/v6/b02/sha256_b02b_开工.txt
+qa/v6/b08/sha256_开工.txt
+qa/v6/b08/sha256_校验.log
+qa/v6/b09/sha256_结束.txt
+qa/v6/b02/sha256_开工.txt
+qa/v6/b02/自检_b02停止记录.md
+qa/v6/b09/自检.md
+qa/v6/b09/sha256_开工.txt
+qa/v6/b09/sha256_校验.log
+qa/v6/parity/sha256_after.json
+qa/v6/parity/sha256_before.json
+qa/v6/b03/sha256_开工.txt
+qa/v6/b03/sha256_校验.log
+qa/v6/b03/自检.md
+qa/v6/b03/sha256_结束.txt
+
+exec
+/bin/bash -lc 'ls -la; find .. -name AGENTS.md -print; cat qa/v6/animatic/自检.md qa/v6/animatic/sha256_开工.txt; cat assembly/pipeline/README.md assembly/subtitle/README.md; rg --files assembly/pipeline assembly/subtitle; cat qa/briefs/v6_a01_animatic.md' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+total 76
+drwxr-xr-x 16 box box 4096 Nov 12 10:05 .
+drwxr-xr-x 20 box box 4096 Nov 12 10:05 ..
+dr-xr-xr-x  2 box box   40 Nov 12 10:05 .agents
+dr-xr-xr-x  2 box box   40 Nov 12 10:05 .aws
+dr-xr-xr-x  2 box box   40 Nov 12 10:05 .codex
+drwxr-xr-x  8 box box 4096 Nov 12 10:04 .git
+-rw-r--r--  1 box box   14 Nov 11 21:38 .gitignore
+drwxr-xr-x  7 box box 4096 Nov 10 23:40 assembly
+drwxr-xr-x  4 box box 4096 Nov 11 21:35 assets
+drwxr-xr-x  7 box box 4096 Nov 11 21:35 engine
+drwxr-xr-x  4 box box 4096 Nov 11 23:42 film
+drwxr-xr-x  6 box box 4096 Nov 11 21:37 node_modules
+-rw-r--r--  1 box box 7799 Nov 11 21:37 package-lock.json
+-rw-r--r--  1 box box  153 Nov 11 21:37 package.json
+drwxr-xr-x  5 box box 4096 Nov 11 21:48 parity_r4
+drwxr-xr-x  5 box box 4096 Nov 11 21:37 parity_runtime
+drwxr-xr-x  6 box box 4096 Nov 11 21:37 qa
+-rw-r--r--  1 box box 2594 Nov 11 21:45 render.mjs
+-rw-r--r--  1 box box 2599 Nov 11 21:47 render_dpr2.mjs
+drwxr-xr-x  2 box box 4096 Nov 11 21:45 tools
+drwxr-xr-x  2 box box 4096 Nov 10 22:42 分镜
+# 整片粗剪 v1 自检
+
+基线 66ff9d4，分支 v6-fresh；未执行 git commit。保留开工时已有工作区改动，未改 v4_mix/、S08 绘制代码或锁定文件，未读取或修改 .mimo.env。无新增医学数字上屏；粗剪占位场景/句号编号按任务要求显示。
+
+总时长：**339.833333 s**（1080p 与 720p 同长）；内容 327.833333 s，真实 timeline.json duration=327.831500 s，30 fps 取整误差 +0.001833 s；保留片尾 12 s。主片 1920×1080、30 fps、H.264；音频 AAC、48 kHz、双声道，无音乐。
+
+S08 全局起点 116.614541667 s；句34结束 141.816458333 s；尾留 0.8 s；请求片段长 26.001916667 s，编码为26.000000 s。嵌入底板按全局时间戳定位，30 fps 最多一帧量化误差。
+
+## 真实时间绑定
+
+仅 film/timeline.js 改动 S08 时序：读取自真实时间轴生成的六句数据快照，以句29起点为0，把每句真实 start/end 映射到原6秒状态区间；句间0.45秒空隙停在下一句起始状态。绘制函数在该模块包装，所有原画笔、相机关键状态与标注保持原代码。句34结束后定格在 b10 的 s34 检查状态。
+
+句29长4.097625秒，低倍保持1.147335秒，低→中推进约1.475145秒，高倍在句29结束前到位，早于句30。各句原状态完整保留，没有因时长删状态。s33最短2.914833秒，镜头推进约0.932747秒，仍保留约1.98秒稳定状态。
+
+分镜表S07为25–30、S08为31–34；本任务明确要求S08成片从29开始，因此S08实际视频覆盖29–34，优先覆盖S07末两句。其余场景按分镜范围显示占位。占位文字左上角x65/y65、28px灰字，完整位于y<950。
+
+## 字幕与配音对齐
+
+loadCues默认没有优先读取timeline.json，存在估算回退。本次显式传入 cues_real.json：77句中英文来自真实timeline.json，start/end逐字段一致，formula=null、finalAudioTiming=true；配音从0开始、不变速。实际合成使用同一subtitleState和30fps采样。下表“出现”指中英alpha都大于0的首个视频帧；0.12秒淡入导致恰在start的alpha为0，故首句首个可见帧为1/30秒。差值均不超过一帧，非估算对齐。
+
+|句|真实start / s|快照差值 / s|首个可见帧时间 / s|差值 / s|
+|---|---:|---:|---:|---:|
+|01|0.000000000|0|0.033333333|+0.033333333|
+|31|126.006958333|0|126.033333333|+0.026375000|
+|34|138.750916667|0|138.766666667|+0.015750000|
+|50|212.153083333|0|212.166666667|+0.013583333|
+|77|323.882291667|0|323.900000000|+0.017708333|
+
+## S08 七状态 MAE
+
+比较新渲染原始1920×1080 PNG与qa/v6/b10七帧，全帧RGB通道平均绝对误差（视频经过有损H.264编码，验收用编码前PNG）。
+
+|b10旧时刻 / s|新片段时刻 / s|MAE|
+|---|---:|---:|
+|1|0.682937500|0.000000000|
+|3.8|2.595162500|0.000000000|
+|9|6.745020833|0.000000000|
+|15|11.436145833|0.000000000|
+|21|16.125708333|0.000000000|
+|27|20.228958333|0.000000000|
+|33|23.669145833|0.000000000|
+
+七帧全部逐像素一致，MAE=0<0.5。contact_sheet.png含整片每20秒17帧（0–320秒）及S08中倍、s30–s34共6帧。
+
+## 命令
+
+```bash
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --duration 26.00191666666662 --out qa/v6/animatic/S08.mp4 --size 1920x1080 --fps 30 --workers 3 --png
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --still 0.6829375,2.5951625,6.74502083333333,11.43614583333333,16.125708333333314,20.228958333333317,23.669145833333292 --out qa/v6/animatic/s08_states --size 1920x1080
+python3 qa/v6/animatic/build_plate.py
+assembly/pipeline/assemble.sh --scene-video /workspace/病理科普视频/v5/qa/v6/animatic/scene_plate.mp4 --cues /workspace/病理科普视频/v5/qa/v6/animatic/cues_real.json --voice /workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav --content-duration 327.8315 --fps 30 --out-dir /workspace/病理科普视频/v5/qa/v6/animatic --out-name 粗剪_v1 --no-blind
+node qa/v6/animatic/check_alignment.mjs
+python3 qa/v6/animatic/final_check.py
+```
+
+底板完整ffmpeg参数见plate_command.json，渲染/合成日志见render.log、assembly.log。assemble脚本已修正固定29–31秒的试片时长检查，改为核对实际预期时长。
+
+## SHA-256
+
+PASS：七个锁定文件开工=结束；记录见sha256_开工.txt、sha256_结束.txt、sha256_校验.log。
+
+```text
+a2e658fc107c4a43c689607337db996fe8da13ea7e4b730f76d9789442b771bf  engine/lib/he.js
+899d24ba596208caa026512c824025a5eb648b86d6bdfd7bc4920bab143544d0  engine/lib/he_detail.js
+889bacbc5c54cd57b7c6018afa33fb1df6bbcb9e8a3b744efece3539826308b9  engine/lib/wash.js
+a1168fc75660bf23424cffff32533dc7289672ffe943537bc6276d6d04742ed6  engine/lib/ann.js
+6c6079ad8a12ded36b5c203f9a3416d51d83c46c757a50d06768dda6bac9a0b2  engine/lib/scope.js
+25ada270e774274d72d5eb0789f9f9c8e5167cd49b28e3b16b55c6bf7c59ee83  engine/lib/camera.js
+4f83add26190441d4c71ed39f2ba83a950fef9933cbdaae95cabda2106542fb4  parity_r4/chapters/04.js
+```
+
+合成脚本检查结果：[]。片尾保持本次开工前状态，合成期间未修改。
+a2e658fc107c4a43c689607337db996fe8da13ea7e4b730f76d9789442b771bf  engine/lib/he.js
+899d24ba596208caa026512c824025a5eb648b86d6bdfd7bc4920bab143544d0  engine/lib/he_detail.js
+889bacbc5c54cd57b7c6018afa33fb1df6bbcb9e8a3b744efece3539826308b9  engine/lib/wash.js
+a1168fc75660bf23424cffff32533dc7289672ffe943537bc6276d6d04742ed6  engine/lib/ann.js
+6c6079ad8a12ded36b5c203f9a3416d51d83c46c757a50d06768dda6bac9a0b2  engine/lib/scope.js
+25ada270e774274d72d5eb0789f9f9c8e5167cd49b28e3b16b55c6bf7c59ee83  engine/lib/camera.js
+4f83add26190441d4c71ed39f2ba83a950fef9933cbdaae95cabda2106542fb4  parity_r4/chapters/04.js
+# v5 final assembly
+
+Builds a 1920×1080 H.264 film: scene plate, bilingual subtitle band, 12 s endcard, stereo 48 kHz AAC. The endcard directory is only read. Old-film music from `v4_mix` is not used.
+
+```
+./pipeline/assemble.sh \
+  --scene-video <path> \          # optional; else a #F4EFE6 plate
+  --cues <snapshot.json> \        # optional; else loadCues()
+  --voice <wav> \                 # optional; else 配音/全稿_v3/旁白_v3.wav if it exists, else silence
+  --music <wav> \                 # optional; else silence
+  --endcard-dir ../endcard \      # default: assembly/endcard
+  --fps 30 \
+  --out-dir qa \
+  --out-name dryrun_测试 \
+  --content-duration 18 \         # optional; pad or trim the picture to this many seconds
+  --max-cues 5 \                  # optional; keep the first N cues
+  --blind                         # also write <out-name>_盲审.mp4 (default on)
+```
+
+`--xfade` turns on hard-cut subtitle switches. `--no-blind` skips the stripped copy. `--keep-tmp` leaves `qa/tmp/`.
+
+## Steps
+
+1. Load cues (`subtitle/loadCues.js`). Content length is the last cue's end, or `--content-duration`. The endcard is always 12 s after that.
+2. Scene. A missing plate becomes a 1920×1080 30 fps `#F4EFE6` video. A provided plate is trimmed or padded with paper frames and scaled or cropped only when it is not already 1920×1080.
+3. Subtitles. Headless Chrome (MixSans loaded before any `measureText`) paints a transparent PNG sequence. Picture content may extend to y < 950 (`BAND.safeTop` in `subtitle/config.js`). From that line the frame is a soft paper scrim — it peaks just above the Chinese halo and fades out by the bottom of the frame, not a solid slab — plus one Chinese line (52 px) and one English card (30 px). `ffmpeg overlay=0:0` puts that band on the scene. Identical frames are hard-linked. `xfade` defaults off.
+4. Endcard. `pipeline/render_endcard.mjs` opens `endcard/index.html` at `http://endcard.local/`, waits for `window.READY`, and calls `window.render(t)` for `t` in `[0, 12)` at 30 fps. The page fills the paper itself. The clip is concatenated after the content.
+5. Audio. Voice starts at t=0 and is trimmed or padded so it never plays over the endcard. Music may cover content + endcard and fades out over the last 0.8 s. Music is ducked under the voice with `sidechaincompress=threshold=0.05:ratio=8:attack=50:release=300`, then `amix`. Missing inputs are silent tracks of the right length. The mix targets −14 LUFS and true peak ≤ −1 dBTP (two-pass `loudnorm`). If both inputs are silence, loudnorm is skipped. Output is stereo 48 kHz AAC, `+faststart`, `yuv420p`.
+6. Writes `<out-name>.mp4`, `<out-name>_720p.mp4` (1280×720), and a JSON report next to the markdown dry-run report.
+
+## Blind review
+
+`pipeline/blind_review.sh INPUT OUTPUT PROBE STRINGS [files...]` re-encodes with `-map_metadata -1`, bitexact flags, and a filter that drops SEI type 6, then clears the `avc1` compressor-name field (ffmpeg 7 still writes `Lavc libx264` there). `qa/blind_ffprobe.txt` is `ffprobe -hide_banner -show_format -show_streams` with structural `DISPOSITION:` rows removed, plus `RESULT: PASS` or `FAIL`.
+
+`qa/blind_strings.txt` scans `endcard.json` (read only), the cue snapshot, and other emitted JSON for `三峡`, `Sharpton`, `Gisele`, `导师`, `指导`. `【待填】` is not a failure.
+
+## Intermediates
+
+Frames are written under `qa/tmp/sub/` and `qa/tmp/endcard/` and deleted after the mp4s exist. Pass `--keep-tmp` to inspect them. The three sample PNGs in `qa/frames/` are kept.
+
+## Dry run
+
+```
+./pipeline/assemble.sh --content-duration 18 --max-cues 5 --out-dir qa --out-name dryrun_测试
+```
+
+That keeps sentences 01–05 (estimate end 17.40 s), holds paper until 18.00 s, then appends the 12 s endcard (30 s total).
+# v5 bilingual subtitles
+
+Standalone subtitle band for the new pathology film. Drop this folder into a host as-is. It does not import `v4_mix` or `v5/lib`.
+
+## Host
+
+Serve the folder over HTTP (ES modules). Open `index.html`, or import the module from your own canvas:
+
+```js
+import { drawSubtitles, safeFade } from './subtitle/subtitle.js';
+
+// Clear the frame first. drawSubtitles paints the fade and the current line;
+// it does not erase the previous frame.
+ctx.clearRect(0, 0, 1920, 1080);
+drawSubtitles(ctx, t, cues, { dark: 0, xfade: false });
+```
+
+`index.html` loads MixSans (weights 400 and 500, at the live sizes and the old comparison sizes) before `window.READY`. `window.render(t)` fills paper `#F4EFE6`, draws the safe fade, then the subtitles. `window.renderOverlay(t)` leaves y < 950 transparent so a scene plate can show through. Set `window.CUES` before rendering. Stills:
+
+```
+node subtitle/render.mjs --cues qa/cues_estimate.json --t 1.74,8.48 --out-dir qa/frames
+```
+
+Playwright uses system Chrome (`CHROME_PATH` or `/usr/bin/google-chrome`).
+
+## API
+
+| Export | Role |
+|---|---|
+| `drawSubtitles(ctx, t, cues, { dark, xfade, paper })` | Cue with `t` in `[start, end)`, then fade + one Chinese line + one English card. No-op if none. |
+| `safeFade(ctx, paper, dark)` | Short soft paper fade from `BAND.fadeTop` to `BAND.fadeEnd`. It does not paint a solid slab down to y=1080. |
+| `loadCues(options)` | Node: read narration / TSV / 定稿. Browser: `fetch` `options.url` or a snapshot. |
+| `loadCuesFromFs(paths)` | Same loader, filesystem only (`subtitle/loadCues.js`). |
+| `split`, `linesFor` | Chinese wrap and per-line timing. `linesFor` strips `[n]` citations from the drawn line. The cue's `text` keeps them. |
+| `measureEnglish`, `consumeOverflow` | Fit one card from 30 px down to 24 px. Overflows at 24 px are drawn and logged. |
+| `CN_SIZE`, `EN_SIZE`, `EN_FLOOR`, `EN_MAX_W`, `BAND`, `MAX` | Live constants. Every number is defined in `config.js`. |
+
+`dark > 0.5` uses fill `#EFE8DC` and halo `rgb(17,17,20)`. Otherwise ink `#2A2A35` and a paper halo (stroke 6, shadow blur 10). No black stroke and no box. Chinese words in the approved `ACCENT` list use vermilion `#D6453A`. English is never accented.
+
+`drawSubtitles(..., { preset: 'old' })` paints the previous sizes. The default preset is `current`. Do not switch the film to `old`.
+
+## Typography
+
+All of these live in `config.js`. The table is the live `current` preset.
+
+| Item | Value |
+|---|---|
+| Chinese | 52 px, weight 500. One line at a time, centered at x=960, baseline `cnY` 1010. |
+| English | 30 px, weight 400, baseline `enY` 1050. Never wraps, never ellipsis. |
+| Floor | 24 px. If the card is still wider than 1840 px, draw it and record it. |
+| Max English width | 1840 px (40 px inset each side). |
+| Chinese budget | 18 visual characters. Quotes `“”"` do not count. Breaks on `，。；：？！、` and `——`. Trailing `，。；、` is dropped on screen. |
+| Font | `"MixSans","Noto Sans CJK SC","Noto Sans SC",sans-serif` |
+| Halo | stroke 6, shadow blur 10 |
+
+`cnY` does not move when English is missing.
+
+`PRESETS.old` (alias `v1`) keeps the previous look for the comparison still only: Chinese 68 px, English 42 px, floor 28 px, `cnY` 986, `enY` 1038, fade 810→910, then a solid paper slab.
+
+## Safe area
+
+Picture content may extend to **y < 950**. `BAND.fadeTop` and `BAND.safeTop` are 950. Tell mini that the picture safe-area top is y=950, so scene art can move down to just above that line.
+
+The backing is a soft scrim from y=950. It peaks at y=961 (opacity 0.16), just above the dense Chinese halo, is 0.05 at the English descent, and is clear again at y=1080. It is not a solid paper slab, and it does not end in a hard edge. The halo keeps the glyphs readable.
+
+Measured with MixSans in Chrome, at these baselines:
+
+| | y |
+|---|---|
+| fadeTop / safeTop | 950 |
+| fadeEnd | 961 |
+| Chinese halo (first alpha) | 952 |
+| Chinese ink | 965–1015 |
+| cnY | 1010 |
+| English cap | 1028 |
+| English ink | 1026–1056 |
+| enY | 1050 |
+
+Chinese descent (y=1015) to the English cap (y=1028) is 13 px. The English descent ends 24 px above y=1080. Ink and halo stay at y ≥ 950.
+
+## Cue
+
+```js
+{ i, id, ch, start, end, text, en, englishCards }
+```
+
+- `i` is 0-based. `id` is `"01"`…`"77"`.
+- `ch` keeps the section title and, when known, ka moji's segment, for example `"01 开场"`. `seg` is also stored.
+- `text` is the Chinese sentence, citations included.
+- `en` joins cards with `" | "` for TSV compatibility.
+- `englishCards` is one string per card.
+
+## English cards
+
+If `en` contains `" | "` (spaces around the pipe), or `englishCards` is already an array, the cards play **one after another** across `[start, end)`. Time is shared by character count. They are never stacked. Chinese line timing is independent: a Chinese wrap does not change the English card.
+
+Default fades: each Chinese line fades in 0.12 s and out 0.08 s. Each English card fades on its own edges with the same timing, so a Chinese wrap does not blink the English.
+
+`{ xfade: true }`: hard-cut inside the sentence. Only the first Chinese line fades in and the last fades out. English cards do the same (first card in, last card out).
+
+## Where timings come from
+
+`loadCues()` / `loadCuesFromFs()` stop at the first source that exists and has usable `start`/`end`:
+
+1. `配音/全稿_v3/narration.json` — `{ segments: [{ id, ch, start, end, text, en }] }`.
+2. `配音/全稿_v3/sentences.tsv` — header `段 起 止 时长 句子 en`. Cells are trimmed; times are numbers.
+3. Fallback (used until the wav is finished): the 77-row table in `解说词_v2/解说词_定稿.md`. `lines.json` supplies `seg` and is checked for mismatches. If Chinese text disagrees, the 定稿 wins and the mismatch is logged.
+
+If a narration or TSV row has an empty `en`, English is filled from `lines.json` (same index, else exact Chinese) and then from the 定稿.
+
+Pass `{ cues: '/path/to/snapshot.json' }` to skip the search. The pipeline writes `qa/cues_estimate.json` with `source`, `formula`, and `cues`.
+
+### Estimate
+
+Not final audio timing.
+
+```
+duration_i = hanzi_i * 0.22 + 0.4    seconds
+start_0 = 0
+end_i = start_i + duration_i
+start_{i+1} = end_i
+```
+
+`hanzi` is the 定稿 字数 column when present: Chinese characters in the spoken sentence (U+4E00–U+9FFF), excluding ASCII letters and digits, punctuation, and citation marks `[n]`. The loader evaluates that formula in whole milliseconds (`hanzi * 220 + 400`).
+
+`source` is `定稿+estimate`.
+assembly/subtitle/loadCues.js
+assembly/subtitle/render.mjs
+assembly/subtitle/fonts/MixSans-Bold.woff2
+assembly/subtitle/fonts/MixSans-Regular.woff2
+assembly/subtitle/index.html
+assembly/subtitle/subtitle.js
+assembly/subtitle/README.md
+assembly/subtitle/config.js
+assembly/pipeline/browser.mjs
+assembly/pipeline/render_endcard.mjs
+assembly/pipeline/README.md
+assembly/pipeline/assemble.sh
+assembly/pipeline/blind_review.sh
+assembly/pipeline/assemble.mjs
+# v6 a01（Codex）：整片粗剪 v1（真实配音 + 双语字幕 + S08 成片画面 + 其余占位）
+
+工作目录 /workspace/病理科普视频/v5，分支 v6-fresh，基于提交 66ff9d4（S08 定稿，tag v6-s08-final）。不许 git commit。
+
+硬约束：
+- 锁定文件（engine/lib/he.js、he_detail.js、wash.js、ann.js、scope.js、camera.js、parity_r4/chapters/04.js）开工和结束都做 sha256 校验，不得改动；也不改 v4_mix/。
+- S08 的画面内容不得改变：在同一画面状态下，新渲染的帧与 qa/v6/b10/ 七帧必须逐像素一致（MAE<0.5）。只允许改时间轴（film/timeline.js），也就是"什么时刻到达哪个画面状态"。
+- 不得打印或改动 /workspace/病理科普视频/配音/.mimo.env。不新增任何数字上屏。
+
+任务：
+1. 时间绑定：真实时间轴在 /workspace/病理科普视频/配音/全稿_v3/timeline.json（lines[n].start/end，单位秒，n=句号）。现在 film/timeline.js 的句 29–34 是每句 6 s 的占位。改成读取真实时长：S08 片段从句 29 开始，到句 34 结束后保留约 0.8 s，片段内的时间以句 29 的起点为 0。低倍→中倍的推进仍放在 s30 之前，各句画面状态（s30–s34）与对应句同步。如果某句太短，推进动作放不下，写进报告，不要擅自删掉画面状态。
+2. 把 S08 片段渲染成 1920×1080、30 fps 的视频，使用 /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs（先查看它支持的视频或帧序列输出方式；不支持视频就输出 PNG 序列，再用 ffmpeg 编码）。
+3. 整片画面底板：长度等于 timeline.json 的 duration（约 327.8 s），底色 #F4EFE6。S08 视频放在句 29 起点对应的真实时刻。其余时段是占位：每个场景（按 分镜/分镜_v1.md 的 S01–S21 句号范围）在左上角用小号灰字写"草稿占位 S0x ／句 aa–bb"，只在粗剪里出现，并且必须在 y<950 之内。
+4. 合成：用 assembly/pipeline/assemble.sh（先读 assembly/pipeline/README.md），--scene-video 用上一步的底板，配音用 /workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav，字幕的时间来自真实时间轴（确认 loadCues 用的是 timeline.json 或 lines.json 的真实 start/end，不是估算公式；如果需要，就把真实时间轴生成一个 cues 快照传给 --cues）。不配音乐。保留片尾。--out-dir 用 /workspace/病理科普视频/v5/qa/v6/animatic，--out-name 用 粗剪_v1。同时导出一份 720p 预览。
+5. 自检，写入 qa/v6/animatic/自检.md：
+   - 总时长。
+   - 字幕与配音的对齐抽查：句 01、31、34、50、77 的字幕出现时刻与 timeline.json 的差值。
+   - S08 各画面状态与 b10 七帧的 MAE。
+   - 渲染命令。
+   - sha256 校验结果。
+   另做一张 contact_sheet.png：从整片每 20 s 取一帧，并加上 S08 段内的 6 帧。
+
+exec
+/bin/bash -lc 'cat assembly/subtitle/subtitle.js; cat assembly/subtitle/index.html; cat qa/v6/animatic/build_plate.py; cat assembly/pipeline/assemble.mjs' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+// Bilingual subtitle component for the v5 film.
+// Sizes, baselines, fade, halo, and colours come from ./config.js.
+// English " | " cards play one after another inside the sentence.
+// Picture content may extend to y < BAND.safeTop. The live band is the current preset.
+
+import {
+  ACTIVE,
+  PRESETS,
+  resolvePreset,
+  CN_SIZE,
+  EN_SIZE,
+  EN_FLOOR,
+  EN_MAX_W,
+  MAX,
+  WEIGHT_CN,
+  WEIGHT_EN,
+  BAND,
+  FADE,
+  HALO,
+  PAPER,
+  INK,
+  ACCENT_RED,
+  FONT,
+  COLOURS,
+} from './config.js';
+
+export {
+  ACTIVE,
+  PRESETS,
+  resolvePreset,
+  CN_SIZE,
+  EN_SIZE,
+  EN_FLOOR,
+  EN_MAX_W,
+  MAX,
+  WEIGHT_CN,
+  WEIGHT_EN,
+  BAND,
+  FADE,
+  HALO,
+  PAPER,
+  INK,
+  ACCENT_RED,
+  FONT,
+  COLOURS,
+};
+
+// Approved keyword list. Do not extend it here.
+export const ACCENT = ['急性蜂窝织炎性阑尾炎', '急性阑尾炎', '化脓性炎', '中性粒细胞', '右下腹', '肚脐周围', '脓苔', '脓液', '纤维素', '炎症', '麦氏点'];
+
+const BREAK = /([，。；：？！、]|——)/;
+const visLen = (s) => [...s.replace(/[“”"]/g, '')].length;
+
+function asPreset(preset) {
+  if (!preset) return ACTIVE;
+  if (typeof preset === 'string') return resolvePreset(preset);
+  return preset;
+}
+
+/** Citation marks are not spoken. Removed from drawn Chinese only. */
+export function stripCitations(text) {
+  return String(text ?? '').replace(/\[\d+\]/g, '');
+}
+
+export function split(text) {
+  const parts = [];
+  let buf = '';
+  for (const tok of String(text ?? '').split(BREAK).filter(Boolean)) {
+    if (BREAK.test(tok) && tok.length <= 2) {
+      buf += tok;
+      parts.push(buf);
+      buf = '';
+    } else buf += tok;
+  }
+  if (buf) parts.push(buf);
+  const lines = [];
+  let cur = '';
+  for (const p of parts) {
+    if (visLen(cur + p) <= MAX) cur += p;
+    else {
+      if (cur) lines.push(cur);
+      cur = p;
+    }
+  }
+  if (cur) lines.push(cur);
+  const out = [];
+  for (const l of lines) {
+    if (visLen(l) <= MAX) out.push(l);
+    else {
+      const a = [...l];
+      for (let i = 0; i < a.length; i += MAX) out.push(a.slice(i, i + MAX).join(''));
+    }
+  }
+  return out.map((l) => l.replace(/[，。；、]+$/, ''));
+}
+
+const lineCache = new Map();
+
+export function linesFor(s) {
+  const src = stripCitations(s.text);
+  const key = `${s.i}|${s.start}|${s.end}|${src}`;
+  if (lineCache.has(key)) return lineCache.get(key);
+  const ls = split(src).filter((l) => l.length);
+  const span = s.end - s.start;
+  const n = ls.reduce((a, l) => a + [...l].length, 0);
+  let out;
+  if (!ls.length || n <= 0 || !(span > 0)) {
+    out = [{ text: ls[0] || src, start: s.start, end: s.end }];
+  } else {
+    let t = s.start;
+    out = ls.map((text, i) => {
+      const d = span * [...text].length / n;
+      const o = { text, start: t, end: i === ls.length - 1 ? s.end : t + d };
+      t += d;
+      return o;
+    });
+    out[out.length - 1].end = s.end;
+  }
+  lineCache.set(key, out);
+  return out;
+}
+
+/** One card string per sequential English line. Prefers englishCards, else splits en on " | ". */
+export function rawCards(s) {
+  if (s && Array.isArray(s.englishCards) && s.englishCards.length) {
+    return s.englishCards.map((c) => String(c).trim()).filter(Boolean);
+  }
+  const en = s && s.en != null ? String(s.en).trim() : '';
+  if (!en) return [];
+  if (en.includes(' | ')) return en.split(' | ').map((c) => c.trim()).filter(Boolean);
+  return [en];
+}
+
+const cardCache = new Map();
+
+/** Time-share cards by character count across the sentence. Independent of Chinese wraps. */
+export function cardsFor(s) {
+  const cards = rawCards(s);
+  const key = `${s.i}|${s.start}|${s.end}|${cards.join('\u0001')}`;
+  if (cardCache.has(key)) return cardCache.get(key);
+  if (!cards.length) {
+    cardCache.set(key, []);
+    return [];
+  }
+  const span = s.end - s.start;
+  const n = cards.reduce((a, c) => a + [...c].length, 0) || cards.length;
+  let t = s.start;
+  const out = cards.map((text, i) => {
+    const d = span * ([...text].length || 1) / n;
+    const o = { text, start: t, end: i === cards.length - 1 ? s.end : t + d };
+    t += d;
+    return o;
+  });
+  out[out.length - 1].end = s.end;
+  cardCache.set(key, out);
+  return out;
+}
+
+function itemAlpha(t, item, index, list, xfade) {
+  if (xfade) {
+    return Math.max(0, Math.min(
+      1,
+      index === 0 ? (t - item.start) / 0.12 : 1,
+      index === list.length - 1 ? (item.end - t) / 0.08 : 1,
+    ));
+  }
+  return Math.max(0, Math.min(1, (t - item.start) / 0.12, (item.end - t) / 0.08));
+}
+
+const enCache = new Map();
+const overflowLog = [];
+const overflowSeen = new Set();
+
+function fitEnglish(ctx, text, style) {
+  const key = `${style.id}\u0000${text}`;
+  let rec = enCache.get(key);
+  if (!rec) {
+    ctx.save();
+    let size = style.enSize;
+    let width = 0;
+    for (;;) {
+      ctx.font = `${style.weightEn} ${size}px ${style.font}`;
+      width = ctx.measureText(text).width;
+      if (width <= style.enMaxW || size <= style.enFloor) break;
+      size -= 1;
+    }
+    rec = { size, width, overflow: width > style.enMaxW };
+    enCache.set(key, rec);
+    ctx.restore();
+  }
+  return rec;
+}
+
+/**
+ * Fit one English card. Shrinks from EN_SIZE to EN_FLOOR. Never wraps.
+ * A cue whose `en` still contains " | " is measured per card; the worst card is returned.
+ * Pass a preset id or object to measure something other than the live default.
+ */
+export function measureEnglish(ctx, s, preset = ACTIVE) {
+  const style = asPreset(preset);
+  const list = rawCards(s || {});
+  if (!list.length) return { size: style.enSize, width: 0, overflow: false };
+  let worst = null;
+  list.forEach((text, k) => {
+    const rec = fitEnglish(ctx, text, style);
+    const seen = `${style.id}:${s && s.i != null ? s.i : ''}:${k}:${text}`;
+    if (rec.overflow && style.id === ACTIVE.id && !overflowSeen.has(seen)) {
+      overflowSeen.add(seen);
+      overflowLog.push({ i: s && s.i, id: s && s.id, text, width: rec.width, maxWidth: style.enMaxW, size: rec.size });
+    }
+    if (!worst || (rec.overflow && !worst.overflow) || rec.size < worst.size || (rec.size === worst.size && rec.width > worst.width)) {
+      worst = rec;
+    }
+  });
+  return worst;
+}
+
+export function consumeOverflow() {
+  return overflowLog.slice();
+}
+
+function findCue(cues, t) {
+  if (!cues) return null;
+  for (let i = 0; i < cues.length; i++) {
+    const s = cues[i];
+    if (t >= s.start && t < s.end) return s;
+  }
+  return null;
+}
+
+function accentSegments(text) {
+  const segs = [];
+  let rest = text;
+  while (rest) {
+    let best = null;
+    for (const w of ACCENT) {
+      const j = rest.indexOf(w);
+      if (j >= 0 && (!best || j < best.j || (j === best.j && w.length > best.w.length))) best = { j, w };
+    }
+    if (!best) {
+      segs.push([rest, 0]);
+      break;
+    }
+    if (best.j) segs.push([rest.slice(0, best.j), 0]);
+    segs.push([best.w, 1]);
+    rest = rest.slice(best.j + best.w.length);
+  }
+  return segs;
+}
+
+function haloRgb(style, dark) {
+  return dark > 0.5 ? style.colours.darkRgb : style.colours.paperRgb;
+}
+
+function paintHalo(ctx, style, dark) {
+  const rgb = haloRgb(style, dark);
+  ctx.shadowColor = `rgba(${rgb},${style.halo.shadowAlpha})`;
+  ctx.shadowBlur = style.halo.blur;
+  ctx.lineWidth = style.halo.stroke;
+  ctx.strokeStyle = `rgba(${rgb},${style.halo.strokeAlpha})`;
+  ctx.lineJoin = 'round';
+}
+
+function paintChinese(ctx, text, dark, alpha, style) {
+  if (!text || alpha <= 0) return;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.font = `${style.weightCn} ${style.cnSize}px ${style.font}`;
+  ctx.textBaseline = 'alphabetic';
+  ctx.textAlign = 'left';
+  const segs = accentSegments(text);
+  const wsum = segs.reduce((a, [sg]) => a + ctx.measureText(sg).width, 0);
+  const x = style.frame.cx - wsum / 2;
+  for (const pass of [0, 1]) {
+    let xx = x;
+    for (const [sg, acc] of segs) {
+      const w = ctx.measureText(sg).width;
+      if (pass === 0) {
+        paintHalo(ctx, style, dark);
+        ctx.strokeText(sg, xx, style.band.cnY);
+        ctx.shadowColor = 'transparent';
+      } else {
+        ctx.fillStyle = acc ? style.colours.accent : (dark > 0.5 ? style.colours.darkInk : style.colours.ink);
+        ctx.fillText(sg, xx, style.band.cnY);
+      }
+      xx += w;
+    }
+  }
+  ctx.restore();
+}
+
+function paintEnglish(ctx, text, dark, alpha, style) {
+  if (!text || alpha <= 0) return;
+  const { size } = fitEnglish(ctx, text, style);
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.font = `${style.weightEn} ${size}px ${style.font}`;
+  ctx.textBaseline = 'alphabetic';
+  ctx.textAlign = 'center';
+  ctx.lineJoin = 'round';
+  paintHalo(ctx, style, dark);
+  ctx.strokeText(text, style.frame.cx, style.band.enY);
+  ctx.shadowColor = 'transparent';
+  ctx.fillStyle = dark > 0.5 ? style.colours.darkInk : style.colours.ink;
+  ctx.fillText(text, style.frame.cx, style.band.enY);
+  ctx.restore();
+}
+
+function paperRgbOf(paper, style, dark) {
+  if (dark > 0) return style.colours.darkRgb;
+  if (!paper || paper === style.colours.paper) return style.colours.paperRgb;
+  const m = /^#([0-9a-f]{6})$/i.exec(paper);
+  if (!m) return style.colours.paperRgb;
+  const n = parseInt(m[1], 16);
+  return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`;
+}
+
+export function safeFade(ctx, paper = PAPER, dark = 0, preset = ACTIVE) {
+  const style = asPreset(preset);
+  const { fadeTop, fadeEnd } = style.band;
+  const rgb = paperRgbOf(paper, style, dark);
+  const ease = style.fade.extend === 'ease';
+  const gradBottom = ease ? style.frame.h : fadeEnd;
+  const fillBottom = style.fade.extend === 'short' ? fadeEnd : style.frame.h;
+  const g = ctx.createLinearGradient(0, fadeTop, 0, gradBottom);
+  for (const stop of style.fade.stops) {
+    g.addColorStop(stop.t, `rgba(${rgb},${stop.a})`);
+  }
+  const h = fillBottom - fadeTop;
+  if (!(h > 0)) return;
+  ctx.fillStyle = g;
+  ctx.fillRect(0, fadeTop, style.frame.w, h);
+}
+
+/**
+ * Draw the paper fade, the current Chinese line, and the current English card.
+ * No-op when t is outside every cue. Host must clear the canvas first.
+ * Chinese line fades and English card fades are independent unless xfade is set.
+ * `preset` selects `current` (default) or `old` / `v1` for the comparison still.
+ */
+export function drawSubtitles(ctx, t, cues, { dark = 0, xfade = false, paper = PAPER, preset = ACTIVE } = {}) {
+  const s = findCue(cues, t);
+  if (!s) return;
+  const style = asPreset(preset);
+  ctx.save();
+  ctx.globalAlpha = 1;
+  safeFade(ctx, paper, dark, style);
+  ctx.restore();
+  const lines = linesFor(s);
+  const li = lines.findIndex((l) => t >= l.start && t < l.end);
+  const cards = cardsFor(s);
+  const ci = cards.findIndex((c) => t >= c.start && t < c.end);
+  if (li >= 0) {
+    const line = lines[li];
+    paintChinese(ctx, line.text, dark, itemAlpha(t, line, li, lines, xfade), style);
+  }
+  if (ci >= 0) {
+    const card = cards[ci];
+    paintEnglish(ctx, card.text, dark, itemAlpha(t, card, ci, cards, xfade), style);
+  }
+  return { cn: li >= 0 ? lines[li].text : '', en: ci >= 0 ? cards[ci].text : '' };
+}
+
+/** Pure timing snapshot used by the assembler to reuse identical frames. */
+export function subtitleState(t, cues, { xfade = false } = {}) {
+  const s = findCue(cues, t);
+  if (!s) return null;
+  const lines = linesFor(s);
+  const li = lines.findIndex((l) => t >= l.start && t < l.end);
+  const cards = cardsFor(s);
+  const ci = cards.findIndex((c) => t >= c.start && t < c.end);
+  const line = li >= 0 ? lines[li] : null;
+  const card = ci >= 0 ? cards[ci] : null;
+  return {
+    id: s.id,
+    cn: line ? line.text : '',
+    en: card ? card.text : '',
+    cnA: line ? itemAlpha(t, line, li, lines, xfade) : 0,
+    enA: card ? itemAlpha(t, card, ci, cards, xfade) : 0,
+  };
+}
+
+export async function loadCues(options = {}) {
+  if (Array.isArray(options.cues)) {
+    const cues = options.cues;
+    return {
+      cues,
+      source: options.source || 'provided',
+      duration: cues.length ? cues[cues.length - 1].end : 0,
+      formula: options.formula || null,
+    };
+  }
+  const isNode = typeof process !== 'undefined' && process.versions && process.versions.node;
+  if (!isNode) {
+    const url = options.url || options.snapshot || 'cues.json';
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`Cannot fetch cues: ${url}`);
+    const data = await r.json();
+    const cues = data.cues || data;
+    return {
+      cues,
+      source: data.source || String(url),
+      duration: data.duration ?? (cues.length ? cues[cues.length - 1].end : 0),
+      formula: data.formula || null,
+      mismatches: data.mismatches || [],
+    };
+  }
+  const { loadCuesFromFs } = await import('./loadCues.js');
+  return loadCuesFromFs(options);
+}
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>v5 bilingual subtitles</title>
+<style>
+@font-face{font-family:MixSans;src:url('./fonts/MixSans-Regular.woff2') format('woff2');font-weight:400 500;font-display:block}
+@font-face{font-family:MixSans;src:url('./fonts/MixSans-Bold.woff2') format('woff2');font-weight:700;font-display:block}
+html,body{margin:0;background:#F4EFE6}
+canvas{display:block;width:1920px;height:1080px}
+</style>
+<canvas width="1920" height="1080"></canvas>
+<script type="module">
+import {
+  drawSubtitles, safeFade, measureEnglish, consumeOverflow,
+  PRESETS, ACTIVE, BAND, FONT, PAPER, INK,
+} from './subtitle.js';
+
+window.READY = false;
+window.CUES = [];
+window.DARK = 0;
+window.XFADE = false;
+
+const faceList = [];
+const seenFace = new Set();
+for (const p of [PRESETS.current, PRESETS.old]) {
+  for (const spec of [
+    `${p.weightCn} ${p.cnSize}px MixSans`,
+    `${p.weightEn} ${p.enSize}px MixSans`,
+    `${p.weightEn} ${p.enFloor}px MixSans`,
+  ]) {
+    if (seenFace.has(spec)) continue;
+    seenFace.add(spec);
+    faceList.push(document.fonts.load(spec));
+  }
+}
+await Promise.all(faceList);
+await document.fonts.ready;
+if (!document.fonts.check(`${ACTIVE.weightCn} ${ACTIVE.cnSize}px MixSans`) || !document.fonts.check(`${ACTIVE.weightEn} ${ACTIVE.enSize}px MixSans`)) {
+  throw new Error('MixSans failed to load');
+}
+
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d', { alpha: true });
+
+function opts(preset) {
+  return { dark: window.DARK || 0, xfade: !!window.XFADE, paper: PAPER, preset };
+}
+
+function reset() {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1;
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+window.render = (t) => {
+  reset();
+  ctx.clearRect(0, 0, 1920, 1080);
+  ctx.fillStyle = PAPER;
+  ctx.fillRect(0, 0, 1920, 1080);
+  safeFade(ctx, PAPER, window.DARK || 0);
+  drawSubtitles(ctx, Number(t), window.CUES || [], opts());
+};
+
+window.renderOverlay = (t) => {
+  reset();
+  ctx.clearRect(0, 0, 1920, 1080);
+  drawSubtitles(ctx, Number(t), window.CUES || [], opts());
+};
+
+window.renderPreset = (t, presetId) => {
+  reset();
+  ctx.clearRect(0, 0, 1920, 1080);
+  ctx.fillStyle = PAPER;
+  ctx.fillRect(0, 0, 1920, 1080);
+  drawSubtitles(ctx, Number(t), window.CUES || [], opts(PRESETS[presetId] || ACTIVE));
+};
+
+window.measureCards = (cues) => {
+  const rows = [];
+  for (const cue of cues) {
+    const cards = cue.englishCards && cue.englishCards.length
+      ? cue.englishCards
+      : (cue.en ? String(cue.en).split(' | ').map((s) => s.trim()).filter(Boolean) : []);
+    cards.forEach((text, k) => {
+      const rec = measureEnglish(ctx, { en: text, i: `${cue.i}:${k}`, id: cue.id });
+      rows.push({ id: cue.id, i: cue.i, card: k, text, chars: [...text].length, size: rec.size, width: Math.round(rec.width * 10) / 10, overflow: rec.overflow });
+    });
+  }
+  return { rows, overflow: consumeOverflow() };
+};
+
+// QA stills: old band vs new band on paper, plus a 390 px-wide phone scale of the new frame.
+window.buildQaStills = (t) => {
+  const barH = 80;
+  const W = 1920;
+  const H = 1080;
+  const phoneW = 390;
+  const phoneH = Math.round(H * phoneW / W);
+  const bandH = H - BAND.safeTop;
+  const stripH = Math.max(1, Math.round(bandH * phoneW / W));
+  const oldLabel = `原 ${PRESETS.old.cnSize} / ${PRESETS.old.enSize}，安全区 ${PRESETS.old.band.safeTop}`;
+  const newLabel = `新 ${ACTIVE.cnSize} / ${ACTIVE.enSize}，安全区 ${BAND.safeTop}`;
+
+  function paint(preset) {
+    reset();
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = PAPER;
+    ctx.fillRect(0, 0, W, H);
+    drawSubtitles(ctx, Number(t), window.CUES || [], opts(preset));
+  }
+
+  const out = document.createElement('canvas');
+  out.width = W;
+  out.height = barH + H + barH + H;
+  const octx = out.getContext('2d');
+  octx.fillStyle = PAPER;
+  octx.fillRect(0, 0, out.width, out.height);
+
+  function bar(y, text) {
+    octx.fillStyle = PAPER;
+    octx.fillRect(0, y, W, barH);
+    octx.fillStyle = INK;
+    octx.font = `500 40px ${FONT}`;
+    octx.textAlign = 'center';
+    octx.textBaseline = 'middle';
+    octx.fillText('「' + text + '」', W / 2, y + barH / 2);
+    octx.fillStyle = '#C8C0B4';
+    octx.fillRect(0, y + barH - 3, W, 3);
+  }
+
+  bar(0, oldLabel);
+  paint(PRESETS.old);
+  octx.drawImage(canvas, 0, barH);
+  bar(barH + H, newLabel);
+  paint(ACTIVE);
+  octx.drawImage(canvas, 0, barH + H + barH);
+
+  const phone = document.createElement('canvas');
+  phone.width = phoneW;
+  phone.height = phoneH;
+  const pctx = phone.getContext('2d');
+  pctx.imageSmoothingEnabled = true;
+  pctx.imageSmoothingQuality = 'high';
+  pctx.drawImage(canvas, 0, 0, phoneW, phoneH);
+
+  const strip = document.createElement('canvas');
+  strip.width = phoneW;
+  strip.height = stripH;
+  const sctx = strip.getContext('2d');
+  sctx.imageSmoothingEnabled = true;
+  sctx.imageSmoothingQuality = 'high';
+  sctx.drawImage(canvas, 0, BAND.safeTop, W, bandH, 0, 0, phoneW, stripH);
+
+  return {
+    compare: out.toDataURL('image/png'),
+    phone: phone.toDataURL('image/png'),
+    strip: strip.toDataURL('image/png'),
+    meta: {
+      phone: { w: phoneW, h: phoneH },
+      strip: { w: phoneW, h: stripH },
+      compare: { w: out.width, h: out.height },
+      labels: { old: '「' + oldLabel + '」', current: '「' + newLabel + '」' },
+      safeTop: BAND.safeTop,
+    },
+  };
+};
+
+window.render(0);
+window.READY = true;
+</script>
+</html>
+import json,re,subprocess,pathlib
+p=pathlib.Path(__file__).resolve().parent
+root=p.parents[2]
+d=json.load(open('/workspace/病理科普视频/配音/全稿_v3/timeline.json')); timing=json.load(open(p/'timing.json'))
+filters=[]
+for scene,a,b in re.findall(r'^\| (S\d{2})／(\d+)—(\d+) ',(root/'分镜/分镜_v1.md').read_text(),re.M):
+ a,b=int(a),int(b)
+ if scene=='S08':continue
+ start=0 if a==1 else d['lines'][a-1]['start']
+ end=d['lines'][b]['start'] if b<77 else d['duration']
+ text=f'草稿占位 {scene} ／句 {a:02}–{b:02}'
+ filters.append(f"drawtext=fontfile=/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc:text='{text}':x=65:y=65:fontsize=28:fontcolor=0x8A8680:enable='gte(t,{start})*lt(t,{end})'")
+# S08 overrides the storyboard's S07 sentences 29–30, as explicitly requested.
+origin=timing['origin'];end=origin+timing['duration']
+f='[0:v]'+','.join(filters)+'[base];[1:v]setpts=PTS-STARTPTS+'+str(origin)+'/TB[s];[base][s]overlay=eof_action=pass:enable=\'gte(t,'+str(origin)+')*lt(t,'+str(end)+')\'[v]'
+cmd=['ffmpeg','-y','-v','error','-f','lavfi','-i',f"color=c=0xF4EFE6:s=1920x1080:r=30:d={d['duration']}",'-i',str(p/'S08.mp4'),'-filter_complex',f,'-map','[v]','-t',str(d['duration']),'-r','30','-c:v','libx264','-preset','veryfast','-crf','16','-pix_fmt','yuv420p','-an',str(p/'scene_plate.mp4')]
+(p/'plate_command.json').write_text(json.dumps(cmd,ensure_ascii=False,indent=2));subprocess.run(cmd,check=True)
+#!/usr/bin/env node
+// Final assembly: cues + scene video + bilingual subtitle overlay + 12 s endcard + audio.
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+import fsp from 'node:fs/promises';
+import path from 'node:path';
+import { spawn } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { loadCuesFromFs, writeSnapshot } from '../subtitle/loadCues.js';
+import { subtitleState, linesFor, cardsFor, BAND, CN_SIZE, EN_SIZE, EN_FLOOR, EN_MAX_W, MAX, WEIGHT_CN, WEIGHT_EN, FADE, HALO } from '../subtitle/subtitle.js';
+import { canvasPng, withPage } from './browser.mjs';
+import { renderEndcard } from './render_endcard.mjs';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const DEFAULT_VOICE = '/workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav';
+const ENDCARD_SECONDS = 12;
+
+function parseArgs(argv) {
+  const o = {
+    sceneVideo: null,
+    cues: null,
+    voice: null,
+    music: null,
+    endcardDir: path.join(root, 'endcard'),
+    fps: 30,
+    outDir: path.join(root, 'qa'),
+    outName: 'dryrun_测试',
+    contentDuration: null,
+    maxCues: null,
+    blind: true,
+    xfade: false,
+    keepTmp: false,
+  };
+  for (let i = 2; i < argv.length; i++) {
+    const a = argv[i];
+    const nxt = () => {
+      if (i + 1 >= argv.length) throw new Error('missing value for ' + a);
+      return argv[++i];
+    };
+    if (a === '--scene-video') o.sceneVideo = nxt();
+    else if (a === '--cues') o.cues = nxt();
+    else if (a === '--voice') o.voice = nxt();
+    else if (a === '--music') o.music = nxt();
+    else if (a === '--endcard-dir') o.endcardDir = path.resolve(nxt());
+    else if (a === '--fps') o.fps = Number(nxt());
+    else if (a === '--out-dir') o.outDir = path.resolve(nxt());
+    else if (a === '--out-name') o.outName = nxt();
+    else if (a === '--content-duration') o.contentDuration = Number(nxt());
+    else if (a === '--max-cues') o.maxCues = Number(nxt());
+    else if (a === '--blind') o.blind = true;
+    else if (a === '--no-blind') o.blind = false;
+    else if (a === '--xfade') o.xfade = true;
+    else if (a === '--keep-tmp') o.keepTmp = true;
+    else throw new Error('Unknown argument ' + a);
+  }
+  if (!o.voice && fs.existsSync(DEFAULT_VOICE)) o.voice = DEFAULT_VOICE;
+  return o;
+}
+
+function run(cmd, args) {
+  return new Promise((resolve, reject) => {
+    const p = spawn(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'] });
+    let out = '';
+    let err = '';
+    p.stdout.on('data', (d) => { out += d; });
+    p.stderr.on('data', (d) => { err += d; });
+    p.on('close', (code) => {
+      if (code === 0) resolve({ out, err });
+      else reject(new Error(`${cmd} ${args.map((x) => (/\s/.test(x) ? JSON.stringify(x) : x)).join(' ')}\n${err.slice(-4000)}`));
+    });
+  });
+}
+
+function sha256(file) {
+  return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+}
+
+function exists(p) {
+  try { return fs.statSync(p).isFile() && fs.statSync(p).size > 0; } catch { return false; }
+}
+
+async function probe(file) {
+  const { out } = await run('ffprobe', ['-hide_banner', '-print_format', 'json', '-show_format', '-show_streams', file]);
+  return JSON.parse(out);
+}
+
+function visualKey(state) {
+  if (!state) return 'none';
+  const q = (a) => (a >= 0.999 ? 1 : a <= 0.001 ? 0 : Math.round(a * 1000) / 1000);
+  return `${state.cn}\t${state.en}\t${q(state.cnA)}\t${q(state.enA)}`;
+}
+
+async function linkOrCopy(src, dest) {
+  try { await fsp.link(src, dest); } catch { await fsp.copyFile(src, dest); }
+}
+
+async function rawPixels(png, pixFmt) {
+  return new Promise((resolve, reject) => {
+    const p = spawn('ffmpeg', ['-v', 'error', '-i', png, '-f', 'rawvideo', '-pix_fmt', pixFmt, 'pipe:1'], { stdio: ['ignore', 'pipe', 'pipe'] });
+    const chunks = [];
+    let err = '';
+    p.stdout.on('data', (d) => chunks.push(d));
+    p.stderr.on('data', (d) => { err += d; });
+    p.on('close', (code) => (code === 0 ? resolve(Buffer.concat(chunks)) : reject(new Error(err || 'raw decode failed'))));
+  });
+}
+
+function checkFullFrame(buf) {
+  const w = 1920;
+  const h = 1080;
+  const paper = [0xf4, 0xef, 0xe6];
+  let above = 0;
+  let minAbove = null;
+  let ink = 0;
+  let minInk = null;
+  for (let y = 0; y < h; y++) {
+    const row = y * w * 3;
+    for (let x = 0; x < w; x++) {
+      const i = row + x * 3;
+      const diff = Math.abs(buf[i] - paper[0]) + Math.abs(buf[i + 1] - paper[1]) + Math.abs(buf[i + 2] - paper[2]);
+      if (diff <= 12) continue;
+      if (y < BAND.fadeTop) {
+        above++;
+        if (minAbove == null) minAbove = y;
+      } else {
+        ink++;
+        if (minInk == null) minInk = y;
+      }
+    }
+  }
+  return { above, minAbove, ink, minInk };
+}
+
+function checkOverlay(buf) {
+  const w = 1920;
+  const h = 1080;
+  let above = 0;
+  let minAbove = null;
+  let opaque = 0;
+  for (let y = 0; y < h; y++) {
+    const row = y * w * 4;
+    for (let x = 0; x < w; x++) {
+      const a = buf[row + x * 4 + 3];
+      if (y < BAND.fadeTop) {
+        if (a !== 0) {
+          above++;
+          if (minAbove == null) minAbove = y;
+        }
+      } else if (a === 255) opaque++;
+    }
+  }
+  return { above, minAbove, opaque };
+}
+
+function pngSize(buf) {
+  if (buf.toString('ascii', 1, 4) !== 'PNG') throw new Error('not a png');
+  return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) };
+}
+
+function lastJson(text) {
+  const i = text.lastIndexOf('{');
+  const j = text.lastIndexOf('}');
+  if (i < 0 || j < i) throw new Error('no JSON in ffmpeg output\n' + text.slice(-1800));
+  return JSON.parse(text.slice(i, j + 1));
+}
+
+async function maxVolumeDb(file) {
+  const { err } = await run('ffmpeg', ['-hide_banner', '-i', file, '-af', 'volumedetect', '-f', 'null', '-']);
+  const m = err.match(/max_volume:\s*(-?[\d.]+|-?inf)\s*dB/i);
+  if (!m) return null;
+  if (m[1] === '-inf') return -Infinity;
+  return Number(m[1]);
+}
+
+async function buildAudio({ voice, music, contentDur, totalDur, outWav }) {
+  const voiceOk = voice && exists(voice);
+  const musicOk = music && exists(music);
+  let voiceSilent = !voiceOk;
+  let musicSilent = !musicOk;
+  if (voiceOk) {
+    const peak = await maxVolumeDb(voice);
+    voiceSilent = peak == null || peak <= -70;
+  }
+  if (musicOk) {
+    const peak = await maxVolumeDb(music);
+    musicSilent = peak == null || peak <= -70;
+  }
+  const report = {
+    voice: voiceOk ? voice : null,
+    music: musicOk ? music : null,
+    voiceSilent,
+    musicSilent,
+  };
+  if (voiceSilent && musicSilent) {
+    await run('ffmpeg', [
+      '-y', '-hide_banner', '-loglevel', 'error',
+      '-f', 'lavfi', '-i', 'anullsrc=channel_layout=stereo:sample_rate=48000',
+      '-t', totalDur.toFixed(6),
+      '-c:a', 'pcm_s16le', outWav,
+    ]);
+    report.loudnorm = 'skipped';
+    report.reason = 'Both voice and music are missing or digital silence. loudnorm is skipped because it misbehaves on digital silence.';
+    report.integratedLufs = null;
+    report.truePeak = null;
+    return report;
+  }
+
+  const c = contentDur.toFixed(6);
+  const tot = totalDur.toFixed(6);
+  const fadeAt = Math.max(0, totalDur - 0.8).toFixed(6);
+  const vIn = voiceOk ? ['-i', voice] : ['-f', 'lavfi', '-t', tot, '-i', 'anullsrc=channel_layout=stereo:sample_rate=48000'];
+  const mIn = musicOk ? ['-i', music] : ['-f', 'lavfi', '-t', tot, '-i', 'anullsrc=channel_layout=stereo:sample_rate=48000'];
+  const graph = [
+    `[0:a]aformat=sample_rates=48000:channel_layouts=stereo,atrim=0:${c},asetpts=PTS-STARTPTS,apad=whole_dur=${tot},atrim=0:${tot}[voice]`,
+    `[1:a]aformat=sample_rates=48000:channel_layouts=stereo,atrim=0:${tot},asetpts=PTS-STARTPTS,apad=whole_dur=${tot},afade=t=out:st=${fadeAt}:d=0.8[music]`,
+    `[music][voice]sidechaincompress=threshold=0.05:ratio=8:attack=50:release=300[ducked]`,
+    `[ducked][voice]amix=inputs=2:duration=longest:dropout_transition=0:normalize=0,atrim=0:${tot},asetpts=PTS-STARTPTS[mix]`,
+  ].join(';');
+  const mixed = outWav.replace(/\.wav$/, '.mixed.wav');
+  await run('ffmpeg', ['-y', '-hide_banner', '-loglevel', 'error', ...vIn, ...mIn, '-filter_complex', graph, '-map', '[mix]', '-c:a', 'pcm_s16le', mixed]);
+  const pass1 = await run('ffmpeg', ['-hide_banner', '-i', mixed, '-af', 'loudnorm=I=-14:TP=-1:LRA=11:print_format=json', '-f', 'null', '-']);
+  const measured = lastJson(pass1.err);
+  const af = [
+    'loudnorm=I=-14:TP=-1:LRA=11',
+    `measured_I=${measured.input_i}`,
+    `measured_TP=${measured.input_tp}`,
+    `measured_LRA=${measured.input_lra}`,
+    `measured_thresh=${measured.input_thresh}`,
+    `offset=${measured.target_offset}`,
+    'linear=true',
+  ].join(':');
+  await run('ffmpeg', ['-y', '-hide_banner', '-loglevel', 'error', '-i', mixed, '-af', af, '-ar', '48000', '-ac', '2', '-c:a', 'pcm_s16le', outWav]);
+  const pass2 = await run('ffmpeg', ['-hide_banner', '-i', outWav, '-af', 'loudnorm=I=-14:TP=-1:LRA=11:print_format=json', '-f', 'null', '-']);
+  const after = lastJson(pass2.err);
+  await fsp.rm(mixed, { force: true });
+  report.loudnorm = 'two-pass';
+  report.integratedLufs = Number(after.input_i);
+  report.truePeak = Number(after.input_tp);
+  report.target = { integratedLufs: -14, truePeakMax: -1 };
+  return report;
+}
+
+async function makeScene({ sceneVideo, frames, fps, out }) {
+  const dur = frames / fps;
+  if (!sceneVideo) {
+    await run('ffmpeg', [
+      '-y', '-hide_banner', '-loglevel', 'error',
+      '-f', 'lavfi', '-i', `color=c=0xF4EFE6:s=1920x1080:r=${fps}`,
+      '-frames:v', String(frames), '-r', String(fps),
+      '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'veryfast', '-crf', '16', '-bf', '0', '-g', String(fps),
+      '-an', out,
+    ]);
+    return 'placeholder #F4EFE6';
+  }
+  const info = await probe(sceneVideo);
+  const v = info.streams.find((s) => s.codec_type === 'video');
+  const same = Number(v.width) === 1920 && Number(v.height) === 1080;
+  const prep = same
+    ? `fps=${fps},setpts=PTS-STARTPTS,trim=duration=${dur.toFixed(6)}`
+    : `scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,fps=${fps},setpts=PTS-STARTPTS,trim=duration=${dur.toFixed(6)}`;
+  const d = dur.toFixed(6);
+  await run('ffmpeg', [
+    '-y', '-hide_banner', '-loglevel', 'error',
+    '-i', sceneVideo,
+    '-f', 'lavfi', '-i', `color=c=0xF4EFE6:s=1920x1080:r=${fps}:d=${d}`,
+    '-filter_complex', `[0:v]${prep}[v];[1:v]fps=${fps},trim=duration=${d},setpts=PTS-STARTPTS[p];[p][v]overlay=eof_action=pass,format=yuv420p`,
+    '-frames:v', String(frames), '-r', String(fps),
+    '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'veryfast', '-crf', '16', '-bf', '0', '-g', String(fps),
+    '-an', out,
+  ]);
+  return sceneVideo;
+}
+
+function cueWindow(cues) {
+  return cues.map((c) => ({
+    id: c.id,
+    ch: c.ch,
+    start: round3(c.start),
+    end: round3(c.end),
+    hanzi: c.hanzi,
+    text: c.text,
+    en: c.en,
+    englishCards: c.englishCards,
+    lines: linesFor(c).map((l) => ({ text: l.text, start: round3(l.start), end: round3(l.end) })),
+    cards: cardsFor(c).map((l) => ({ text: l.text, start: round3(l.start), end: round3(l.end) })),
+  }));
+}
+
+function round3(n) {
+  return Math.round(n * 1000) / 1000;
+}
+
+function fmtBytes(n) {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / 1024 / 1024).toFixed(2)} MB`;
+}
+
+async function main() {
+  const opt = parseArgs(process.argv);
+  if (!(opt.fps > 0)) throw new Error('fps must be positive');
+  await fsp.mkdir(opt.outDir, { recursive: true });
+  const tmp = path.join(opt.outDir, 'tmp');
+  const subDir = path.join(tmp, 'sub');
+  const endDir = path.join(tmp, 'endcard');
+  await fsp.rm(tmp, { recursive: true, force: true });
+  await fsp.mkdir(subDir, { recursive: true });
+  await fsp.mkdir(path.join(opt.outDir, 'frames'), { recursive: true });
+
+  const endcardJson = path.join(opt.endcardDir, 'data/endcard.json');
+  const watched = ['data/endcard.json', 'endcard.js', 'index.html', 'render.mjs'].map((rel) => path.join(opt.endcardDir, rel));
+  const hashesBefore = Object.fromEntries(watched.map((f) => [f, sha256(f)]));
+  if (!fs.readFileSync(endcardJson, 'utf8').includes('【待填】')) {
+    throw new Error('endcard.json is missing 【待填】 before assembly; refusing to continue');
+  }
+
+  const loaded = loadCuesFromFs({ cues: opt.cues || undefined });
+  const snapName = String(loaded.source || '').includes('estimate') ? 'cues_estimate.json' : 'cues_loaded.json';
+  const snapPath = path.join(opt.outDir, snapName);
+  writeSnapshot(snapPath, loaded);
+
+  console.log(`cues ${loaded.count} source=${loaded.source} duration=${loaded.duration}`);
+  if (loaded.count !== 77 && String(loaded.source).includes('estimate')) {
+    throw new Error(`expected 77 estimated cues, got ${loaded.count}`);
+  }
+
+  let clip = loaded.cues.slice();
+  if (opt.maxCues) clip = clip.slice(0, opt.maxCues);
+  let contentDur = clip[clip.length - 1].end;
+  if (opt.contentDuration != null) {
+    contentDur = opt.contentDuration;
+    clip = clip.filter((c) => c.start < contentDur).map((c) => (c.end > contentDur ? { ...c, end: contentDur } : { ...c }));
+  }
+  const contentFrames = Math.round(contentDur * opt.fps);
+  const endFrames = Math.round(ENDCARD_SECONDS * opt.fps);
+  const contentDurExact = contentFrames / opt.fps;
+  const totalDur = (contentFrames + endFrames) / opt.fps;
+  const clipPath = path.join(opt.outDir, 'cues_dryrun.json');
+  fs.writeFileSync(clipPath, JSON.stringify({
+    source: loaded.source,
+    formula: loaded.formula,
+    contentDuration: contentDurExact,
+    lastCueEnd: clip[clip.length - 1].end,
+    cues: clip,
+  }, null, 2) + '\n');
+
+  const c1 = clip.find((c) => c.id === '01') || clip[0];
+  const c3 = clip.find((c) => c.id === '03');
+  if (!c3) throw new Error('dry-run window has no sentence 03');
+  const t1 = (c1.start + c1.end) / 2;
+  const t3 = (c3.start + c3.end) / 2;
+  const framesDir = path.join(opt.outDir, 'frames');
+  const stills = [
+    { t: t1, file: path.join(framesDir, '帧_01_句01中点.png'), kind: 'subtitle' },
+    { t: t3, file: path.join(framesDir, '帧_02_最长英文_s03.png'), kind: 'subtitle' },
+  ];
+
+  console.log(`content ${contentDurExact}s (${contentFrames} frames) + endcard ${ENDCARD_SECONDS}s → ${totalDur}s`);
+  console.log(`still t01=${t1} t03=${t3} endcardLocal=3 file=${contentDurExact + 3}`);
+
+  const audioPath = path.join(tmp, 'audio.wav');
+  const audioReport = await buildAudio({
+    voice: opt.voice,
+    music: opt.music,
+    contentDur: contentDurExact,
+    totalDur,
+    outWav: audioPath,
+  });
+  console.log('audio', audioReport.loudnorm, audioReport.reason || '');
+
+  const scenePath = path.join(tmp, 'scene.mp4');
+  const sceneNote = await makeScene({ sceneVideo: opt.sceneVideo, frames: contentFrames, fps: opt.fps, out: scenePath });
+  console.log('scene', sceneNote);
+
+  const runs = [];
+  for (let i = 0; i < contentFrames; i++) {
+    const t = i / opt.fps;
+    const key = visualKey(subtitleState(t, clip, { xfade: opt.xfade }));
+    const last = runs[runs.length - 1];
+    if (last && last.key === key) last.count += 1;
+    else runs.push({ key, t, index: i, count: 1 });
+  }
+  console.log(`subtitle unique frames ${runs.length} / ${contentFrames}`);
+
+  const measurePath = path.join(opt.outDir, 'english_measure.json');
+  let measured = null;
+  let overlayCheck = null;
+  let qaPaths = null;
+  let qaMeta = null;
+  await withPage(path.join(root, 'subtitle'), 'http://subtitle.local', async (page) => {
+    measured = await page.evaluate((cues) => window.measureCards(cues), loaded.cues);
+    await page.evaluate(({ cues, xfade }) => { window.CUES = cues; window.XFADE = xfade; }, { cues: clip, xfade: opt.xfade });
+    for (const still of stills) {
+      const png = await canvasPng(page, still.t, 'full');
+      await fsp.writeFile(still.file, png);
+      console.log('still', still.file);
+    }
+    const extras = await page.evaluate((t) => window.buildQaStills(t), t3);
+    const qaNames = {
+      compare: '对比_字幕字号.png',
+      phone: '预览_手机竖屏.png',
+      strip: '预览_手机竖屏_条.png',
+    };
+    qaPaths = {};
+    for (const [key, name] of Object.entries(qaNames)) {
+      const file = path.join(framesDir, name);
+      const url = extras[key];
+      const comma = url.indexOf(',');
+      if (comma < 0) throw new Error('QA still ' + name + ' was not a PNG');
+      await fsp.writeFile(file, Buffer.from(url.slice(comma + 1), 'base64'));
+      qaPaths[key] = file;
+      console.log('qa', file);
+    }
+    qaMeta = extras.meta;
+    let n = 0;
+    let holdChecked = false;
+    for (const run of runs) {
+      const png = await canvasPng(page, run.t, 'overlay');
+      const first = path.join(subDir, `f_${String(n).padStart(5, '0')}.png`);
+      await fsp.writeFile(first, png);
+      if (!holdChecked) {
+        const st = subtitleState(run.t, clip, { xfade: opt.xfade });
+        if (st && st.cn && st.cnA >= 0.999 && st.en && st.enA >= 0.999) {
+          const raw = await rawPixels(first, 'rgba');
+          overlayCheck = checkOverlay(raw);
+          holdChecked = true;
+          console.log('overlay alpha check', overlayCheck);
+        }
+      }
+      n += 1;
+      for (let k = 1; k < run.count; k++) {
+        await linkOrCopy(first, path.join(subDir, `f_${String(n).padStart(5, '0')}.png`));
+        n += 1;
+      }
+      if (n % 120 === 0 || n === contentFrames) console.log(`subtitle frames ${n}/${contentFrames}`);
+    }
+    if (n !== contentFrames) throw new Error(`subtitle frames ${n} != ${contentFrames}`);
+  });
+  fs.writeFileSync(measurePath, JSON.stringify(measured, null, 2) + '\n');
+
+  const dead = (measured.rows || []).filter((r) => r.text && !(r.width > 0));
+  if (dead.length) throw new Error('MixSans measureText returned 0 for ' + dead[0].text);
+
+  const contentPath = path.join(tmp, 'content.mp4');
+  console.log('overlay encode');
+  await run('ffmpeg', [
+    '-y', '-hide_banner', '-loglevel', 'error',
+    '-i', scenePath,
+    '-framerate', String(opt.fps), '-start_number', '0', '-i', path.join(subDir, 'f_%05d.png'),
+    '-filter_complex', '[1:v]format=rgba[s];[0:v][s]overlay=0:0:format=auto,format=yuv420p',
+    '-frames:v', String(contentFrames), '-r', String(opt.fps),
+    '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'veryfast', '-crf', '14', '-bf', '0', '-g', String(opt.fps),
+    '-an', contentPath,
+  ]);
+  await fsp.rm(subDir, { recursive: true, force: true });
+
+  const endcardPath = path.join(tmp, 'endcard.mp4');
+  const endStill = path.join(framesDir, '帧_03_片尾A_t3.png');
+  console.log('endcard render');
+  await renderEndcard({
+    endcardDir: opt.endcardDir,
+    frameDir: endDir,
+    videoPath: endcardPath,
+    fps: opt.fps,
+    duration: ENDCARD_SECONDS,
+    stills: [{ t: 3, file: endStill }],
+  });
+  await fsp.rm(endDir, { recursive: true, force: true });
+
+  const out1080 = path.join(opt.outDir, `${opt.outName}.mp4`);
+  const out720 = path.join(opt.outDir, `${opt.outName}_720p.mp4`);
+  const outBlind = path.join(opt.outDir, `${opt.outName}_盲审.mp4`);
+  console.log('mux', out1080);
+  await run('ffmpeg', [
+    '-y', '-hide_banner', '-loglevel', 'error',
+    '-i', contentPath,
+    '-i', endcardPath,
+    '-i', audioPath,
+    '-filter_complex', '[0:v][1:v]concat=n=2:v=1:a=0[v]',
+    '-map', '[v]', '-map', '2:a:0',
+    '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-r', String(opt.fps), '-preset', 'veryfast', '-crf', '16', '-bf', '0', '-g', String(opt.fps),
+    '-c:a', 'aac', '-b:a', '160k', '-ar', '48000', '-ac', '2',
+    '-movflags', '+faststart',
+    out1080,
+  ]);
+  console.log('720p');
+  await run('ffmpeg', [
+    '-y', '-hide_banner', '-loglevel', 'error',
+    '-i', out1080,
+    '-vf', 'scale=1280:720',
+    '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'veryfast', '-crf', '18', '-bf', '0',
+    '-c:a', 'copy',
+    '-movflags', '+faststart',
+    out720,
+  ]);
+
+  const hashesAfter = Object.fromEntries(watched.map((f) => [f, sha256(f)]));
+  const endcardUntouched = watched.every((f) => hashesBefore[f] === hashesAfter[f]);
+  const pendingStill = fs.readFileSync(endcardJson, 'utf8').includes('【待填】');
+
+  const inkReports = [];
+  for (const still of stills) {
+    const buf = fs.readFileSync(still.file);
+    const size = pngSize(buf);
+    const raw = await rawPixels(still.file, 'rgb24');
+    const ink = checkFullFrame(raw);
+    inkReports.push({ file: still.file, ...size, t: still.t, ...ink, pass: size.w === 1920 && size.h === 1080 && ink.above === 0 && ink.ink > 0 && ink.minInk >= BAND.fadeTop });
+  }
+  const endBuf = fs.readFileSync(endStill);
+  const endSize = pngSize(endBuf);
+
+  const p1080 = await probe(out1080);
+  const p720 = await probe(out720);
+  const v1080 = p1080.streams.find((s) => s.codec_type === 'video');
+  const a1080 = p1080.streams.find((s) => s.codec_type === 'audio');
+  const dur1080 = Number(p1080.format.duration);
+  const dur720 = Number(p720.format.duration);
+
+  const shrinks = (measured.rows || []).filter((r) => r.size < EN_SIZE && !r.overflow);
+  const overflows = (measured.rows || []).filter((r) => r.overflow);
+  const widest = (measured.rows || []).reduce((a, b) => (!a || b.width > a.width ? b : a), null);
+
+  const blockers = [];
+  if (!endcardUntouched) blockers.push('endcard files changed during the run');
+  if (!pendingStill) blockers.push('【待填】 missing from endcard.json');
+  if (loaded.count !== 77) blockers.push(`cue count ${loaded.count}, expected 77 for this dry run`);
+  for (const ink of inkReports) if (!ink.pass) blockers.push(`ink/safe-area fail ${path.basename(ink.file)} above=${ink.above} minInk=${ink.minInk}`);
+  if (!overlayCheck || overlayCheck.above !== 0 || overlayCheck.opaque < 1000) blockers.push('transparent subtitle band failed the alpha check');
+  if (Math.abs(dur1080 - totalDur) > 1 / opt.fps + 0.01) blockers.push(`duration ${dur1080}s differs from expected ${totalDur}s`);
+  if (Number(v1080.width) !== 1920 || Number(v1080.height) !== 1080) blockers.push('master is not 1920x1080');
+  if (v1080.pix_fmt !== 'yuv420p') blockers.push('master pix_fmt is ' + v1080.pix_fmt);
+  if (!a1080) blockers.push('master has no audio stream');
+  else if (Number(a1080.sample_rate) !== 48000 || Number(a1080.channels) !== 2) blockers.push('audio is not stereo 48 kHz');
+  if (endSize.w !== 1920 || endSize.h !== 1080) blockers.push('endcard still is not 1920x1080');
+  const qaSize = {};
+  if (!qaPaths || !qaMeta) blockers.push('comparison and phone stills were not written');
+  else {
+    for (const [key, file] of Object.entries(qaPaths)) {
+      qaSize[key] = pngSize(fs.readFileSync(file));
+    }
+    const expect = {
+      compare: qaMeta.compare,
+      phone: qaMeta.phone,
+      strip: qaMeta.strip,
+    };
+    for (const key of Object.keys(expect)) {
+      const got = qaSize[key];
+      const want = expect[key];
+      if (!got || got.w !== want.w || got.h !== want.h) blockers.push(`QA frame ${key} is ${got ? got.w + 'x' + got.h : 'missing'}, expected ${want.w}x${want.h}`);
+    }
+    if (qaMeta.phone.w !== 390) blockers.push('phone preview is not 390 px wide');
+    if (qaMeta.safeTop !== BAND.safeTop) blockers.push('phone/compare safeTop does not match BAND');
+  }
+
+  let blind = { skipped: !opt.blind };
+  if (opt.blind) {
+    const probeTxt = path.join(opt.outDir, 'blind_ffprobe.txt');
+    const stringsTxt = path.join(opt.outDir, 'blind_strings.txt');
+    const scan = [endcardJson, snapPath, clipPath, measurePath];
+    const script = path.join(root, 'pipeline/blind_review.sh');
+    const proc = await runCapture(script, [out1080, outBlind, probeTxt, stringsTxt, ...scan]);
+    blind = {
+      skipped: false,
+      exitCode: proc.code,
+      probe: probeTxt,
+      strings: stringsTxt,
+      pass: proc.code === 0 && fs.readFileSync(probeTxt, 'utf8').includes('RESULT: PASS') && fs.readFileSync(stringsTxt, 'utf8').includes('RESULT: PASS'),
+      stderr: proc.err.slice(-1500),
+    };
+    if (!blind.pass) blockers.push('blind review FAIL');
+  }
+
+  const fileInfo = (file) => {
+    const st = fs.statSync(file);
+    return { file, bytes: st.size, size: fmtBytes(st.size) };
+  };
+  const info1080 = fileInfo(out1080);
+  const info720 = fileInfo(out720);
+  const infoBlind = opt.blind && exists(outBlind) ? fileInfo(outBlind) : null;
+
+  const windowTable = cueWindow(clip);
+  const state1 = subtitleState(t1, clip, { xfade: opt.xfade });
+  const state3 = subtitleState(t3, clip, { xfade: opt.xfade });
+  const mismatches = loaded.mismatches || [];
+
+  const report = {
+    source: loaded.source,
+    formula: loaded.formula,
+    finalAudioTiming: loaded.finalAudioTiming,
+    note: loaded.note || null,
+    cueCount: loaded.count,
+    first: loaded.cues[0] && loaded.cues[0].text,
+    last: loaded.cues[loaded.cues.length - 1] && loaded.cues[loaded.cues.length - 1].text,
+    mismatches,
+    contentDuration: contentDurExact,
+    lastCueEnd: clip[clip.length - 1].end,
+    endcardDuration: ENDCARD_SECONDS,
+    totalDurationExpected: totalDur,
+    duration1080: dur1080,
+    duration720: dur720,
+    video: { width: v1080.width, height: v1080.height, pix_fmt: v1080.pix_fmt, codec: v1080.codec_name },
+    audio: a1080 ? { codec: a1080.codec_name, sampleRate: a1080.sample_rate, channels: a1080.channels } : null,
+    files: { master: info1080, p720: info720, blind: infoBlind },
+    audioReport,
+    typography: { CN_SIZE, EN_SIZE, EN_FLOOR, EN_MAX_W, MAX, weightCn: WEIGHT_CN, weightEn: WEIGHT_EN, halo: HALO, fade: FADE },
+    BAND,
+    pictureSafeTop: BAND.safeTop,
+    xfade: opt.xfade,
+    scene: sceneNote,
+    english: {
+      cards: measured.rows.length,
+      shrinks,
+      overflows: overflows.length ? overflows : measured.overflow,
+      widest,
+    },
+    stills: { t1, t3, endcardT: 3, fileTime: contentDurExact + 3, state1, state3, inkReports, endSize, overlayCheck, qaPaths, qaMeta, qaSize },
+    window: windowTable,
+    endcardUntouched,
+    pendingStill,
+    blind,
+    blockers,
+  };
+  const jsonPath = path.join(opt.outDir, `${opt.outName}_report.json`);
+  fs.writeFileSync(jsonPath, JSON.stringify(report, null, 2) + '\n');
+  const mdPath = path.join(opt.outDir, 'dryrun_report.md');
+  fs.writeFileSync(mdPath, renderMarkdown(report));
+  console.log('report', mdPath);
+
+  if (!opt.keepTmp) await fsp.rm(tmp, { recursive: true, force: true });
+  if (blockers.length) {
+    console.error('BLOCKERS:\n' + blockers.map((b) => '- ' + b).join('\n'));
+    process.exitCode = 1;
+  } else {
+    console.log('dry run OK');
+  }
+}
+
+function runCapture(cmd, args) {
+  return new Promise((resolve) => {
+    const p = spawn(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'] });
+    let out = '';
+    let err = '';
+    p.stdout.on('data', (d) => { out += d; });
+    p.stderr.on('data', (d) => { err += d; });
+    p.on('close', (code) => resolve({ code, out, err }));
+  });
+}
+
+function renderMarkdown(r) {
+  const lines = [];
+  lines.push('# v5 assembly dry run');
+  lines.push('');
+  lines.push(`Cue source: \`${r.source}\`. Count: **${r.cueCount}**.`);
+  lines.push(`First: ${r.first}`);
+  lines.push(`Last: ${r.last}`);
+  lines.push('');
+  if (r.formula) {
+    lines.push(`Estimate formula: \`${r.formula}\`.`);
+    lines.push('Each duration is rounded to the nearest millisecond (`hanzi * 220 + 400` ms). This is not final audio timing.');
+    lines.push('');
+  }
+  lines.push(`Mismatches vs lines.json / 字数 column: ${r.mismatches.length}.`);
+  if (r.mismatches.length) {
+    lines.push('');
+    lines.push('```');
+    lines.push(JSON.stringify(r.mismatches.slice(0, 30), null, 2));
+    lines.push('```');
+  }
+  lines.push('');
+  lines.push('## Typography');
+  lines.push('');
+  lines.push('| Item | Value |');
+  lines.push('|---|---|');
+  lines.push(`| Chinese | ${r.typography.CN_SIZE} px, weight ${r.typography.weightCn} |`);
+  lines.push(`| English | ${r.typography.EN_SIZE} px, weight ${r.typography.weightEn}, floor ${r.typography.EN_FLOOR} px |`);
+  lines.push(`| English max width | ${r.typography.EN_MAX_W} px |`);
+  lines.push(`| Chinese wrap budget | ${r.typography.MAX} visual characters |`);
+  lines.push(`| fadeTop / safeTop | ${r.BAND.fadeTop} |`);
+  lines.push(`| fadeEnd | ${r.BAND.fadeEnd} |`);
+  lines.push(`| cnY | ${r.BAND.cnY} |`);
+  lines.push(`| enY | ${r.BAND.enY} |`);
+  lines.push(`| fade extend | ${r.typography.fade.extend} |`);
+  lines.push(`| fade stops | ${r.typography.fade.stops.map((s) => `${s.t}→${s.a}`).join(', ')} |`);
+  lines.push(`| halo | stroke ${r.typography.halo.stroke}, blur ${r.typography.halo.blur}, shadow ${r.typography.halo.shadowAlpha}, stroke alpha ${r.typography.halo.strokeAlpha} |`);
+  lines.push(`| xfade | ${r.xfade} |`);
+  lines.push('');
+  lines.push(`Picture safe-area top: **y=${r.pictureSafeTop}**. Scene art may extend down through y < ${r.pictureSafeTop}. This is the number to give mini.`);
+  const peak = r.typography.fade.stops.reduce((a, s) => (s.a > a.a ? s : a), r.typography.fade.stops[0]);
+  lines.push(`The backing is a soft scrim (${r.typography.fade.extend}) from y=${r.BAND.fadeTop}. Peak opacity ${peak.a} is at fadeEnd y=${r.BAND.fadeEnd}, just above the dense Chinese halo. It eases out instead of becoming a solid paper slab.`);
+  lines.push(`Chinese baseline cnY=${r.BAND.cnY}. English baseline enY=${r.BAND.enY}. Ink and the halo stay at y ≥ ${r.pictureSafeTop}.`);
+  lines.push('');
+  lines.push('## Timing of the dry-run window');
+  lines.push('');
+  lines.push(`Content duration ${r.contentDuration} s (last cue ends ${r.lastCueEnd} s; the gap is a paper hold). Endcard ${r.endcardDuration} s. Expected total ${r.totalDurationExpected} s.`);
+  lines.push('');
+  lines.push('| id | ch | start | end | zh lines | en cards |');
+  lines.push('|---|---|---:|---:|---:|---:|');
+  for (const c of r.window) {
+    lines.push(`| ${c.id} | ${c.ch} | ${c.start} | ${c.end} | ${c.lines.length} | ${c.cards.length} |`);
+  }
+  lines.push('');
+  for (const c of r.window) {
+    lines.push(`**${c.id}** ${c.text}`);
+    lines.push('');
+    for (const l of c.lines) lines.push(`- 中 ${l.start}–${l.end} ${l.text}`);
+    for (const l of c.cards) lines.push(`- EN ${l.start}–${l.end} ${l.text}`);
+    lines.push('');
+  }
+  lines.push('## English measure');
+  lines.push('');
+  lines.push(`Cards measured: ${r.english.cards}. Widest: ${r.english.widest ? `${r.english.widest.id} card ${r.english.widest.card} “${r.english.widest.text}” ${r.english.widest.width}px at ${r.english.widest.size}px` : 'n/a'}.`);
+  const shrinkN = r.english.shrinks.length;
+  const overflowN = (r.english.overflows || []).length;
+  lines.push(`Shrinks below ${r.typography.EN_SIZE} px: ${shrinkN}. Overflows at the ${r.typography.EN_FLOOR} px floor: ${overflowN}.`);
+  if (shrinkN === 0 && overflowN === 0) {
+    lines.push(`Every English card fits at ${r.typography.EN_SIZE} px. None shrink below ${r.typography.EN_SIZE}, and none overflow at ${r.typography.EN_FLOOR} px.`);
+  }
+  if (r.english.shrinks.length) {
+    for (const s of r.english.shrinks) lines.push(`- shrink ${s.id}: ${s.size}px ${s.width}px ${s.text}`);
+  }
+  if (r.english.overflows && r.english.overflows.length) {
+    for (const s of r.english.overflows) lines.push(`- overflow ${s.id || s.i}: ${s.size}px ${s.width}px ${s.text}`);
+  }
+  lines.push('');
+  lines.push('## Sample frames');
+  lines.push('');
+  lines.push(`- 帧_01_句01中点.png at t=${round3(r.stills.t1)} shows “${r.stills.state1 && r.stills.state1.cn}” / “${r.stills.state1 && r.stills.state1.en}”.`);
+  lines.push(`- 帧_02_最长英文_s03.png at t=${round3(r.stills.t3)} shows “${r.stills.state3 && r.stills.state3.en}”.`);
+  lines.push(`- 帧_03_片尾A_t3.png is endcard local t=3 (file time ≈ ${round3(r.stills.fileTime)} s), ${r.stills.endSize.w}×${r.stills.endSize.h}.`);
+  lines.push('');
+  lines.push(`Safe-area scan (non-paper pixels above y=${r.pictureSafeTop} fail; ink must exist at y≥${r.pictureSafeTop}):`);
+  lines.push('');
+  for (const ink of r.stills.inkReports) {
+    lines.push(`- ${path.basename(ink.file)} ${ink.w}×${ink.h} above=${ink.above} minInkY=${ink.minInk} inkPixels=${ink.ink} ${ink.pass ? 'PASS' : 'FAIL'}`);
+  }
+  if (r.stills.overlayCheck) {
+    lines.push(`- Overlay alpha: pixels above y=${r.pictureSafeTop} with alpha≠0: ${r.stills.overlayCheck.above}; opaque pixels in the band: ${r.stills.overlayCheck.opaque}.`);
+  }
+  const inkOk = r.stills.inkReports.every((ink) => ink.pass) && r.stills.overlayCheck && r.stills.overlayCheck.above === 0;
+  lines.push('');
+  lines.push(inkOk
+    ? `Ink and halo stay at y ≥ ${r.pictureSafeTop}. Full-frame ink starts at or below the safe area, and the subtitle overlay has no alpha above it.`
+    : `Ink or halo crossed y < ${r.pictureSafeTop}. See the scan above.`);
+  lines.push('');
+  if (r.stills.qaPaths) {
+    lines.push('Comparison and phone preview:');
+    lines.push('');
+    const q = r.stills.qaPaths;
+    const s = r.stills.qaSize || {};
+    const m = r.stills.qaMeta || {};
+    lines.push(`- ${q.compare}${s.compare ? ` (${s.compare.w}×${s.compare.h})` : ''}`);
+    if (m.labels) lines.push(`  - ${m.labels.old}`);
+    if (m.labels) lines.push(`  - ${m.labels.current}`);
+    lines.push(`- ${q.phone}${s.phone ? ` (${s.phone.w}×${s.phone.h})` : ''} — 1920×1080 frame scaled to 390 px wide.`);
+    if (q.strip) lines.push(`- ${q.strip}${s.strip ? ` (${s.strip.w}×${s.strip.h})` : ''} — subtitle band from y=${r.pictureSafeTop}, same scale.`);
+    lines.push('');
+  }
+  lines.push('## Outputs');
+  lines.push('');
+  lines.push(`Scene: ${r.scene}.`);
+  lines.push(`Master: ${r.files.master.file} ${r.files.master.size}, ${r.duration1080.toFixed(3)} s, ${r.video.width}×${r.video.height} ${r.video.pix_fmt} ${r.video.codec}, audio ${r.audio ? `${r.audio.codec} ${r.audio.sampleRate} Hz ${r.audio.channels} ch` : 'MISSING'}.`);
+  lines.push(`720p: ${r.files.p720.file} ${r.files.p720.size}, ${r.duration720.toFixed(3)} s.`);
+  if (r.files.blind) lines.push(`Blind: ${r.files.blind.file} ${r.files.blind.size}.`);
+  lines.push('');
+  lines.push('## Loudness');
+  lines.push('');
+  if (r.audioReport.loudnorm === 'skipped') {
+    lines.push(r.audioReport.reason);
+    lines.push('The programme is a valid silent stereo 48 kHz AAC stream.');
+  } else {
+    lines.push(`loudnorm ${r.audioReport.loudnorm}. Integrated ${r.audioReport.integratedLufs} LUFS, true peak ${r.audioReport.truePeak} dBTP. Target -14 LUFS, true peak ≤ -1 dBTP.`);
+  }
+  lines.push(`Voice file: ${r.audioReport.voice || 'none'}. Music file: ${r.audioReport.music || 'none (v4 music is not reused)'}.`);
+  lines.push('');
+  lines.push('## Blind review');
+  lines.push('');
+  lines.push(`Endcard files unchanged: ${r.endcardUntouched}. 【待填】 still present: ${r.pendingStill}.`);
+  lines.push(`Blind result: ${r.blind.skipped ? 'skipped' : (r.blind.pass ? 'PASS' : 'FAIL')}.`);
+  if (!r.blind.skipped) {
+    lines.push(`Probe: ${r.blind.probe}`);
+    lines.push(`Strings: ${r.blind.strings}`);
+  }
+  lines.push('');
+  lines.push('## Blockers');
+  lines.push('');
+  if (!r.blockers.length) lines.push('None.');
+  else for (const b of r.blockers) lines.push(`- ${b}`);
+  lines.push('');
+  lines.push('Intermediate PNG sequences live in `qa/tmp/` during the run and are deleted after a successful encode. The three sample frames are kept.');
+  lines.push('');
+  return lines.join('\n');
+}
+
+main().catch((err) => {
+  console.error(err && err.stack || err);
+  process.exit(1);
+});
+
+exec
+/bin/bash -lc "sed -n '1,160p' assembly/pipeline/assemble.mjs; rg -n 'runs|DARK|signature|key|CUES' assembly/pipeline/assemble.mjs; cat qa/v6/animatic/build_plate.py; cat assembly/subtitle/config.js; cat assembly/pipeline/browser.mjs; git rev-parse --short HEAD" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+#!/usr/bin/env node
+// Final assembly: cues + scene video + bilingual subtitle overlay + 12 s endcard + audio.
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+import fsp from 'node:fs/promises';
+import path from 'node:path';
+import { spawn } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { loadCuesFromFs, writeSnapshot } from '../subtitle/loadCues.js';
+import { subtitleState, linesFor, cardsFor, BAND, CN_SIZE, EN_SIZE, EN_FLOOR, EN_MAX_W, MAX, WEIGHT_CN, WEIGHT_EN, FADE, HALO } from '../subtitle/subtitle.js';
+import { canvasPng, withPage } from './browser.mjs';
+import { renderEndcard } from './render_endcard.mjs';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const DEFAULT_VOICE = '/workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav';
+const ENDCARD_SECONDS = 12;
+
+function parseArgs(argv) {
+  const o = {
+    sceneVideo: null,
+    cues: null,
+    voice: null,
+    music: null,
+    endcardDir: path.join(root, 'endcard'),
+    fps: 30,
+    outDir: path.join(root, 'qa'),
+    outName: 'dryrun_测试',
+    contentDuration: null,
+    maxCues: null,
+    blind: true,
+    xfade: false,
+    keepTmp: false,
+  };
+  for (let i = 2; i < argv.length; i++) {
+    const a = argv[i];
+    const nxt = () => {
+      if (i + 1 >= argv.length) throw new Error('missing value for ' + a);
+      return argv[++i];
+    };
+    if (a === '--scene-video') o.sceneVideo = nxt();
+    else if (a === '--cues') o.cues = nxt();
+    else if (a === '--voice') o.voice = nxt();
+    else if (a === '--music') o.music = nxt();
+    else if (a === '--endcard-dir') o.endcardDir = path.resolve(nxt());
+    else if (a === '--fps') o.fps = Number(nxt());
+    else if (a === '--out-dir') o.outDir = path.resolve(nxt());
+    else if (a === '--out-name') o.outName = nxt();
+    else if (a === '--content-duration') o.contentDuration = Number(nxt());
+    else if (a === '--max-cues') o.maxCues = Number(nxt());
+    else if (a === '--blind') o.blind = true;
+    else if (a === '--no-blind') o.blind = false;
+    else if (a === '--xfade') o.xfade = true;
+    else if (a === '--keep-tmp') o.keepTmp = true;
+    else throw new Error('Unknown argument ' + a);
+  }
+  if (!o.voice && fs.existsSync(DEFAULT_VOICE)) o.voice = DEFAULT_VOICE;
+  return o;
+}
+
+function run(cmd, args) {
+  return new Promise((resolve, reject) => {
+    const p = spawn(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'] });
+    let out = '';
+    let err = '';
+    p.stdout.on('data', (d) => { out += d; });
+    p.stderr.on('data', (d) => { err += d; });
+    p.on('close', (code) => {
+      if (code === 0) resolve({ out, err });
+      else reject(new Error(`${cmd} ${args.map((x) => (/\s/.test(x) ? JSON.stringify(x) : x)).join(' ')}\n${err.slice(-4000)}`));
+    });
+  });
+}
+
+function sha256(file) {
+  return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+}
+
+function exists(p) {
+  try { return fs.statSync(p).isFile() && fs.statSync(p).size > 0; } catch { return false; }
+}
+
+async function probe(file) {
+  const { out } = await run('ffprobe', ['-hide_banner', '-print_format', 'json', '-show_format', '-show_streams', file]);
+  return JSON.parse(out);
+}
+
+function visualKey(state) {
+  if (!state) return 'none';
+  const q = (a) => (a >= 0.999 ? 1 : a <= 0.001 ? 0 : Math.round(a * 1000) / 1000);
+  return `${state.cn}\t${state.en}\t${q(state.cnA)}\t${q(state.enA)}`;
+}
+
+async function linkOrCopy(src, dest) {
+  try { await fsp.link(src, dest); } catch { await fsp.copyFile(src, dest); }
+}
+
+async function rawPixels(png, pixFmt) {
+  return new Promise((resolve, reject) => {
+    const p = spawn('ffmpeg', ['-v', 'error', '-i', png, '-f', 'rawvideo', '-pix_fmt', pixFmt, 'pipe:1'], { stdio: ['ignore', 'pipe', 'pipe'] });
+    const chunks = [];
+    let err = '';
+    p.stdout.on('data', (d) => chunks.push(d));
+    p.stderr.on('data', (d) => { err += d; });
+    p.on('close', (code) => (code === 0 ? resolve(Buffer.concat(chunks)) : reject(new Error(err || 'raw decode failed'))));
+  });
+}
+
+function checkFullFrame(buf) {
+  const w = 1920;
+  const h = 1080;
+  const paper = [0xf4, 0xef, 0xe6];
+  let above = 0;
+  let minAbove = null;
+  let ink = 0;
+  let minInk = null;
+  for (let y = 0; y < h; y++) {
+    const row = y * w * 3;
+    for (let x = 0; x < w; x++) {
+      const i = row + x * 3;
+      const diff = Math.abs(buf[i] - paper[0]) + Math.abs(buf[i + 1] - paper[1]) + Math.abs(buf[i + 2] - paper[2]);
+      if (diff <= 12) continue;
+      if (y < BAND.fadeTop) {
+        above++;
+        if (minAbove == null) minAbove = y;
+      } else {
+        ink++;
+        if (minInk == null) minInk = y;
+      }
+    }
+  }
+  return { above, minAbove, ink, minInk };
+}
+
+function checkOverlay(buf) {
+  const w = 1920;
+  const h = 1080;
+  let above = 0;
+  let minAbove = null;
+  let opaque = 0;
+  for (let y = 0; y < h; y++) {
+    const row = y * w * 4;
+    for (let x = 0; x < w; x++) {
+      const a = buf[row + x * 4 + 3];
+      if (y < BAND.fadeTop) {
+        if (a !== 0) {
+          above++;
+          if (minAbove == null) minAbove = y;
+        }
+      } else if (a === 255) opaque++;
+    }
+  }
+  return { above, minAbove, opaque };
+}
+
+function pngSize(buf) {
+  if (buf.toString('ascii', 1, 4) !== 'PNG') throw new Error('not a png');
+  return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) };
+}
+
+function lastJson(text) {
+375:  const runs = [];
+378:    const key = visualKey(subtitleState(t, clip, { xfade: opt.xfade }));
+379:    const last = runs[runs.length - 1];
+380:    if (last && last.key === key) last.count += 1;
+381:    else runs.push({ key, t, index: i, count: 1 });
+383:  console.log(`subtitle unique frames ${runs.length} / ${contentFrames}`);
+392:    await page.evaluate(({ cues, xfade }) => { window.CUES = cues; window.XFADE = xfade; }, { cues: clip, xfade: opt.xfade });
+405:    for (const [key, name] of Object.entries(qaNames)) {
+407:      const url = extras[key];
+411:      qaPaths[key] = file;
+417:    for (const run of runs) {
+538:    for (const [key, file] of Object.entries(qaPaths)) {
+539:      qaSize[key] = pngSize(fs.readFileSync(file));
+546:    for (const key of Object.keys(expect)) {
+547:      const got = qaSize[key];
+548:      const want = expect[key];
+549:      if (!got || got.w !== want.w || got.h !== want.h) blockers.push(`QA frame ${key} is ${got ? got.w + 'x' + got.h : 'missing'}, expected ${want.w}x${want.h}`);
+import json,re,subprocess,pathlib
+p=pathlib.Path(__file__).resolve().parent
+root=p.parents[2]
+d=json.load(open('/workspace/病理科普视频/配音/全稿_v3/timeline.json')); timing=json.load(open(p/'timing.json'))
+filters=[]
+for scene,a,b in re.findall(r'^\| (S\d{2})／(\d+)—(\d+) ',(root/'分镜/分镜_v1.md').read_text(),re.M):
+ a,b=int(a),int(b)
+ if scene=='S08':continue
+ start=0 if a==1 else d['lines'][a-1]['start']
+ end=d['lines'][b]['start'] if b<77 else d['duration']
+ text=f'草稿占位 {scene} ／句 {a:02}–{b:02}'
+ filters.append(f"drawtext=fontfile=/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc:text='{text}':x=65:y=65:fontsize=28:fontcolor=0x8A8680:enable='gte(t,{start})*lt(t,{end})'")
+# S08 overrides the storyboard's S07 sentences 29–30, as explicitly requested.
+origin=timing['origin'];end=origin+timing['duration']
+f='[0:v]'+','.join(filters)+'[base];[1:v]setpts=PTS-STARTPTS+'+str(origin)+'/TB[s];[base][s]overlay=eof_action=pass:enable=\'gte(t,'+str(origin)+')*lt(t,'+str(end)+')\'[v]'
+cmd=['ffmpeg','-y','-v','error','-f','lavfi','-i',f"color=c=0xF4EFE6:s=1920x1080:r=30:d={d['duration']}",'-i',str(p/'S08.mp4'),'-filter_complex',f,'-map','[v]','-t',str(d['duration']),'-r','30','-c:v','libx264','-preset','veryfast','-crf','16','-pix_fmt','yuv420p','-an',str(p/'scene_plate.mp4')]
+(p/'plate_command.json').write_text(json.dumps(cmd,ensure_ascii=False,indent=2));subprocess.run(cmd,check=True)
+// Single source of truth for subtitle typography.
+// subtitle.js, index.html, and the assembler read these values.
+// `current` is the live default. `old` / `v1` is the previous 68/42 band,
+// used only by the comparison still.
+
+export const FONT = '"MixSans","Noto Sans CJK SC","Noto Sans SC",sans-serif';
+
+export const FRAME = Object.freeze({ w: 1920, h: 1080, cx: 960 });
+
+export const COLOURS = Object.freeze({
+  paper: '#F4EFE6',
+  paperRgb: '244,239,230',
+  ink: '#2A2A35',
+  accent: '#D6453A',
+  darkInk: '#EFE8DC',
+  darkRgb: '17,17,20',
+});
+
+// Halo recipe shared by both presets: paper (or dark) stroke, then the fill.
+export const HALO = Object.freeze({
+  stroke: 6,
+  blur: 10,
+  shadowAlpha: 0.9,
+  strokeAlpha: 0.82,
+});
+
+// Chrome + MixSans, weight 500 at 52 px, baseline 1010 (s03 and the tallest cue glyphs):
+//   halo alpha begins at y=952, dense stroke at y=962, ink y=965–1015.
+// Weight 400 at 30 px, baseline 1050:
+//   English ink y=1026–1056, cap top y=1028, descent ends 24 px above y=1080.
+// Gap from the Chinese descent (y=1015) to the English cap (y=1028) is 13 px.
+// safeTop 950 stays above that halo. The scrim peaks at fadeEnd 961, just above the
+// dense halo, then eases to clear at the bottom of the frame. It is not a solid slab.
+
+function band(fadeTop, fadeEnd, cnY, enY, safeTop) {
+  return Object.freeze({ fadeTop, fadeEnd, cnY, enY, safeTop });
+}
+
+function fade(extend, stops) {
+  return Object.freeze({
+    extend,
+    stops: Object.freeze(stops.map((s) => Object.freeze({
+      t: Math.round(s.t * 10000) / 10000,
+      a: s.a,
+    }))),
+  });
+}
+
+// `ease` stops are t along y = fadeTop → frame bottom. The peak is fadeEnd.
+function easeFade(fadeTop, points) {
+  const span = FRAME.h - fadeTop;
+  return fade('ease', points.map((p) => ({ t: (p.y - fadeTop) / span, a: p.a })));
+}
+
+function preset(p) {
+  return Object.freeze({
+    id: p.id,
+    cnSize: p.cnSize,
+    enSize: p.enSize,
+    enFloor: p.enFloor,
+    enMaxW: 1840,
+    max: 18,
+    weightCn: 500,
+    weightEn: 400,
+    font: FONT,
+    frame: FRAME,
+    halo: HALO,
+    colours: COLOURS,
+    band: p.band,
+    fade: p.fade,
+  });
+}
+
+const CURRENT_TOP = 950;
+const CURRENT_FADE_END = 961;
+const current = preset({
+  id: 'current',
+  cnSize: 52,
+  enSize: 30,
+  enFloor: 24,
+  band: band(CURRENT_TOP, CURRENT_FADE_END, 1010, 1050, CURRENT_TOP),
+  // Peak just above the dense halo, then clear again at the frame bottom.
+  fade: easeFade(CURRENT_TOP, [
+    { y: CURRENT_TOP, a: 0 },
+    { y: CURRENT_FADE_END, a: 0.16 },
+    { y: 1056, a: 0.05 },
+    { y: FRAME.h, a: 0 },
+  ]),
+});
+
+const old = preset({
+  id: 'old',
+  cnSize: 68,
+  enSize: 42,
+  enFloor: 28,
+  band: band(810, 910, 986, 1038, 810),
+  // Original heavier fade: transparent at 810, solid paper by 910, then a solid slab to y=1080.
+  fade: fade('solid', [
+    { t: 0, a: 0 },
+    { t: 1, a: 1 },
+  ]),
+});
+
+export const PRESETS = Object.freeze({
+  current,
+  old,
+  v1: old,
+});
+
+export const ACTIVE = PRESETS.current;
+
+export const CN_SIZE = ACTIVE.cnSize;
+export const EN_SIZE = ACTIVE.enSize;
+export const EN_FLOOR = ACTIVE.enFloor;
+export const EN_MAX_W = ACTIVE.enMaxW;
+export const MAX = ACTIVE.max;
+export const WEIGHT_CN = ACTIVE.weightCn;
+export const WEIGHT_EN = ACTIVE.weightEn;
+export const BAND = ACTIVE.band;
+export const FADE = ACTIVE.fade;
+export const PAPER = COLOURS.paper;
+export const INK = COLOURS.ink;
+export const ACCENT_RED = COLOURS.accent;
+
+export function resolvePreset(id = 'current') {
+  const found = PRESETS[id];
+  if (!found) throw new Error('Unknown subtitle preset ' + id);
+  return found;
+}
+// Shared headless Chrome for subtitle and endcard frame renders.
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { chromium } from 'playwright';
+
+export const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
+  '.json': 'application/json',
+  '.woff2': 'font/woff2',
+  '.png': 'image/png',
+  '.css': 'text/css',
+};
+
+export function chromePath() {
+  return process.env.CHROME_PATH || '/usr/bin/google-chrome';
+}
+
+export async function launchChrome() {
+  return chromium.launch({
+    headless: true,
+    executablePath: chromePath(),
+    args: ['--no-sandbox', '--disable-dev-shm-usage', '--font-render-hinting=none', '--force-color-profile=srgb'],
+  });
+}
+
+export async function routeRoot(page, origin, root) {
+  const rootResolved = path.resolve(root);
+  await page.route(origin + '/**', async (route) => {
+    try {
+      const rel = decodeURIComponent(new URL(route.request().url()).pathname);
+      const file = path.resolve(rootResolved, '.' + (rel === '/' ? '/index.html' : rel));
+      if (file !== rootResolved && !file.startsWith(rootResolved + path.sep)) throw new Error('outside root');
+      const body = await fs.readFile(file);
+      await route.fulfill({
+        status: 200,
+        contentType: MIME[path.extname(file)] || 'application/octet-stream',
+        body,
+      });
+    } catch {
+      await route.fulfill({ status: 404, body: '' });
+    }
+  });
+}
+
+export async function withPage(root, origin, fn) {
+  const browser = await launchChrome();
+  const errors = [];
+  try {
+    const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
+    page.setDefaultTimeout(60000);
+    page.on('pageerror', (e) => errors.push(String(e.message || e)));
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') errors.push(msg.text());
+    });
+    await routeRoot(page, origin, root);
+    await page.goto(origin + '/');
+    await page.waitForFunction(() => window.READY === true);
+    if (errors.length) throw new Error(errors.join('\n'));
+    const value = await fn(page, errors);
+    if (errors.length) throw new Error(errors.join('\n'));
+    return value;
+  } finally {
+    await browser.close();
+  }
+}
+
+export async function canvasPng(page, t, mode) {
+  const url = await page.evaluate(({ t, mode }) => {
+    if (mode === 'overlay') window.renderOverlay(t);
+    else window.render(t);
+    return document.querySelector('canvas').toDataURL('image/png');
+  }, { t, mode });
+  const comma = url.indexOf(',');
+  if (comma < 0) throw new Error('canvas did not return a PNG');
+  return Buffer.from(url.slice(comma + 1), 'base64');
+}
+a11a43a
+
+exec
+/bin/bash -lc "mkdir -p qa/v6/animatic/v2; sha256sum engine/lib/{he,he_detail,wash,ann,scope,camera}.js parity_r4/chapters/04.js > qa/v6/animatic/v2/sha256_开工.txt; sha256sum -c qa/v6/animatic/sha256_开工.txt; cat qa/v6/animatic/timing.json; python3 - <<'PY'
+import json
+from PIL import Image
+import subprocess
+p='qa/v6/animatic/S08.mp4'
+subprocess.run(['ffmpeg','-v','error','-i',p,'-frames:v','1','-y','/tmp/s08.png'],check=True)
+im=Image.open('/tmp/s08.png'); print(im.getpixel((0,0)))
+d=json.load(open('qa/v6/animatic/cues_real.json'));print([(x['id'],x['start'],x['end']) for x in d['cues'][27:36]])
+PY" in /workspace/病理科普视频/v5
+ succeeded in 173ms:
+engine/lib/he.js: OK
+engine/lib/he_detail.js: OK
+engine/lib/wash.js: OK
+engine/lib/ann.js: OK
+engine/lib/scope.js: OK
+engine/lib/camera.js: OK
+parity_r4/chapters/04.js: OK
+{
+  "origin": 116.61454166666672,
+  "duration": 26.00191666666662,
+  "states": [
+    0.6829375,
+    2.5951625,
+    6.74502083333333,
+    11.43614583333333,
+    16.125708333333314,
+    20.228958333333317,
+    23.669145833333292
+  ]
+}(17, 16, 21)
+[('28', 112.44695833333338, 116.16454166666672), ('29', 116.61454166666672, 120.71216666666672), ('30', 121.16216666666672, 125.55695833333338), ('31', 126.00695833333339, 130.09441666666672), ('32', 130.5444166666667, 134.93608333333339), ('33', 135.38608333333337, 138.3009166666667), ('34', 138.75091666666668, 141.81645833333334), ('35', 142.26645833333333, 145.014875), ('36', 145.46487499999998, 149.54279166666663)]
+
+codex
+已确认 HEAD 为 a11a43a，七个锁定文件校验通过。切入将设在“句 29 起点前 0.45 秒至后 0.25 秒”，共 0.7 秒，低倍画面会在要求的 0.3 秒内完整可见；切出从句 34 结束开始，持续 0.7 秒。画面和字幕将共用同一份句号配置，字幕只绘制一次并平滑变色。
+exec
+/bin/bash -lc "cat > assembly/subtitle/sceneTheme.js <<'EOF'
+// Add microscope ranges here; all anchors resolve against the supplied real cues.
+export const MICROSCOPE_RANGES = [
+  { scene: 'S08', first: '29', last: '34', enterBefore: 0.45, enterAfter: 0.25, exitAfter: 0.7 },
+];
+export function resolveRanges(cues, ranges = MICROSCOPE_RANGES) {
+  return ranges.map(r => {
+    const first = cues.find(c => c.id === r.first), last = cues.find(c => c.id === r.last);
+    if ("'!first || !last) throw new Error(`Missing theme anchors: ${r.scene}`);
+    return { ...r, enterStart: first.start - r.enterBefore, enterEnd: first.start + r.enterAfter,
+      exitStart: last.end, exitEnd: last.end + r.exitAfter };
+  });
+}
+export const smooth = x => { x = Math.max(0, Math.min(1, x)); return x*x*(3-2*x); };
+export function darkAt(t, cues, ranges = MICROSCOPE_RANGES) {
+  return resolveRanges(cues, ranges).reduce((a, r) => Math.max(a,
+    smooth((t-r.enterStart)/(r.enterEnd-r.enterStart)) *
+    (1-smooth((t-r.exitStart)/(r.exitEnd-r.exitStart)))), 0);
+}
+EOF
+python3 - <<'"'PY'
+p='assembly/subtitle/subtitle.js'
+s=open(p).read(); s=s.replace(\"function haloRgb(style, dark) {\\n  return dark > 0.5 ? style.colours.darkRgb : style.colours.paperRgb;\\n}\",'''// Interpolate one glyph pass: no duplicated text or threshold switch.
+function mixColour(a, b, t) {
+  if (t <= 0) return a;
+  if (t >= 1) return b;
+  const rgb = c => c.startsWith('#') ? c.slice(1).match(/../g).map(x => parseInt(x,16)) : c.split(',').map(Number);
+  return "'`rgb(${rgb(a).map((v,i) => Math.round(v+(rgb(b)[i]-v)*t)).join('"',')})"'`;
+}
+function haloRgb(style, dark) {
+  if (dark <= 0) return style.colours.paperRgb;
+  if (dark >= 1) return style.colours.darkRgb;
+  return style.colours.paperRgb.split('"',').map((v,i) => Math.round(+v+(+style.colours.darkRgb.split(',')[i]-v)*dark)).join(',');
+}''')
+s=s.replace(\"acc ? style.colours.accent : (dark > 0.5 ? style.colours.darkInk : style.colours.ink)\",\"acc ? mixColour(style.colours.accent, '#EE7465', dark) : mixColour(style.colours.ink, '#F4EFE6', dark)\")
+s=s.replace(\"dark > 0.5 ? style.colours.darkInk : style.colours.ink\",\"mixColour(style.colours.ink, '#F4EFE6', dark)\")
+s=s.replace('  const style = asPreset(preset);\\n  const { fadeTop, fadeEnd } = style.band;', '  if (dark >= 1) return;\\n  const style = asPreset(preset);\\n  const { fadeTop, fadeEnd } = style.band;')
+s=s.replace('"'`rgba(${rgb},${stop.a})`'"','"'`rgba(${rgb},${stop.a * (1-dark)})`'"')
+# Fade remains paper while disappearing; no grey band during interpolation.
+s=s.replace('const rgb = paperRgbOf(paper, style, dark);','const rgb = paperRgbOf(paper, style, 0);')
+open(p,'w').write(s)
+p='assembly/subtitle/index.html'; s=open(p).read().replace(\"window.READY = false;\",\"import { darkAt } from './sceneTheme.js';\\nwindow.AUTO_THEME = false;\\nwindow.READY = false;\")
+s=s.replace('function opts(preset) {','function opts(preset, t = 0) {').replace('dark: window.DARK || 0','dark: window.AUTO_THEME ? darkAt(t, window.CUES) : (window.DARK || 0)').replace('opts());','opts(undefined, t));').replace('opts(PRESETS[presetId] || ACTIVE)','opts(PRESETS[presetId] || ACTIVE, t)');open(p,'w').write(s)
+p='assembly/pipeline/assemble.mjs';s=open(p).read().replace(\"const root =\", \"import { darkAt } from '../subtitle/sceneTheme.js';\\n\\nconst root =\",1).replace(\"const key = visualKey(subtitleState(t, clip, { xfade: opt.xfade }));\",\"const key = visualKey(subtitleState(t, clip, { xfade: opt.xfade })) + '\\\\t' + darkAt(t, clip);\")
+s=s.replace('window.CUES = cues; window.XFADE = xfade;', 'window.CUES = cues; window.XFADE = xfade; window.AUTO_THEME = true;');open(p,'w').write(s)
+PY
+node --input-type=module - <<'JS' > qa/v6/animatic/v2/ranges.json
+import fs from 'node:fs';import {resolveRanges} from './assembly/subtitle/sceneTheme.js';console.log(JSON.stringify(resolveRanges(JSON.parse(fs.readFileSync('qa/v6/animatic/cues_real.json')).cues),null,2));
+JS" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+exec
+/bin/bash -lc "rg -n 'scope|radius|cx|cy' film -g '*.js' | head -35; df -h .; cat > qa/v6/animatic/v2/build_transitions.py <<'PY'
+\"\"\"Iris transitions over an existing plate; ranges are resolved from cue IDs in sceneTheme.js.\"\"\"
+import pathlib,json,subprocess,math
+import numpy as np
+from PIL import Image
+P=pathlib.Path(__file__).resolve().parent
+r=json.loads((P/'ranges.json').read_text())[0]
+def run(a):subprocess.run(a,check=True)
+def frame(t,out):run(['ffmpeg','-v','error','-y','-ss',str(t),'-i',str(P.parent/'S08.mp4'),'-frames:v','1',str(out)])
+frame(0,P/'first.png');frame(25.9,P/'last.png')
+y,x=np.mgrid[:1080,:1920]; dist=np.sqrt((x-960)**2+(y-470)**2)
+paper=np.array([244,239,230.]);dark=np.array([17,16,21.])
+for kind in ['enter','exit']:
+ start,end=r[kind+'Start'],r[kind+'End']
+ # Exact global frame alignment avoids a second rounding at overlay placement.
+ first=math.floor(start*30);last=math.ceil(end*30)
+ im=np.array(Image.open(P/('first.png' if kind=='enter' else 'last.png')).convert('RGB'),dtype=float)
+ folder=P/kind;folder.mkdir(exist_ok=True)
+ for k,n in enumerate(range(first,last+1)):
+  u=np.clip((n/30-start)/(end-start),0,1);u=u*u*(3-2*u);d=u if kind=='enter' else 1-u
+  # A feathered iris expands from the eyepiece centre. Background dims independently.
+  radius=1250*d; mask=np.clip((radius-dist)/18,0,1)[...,None]
+  bg=paper*(1-d)+dark*d
+  out=im*mask+bg*(1-mask)
+  if d==1:out=im
+  Image.fromarray(np.uint8(np.clip(out,0,255))).save(folder/f'{k:03}.png')
+ run(['ffmpeg','-v','error','-y','-framerate','30','-i',str(folder/'%03d.png'),'-c:v','libx264','-crf','14','-pix_fmt','yuv420p',str(P/(kind+'.mp4'))])
+ r[kind+'FrameStart']=first/30;r[kind+'FrameEnd']=(last+1)/30
+(P/'resolved.json').write_text(json.dumps(r,indent=2))
+f=f\"[1:v]setpts=PTS+{r['enterFrameStart']}/TB[a];[2:v]setpts=PTS+{r['exitFrameStart']}/TB[b];[0:v][a]overlay=eof_action=pass:enable='gte(t,{r['enterFrameStart']})*lt(t,{r['enterFrameEnd']})'[x];[x][b]overlay=eof_action=pass:enable='gte(t,{r['exitFrameStart']})*lt(t,{r['exitFrameEnd']})'[v]\"
+run(['ffmpeg','-v','error','-y','-i',str(P.parent/'scene_plate.mp4'),'-i',str(P/'enter.mp4'),'-i',str(P/'exit.mp4'),'-filter_complex_threads','1','-filter_complex',f,'-map','[v]','-c:v','libx264','-preset','veryfast','-crf','16','-an',str(P/'scene_plate.mp4')])
+PY
+python3 qa/v6/animatic/v2/build_transitions.py > qa/v6/animatic/v2/plate.log 2>&1" in /workspace/病理科普视频/v5
+exec
+/bin/bash -lc "sed -n '1,55p' film/chapters/s08.js; cat film/timeline.js; sed -n '345,399p' assembly/pipeline/assemble.mjs; tail -5 qa/v6/animatic/v2/plate.log" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+import {bake,drawWash} from '../lib/wash.js';
+import {drawHE,CELLS} from '../lib/he.js';
+import {detailedNeutrophil} from '../lib/he_detail.js';
+import {rng} from '../lib/motion.js';
+import {drawHE as drawMucosa} from '../lib_ext/he_mucosa.js';
+import {cryptNucleus,columnar,erythrocyte,cell,follicle} from '../lib_ext/cells_ext.js';
+const R=rng(40802),TAU=Math.PI*2;let map,source,lowBase,ulcerMap;
+export function point(x,y){const a=x/620-Math.PI/2,r=620+y+12*Math.sin(a*3)+9*Math.sin(a*5),u=1.6*Math.cos(a)*r,v=Math.sin(a)*r;return [u*Math.cos(.14)-v*Math.sin(.14),u*Math.sin(.14)+v*Math.cos(.14)];}
+export default {prepare(){bake('s08.congestion',(b,P)=>{P.fill(b,P.blob(0,0,75,18,.3,47),'#C86A87',130,.2);},{seed:47,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});bake('s08.lumen', (b,P)=>{P.fill(b,P.blob(0,0,300,22,.2,43),'#DCA4B2',200,.15);},{seed:43,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});bake('s08.pus.escape',(b,P)=>{const fan=[[-75,150],[-100,90],[-165,22],[-222,-60],[-255,-145],[-184,-210],[-130,-185],[-65,-245],[8,-213],[75,-250],[145,-190],[227,-162],[185,-82],[140,-25],[111,52],[68,130],[38,180],[-15,198]];P.fill(b,fan,'#E9B4B7',85,.65);P.fill(b,fan.map(([x,y])=>[x*.72+12,y*.82+28]),'#E7C5A4',70,.7);},{seed:40720,hd:true,soft:true,grain:.12,edge:.18,bleed:.85});source=buildSource('original');lowBase=buildSource('low');const ulcerSource=buildSource('ulcer');ulcerMap=mapSource(ulcerSource);const c=source.getContext('2d');
+map=mapSource(source);
+},draw(c,t,T){c.setTransform(1,0,0,1,0,0);c.fillStyle='#111114';c.fillRect(0,0,1920,1080);const id=Math.min(34,29+Math.floor(t/(T.end(29)-T.at(29))));const targets={30:[-270,-80],31:[-200,-226],32:[-170,70],33:[-65,-215],34:[10,-285]};const keys=[[T.at(29),[0,0,.48]],[T.frac(29,.28),[0,0,.48]],[T.frac(29,.64),[...point(-90,-5),.82]],[T.end(29),[...point(...targets[30]),2.7]]];for(let s=30;s<=34;s++){keys.push([T.frac(s,.32),[...point(...targets[s]),2.7]],[T.end(s),[...point(...targets[s]),2.7]]);}let v=keys[0][1];for(let i=1;i<keys.length;i++){if(t>=keys[i][0]){v=keys[i][1];continue;}const a=keys[i-1],b=keys[i],k=Math.max(0,(t-a[0])/(b[0]-a[0]));v=a[1].map((x,j)=>x+(b[1][j]-x)*k);break;}const [x,y,z]=v;c.save();c.beginPath();c.arc(1110,475,425,0,TAU);c.clip();c.fillStyle='#F6EEF0';c.fill();c.translate(1110,475);c.scale(z,z);c.translate(-x,-y);if(t<T.frac(29,.63)) drawLow(c,t,T); else c.drawImage(id===34?ulcerMap:map,-1600,-1050);c.restore();c.strokeStyle='#4C4555';c.lineWidth=1.6;c.beginPath();c.arc(1110,475,431,0,TAU);c.stroke();c.fillStyle='#E8DDE9';c.font='500 30px MixSans';c.fillText(t<T.frac(29,.32)?'低倍':t<T.frac(29,.86)?'中倍':'高倍',1030,35);
+const text={29:['正常阑尾参照','隐窝 · 固有层','黏膜肌层 · 淋巴滤泡','内环肌 / 外纵肌 · 浆膜'],30:['黏膜下层','血管扩张、充血','中性粒细胞沿血管壁游出'],31:['黏膜与固有层','中性粒细胞浸润','淋巴细胞与浆细胞参照'],32:['固有肌层','内环行肌：长梭形核','外纵行肌：圆点核','中性粒细胞仅少量'],33:['返回黏膜','经过受损的隐窝与上皮'],34:['局灶上皮缺损','结构连续性中断','病变以黏膜、黏膜下层为主']};const phase=(t-T.at(id))/(T.end(id)-T.at(id));c.save();c.globalAlpha=Math.max(0,Math.min(1,phase/.1,(1-phase)/.1));text[id].forEach((s,i)=>{c.font=`${i?400:700} ${i?27:36}px MixSans`;c.fillText(s,75,320+i*56);});c.strokeStyle='#BFA9CB';c.lineWidth=1.6;c.beginPath();c.moveTo(475,410);c.lineTo(630,410);
+const target=id===29?[-90,-55]:targets[id];
+let tip=point(...target);
+if(t<T.frac(29,.63)) {let q=Math.max(0,Math.min(1,(t-T.frac(29,.28))/(T.frac(29,.63)-T.frac(29,.28))));q=q*q*(3-2*q);const a=point(-90,-5),m=lowPoint(-90,-5,q),sc=1+.2*(1-q),p=lowPoint(...target,q);tip=[sc*(p[0]+(a[0]-m[0])*q)+a[0]*(1-sc)*q,sc*(p[1]+(a[1]-m[1])*q)+a[1]*(1-sc)*q];}
+c.lineTo(1110+(tip[0]-x)*z,475+(tip[1]-y)*z);c.stroke();c.restore();
+if(new URLSearchParams(location.search).has('cells')){c.fillStyle='#F6EEF0';c.fillRect(0,0,1920,940);c.save();c.translate(180,220);c.scale(2,2);['lymph','plasma','dot','meso'].forEach((s,i)=>cell(c,i*130,0,s,1,0,i));detailedNeutrophil(c,520,0,{lobes:3,rot:0,sz:1},1);c.restore();c.fillStyle='#51336F';c.font='28px MixSans';['淋巴细胞','浆细胞','外纵行肌核','间皮','引擎中性粒细胞'].forEach((s,i)=>c.fillText(s,110+i*260,300));}}
+};
+
+// Low-only reconstruction. Dark connected components retain their own local
+// coordinates; only their centres follow the annulus. No source RNG is consumed.
+let lowSource, lowCells, lowCache;
+function lowMaterial() {
+  const w=840,h=620,im=lowBase.getContext('2d').getImageData(0,0,w,h);
+  const d=im.data,pristine=new Uint8ClampedArray(d),mask=new Uint8Array(w*h),seen=new Uint8Array(w*h);
+  for(let i=0;i<mask.length;i++)mask[i]=d[i*4]<155 && d[i*4+1]<125 && d[i*4+2]>d[i*4+1]*1.08 ? 1:0;
+  lowCells=[];
+  for(let i=0;i<mask.length;i++) {
+    if(!mask[i]||seen[i])continue;
+    const queue=[i];seen[i]=1;let x0=w,y0=h,x1=0,y1=0;
+    for(let k=0;k<queue.length;k++) {const n=queue[k],x=n%w,y=Math.floor(n/w);x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y);
+      for(const q of [n-1,n+1,n-w,n+w])if(q>=0&&q<w*h&&!seen[q]&&mask[q]&&Math.abs(q%w-x)<=1){seen[q]=1;queue.push(q);}}
+    // Continuous epithelium and vessel contours remain structural paths.
+    if(x1-x0>65||y1-y0>65||queue.length<2)continue;
+    x0=Math.max(0,x0-2);y0=Math.max(0,y0-2);x1=Math.min(w-1,x1+2);y1=Math.min(h-1,y1+2);
+    const tile=document.createElement('canvas');tile.width=x1-x0+1;tile.height=y1-y0+1;
+    tile.getContext('2d').drawImage(lowBase,x0,y0,tile.width,tile.height,0,0,tile.width,tile.height);
+    const coverage=new Set();
+    for(const n of queue)for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++) {
+      const xx=n%w+dx,yy=Math.floor(n/w)+dy;
+      if(xx>=x0&&xx<=x1&&yy>=y0&&yy<=y1&&dx*dx+dy*dy<=5)coverage.add(yy*w+xx);
+    }
+    const tc=tile.getContext('2d'),ti=tc.getImageData(0,0,tile.width,tile.height);
+    for(let yy=0;yy<tile.height;yy++)for(let xx=0;xx<tile.width;xx++)if(!coverage.has((yy+y0)*w+xx+x0))ti.data[(yy*tile.width+xx)*4+3]=0;
+    tc.putImageData(ti,0,0);
+    lowCells.push({tile,x:(x0+x1)/2-420,y:(y0+y1)/2-320});
+    // Inpaint only the small local crop; preserve the original baked wash.
+    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++) {
+      if(!coverage.has(y*w+x))continue;
+      let best=-1,dist=1e9;
+      for(let dy=-6;dy<=6;dy+=2)for(let dx=-6;dx<=6;dx+=2){const xx=Math.max(0,Math.min(w-1,x+dx)),yy=Math.max(0,Math.min(h-1,y+dy)),q=yy*w+xx;if(!mask[q]&&!coverage.has(q)&&dx*dx+dy*dy<dist){best=q;dist=dx*dx+dy*dy;}}
+      if(best>=0)for(let ch=0;ch<3;ch++)d[(y*w+x)*4+ch]=pristine[best*4+ch];
+    }
+  }
+  lowSource=im;
+// Timing snapshot generated from /workspace/病理科普视频/配音/全稿_v3/timeline.json
+// (lines n=29–34, real start/end seconds; no estimated durations).
+// Preserve the approved scene through its legacy clock.
+import scene from './chapters/s08.js';
+const timing = [{"n": 29, "seg": "04", "chapter": "红·单纯性", "start": 116.61454166666672, "end": 120.71216666666672, "dur": 4.097625, "text": "然而战况一旦失控，也可能伤及自身组织。", "en": "An excessive response can also damage the | body's own tissue."}, {"n": 30, "seg": "04", "chapter": "红·单纯性", "start": 121.16216666666672, "end": 125.55695833333338, "dur": 4.394791666666666, "text": "液体、蛋白质和白细胞外出，叫渗出。", "en": "These changes are called exudation."}, {"n": 31, "seg": "04", "chapter": "红·单纯性", "start": 126.00695833333339, "end": 130.09441666666672, "dur": 4.087458333333333, "text": "单纯性时，中性粒细胞主要驻守在", "en": "In simple appendicitis, neutrophils are | mainly found"}, {"n": 32, "seg": "04", "chapter": "红·单纯性", "start": 130.5444166666667, "end": 134.93608333333339, "dur": 4.391666666666667, "text": "黏膜及黏膜下层，组织损伤相对较轻。", "en": "in the mucosa and submucosa, with | relatively mild damage."}, {"n": 33, "seg": "04", "chapter": "红·单纯性", "start": 135.38608333333337, "end": 138.3009166666667, "dur": 2.914833333333333, "text": "变质，就是细胞组织的变性、坏死。", "en": "Alteration means cell degeneration and | necrosis."}, {"n": 34, "seg": "04", "chapter": "红·单纯性", "start": 138.75091666666668, "end": 141.81645833333334, "dur": 3.065541666666667, "text": "此时，黏膜上皮已局部受损脱落。[2]", "en": "Mucosal epithelium is locally injured | and shed."}];
+export const origin = timing[0].start;
+export const sentences = timing.map(s => ({id:s.n,start:s.start-origin,end:s.end-origin}));
+export const duration = sentences.at(-1).end + 0.8;
+export const T = {
+  at: id => sentences[id-29].start,
+  end: id => id===34 ? duration : sentences[id-29].end,
+  frac: (id,f) => sentences[id-29].start + (sentences[id-29].end-sentences[id-29].start)*f,
+};
+const legacy = {at:id=>(id-29)*6,end:id=>(id-28)*6,frac:(id,f)=>(id-29+f)*6};
+export function sceneTime(t) {
+  const s = sentences.find(s=>t<s.end) || sentences.at(-1);
+  if(t>=sentences.at(-1).end) return 33; // retain the approved final state for the tail
+  return (s.id-29)*6 + Math.max(0,(t-s.start)/(s.end-s.start))*6;
+}
+const draw = scene.draw;
+scene.draw = (ctx,t) => draw.call(scene,ctx,sceneTime(t),legacy);
+    lastCueEnd: clip[clip.length - 1].end,
+    cues: clip,
+  }, null, 2) + '\n');
+
+  const c1 = clip.find((c) => c.id === '01') || clip[0];
+  const c3 = clip.find((c) => c.id === '03');
+  if (!c3) throw new Error('dry-run window has no sentence 03');
+  const t1 = (c1.start + c1.end) / 2;
+  const t3 = (c3.start + c3.end) / 2;
+  const framesDir = path.join(opt.outDir, 'frames');
+  const stills = [
+    { t: t1, file: path.join(framesDir, '帧_01_句01中点.png'), kind: 'subtitle' },
+    { t: t3, file: path.join(framesDir, '帧_02_最长英文_s03.png'), kind: 'subtitle' },
+  ];
+
+  console.log(`content ${contentDurExact}s (${contentFrames} frames) + endcard ${ENDCARD_SECONDS}s → ${totalDur}s`);
+  console.log(`still t01=${t1} t03=${t3} endcardLocal=3 file=${contentDurExact + 3}`);
+
+  const audioPath = path.join(tmp, 'audio.wav');
+  const audioReport = await buildAudio({
+    voice: opt.voice,
+    music: opt.music,
+    contentDur: contentDurExact,
+    totalDur,
+    outWav: audioPath,
+  });
+  console.log('audio', audioReport.loudnorm, audioReport.reason || '');
+
+  const scenePath = path.join(tmp, 'scene.mp4');
+  const sceneNote = await makeScene({ sceneVideo: opt.sceneVideo, frames: contentFrames, fps: opt.fps, out: scenePath });
+  console.log('scene', sceneNote);
+
+  const runs = [];
+  for (let i = 0; i < contentFrames; i++) {
+    const t = i / opt.fps;
+    const key = visualKey(subtitleState(t, clip, { xfade: opt.xfade })) + '\t' + darkAt(t, clip);
+    const last = runs[runs.length - 1];
+    if (last && last.key === key) last.count += 1;
+    else runs.push({ key, t, index: i, count: 1 });
+  }
+  console.log(`subtitle unique frames ${runs.length} / ${contentFrames}`);
+
+  const measurePath = path.join(opt.outDir, 'english_measure.json');
+  let measured = null;
+  let overlayCheck = null;
+  let qaPaths = null;
+  let qaMeta = null;
+  await withPage(path.join(root, 'subtitle'), 'http://subtitle.local', async (page) => {
+    measured = await page.evaluate((cues) => window.measureCards(cues), loaded.cues);
+    await page.evaluate(({ cues, xfade }) => { window.CUES = cues; window.XFADE = xfade; window.AUTO_THEME = true; }, { cues: clip, xfade: opt.xfade });
+    for (const still of stills) {
+      const png = await canvasPng(page, still.t, 'full');
+      await fsp.writeFile(still.file, png);
+      console.log('still', still.file);
+    }
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+p='qa/v6/animatic/v2/build_transitions.py';s=open(p).read().replace('(x-960)**2+(y-470)**2','(x-1110)**2+(y-475)**2').replace('last=math.ceil(end*30)','last=math.ceil((end if kind==\\'enter\\' else r[\\'exitStart\\']+0.8)*30)');open(p,'w').write(s)
+PY
+python3 qa/v6/animatic/v2/build_transitions.py > qa/v6/animatic/v2/plate.log 2>&1" in /workspace/病理科普视频/v5
+exec
+/bin/bash -lc "ps -eo pid,ppid,args | rg 'build_transitions|scene_plate.mp4'" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+      1       0 codex-linux-sandbox --sandbox-policy-cwd /workspace/病理科普视频/v5 --command-cwd /workspace/病理科普视频/v5 --permission-profile {"type":"managed","file_system":{"type":"restricted","entries":[{"path":{"type":"special","value":{"kind":"root"}},"access":"read"},{"path":{"type":"path","path":"/workspace/病理科普视频/v5"},"access":"write"},{"path":{"type":"path","path":"/workspace/病理科普视频"},"access":"write"},{"path":{"type":"path","path":"/workspace/garden-skills"},"access":"write"},{"path":{"type":"special","value":{"kind":"slash_tmp"}},"access":"write"},{"path":{"type":"special","value":{"kind":"tmpdir"}},"access":"write"},{"path":{"type":"path","path":"/workspace/病理科普视频/v5/.git"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/病理科普视频/.git"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/garden-skills/.git"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/病理科普视频/v5/.agents"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/病理科普视频/.agents"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/garden-skills/.agents"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/病理科普视频/v5/.codex"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/病理科普视频/.codex"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/garden-skills/.codex"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/病理科普视频/v5/.aws"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/病理科普视频/.aws"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/garden-skills/.aws"},"access":"read","missing_path_behavior":"skip"}]},"network":"enabled"} --apply-seccomp-then-exec -- /bin/bash -c __CODEX_SNAPSHOT_OVERRIDE_SET_0="${CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS+x}" __CODEX_SNAPSHOT_OVERRIDE_0="${CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS-}" __CODEX_SNAPSHOT_OVERRIDE_SET_1="${CODEX_PERMISSION_PROFILE+x}" __CODEX_SNAPSHOT_OVERRIDE_1="${CODEX_PERMISSION_PROFILE-}" __CODEX_SNAPSHOT_OVERRIDE_SET_2="${CODEX_PLUGIN_METRICS_OUTPUT+x}" __CODEX_SNAPSHOT_OVERRIDE_2="${CODEX_PLUGIN_METRICS_OUTPUT-}" __CODEX_SNAPSHOT_OVERRIDE_SET_3="${CODEX_SESSION_ID+x}" __CODEX_SNAPSHOT_OVERRIDE_3="${CODEX_SESSION_ID-}" __CODEX_SNAPSHOT_OVERRIDE_SET_4="${CODEX_THREAD_ID+x}" __CODEX_SNAPSHOT_OVERRIDE_4="${CODEX_THREAD_ID-}" __CODEX_SNAPSHOT_OVERRIDE_SET_5="${CODEX_TOOL_CALL_ID+x}" __CODEX_SNAPSHOT_OVERRIDE_5="${CODEX_TOOL_CALL_ID-}" __CODEX_SNAPSHOT_OVERRIDE_SET_6="${CODEX_VERSION+x}" __CODEX_SNAPSHOT_OVERRIDE_6="${CODEX_VERSION-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_0="${ALL_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_0="${ALL_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_1="${BUNDLE_HTTPS_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_1="${BUNDLE_HTTPS_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_2="${BUNDLE_HTTP_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_2="${BUNDLE_HTTP_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_3="${BUNDLE_NO_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_3="${BUNDLE_NO_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_4="${BUNDLE_SSL_CA_CERT+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_4="${BUNDLE_SSL_CA_CERT-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_5="${CARGO_HTTP_CAINFO+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_5="${CARGO_HTTP_CAINFO-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_6="${CODEX_CA_CERTIFICATE+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_6="${CODEX_CA_CERTIFICATE-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_7="${CODEX_NETWORK_ALLOW_LOCAL_BINDING+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_7="${CODEX_NETWORK_ALLOW_LOCAL_BINDING-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_8="${CODEX_NETWORK_PROXY_ACTIVE+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_8="${CODEX_NETWORK_PROXY_ACTIVE-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_9="${CODEX_NETWORK_PROXY_ATTRIBUTION+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_9="${CODEX_NETWORK_PROXY_ATTRIBUTION-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_10="${CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_10="${CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_11="${CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_11="${CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_12="${CURL_CA_BUNDLE+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_12="${CURL_CA_BUNDLE-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_13="${DOCKER_HTTPS_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_13="${DOCKER_HTTPS_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_14="${DOCKER_HTTP_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_14="${DOCKER_HTTP_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_15="${ELECTRON_GET_USE_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_15="${ELECTRON_GET_USE_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_16="${FTP_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_16="${FTP_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_17="${GIT_SSL_CAINFO+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_17="${GIT_SSL_CAINFO-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_18="${HTTPS_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_18="${HTTPS_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_19="${HTTP_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_19="${HTTP_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_20="${NODE_EXTRA_CA_CERTS+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_20="${NODE_EXTRA_CA_CERTS-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_21="${NODE_USE_ENV_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_21="${NODE_USE_ENV_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_22="${NO_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_22="${NO_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_23="${NPM_CONFIG_CAFILE+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_23="${NPM_CONFIG_CAFILE-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_24="${NPM_CONFIG_HTTPS_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_24="${NPM_CONFIG_HTTPS_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_25="${NPM_CONFIG_HTTP_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_25="${NPM_CONFIG_HTTP_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_26="${NPM_CONFIG_NOPROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_26="${NPM_CONFIG_NOPROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_27="${NPM_CONFIG_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_27="${NPM_CONFIG_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_28="${PIP_CERT+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_28="${PIP_CERT-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_29="${PIP_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_29="${PIP_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_30="${REQUESTS_CA_BUNDLE+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_30="${REQUESTS_CA_BUNDLE-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_31="${SSL_CERT_FILE+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_31="${SSL_CERT_FILE-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_32="${WSS_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_32="${WSS_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_33="${WS_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_33="${WS_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_34="${YARN_HTTPS_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_34="${YARN_HTTPS_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_35="${YARN_HTTP_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_35="${YARN_HTTP_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_36="${YARN_NO_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_36="${YARN_NO_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_37="${all_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_37="${all_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_38="${ftp_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_38="${ftp_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_39="${http_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_39="${http_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_40="${https_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_40="${https_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_41="${no_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_41="${no_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_42="${npm_config_cafile+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_42="${npm_config_cafile-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_43="${npm_config_http_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_43="${npm_config_http_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_44="${npm_config_https_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_44="${npm_config_https_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_45="${npm_config_noproxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_45="${npm_config_noproxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_46="${npm_config_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_46="${npm_config_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_47="${ws_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_47="${ws_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_48="${wss_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_48="${wss_proxy-}" __CODEX_SNAPSHOT_PROXY_ENV_SET="${CODEX_NETWORK_PROXY_ACTIVE+x}"  if . '/home/box/.codex/shell_snapshots/01a1cd80-af19-7120-9d5a-2bfb8b0feb3a.1794449125156542093.sh' >/dev/null 2>&1; then :; fi  if [ -n "${__CODEX_SNAPSHOT_OVERRIDE_SET_0}" ]; then   if [ -z "${CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS+x}" ] || [ "${CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS-}" != "${__CODEX_SNAPSHOT_OVERRIDE_0}" ]; then export CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS="${__CODEX_SNAPSHOT_OVERRIDE_0}"; else export CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS; fi else builtin unset CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS 2>/dev/null || command unset CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS; fi builtin unset __CODEX_SNAPSHOT_OVERRIDE_SET_0 __CODEX_SNAPSHOT_OVERRIDE_0 2>/dev/null || command unset __CODEX_SNAPSHOT_OVERRIDE_SET_0 __CODEX_SNAPSHOT_OVERRIDE_0 if [ -n "${__CODEX_SNAPSHOT_OVERRIDE_SET_1}" ]; then   if [ -z "${CODEX_PERMISSION_PROFILE+x}" ] || [ "${CODEX_PERMISSION_PROFILE-}" != "${__CODEX_SNAPSHOT_OVERRIDE_1}" ]; then export CODEX_PERMISSION_PROFILE="${__CODEX_SNAPSHOT_OVERRIDE_1}"; else export CODEX_PERMISSION_PROFILE; fi else builtin unset CODEX_PERMISSION_PROFILE 2>/dev/null || command unset CODEX_PERMISSION_PROFILE; fi builtin unset __CODEX_SNAPSHOT_OVERRIDE_SET_1 __CODEX_SNAPSHOT_OVERRIDE_1 2>/dev/null || command unset __CODEX_SNAPSHOT_OVERRIDE_SET_1 __CODEX_SNAPSHOT_OVERRIDE_1 if [ -n "${__CODEX_SNAPSHOT_OVERRIDE_SET_2}" ]; then   if [ -z "${CODEX_PLUGIN_METRICS_OUTPUT+x}" ] || [ "${CODEX_PLUGIN_METRICS_OUTPUT-}" != "${__CODEX_SNAPSHOT_OVERRIDE_2}" ]; then export CODEX_PLUGIN_METRICS_OUTPUT="${__CODEX_SNAPSHOT_OVERRIDE_2}"; else export CODEX_PLUGIN_METRICS_OUTPUT; fi else builtin unset CODEX_PLUGIN_METRICS_OUTPUT 2>/dev/null || command unset CODEX_PLUGIN_METRICS_OUTPUT; fi builtin unset __CODEX_SNAPSHOT_OVERRIDE_SET_2 __CODEX_SNAPSHOT_OVERRIDE_2 2>/dev/null || command unset __CODEX_SNAPSHOT_OVERRIDE_SET_2 __CODEX_SNAPSHOT_OVERRIDE_2 if [ -n "${__CODEX_SNAPSHOT_OVERRIDE_SET_3}" ]; then   if [ -z "${CODEX_SESSION_ID+x}" ] || [ "${CODEX_SESSION_ID-}" != "${__CODEX_SNAPSHOT_OVERRIDE_3}" ]; then export CODEX_SESSION_ID="${__CODEX_SNAPSHOT_OVERRIDE_3}"; else export CODEX_SESSION_ID; fi else builtin unset CODEX_SESSION_ID 2>/dev/null || command unset CODEX_SESSION_ID; fi builtin unset __CODEX_SNAPSHOT_OVERRIDE_SET_3 __CODEX_SNAPSHOT_OVERRIDE_3 2>/dev/null || command unset __CODEX_SNAPSHOT_OVERRIDE_SET_3 __CODEX_SNAPSHOT_OVERRIDE_3 if [ -n "${__CODEX_SNAPSHOT_OVERRIDE_SET_4}" ]; then   if [ -z "${CODEX_THREAD_ID+x}" ] || [ "${CODEX_THREAD_ID-}" != "${__CODEX_SNAPSHOT_OVERRIDE_4}" ]; then export CODEX_THREAD_ID="${__CODEX_SNAPSHOT_OVERRIDE_4}"; else export CODEX_THREAD_ID; fi else builtin unset CODEX_THREAD_ID 2>/dev/null || command unset CODEX_THREAD_ID; fi builtin unset __CODEX_SNAPSHOT_OVERRIDE_SET_4 __CODEX_SNAPSHOT_OVERRIDE_4 2>/dev/null || command unset __CODEX_SNAPSHOT_OVERRIDE_SET_4 __CODEX_SNAPSHOT_OVERRIDE_4 if [ -n "${__CODEX_SNAPSHOT_OVERRIDE_SET_5}" ]; then   if [ -z "${CODEX_TOOL_CALL_ID+x}" ] || [ "${CODEX_TOOL_CALL_ID-}" != "${__CODEX_SNAPSHOT_OVERRIDE_5}" ]; then export CODEX_TOOL_CALL_ID="${__CODEX_SNAPSHOT_OVERRIDE_5}"; else export CODEX_TOOL_CALL_ID; fi else builtin unset CODEX_TOOL_CALL_ID 2>/dev/null || command unset CODEX_TOOL_CALL_ID; fi builtin unset __CODEX_SNAPSHOT_OVERRIDE_SET_5 __CODEX_SNAPSHOT_OVERRIDE_5 2>/dev/null || command unset __CODEX_SNAPSHOT_OVERRIDE_SET_5 __CODEX_SNAPSHOT_OVERRIDE_5 if [ -n "${__CODEX_SNAPSHOT_OVERRIDE_SET_6}" ]; then   if [ -z "${CODEX_VERSION+x}" ] || [ "${CODEX_VERSION-}" != "${__CODEX_SNAPSHOT_OVERRIDE_6}" ]; then export CODEX_VERSION="${__CODEX_SNAPSHOT_OVERRIDE_6}"; else export CODEX_VERSION; fi else builtin unset CODEX_VERSION 2>/dev/null || command unset CODEX_VERSION; fi builtin unset __CODEX_SNAPSHOT_OVERRIDE_SET_6 __CODEX_SNAPSHOT_OVERRIDE_6 2>/dev/null || command unset __CODEX_SNAPSHOT_OVERRIDE_SET_6 __CODEX_SNAPSHOT_OVERRIDE_6 if [ -n "$__CODEX_SNAPSHOT_PROXY_ENV_SET" ] || [ -n "${CODEX_NETWORK_PROXY_ACTIVE+x}" ]; then if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_0}" ]; then   if [ -z "${ALL_PROXY+x}" ] || [ "${ALL_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_0}" ]; then export ALL_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_0}"; else export ALL_PROXY; fi else builtin unset ALL_PROXY 2>/dev/null || command unset ALL_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_0 __CODEX_SNAPSHOT_PROXY_OVERRIDE_0 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_0 __CODEX_SNAPSHOT_PROXY_OVERRIDE_0 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_1}" ]; then   if [ -z "${BUNDLE_HTTPS_PROXY+x}" ] || [ "${BUNDLE_HTTPS_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_1}" ]; then export BUNDLE_HTTPS_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_1}"; else export BUNDLE_HTTPS_PROXY; fi else builtin unset BUNDLE_HTTPS_PROXY 2>/dev/null || command unset BUNDLE_HTTPS_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_1 __CODEX_SNAPSHOT_PROXY_OVERRIDE_1 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_1 __CODEX_SNAPSHOT_PROXY_OVERRIDE_1 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_2}" ]; then   if [ -z "${BUNDLE_HTTP_PROXY+x}" ] || [ "${BUNDLE_HTTP_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_2}" ]; then export BUNDLE_HTTP_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_2}"; else export BUNDLE_HTTP_PROXY; fi else builtin unset BUNDLE_HTTP_PROXY 2>/dev/null || command unset BUNDLE_HTTP_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_2 __CODEX_SNAPSHOT_PROXY_OVERRIDE_2 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_2 __CODEX_SNAPSHOT_PROXY_OVERRIDE_2 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_3}" ]; then   if [ -z "${BUNDLE_NO_PROXY+x}" ] || [ "${BUNDLE_NO_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_3}" ]; then export BUNDLE_NO_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_3}"; else export BUNDLE_NO_PROXY; fi else builtin unset BUNDLE_NO_PROXY 2>/dev/null || command unset BUNDLE_NO_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_3 __CODEX_SNAPSHOT_PROXY_OVERRIDE_3 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_3 __CODEX_SNAPSHOT_PROXY_OVERRIDE_3 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_4}" ]; then   if [ -z "${BUNDLE_SSL_CA_CERT+x}" ] || [ "${BUNDLE_SSL_CA_CERT-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_4}" ]; then export BUNDLE_SSL_CA_CERT="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_4}"; else export BUNDLE_SSL_CA_CERT; fi else builtin unset BUNDLE_SSL_CA_CERT 2>/dev/null || command unset BUNDLE_SSL_CA_CERT; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_4 __CODEX_SNAPSHOT_PROXY_OVERRIDE_4 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_4 __CODEX_SNAPSHOT_PROXY_OVERRIDE_4 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_5}" ]; then   if [ -z "${CARGO_HTTP_CAINFO+x}" ] || [ "${CARGO_HTTP_CAINFO-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_5}" ]; then export CARGO_HTTP_CAINFO="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_5}"; else export CARGO_HTTP_CAINFO; fi else builtin unset CARGO_HTTP_CAINFO 2>/dev/null || command unset CARGO_HTTP_CAINFO; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_5 __CODEX_SNAPSHOT_PROXY_OVERRIDE_5 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_5 __CODEX_SNAPSHOT_PROXY_OVERRIDE_5 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_6}" ]; then   if [ -z "${CODEX_CA_CERTIFICATE+x}" ] || [ "${CODEX_CA_CERTIFICATE-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_6}" ]; then export CODEX_CA_CERTIFICATE="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_6}"; else export CODEX_CA_CERTIFICATE; fi else builtin unset CODEX_CA_CERTIFICATE 2>/dev/null || command unset CODEX_CA_CERTIFICATE; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_6 __CODEX_SNAPSHOT_PROXY_OVERRIDE_6 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_6 __CODEX_SNAPSHOT_PROXY_OVERRIDE_6 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_7}" ]; then   if [ -z "${CODEX_NETWORK_ALLOW_LOCAL_BINDING+x}" ] || [ "${CODEX_NETWORK_ALLOW_LOCAL_BINDING-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_7}" ]; then export CODEX_NETWORK_ALLOW_LOCAL_BINDING="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_7}"; else export CODEX_NETWORK_ALLOW_LOCAL_BINDING; fi else builtin unset CODEX_NETWORK_ALLOW_LOCAL_BINDING 2>/dev/null || command unset CODEX_NETWORK_ALLOW_LOCAL_BINDING; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_7 __CODEX_SNAPSHOT_PROXY_OVERRIDE_7 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_7 __CODEX_SNAPSHOT_PROXY_OVERRIDE_7 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_8}" ]; then   if [ -z "${CODEX_NETWORK_PROXY_ACTIVE+x}" ] || [ "${CODEX_NETWORK_PROXY_ACTIVE-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_8}" ]; then export CODEX_NETWORK_PROXY_ACTIVE="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_8}"; else export CODEX_NETWORK_PROXY_ACTIVE; fi else builtin unset CODEX_NETWORK_PROXY_ACTIVE 2>/dev/null || command unset CODEX_NETWORK_PROXY_ACTIVE; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_8 __CODEX_SNAPSHOT_PROXY_OVERRIDE_8 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_8 __CODEX_SNAPSHOT_PROXY_OVERRIDE_8 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_9}" ]; then   if [ -z "${CODEX_NETWORK_PROXY_ATTRIBUTION+x}" ] || [ "${CODEX_NETWORK_PROXY_ATTRIBUTION-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_9}" ]; then export CODEX_NETWORK_PROXY_ATTRIBUTION="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_9}"; else export CODEX_NETWORK_PROXY_ATTRIBUTION; fi else builtin unset CODEX_NETWORK_PROXY_ATTRIBUTION 2>/dev/null || command unset CODEX_NETWORK_PROXY_ATTRIBUTION; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_9 __CODEX_SNAPSHOT_PROXY_OVERRIDE_9 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_9 __CODEX_SNAPSHOT_PROXY_OVERRIDE_9 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_10}" ]; then   if [ -z "${CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS+x}" ] || [ "${CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_10}" ]; then export CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_10}"; else export CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS; fi else builtin unset CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS 2>/dev/null || command unset CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_10 __CODEX_SNAPSHOT_PROXY_OVERRIDE_10 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_10 __CODEX_SNAPSHOT_PROXY_OVERRIDE_10 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_11}" ]; then   if [ -z "${CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE+x}" ] || [ "${CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_11}" ]; then export CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_11}"; else export CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE; fi else builtin unset CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE 2>/dev/null || command unset CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_11 __CODEX_SNAPSHOT_PROXY_OVERRIDE_11 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_11 __CODEX_SNAPSHOT_PROXY_OVERRIDE_11 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_12}" ]; then   if [ -z "${CURL_CA_BUNDLE+x}" ] || [ "${CURL_CA_BUNDLE-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_12}" ]; then export CURL_CA_BUNDLE="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_12}"; else export CURL_CA_BUNDLE; fi else builtin unset CURL_CA_BUNDLE 2>/dev/null || command unset CURL_CA_BUNDLE; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_12 __CODEX_SNAPSHOT_PROXY_OVERRIDE_12 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_12 __CODEX_SNAPSHOT_PROXY_OVERRIDE_12 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_13}" ]; then   if [ -z "${DOCKER_HTTPS_PROXY+x}" ] || [ "${DOCKER_HTTPS_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_13}" ]; then export DOCKER_HTTPS_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_13}"; else export DOCKER_HTTPS_PROXY; fi else builtin unset DOCKER_HTTPS_PROXY 2>/dev/null || command unset DOCKER_HTTPS_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_13 __CODEX_SNAPSHOT_PROXY_OVERRIDE_13 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_13 __CODEX_SNAPSHOT_PROXY_OVERRIDE_13 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_14}" ]; then   if [ -z "${DOCKER_HTTP_PROXY+x}" ] || [ "${DOCKER_HTTP_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_14}" ]; then export DOCKER_HTTP_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_14}"; else export DOCKER_HTTP_PROXY; fi else builtin unset DOCKER_HTTP_PROXY 2>/dev/null || command unset DOCKER_HTTP_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_14 __CODEX_SNAPSHOT_PROXY_OVERRIDE_14 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_14 __CODEX_SNAPSHOT_PROXY_OVERRIDE_14 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_15}" ]; then   if [ -z "${ELECTRON_GET_USE_PROXY+x}" ] || [ "${ELECTRON_GET_USE_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_15}" ]; then export ELECTRON_GET_USE_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_15}"; else export ELECTRON_GET_USE_PROXY; fi else builtin unset ELECTRON_GET_USE_PROXY 2>/dev/null || command unset ELECTRON_GET_USE_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_15 __CODEX_SNAPSHOT_PROXY_OVERRIDE_15 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_15 __CODEX_SNAPSHOT_PROXY_OVERRIDE_15 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_16}" ]; then   if [ -z "${FTP_PROXY+x}" ] || [ "${FTP_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_16}" ]; then export FTP_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_16}"; else export FTP_PROXY; fi else builtin unset FTP_PROXY 2>/dev/null || command unset FTP_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_16 __CODEX_SNAPSHOT_PROXY_OVERRIDE_16 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_16 __CODEX_SNAPSHOT_PROXY_OVERRIDE_16 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_17}" ]; then   if [ -z "${GIT_SSL_CAINFO+x}" ] || [ "${GIT_SSL_CAINFO-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_17}" ]; then export GIT_SSL_CAINFO="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_17}"; else export GIT_SSL_CAINFO; fi else builtin unset GIT_SSL_CAINFO 2>/dev/null || command unset GIT_SSL_CAINFO; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_17 __CODEX_SNAPSHOT_PROXY_OVERRIDE_17 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_17 __CODEX_SNAPSHOT_PROXY_OVERRIDE_17 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_18}" ]; then   if [ -z "${HTTPS_PROXY+x}" ] || [ "${HTTPS_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_18}" ]; then export HTTPS_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_18}"; else export HTTPS_PROXY; fi else builtin unset HTTPS_PROXY 2>/dev/null || command unset HTTPS_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_18 __CODEX_SNAPSHOT_PROXY_OVERRIDE_18 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_18 __CODEX_SNAPSHOT_PROXY_OVERRIDE_18 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_19}" ]; then   if [ -z "${HTTP_PROXY+x}" ] || [ "${HTTP_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_19}" ]; then export HTTP_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_19}"; else export HTTP_PROXY; fi else builtin unset HTTP_PROXY 2>/dev/null || command unset HTTP_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_19 __CODEX_SNAPSHOT_PROXY_OVERRIDE_19 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_19 __CODEX_SNAPSHOT_PROXY_OVERRIDE_19 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_20}" ]; then   if [ -z "${NODE_EXTRA_CA_CERTS+x}" ] || [ "${NODE_EXTRA_CA_CERTS-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_20}" ]; then export NODE_EXTRA_CA_CERTS="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_20}"; else export NODE_EXTRA_CA_CERTS; fi else builtin unset NODE_EXTRA_CA_CERTS 2>/dev/null || command unset NODE_EXTRA_CA_CERTS; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_20 __CODEX_SNAPSHOT_PROXY_OVERRIDE_20 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_20 __CODEX_SNAPSHOT_PROXY_OVERRIDE_20 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_21}" ]; then   if [ -z "${NODE_USE_ENV_PROXY+x}" ] || [ "${NODE_USE_ENV_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_21}" ]; then export NODE_USE_ENV_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_21}"; else export NODE_USE_ENV_PROXY; fi else builtin unset NODE_USE_ENV_PROXY 2>/dev/null || command unset NODE_USE_ENV_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_21 __CODEX_SNAPSHOT_PROXY_OVERRIDE_21 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_21 __CODEX_SNAPSHOT_PROXY_OVERRIDE_21 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_22}" ]; then   if [ -z "${NO_PROXY+x}" ] || [ "${NO_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_22}" ]; then export NO_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_22}"; else export NO_PROXY; fi else builtin unset NO_PROXY 2>/dev/null || command unset NO_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_22 __CODEX_SNAPSHOT_PROXY_OVERRIDE_22 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_22 __CODEX_SNAPSHOT_PROXY_OVERRIDE_22 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_23}" ]; then   if [ -z "${NPM_CONFIG_CAFILE+x}" ] || [ "${NPM_CONFIG_CAFILE-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_23}" ]; then export NPM_CONFIG_CAFILE="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_23}"; else export NPM_CONFIG_CAFILE; fi else builtin unset NPM_CONFIG_CAFILE 2>/dev/null || command unset NPM_CONFIG_CAFILE; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_23 __CODEX_SNAPSHOT_PROXY_OVERRIDE_23 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_23 __CODEX_SNAPSHOT_PROXY_OVERRIDE_23 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_24}" ]; then   if [ -z "${NPM_CONFIG_HTTPS_PROXY+x}" ] || [ "${NPM_CONFIG_HTTPS_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_24}" ]; then export NPM_CONFIG_HTTPS_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_24}"; else export NPM_CONFIG_HTTPS_PROXY; fi else builtin unset NPM_CONFIG_HTTPS_PROXY 2>/dev/null || command unset NPM_CONFIG_HTTPS_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_24 __CODEX_SNAPSHOT_PROXY_OVERRIDE_24 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_24 __CODEX_SNAPSHOT_PROXY_OVERRIDE_24 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_25}" ]; then   if [ -z "${NPM_CONFIG_HTTP_PROXY+x}" ] || [ "${NPM_CONFIG_HTTP_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_25}" ]; then export NPM_CONFIG_HTTP_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_25}"; else export NPM_CONFIG_HTTP_PROXY; fi else builtin unset NPM_CONFIG_HTTP_PROXY 2>/dev/null || command unset NPM_CONFIG_HTTP_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_25 __CODEX_SNAPSHOT_PROXY_OVERRIDE_25 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_25 __CODEX_SNAPSHOT_PROXY_OVERRIDE_25 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_26}" ]; then   if [ -z "${NPM_CONFIG_NOPROXY+x}" ] || [ "${NPM_CONFIG_NOPROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_26}" ]; then export NPM_CONFIG_NOPROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_26}"; else export NPM_CONFIG_NOPROXY; fi else builtin unset NPM_CONFIG_NOPROXY 2>/dev/null || command unset NPM_CONFIG_NOPROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_26 __CODEX_SNAPSHOT_PROXY_OVERRIDE_26 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_26 __CODEX_SNAPSHOT_PROXY_OVERRIDE_26 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_27}" ]; then   if [ -z "${NPM_CONFIG_PROXY+x}" ] || [ "${NPM_CONFIG_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_27}" ]; then export NPM_CONFIG_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_27}"; else export NPM_CONFIG_PROXY; fi else builtin unset NPM_CONFIG_PROXY 2>/dev/null || command unset NPM_CONFIG_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_27 __CODEX_SNAPSHOT_PROXY_OVERRIDE_27 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_27 __CODEX_SNAPSHOT_PROXY_OVERRIDE_27 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_28}" ]; then   if [ -z "${PIP_CERT+x}" ] || [ "${PIP_CERT-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_28}" ]; then export PIP_CERT="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_28}"; else export PIP_CERT; fi else builtin unset PIP_CERT 2>/dev/null || command unset PIP_CERT; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_28 __CODEX_SNAPSHOT_PROXY_OVERRIDE_28 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_28 __CODEX_SNAPSHOT_PROXY_OVERRIDE_28 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_29}" ]; then   if [ -z "${PIP_PROXY+x}" ] || [ "${PIP_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_29}" ]; then export PIP_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_29}"; else export PIP_PROXY; fi else builtin unset PIP_PROXY 2>/dev/null || command unset PIP_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_29 __CODEX_SNAPSHOT_PROXY_OVERRIDE_29 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_29 __CODEX_SNAPSHOT_PROXY_OVERRIDE_29 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_30}" ]; then   if [ -z "${REQUESTS_CA_BUNDLE+x}" ] || [ "${REQUESTS_CA_BUNDLE-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_30}" ]; then export REQUESTS_CA_BUNDLE="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_30}"; else export REQUESTS_CA_BUNDLE; fi else builtin unset REQUESTS_CA_BUNDLE 2>/dev/null || command unset REQUESTS_CA_BUNDLE; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_30 __CODEX_SNAPSHOT_PROXY_OVERRIDE_30 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_30 __CODEX_SNAPSHOT_PROXY_OVERRIDE_30 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_31}" ]; then   if [ -z "${SSL_CERT_FILE+x}" ] || [ "${SSL_CERT_FILE-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_31}" ]; then export SSL_CERT_FILE="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_31}"; else export SSL_CERT_FILE; fi else builtin unset SSL_CERT_FILE 2>/dev/null || command unset SSL_CERT_FILE; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_31 __CODEX_SNAPSHOT_PROXY_OVERRIDE_31 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_31 __CODEX_SNAPSHOT_PROXY_OVERRIDE_31 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_32}" ]; then   if [ -z "${WSS_PROXY+x}" ] || [ "${WSS_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_32}" ]; then export WSS_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_32}"; else export WSS_PROXY; fi else builtin unset WSS_PROXY 2>/dev/null || command unset WSS_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_32 __CODEX_SNAPSHOT_PROXY_OVERRIDE_32 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_32 __CODEX_SNAPSHOT_PROXY_OVERRIDE_32 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_33}" ]; then   if [ -z "${WS_PROXY+x}" ] || [ "${WS_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_33}" ]; then export WS_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_33}"; else export WS_PROXY; fi else builtin unset WS_PROXY 2>/dev/null || command unset WS_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_33 __CODEX_SNAPSHOT_PROXY_OVERRIDE_33 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_33 __CODEX_SNAPSHOT_PROXY_OVERRIDE_33 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_34}" ]; then   if [ -z "${YARN_HTTPS_PROXY+x}" ] || [ "${YARN_HTTPS_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_34}" ]; then export YARN_HTTPS_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_34}"; else export YARN_HTTPS_PROXY; fi else builtin unset YARN_HTTPS_PROXY 2>/dev/null || command unset YARN_HTTPS_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_34 __CODEX_SNAPSHOT_PROXY_OVERRIDE_34 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_34 __CODEX_SNAPSHOT_PROXY_OVERRIDE_34 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_35}" ]; then   if [ -z "${YARN_HTTP_PROXY+x}" ] || [ "${YARN_HTTP_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_35}" ]; then export YARN_HTTP_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_35}"; else export YARN_HTTP_PROXY; fi else builtin unset YARN_HTTP_PROXY 2>/dev/null || command unset YARN_HTTP_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_35 __CODEX_SNAPSHOT_PROXY_OVERRIDE_35 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_35 __CODEX_SNAPSHOT_PROXY_OVERRIDE_35 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_36}" ]; then   if [ -z "${YARN_NO_PROXY+x}" ] || [ "${YARN_NO_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_36}" ]; then export YARN_NO_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_36}"; else export YARN_NO_PROXY; fi else builtin unset YARN_NO_PROXY 2>/dev/null || command unset YARN_NO_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_36 __CODEX_SNAPSHOT_PROXY_OVERRIDE_36 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_36 __CODEX_SNAPSHOT_PROXY_OVERRIDE_36 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_37}" ]; then   if [ -z "${all_proxy+x}" ] || [ "${all_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_37}" ]; then export all_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_37}"; else export all_proxy; fi else builtin unset all_proxy 2>/dev/null || command unset all_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_37 __CODEX_SNAPSHOT_PROXY_OVERRIDE_37 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_37 __CODEX_SNAPSHOT_PROXY_OVERRIDE_37 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_38}" ]; then   if [ -z "${ftp_proxy+x}" ] || [ "${ftp_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_38}" ]; then export ftp_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_38}"; else export ftp_proxy; fi else builtin unset ftp_proxy 2>/dev/null || command unset ftp_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_38 __CODEX_SNAPSHOT_PROXY_OVERRIDE_38 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_38 __CODEX_SNAPSHOT_PROXY_OVERRIDE_38 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_39}" ]; then   if [ -z "${http_proxy+x}" ] || [ "${http_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_39}" ]; then export http_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_39}"; else export http_proxy; fi else builtin unset http_proxy 2>/dev/null || command unset http_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_39 __CODEX_SNAPSHOT_PROXY_OVERRIDE_39 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_39 __CODEX_SNAPSHOT_PROXY_OVERRIDE_39 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_40}" ]; then   if [ -z "${https_proxy+x}" ] || [ "${https_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_40}" ]; then export https_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_40}"; else export https_proxy; fi else builtin unset https_proxy 2>/dev/null || command unset https_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_40 __CODEX_SNAPSHOT_PROXY_OVERRIDE_40 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_40 __CODEX_SNAPSHOT_PROXY_OVERRIDE_40 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_41}" ]; then   if [ -z "${no_proxy+x}" ] || [ "${no_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_41}" ]; then export no_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_41}"; else export no_proxy; fi else builtin unset no_proxy 2>/dev/null || command unset no_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_41 __CODEX_SNAPSHOT_PROXY_OVERRIDE_41 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_41 __CODEX_SNAPSHOT_PROXY_OVERRIDE_41 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_42}" ]; then   if [ -z "${npm_config_cafile+x}" ] || [ "${npm_config_cafile-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_42}" ]; then export npm_config_cafile="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_42}"; else export npm_config_cafile; fi else builtin unset npm_config_cafile 2>/dev/null || command unset npm_config_cafile; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_42 __CODEX_SNAPSHOT_PROXY_OVERRIDE_42 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_42 __CODEX_SNAPSHOT_PROXY_OVERRIDE_42 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_43}" ]; then   if [ -z "${npm_config_http_proxy+x}" ] || [ "${npm_config_http_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_43}" ]; then export npm_config_http_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_43}"; else export npm_config_http_proxy; fi else builtin unset npm_config_http_proxy 2>/dev/null || command unset npm_config_http_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_43 __CODEX_SNAPSHOT_PROXY_OVERRIDE_43 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_43 __CODEX_SNAPSHOT_PROXY_OVERRIDE_43 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_44}" ]; then   if [ -z "${npm_config_https_proxy+x}" ] || [ "${npm_config_https_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_44}" ]; then export npm_config_https_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_44}"; else export npm_config_https_proxy; fi else builtin unset npm_config_https_proxy 2>/dev/null || command unset npm_config_https_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_44 __CODEX_SNAPSHOT_PROXY_OVERRIDE_44 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_44 __CODEX_SNAPSHOT_PROXY_OVERRIDE_44 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_45}" ]; then   if [ -z "${npm_config_noproxy+x}" ] || [ "${npm_config_noproxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_45}" ]; then export npm_config_noproxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_45}"; else export npm_config_noproxy; fi else builtin unset npm_config_noproxy 2>/dev/null || command unset npm_config_noproxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_45 __CODEX_SNAPSHOT_PROXY_OVERRIDE_45 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_45 __CODEX_SNAPSHOT_PROXY_OVERRIDE_45 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_46}" ]; then   if [ -z "${npm_config_proxy+x}" ] || [ "${npm_config_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_46}" ]; then export npm_config_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_46}"; else export npm_config_proxy; fi else builtin unset npm_config_proxy 2>/dev/null || command unset npm_config_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_46 __CODEX_SNAPSHOT_PROXY_OVERRIDE_46 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_46 __CODEX_SNAPSHOT_PROXY_OVERRIDE_46 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_47}" ]; then   if [ -z "${ws_proxy+x}" ] || [ "${ws_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_47}" ]; then export ws_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_47}"; else export ws_proxy; fi else builtin unset ws_proxy 2>/dev/null || command unset ws_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_47 __CODEX_SNAPSHOT_PROXY_OVERRIDE_47 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_47 __CODEX_SNAPSHOT_PROXY_OVERRIDE_47 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_48}" ]; then   if [ -z "${wss_proxy+x}" ] || [ "${wss_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_48}" ]; then export wss_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_48}"; else export wss_proxy; fi else builtin unset wss_proxy 2>/dev/null || command unset wss_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_48 __CODEX_SNAPSHOT_PROXY_OVERRIDE_48 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_48 __CODEX_SNAPSHOT_PROXY_OVERRIDE_48 fi if [ -n "${PATH:-}" ]; then export PATH='/home/box/.local/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/codex-path':"$PATH"; else export PATH='/home/box/.local/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/codex-path'; fi  exec '/bin/bash' -c 'ps -eo pid,ppid,args | rg '"'"'build_transitions|scene_plate.mp4'"'"''
+      2       1 /bin/bash -c ps -eo pid,ppid,args | rg 'build_transitions|scene_plate.mp4'
+      4       2 rg build_transitions|scene_plate.mp4
+
+ succeeded in 29058ms:
+film/chapters/s08.js:6:import {cryptNucleus,columnar,erythrocyte,cell,follicle} from '../lib_ext/cells_ext.js';
+film/chapters/s08.js:160: for(let i=0;i<13;i++)erythrocyte(c,-18+U()*55,-278+U()*20,.65,U()*TAU,i);
+film/chapters/s08.js:190: for(const [i,x,y] of [[0,-57,-353],[1,48,-365],[2,-26,-379],[3,88,-382]]){c.save();c.globalAlpha=.45;erythrocyte(c,x,y,.38,E()*TAU,i);c.restore();}
+film/lib_ext/he_mucosa.js:20:function blobPath(ctx, cx, cy, rx, ry, seed, amp = .12, n = 22) { ctx.beginPath(); for (let i = 0; i <= n; i++) { const a = i / n * 6.283, f = 1 + amp * (noise2(Math.cos(a) * 1.3 + seed, Math.sin(a) * 1.3 + seed * .7) - .5) * 2; const x = cx + Math.cos(a) * rx * f, y = cy + Math.sin(a) * ry * f; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.closePath(); }
+film/lib_ext/he_mucosa.js:24:  for (let c = 0; c < 14; c++) { const cx = -400 + R() * 800, cy = -400 + R() * 100, n = 8 + Math.floor(R() * 12);
+film/lib_ext/he_mucosa.js:25:    for (let i = 0; i < n; i++) out.push({ x: cx + gauss() * 45, y: Math.min(-296, cy + gauss() * 30), band: 'lumen', kind: 'pus', lobes: lobePick(), rot: R() * 6.28, sz: .85 + R() * .3 }); }
+film/lib_ext/he_mucosa.js:34:    c.cx = (c.mx + c.x) / 2 + gauss() * 50; c.cy = (c.my + c.y) / 2 + gauss() * 50; }                                        // curved emigration path
+film/lib_ext/he_mucosa.js:86:      else { const q = (k - .25) / .75, e = 1 - Math.pow(1 - q, 2.2); [x, y] = bez([c.mx, c.my], [c.cx, c.cy], [c.x, c.y], e); s = .6 + .4 * Math.min(1, q * 2); } }
+film/timeline.js:3:// Preserve the approved scene through its legacy clock.
+film/timeline.js:14:const legacy = {at:id=>(id-29)*6,end:id=>(id-28)*6,frac:(id,f)=>(id-29+f)*6};
+film/timeline.js:21:scene.draw = (ctx,t) => draw.call(scene,ctx,sceneTime(t),legacy);
+film/lib_ext/cells_ext.js:37:export function erythrocyte(c,x,y,s=1,rot=0,key=0){
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vdb        128G   65G   63G  51% /workspace/病理科普视频/v5
+
+exec
+/bin/bash -lc 'tail -8 qa/v6/animatic/v2/plate.log; ffprobe -v error -show_entries format=duration -of csv=p=0 qa/v6/animatic/v2/scene_plate.mp4; assembly/pipeline/assemble.sh --scene-video /workspace/病理科普视频/v5/qa/v6/animatic/v2/scene_plate.mp4 --cues /workspace/病理科普视频/v5/qa/v6/animatic/cues_real.json --voice /workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav --content-duration 327.8315 --fps 30 --out-dir /workspace/病理科普视频/v5/qa/v6/animatic/v2 --out-name 粗剪_v2 --no-blind > qa/v6/animatic/v2/assembly.log 2>&1' in /workspace/病理科普视频/v5
+ succeeded in 29826ms:
+exec
+/bin/bash -lc "tail -4 qa/v6/animatic/v2/assembly.log; cat > qa/v6/animatic/v2/check_paper.mjs <<'JS'
+import fs from 'node:fs';
+import {execFileSync} from 'node:child_process';
+import {withPage,canvasPng} from '../../../../assembly/pipeline/browser.mjs';
+const root=process.cwd(), out=root+'/qa/v6/animatic/v2/';
+const old=out+'baseline_subtitle';fs.mkdirSync(old,{recursive:true});
+for(const f of ['subtitle.js','config.js','index.html'])fs.writeFileSync(old+'/'+f,execFileSync('git',['show','HEAD:assembly/subtitle/'+f]));
+fs.symlinkSync(root+'/assembly/subtitle/fonts',old+'/fonts','dir');
+const cues=JSON.parse(fs.readFileSync(out+'../cues_real.json')).cues;
+const times=[1,50,220];
+for(const [dir,prefix] of [[old,'v1'],[root+'/assembly/subtitle','v2']])await withPage(dir,'http://paper.local',async page=>{
+ await page.evaluate(c=>{window.CUES=c;window.AUTO_THEME=true;},cues);
+ for(const t of times)fs.writeFileSync(out+"'`paper_${prefix}_${t}.png`,await canvasPng(page,t,'"'overlay'));
+});
+JS
+node qa/v6/animatic/v2/check_paper.mjs" in /workspace/病理科普视频/v5
+ succeeded in 1166ms:
+cues 77 source=全稿_v3/timeline.json real start/end duration=327.8315
+content 327.8333333333333s (9835 frames) + endcard 12s → 339.8333333333333s
+still t01=2.0604583333333335 t03=10.364729166666667 endcardLocal=3 file=330.8333333333333
+
+exec
+/bin/bash -lc 'tail -5 qa/v6/animatic/v2/assembly.log; tail -3 qa/v6/animatic/v2/plate.log; ls -lh qa/v6/animatic/v2/scene_plate.mp4' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+cues 77 source=全稿_v3/timeline.json real start/end duration=327.8315
+content 327.8333333333333s (9835 frames) + endcard 12s → 339.8333333333333s
+still t01=2.0604583333333335 t03=10.364729166666667 endcardLocal=3 file=330.8333333333333
+audio two-pass 
+-rw-r--r-- 1 box box 6.0M Nov 12 10:07 qa/v6/animatic/v2/scene_plate.mp4
+
+codex
+过渡底板已生成：纸色逐渐压暗，圆形视野展开，切出时反向收拢。深色字幕已改为暖白文字、深色描边和更明亮的朱红高亮，并去掉浅色渐变带。现在正在合成整片，同时比对纸色段的字幕帧，检查原样式是否逐像素保留。
+exec
+/bin/bash -lc "python3 - <<'PY'
+from PIL import Image
+import numpy as np,json
+p='qa/v6/animatic/v2/'
+r=[]
+for t in [1,50,220]:
+ a=np.array(Image.open(p+f'paper_v1_{t}.png')).astype(float); b=np.array(Image.open(p+f'paper_v2_{t}.png')).astype(float)
+ r.append({'t':t,'mae_rgba':float(np.abs(a-b).mean())})
+print(r);open(p+'paper_mae.json','w').write(json.dumps(r,indent=2))
+PY
+ tail -4 qa/v6/animatic/v2/assembly.log" in /workspace/病理科普视频/v5
+ succeeded in 627ms:
+[{'t': 1, 'mae_rgba': 0.0}, {'t': 50, 'mae_rgba': 0.0}, {'t': 220, 'mae_rgba': 0.0}]
+cues 77 source=全稿_v3/timeline.json real start/end duration=327.8315
+content 327.8333333333333s (9835 frames) + endcard 12s → 339.8333333333333s
+still t01=2.0604583333333335 t03=10.364729166666667 endcardLocal=3 file=330.8333333333333
+audio two-pass 
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+s=open('qa/v6/animatic/v2/build_transitions.py').read();s=s.replace('import pathlib,json,subprocess,math','import pathlib,json,subprocess,math,argparse')
+a=s.index('P=pathlib');b=s.index('def run',a)
+s=s[:a]+'''ap=argparse.ArgumentParser(description=__doc__)
+ap.add_argument('--ranges',required=True);ap.add_argument('--scene',required=True)
+ap.add_argument('--scene-video',required=True);ap.add_argument('--base',required=True)
+ap.add_argument('--out',required=True);ap.add_argument('--work',required=True)
+ap.add_argument('--tail',type=float,default=0.8)
+ap.add_argument('--cx',type=float,default=1110);ap.add_argument('--cy',type=float,default=475)
+a=ap.parse_args();P=pathlib.Path(a.work);P.mkdir(parents=True,exist_ok=True)
+r=next(r for r in json.loads(pathlib.Path(a.ranges).read_text()) if r['scene']==a.scene)
+'''+s[b:]
+s=s.replace(\"str(P.parent/'S08.mp4')\",\"a.scene_video\").replace(\"frame(0,P/'first.png');frame(25.9,P/'last.png')\",'''duration=float(subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration','-of','csv=p=0',a.scene_video]))
+frame(0,P/'first.png');frame(max(0,duration-0.1),P/'last.png')''').replace('(x-1110)**2+(y-475)**2','(x-a.cx)**2+(y-a.cy)**2').replace(\"r['exitStart']+0.8\",\"r['exitStart']+a.tail\").replace(\"str(P.parent/'scene_plate.mp4')\",\"a.base\").replace(\"str(P/'scene_plate.mp4')\",\"a.out\")
+open('assembly/pipeline/iris_plate.py','w').write(s)
+PY
+cat >> assembly/subtitle/README.md <<'EOF'
+
+## Scene themes (v6)
+
+"'`sceneTheme.js` holds microscope cue ranges. Add `{scene, first, last,
+enterBefore, enterAfter, exitAfter}`; IDs are strings from the actual cue snapshot.
+`resolveRanges(cues)` supplies picture anchor times; `darkAt(t,cues)` supplies the
+same smoothstep progress for subtitle colours. The assembler enables AUTO_THEME,
+and includes this progress in its frame reuse key. Layout, cue alpha, wrapping,
+and English card timing stay identical. Paper (dark=0) preserves the original
+pixel path. Dark (dark=1) uses #F4EFE6, dark halo, #EE7465 accents, and no scrim.
+Intermediate values interpolate one glyph pass and fade the paper scrim away.
+EOF
+cat >> assembly/pipeline/README.md <<'"'EOF'
+
+## Microscope iris transitions
+
+Resolve "'`subtitle/sceneTheme.js::resolveRanges` with the current cue snapshot to a
+JSON file (never store absolute edit times as configuration). Then:
+
+```
+python3 assembly/pipeline/iris_plate.py --ranges resolved_ranges.json --scene S08 '"\\
+  --scene-video S08.mp4 --base scene_plate.mp4 --out transitioned_plate.mp4 \\
+  --work qa/iris_S08 --tail 0.8 --cx 1110 --cy 475
+"'```
+
+The scene input'"'s first frame is held during entry; its final held state is used
+for exit. The paper dims while a feathered circular mask expands about the
+specified eyepiece centre; exit reverses it. Tail must match the scene hold in
+the base plate. For S10/S11/S14/S19 add a cue range, supply that scene's local clip,
+and invoke again using the previous transitioned plate as "'`--base` (distinct
+output). Regenerate resolved ranges and the plate whenever narration changes.
+EOF
+ tail -6 qa/v6/animatic/v2/assembly.log' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+subtitle frames 3360/9835
+subtitle frames 4920/9835
+subtitle frames 9240/9835
+subtitle frames 9720/9835
+subtitle frames 9835/9835
+overlay encode
+
+exec
+/bin/bash -lc "cat > qa/v6/animatic/v2/final_check.py <<'PY'
+import pathlib,json,subprocess,math
+import numpy as np
+from PIL import Image,ImageDraw,ImageFont
+P=pathlib.Path(__file__).resolve().parent
+font=ImageFont.truetype('/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',22)
+r=json.loads((P/'resolved.json').read_text());cues=json.loads((P.parent/'cues_real.json').read_text())['cues']
+v2=P.parent/'粗剪_v2.mp4';v1=P.parent/'粗剪_v1.mp4'
+def frame(v,t):
+ data=subprocess.check_output(['ffmpeg','-v','error','-ss',str(t),'-i',str(v),'-frames:v','1','-f','image2pipe','-vcodec','png','-threads','1','-'])
+ import io
+ return Image.open(io.BytesIO(data)).convert('RGB')
+for kind,label in [('enter','切入'),('exit','切出')]:
+ times=np.linspace(r[kind+'Start']-.1,r[kind+'End']+.1,6)
+ sheet=Image.new('RGB',(1920,2*580),'#F4EFE6');d=ImageDraw.Draw(sheet)
+ for i,t in enumerate(times):
+  t=round(t*30)/30;im=frame(v2,t).resize((640,360));x=(i%3)*640;y=(i//3)*580
+  sheet.paste(im,(x,y+40));d.text((x+12,y+8),f'{label}  t={t:.3f}s',font=font,fill='#2A2A35')
+  # Include a full-resolution subtitle crop, scaled to tile width.
+  sheet.paste(frame(v2,t).crop((0,950,1920,1080)).resize((640,100)),(x,y+415))
+ sheet.save(P/f'过渡_{label}.png')
+sheet=Image.new('RGB',(3840,380),'#F4EFE6');d=ImageDraw.Draw(sheet)
+for i,id in enumerate(['31','34']):
+ cue=next(c for c in cues if c['id']==id);t=round((cue['start']+.65)*30)/30
+ for j,v in enumerate([v1,v2]):
+  sheet.paste(frame(v,t).crop((0,950,1920,1080)),(j*1920,i*190+50))
+  d.text((j*1920+15,i*190+10),f'句{id} / v{j+1} / t={t:.3f}s',font=font,fill='#2A2A35')
+sheet.save(P/'字幕_v1_vs_v2.png')
+video_mae=[]
+for t in [1,50,220]:
+ a=np.array(frame(v1,t).crop((0,950,1920,1080)),dtype=float);b=np.array(frame(v2,t).crop((0,950,1920,1080)),dtype=float)
+ video_mae.append({'t':t,'mae_rgb':float(np.abs(a-b).mean())})
+(P/'video_paper_mae.json').write_text(json.dumps(video_mae,indent=2))
+print('encoded paper MAE',video_mae)
+for v in [v2,P.parent/'粗剪_v2_720p.mp4']:
+ data=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_format','-show_streams','-of','json',str(v)]));(P/(v.stem+'_probe.json')).write_text(json.dumps(data,indent=2));print(v.name,data['format']['duration'])
+PY
+ tail -4 qa/v6/animatic/v2/assembly.log; git diff --stat" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+subtitle frames 9240/9835
+subtitle frames 9720/9835
+subtitle frames 9835/9835
+overlay encode
+ assembly/pipeline/README.md    | 18 ++++++++++++++++++
+ assembly/pipeline/assemble.mjs |  6 ++++--
+ assembly/subtitle/README.md    | 11 +++++++++++
+ assembly/subtitle/index.html   | 12 +++++++-----
+ assembly/subtitle/subtitle.js  | 20 +++++++++++++++-----
+ 5 files changed, 55 insertions(+), 12 deletions(-)
+
+exec
+/bin/bash -lc 'tail -6 qa/v6/animatic/v2/assembly.log; git diff --check; python3 -m py_compile assembly/pipeline/iris_plate.py; node --check assembly/subtitle/sceneTheme.js' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+subtitle frames 3360/9835
+subtitle frames 4920/9835
+subtitle frames 9240/9835
+subtitle frames 9720/9835
+subtitle frames 9835/9835
+overlay encode
+
+exec
+/bin/bash -lc "node --input-type=module - <<'JS'
+import fs from 'node:fs';import assert from 'node:assert/strict';import {resolveRanges,darkAt} from './assembly/subtitle/sceneTheme.js';
+const cues=JSON.parse(fs.readFileSync('qa/v6/animatic/cues_real.json')).cues,r=resolveRanges(cues)[0];
+assert.equal(darkAt(r.enterStart,cues),0);assert.equal(darkAt(r.enterEnd,cues),1);assert.equal(darkAt(r.exitStart,cues),1);assert.equal(darkAt(r.exitEnd,cues),0);
+for(let i=1;i<=70;i++){const t=r.enterStart+i*.01;assert(darkAt(t,cues)>=darkAt(t-.01,cues)-1e-12);}
+const shifted=cues.map(c=>({...c,start:c.start+10,end:c.end+10}));assert(Math.abs(resolveRanges(shifted)[0].enterStart-r.enterStart-10)<1e-10);
+console.log('cue-relative timing, endpoints, continuous monotonic entry: PASS');
+JS
+ tail -5 qa/v6/animatic/v2/assembly.log; du -sh qa/v6/animatic/v2/tmp" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+cue-relative timing, endpoints, continuous monotonic entry: PASS
+subtitle frames 9240/9835
+subtitle frames 9720/9835
+subtitle frames 9835/9835
+overlay encode
+endcard render
+116M	qa/v6/animatic/v2/tmp
+
+codex
+纸色段的三帧字幕比对已通过，编码前 RGBA MAE 均为 0。句号相对时间和过渡端点检查也已通过。整片已完成字幕叠加，正在处理片尾；完成后会从最终视频提取两张六帧过渡拼图和句 31、34 的字幕对比图。
+exec
+/bin/bash -lc 'git diff -- assembly/subtitle/index.html assembly/subtitle/subtitle.js; ls -lh qa/v6/animatic/v2/tmp/*.mp4' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+diff --git a/assembly/subtitle/index.html b/assembly/subtitle/index.html
+index 12d8878..8ad1116 100644
+--- a/assembly/subtitle/index.html
++++ b/assembly/subtitle/index.html
+@@ -17,6 +17,8 @@ import {
+   PRESETS, ACTIVE, BAND, FONT, PAPER, INK,
+ } from './subtitle.js';
+ 
++import { darkAt } from './sceneTheme.js';
++window.AUTO_THEME = false;
+ window.READY = false;
+ window.CUES = [];
+ window.DARK = 0;
+@@ -44,8 +46,8 @@ if (!document.fonts.check(`${ACTIVE.weightCn} ${ACTIVE.cnSize}px MixSans`) || !d
+ const canvas = document.querySelector('canvas');
+ const ctx = canvas.getContext('2d', { alpha: true });
+ 
+-function opts(preset) {
+-  return { dark: window.DARK || 0, xfade: !!window.XFADE, paper: PAPER, preset };
++function opts(preset, t = 0) {
++  return { dark: window.AUTO_THEME ? darkAt(t, window.CUES) : (window.DARK || 0), xfade: !!window.XFADE, paper: PAPER, preset };
+ }
+ 
+ function reset() {
+@@ -62,13 +64,13 @@ window.render = (t) => {
+   ctx.fillStyle = PAPER;
+   ctx.fillRect(0, 0, 1920, 1080);
+   safeFade(ctx, PAPER, window.DARK || 0);
+-  drawSubtitles(ctx, Number(t), window.CUES || [], opts());
++  drawSubtitles(ctx, Number(t), window.CUES || [], opts(undefined, t));
+ };
+ 
+ window.renderOverlay = (t) => {
+   reset();
+   ctx.clearRect(0, 0, 1920, 1080);
+-  drawSubtitles(ctx, Number(t), window.CUES || [], opts());
++  drawSubtitles(ctx, Number(t), window.CUES || [], opts(undefined, t));
+ };
+ 
+ window.renderPreset = (t, presetId) => {
+@@ -76,7 +78,7 @@ window.renderPreset = (t, presetId) => {
+   ctx.clearRect(0, 0, 1920, 1080);
+   ctx.fillStyle = PAPER;
+   ctx.fillRect(0, 0, 1920, 1080);
+-  drawSubtitles(ctx, Number(t), window.CUES || [], opts(PRESETS[presetId] || ACTIVE));
++  drawSubtitles(ctx, Number(t), window.CUES || [], opts(PRESETS[presetId] || ACTIVE, t));
+ };
+ 
+ window.measureCards = (cues) => {
+diff --git a/assembly/subtitle/subtitle.js b/assembly/subtitle/subtitle.js
+index 78bd968..76b28a2 100644
+--- a/assembly/subtitle/subtitle.js
++++ b/assembly/subtitle/subtitle.js
+@@ -248,8 +248,17 @@ function accentSegments(text) {
+   return segs;
+ }
+ 
++// Interpolate one glyph pass: no duplicated text or threshold switch.
++function mixColour(a, b, t) {
++  if (t <= 0) return a;
++  if (t >= 1) return b;
++  const rgb = c => c.startsWith('#') ? c.slice(1).match(/../g).map(x => parseInt(x,16)) : c.split(',').map(Number);
++  return `rgb(${rgb(a).map((v,i) => Math.round(v+(rgb(b)[i]-v)*t)).join(',')})`;
++}
+ function haloRgb(style, dark) {
+-  return dark > 0.5 ? style.colours.darkRgb : style.colours.paperRgb;
++  if (dark <= 0) return style.colours.paperRgb;
++  if (dark >= 1) return style.colours.darkRgb;
++  return style.colours.paperRgb.split(',').map((v,i) => Math.round(+v+(+style.colours.darkRgb.split(',')[i]-v)*dark)).join(',');
+ }
+ 
+ function paintHalo(ctx, style, dark) {
+@@ -280,7 +289,7 @@ function paintChinese(ctx, text, dark, alpha, style) {
+         ctx.strokeText(sg, xx, style.band.cnY);
+         ctx.shadowColor = 'transparent';
+       } else {
+-        ctx.fillStyle = acc ? style.colours.accent : (dark > 0.5 ? style.colours.darkInk : style.colours.ink);
++        ctx.fillStyle = acc ? mixColour(style.colours.accent, '#EE7465', dark) : mixColour(style.colours.ink, '#F4EFE6', dark);
+         ctx.fillText(sg, xx, style.band.cnY);
+       }
+       xx += w;
+@@ -301,7 +310,7 @@ function paintEnglish(ctx, text, dark, alpha, style) {
+   paintHalo(ctx, style, dark);
+   ctx.strokeText(text, style.frame.cx, style.band.enY);
+   ctx.shadowColor = 'transparent';
+-  ctx.fillStyle = dark > 0.5 ? style.colours.darkInk : style.colours.ink;
++  ctx.fillStyle = mixColour(style.colours.ink, '#F4EFE6', dark);
+   ctx.fillText(text, style.frame.cx, style.band.enY);
+   ctx.restore();
+ }
+@@ -316,15 +325,16 @@ function paperRgbOf(paper, style, dark) {
+ }
+ 
+ export function safeFade(ctx, paper = PAPER, dark = 0, preset = ACTIVE) {
++  if (dark >= 1) return;
+   const style = asPreset(preset);
+   const { fadeTop, fadeEnd } = style.band;
+-  const rgb = paperRgbOf(paper, style, dark);
++  const rgb = paperRgbOf(paper, style, 0);
+   const ease = style.fade.extend === 'ease';
+   const gradBottom = ease ? style.frame.h : fadeEnd;
+   const fillBottom = style.fade.extend === 'short' ? fadeEnd : style.frame.h;
+   const g = ctx.createLinearGradient(0, fadeTop, 0, gradBottom);
+   for (const stop of style.fade.stops) {
+-    g.addColorStop(stop.t, `rgba(${rgb},${stop.a})`);
++    g.addColorStop(stop.t, `rgba(${rgb},${stop.a * (1-dark)})`);
+   }
+   const h = fillBottom - fadeTop;
+   if (!(h > 0)) return;
+-rw-r--r-- 1 box box  29M Nov 12 10:09 qa/v6/animatic/v2/tmp/content.mp4
+-rw-r--r-- 1 box box 3.1M Nov 12 10:09 qa/v6/animatic/v2/tmp/endcard.mp4
+-rw-r--r-- 1 box box 9.8M Nov 12 10:08 qa/v6/animatic/v2/tmp/scene.mp4
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+p='assembly/subtitle/config.js';s=open(p).read().replace(\"darkInk: '#EFE8DC',\",\"darkInk: '#F4EFE6',\\n  darkAccent: '#EE7465',\");open(p,'w').write(s)
+p='assembly/subtitle/subtitle.js';s=open(p).read().replace(\"mixColour(style.colours.accent, '#EE7465', dark)\",\"mixColour(style.colours.accent, style.colours.darkAccent, dark)\").replace(\"mixColour(style.colours.ink, '#F4EFE6', dark)\",\"mixColour(style.colours.ink, style.colours.darkInk, dark)\");open(p,'w').write(s)
+PY
+ tail -5 qa/v6/animatic/v2/assembly.log" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+subtitle frames 9720/9835
+subtitle frames 9835/9835
+overlay encode
+endcard render
+mux /workspace/病理科普视频/v5/qa/v6/animatic/v2/粗剪_v2.mp4
+
+exec
+/bin/bash -lc 'node qa/v6/animatic/v2/check_paper.mjs' in /workspace/病理科普视频/v5
+ exited 1 in 195ms:
+node:fs:1937
+  binding.symlink(
+          ^
+
+Error: EEXIST: file already exists, symlink '/workspace/病理科普视频/v5/assembly/subtitle/fonts' -> '/workspace/病理科普视频/v5/qa/v6/animatic/v2/baseline_subtitle/fonts'
+    at Object.symlinkSync (node:fs:1937:11)
+    at file:///workspace/%E7%97%85%E7%90%86%E7%A7%91%E6%99%AE%E8%A7%86%E9%A2%91/v5/qa/v6/animatic/v2/check_paper.mjs:7:4
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  errno: -17,
+  code: 'EEXIST',
+  syscall: 'symlink',
+  path: '/workspace/病理科普视频/v5/assembly/subtitle/fonts',
+  dest: '/workspace/病理科普视频/v5/qa/v6/animatic/v2/baseline_subtitle/fonts'
+}
+
+Node.js v24.22.1
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+p='qa/v6/animatic/v2/check_paper.mjs';s=open(p).read().replace(\"fs.symlinkSync(root+'/assembly/subtitle/fonts',old+'/fonts','dir');\",\"if ("'!fs.existsSync(old+'"'/fonts')) fs.symlinkSync(root+'/assembly/subtitle/fonts',old+'/fonts','dir');\");open(p,'w').write(s)
+PY
+node qa/v6/animatic/v2/check_paper.mjs" in /workspace/病理科普视频/v5
+ succeeded in 1613ms:
+ succeeded in 144336ms:
+[mov,mp4,m4a,3gp,3g2,mj2 @ 0x5582fbfff0c0] moov atom not found
+qa/v6/animatic/v2/scene_plate.mp4: Invalid data found when processing input
+
+exec
+/bin/bash -lc 'tail -4 qa/v6/animatic/v2/assembly.log; ls -lh qa/v6/animatic/v2/粗剪*' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+mux /workspace/病理科普视频/v5/qa/v6/animatic/v2/粗剪_v2.mp4
+720p
+report /workspace/病理科普视频/v5/qa/v6/animatic/v2/dryrun_report.md
+dry run OK
+-rw-r--r-- 1 box box 31M Nov 12 10:09 qa/v6/animatic/v2/粗剪_v2.mp4
+-rw-r--r-- 1 box box 13M Nov 12 10:09 qa/v6/animatic/v2/粗剪_v2_720p.mp4
+-rw-r--r-- 1 box box 63K Nov 12 10:09 qa/v6/animatic/v2/粗剪_v2_report.json
+
+exec
+/bin/bash -lc 'mv qa/v6/animatic/v2/粗剪_v2.mp4 qa/v6/animatic/粗剪_v2.mp4; mv qa/v6/animatic/v2/粗剪_v2_720p.mp4 qa/v6/animatic/粗剪_v2_720p.mp4; python3 qa/v6/animatic/v2/final_check.py > qa/v6/animatic/v2/final_check.log 2>&1' in /workspace/病理科普视频/v5
+ succeeded in 6241ms:
+exec
+/bin/bash -lc 'sha256sum engine/lib/{he,he_detail,wash,ann,scope,camera}.js parity_r4/chapters/04.js > qa/v6/animatic/v2/sha256_结束.txt; sha256sum -c qa/v6/animatic/v2/sha256_开工.txt > qa/v6/animatic/v2/sha256_校验.log; git diff --exit-code HEAD -- assembly/endcard film/chapters/s08.js film/timeline.js; cat qa/v6/animatic/v2/sha256_校验.log; tail -4 qa/v6/animatic/v2/final_check.log' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+engine/lib/he.js: OK
+engine/lib/he_detail.js: OK
+engine/lib/wash.js: OK
+engine/lib/ann.js: OK
+engine/lib/scope.js: OK
+engine/lib/camera.js: OK
+parity_r4/chapters/04.js: OK
+encoded paper MAE [{'t': 1, 'mae_rgb': 0.0}, {'t': 50, 'mae_rgb': 0.0}, {'t': 220, 'mae_rgb': 0.0}]
+粗剪_v2.mp4 339.833333
+粗剪_v2_720p.mp4 339.833333
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+p='qa/v6/animatic/v2/final_check.py';s=open(p).read().replace('(1920,2*580)','(1920,2*400)').replace('(i//3)*580','(i//3)*400');a=s.index('  # Include a full-resolution');b=s.index(' sheet.save',a);s=s[:a]+s[b:];open(p,'w').write(s)
+PY
+python3 qa/v6/animatic/v2/final_check.py > qa/v6/animatic/v2/final_check.log 2>&1" in /workspace/病理科普视频/v5
+ succeeded in 4206ms:
+codex
+1080p 和 720p 已导出，时长均为 339.833333 秒，合成检查无阻断项。最终视频中，纸色段三帧字幕区与 v1 的 RGB MAE 也均为 0。七个锁定文件结束校验全部通过；正在整理交付图和自检说明。
+exec
+/bin/bash -lc "python3 - <<'PY'
+import pathlib,json,math
+p=pathlib.Path('qa/v6/animatic/v2');r=json.loads((p/'resolved.json').read_text());full=math.ceil(r['enterEnd']*30)/30
+sha=(p/'sha256_结束.txt').read_text()
+s=f'''# 粗剪 v2 自检
+
+分支 v6-fresh，基于 HEAD a11a43a。未执行 git commit。assembly/endcard/、S08 绘制代码及 film/timeline.js 与 HEAD 一致。未读取、打印或修改配音/.mimo.env。
+
+## 过渡与句号绑定
+
+通用配置：assembly/subtitle/sceneTheme.js 的 MICROSCOPE_RANGES。仅配置句号及相对偏移，不写死全局秒数；resolveRanges 从当前 cues_real.json 解析，darkAt 提供同一 smoothstep 进度。
+
+- 切入：句 29 start −0.45 s → start +0.25 s，长 **0.70 s**。本次解析为 {r['enterStart']:.9f}–{r['enterEnd']:.9f} s；起点正好等于句 28 end，未覆盖句 28 内容。
+- 切出：句 34 end → end +0.70 s，长 **0.70 s**。本次解析为 {r['exitStart']:.9f}–{r['exitEnd']:.9f} s。句 34 完整播完后才开始；句 35 正常开始，字幕按同一进度变色，不移动或裁剪配音/字幕。
+- 纸色随进度压暗，围绕目镜中心 (1110,475) 的羽化圆形遮罩由小展开，切出反向收拢。没有全屏硬溶解或突然黑帧。首帧低倍在切入期间保持；切出使用既有末尾定格画面。切出结束后的纸色保持覆盖原 S08 的 0.8 s 尾留，防止深色底返闪。
+- 低倍完整状态：设计时刻句 29 +0.250000 s；30 fps 首个完全结束过渡的采样帧 **{full:.9f} s**，即句 29 **+{full-(r['enterStart']+.45):.9f} s**，小于 0.3 s。后续低倍保持和原镜头推进未改动。
+
+## 深色字幕
+
+暖白 #F4EFE6、深色描边/阴影；关键词 #EE7465。dark=1 时不绘制浅色渐变带，白色光晕改为深色。字号、基线、字重、中文换行、英文续卡和淡入淡出使用原实现。插值只改变同一套文字的颜色与背景透明度，未叠画两套文字；缓存 key 包含 darkAt，避免跨过渡复用错误帧。
+
+## 纸色 MAE
+
+从 HEAD 提取 v1 原字幕组件，在同一 Chrome / MixSans 环境渲染，再与 v2 对比。另从最终 v1/v2 MP4 同时刻解码并比较 y=950–1079 字幕区 RGB。
+
+|全局时刻|编码前字幕 RGBA MAE|最终视频字幕区 RGB MAE|
+|---|---:|---:|
+|1 s|0|0|
+|50 s|0|0|
+|220 s|0|0|
+
+均为逐像素一致，满足 MAE<0.5。明细见 paper_mae.json、video_paper_mae.json；复查脚本 check_paper.mjs、final_check.py。
+
+## 输出与参数
+
+../粗剪_v2.mp4：1920×1080、30 fps、H.264 yuv420p；../粗剪_v2_720p.mp4：1280×720。总时长均 **339.833333 s**，内容 327.833333 s + 原片尾 12 s。真实 cues_real.json、旁白_v3.wav；旁白从 0 开始，无音乐。字幕合成、编码、音频参数沿用 v1。合成报告 粗剪_v2_report.json：blockers=[]，endcardUntouched=true。视频导出后移动至指定 animatic/ 路径，报告中的原输出路径为移动前位置。
+
+过渡_切入.png / 过渡_切出.png：以各过渡起点前 0.1 s 至终点后 0.1 s 等分取六帧；视频帧按最近的 30 fps 采样，图上注明实际采样时刻。字幕_v1_vs_v2.png：句 31、34 的 start+0.65 s 附近字幕区，左 v1、右 v2。
+
+## 复用及重建
+
+S10/S11/S14/S19 成片接入时，在 MICROSCOPE_RANGES 添加各自 first/last 句号和偏移；本版尚无这些场景画面，保留纸色占位。每次重生成配音后，用新的 cues 调用 resolveRanges，重生成 ranges.json，再运行 assembly/pipeline/iris_plate.py。传入对应场景视频、原底板、输出底板及目镜中心；多段按顺序将上次输出作为下次 --base，输出用不同文件名。字幕自动按全部句号范围切换。通用脚本参数与命令见 assembly/pipeline/README.md。
+
+本次底板构建脚本 build_transitions.py；通用实现已提取至 assembly/pipeline/iris_plate.py。后续接入使用通用实现；不需要改 S08 绘制代码。
+
+合成命令（工作目录 v5）：
+
+"'```bash
+assembly/pipeline/assemble.sh --scene-video "$PWD/qa/v6/animatic/v2/scene_plate.mp4" --cues "$PWD/qa/v6/animatic/cues_real.json" --voice /workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav --content-duration 327.8315 --fps 30 --out-dir "$PWD/qa/v6/animatic/v2" --out-name 粗剪_v2 --no-blind
+```
+
+## SHA-256
+
+开工、结束七个锁定文件逐项一致，sha256_校验.log 全部 OK。片尾及 S08 代码另用 git diff --exit-code HEAD 校验无变更。
+
+```text
+{sha}```
+'"'''
+(p/'自检.md').write_text(s)
+PY
+ git diff --check; cat qa/v6/animatic/v2/final_check.log; git status --short" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+encoded paper MAE [{'t': 1, 'mae_rgb': 0.0}, {'t': 50, 'mae_rgb': 0.0}, {'t': 220, 'mae_rgb': 0.0}]
+粗剪_v2.mp4 339.833333
+粗剪_v2_720p.mp4 339.833333
+ M assembly/pipeline/README.md
+ M assembly/pipeline/assemble.mjs
+ M assembly/subtitle/README.md
+ M assembly/subtitle/config.js
+ M assembly/subtitle/index.html
+ M assembly/subtitle/subtitle.js
+?? assembly/pipeline/__pycache__/
+?? assembly/pipeline/iris_plate.py
+?? assembly/subtitle/sceneTheme.js
+?? qa/briefs/run_v6_a02.log
+?? qa/briefs/v6_a02_dark_transition.md
+?? qa/v6/animatic/S08.mp4
+?? qa/v6/animatic/alignment_frames/
+?? qa/v6/animatic/contact_frames/
+?? qa/v6/animatic/frames/
+?? qa/v6/animatic/s08_states/
+?? qa/v6/animatic/scene_plate.mp4
+?? qa/v6/animatic/v2/
+?? qa/v6/animatic/粗剪_v1.mp4
+?? qa/v6/animatic/粗剪_v1_720p.mp4
+?? qa/v6/animatic/粗剪_v2.mp4
+?? qa/v6/animatic/粗剪_v2_720p.mp4
+
+2026-11-12T02:11:11.961020Z ERROR codex_core::tools::router: error=exec_command failed: CreateProcess { message: "Rejected(\"`/bin/bash -lc \\\"rm -rf assembly/pipeline/__pycache__; python3 - <<'PY'\\nimport json,pathlib\\np=pathlib.Path('qa/v6/animatic/v2'); r=json.loads((p/'粗剪_v2_report.json').read_text()); print('blockers:',r['blockers'],'endcardUntouched:',r['endcardUntouched']); print('deliverables:',[(x.name,x.stat().st_size) for x in [p/'过渡_切入.png',p/'过渡_切出.png',p/'字幕_v1_vs_v2.png',p/'自检.md']])\\nPY\\\"` rejected: rm -f style commands are not permitted. Use a safer approach\")" }
+exec
+/bin/bash -lc "python3 - <<'PY'
+import json,pathlib
+cache=pathlib.Path('assembly/pipeline/__pycache__/iris_plate.cpython-311.pyc')
+for f in pathlib.Path('assembly/pipeline/__pycache__').glob('iris_plate*.pyc'): f.unlink()
+pathlib.Path('assembly/pipeline/__pycache__').rmdir()
+p=pathlib.Path('qa/v6/animatic/v2');r=json.loads((p/'粗剪_v2_report.json').read_text());print('blockers:',r['blockers'],'endcardUntouched:',r['endcardUntouched']);print([(x.name,x.stat().st_size) for x in [p/'过渡_切入.png',p/'过渡_切出.png',p/'字幕_v1_vs_v2.png',p/'自检.md']])
+PY" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+blockers: [] endcardUntouched: True
+[('过渡_切入.png', 519677), ('过渡_切出.png', 444407), ('字幕_v1_vs_v2.png', 374274), ('自检.md', 4826)]
+
+codex
+已完成，未执行 git commit。
+
+- [粗剪 v2（1080p）](/workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v2.mp4)
+- [720p 版本](/workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v2_720p.mp4)
+- [自检与交付说明](/workspace/病理科普视频/v5/qa/v6/animatic/v2/自检.md)
+
+切入、切出各 0.7 秒，按句号绑定；低倍在句 29 开始后 0.252 秒完整可见。纸色字幕三帧 MAE 均为 0，锁定文件 SHA-256 全部通过。三张对比图已放入 `qa/v6/animatic/v2/`。
+tokens used
+62,353
+已完成，未执行 git commit。
+
+- [粗剪 v2（1080p）](/workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v2.mp4)
+- [720p 版本](/workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v2_720p.mp4)
+- [自检与交付说明](/workspace/病理科普视频/v5/qa/v6/animatic/v2/自检.md)
+
+切入、切出各 0.7 秒，按句号绑定；低倍在句 29 开始后 0.252 秒完整可见。纸色字幕三帧 MAE 均为 0，锁定文件 SHA-256 全部通过。三张对比图已放入 `qa/v6/animatic/v2/`。

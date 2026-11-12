@@ -248,8 +248,17 @@ function accentSegments(text) {
   return segs;
 }
 
+// Interpolate one glyph pass: no duplicated text or threshold switch.
+function mixColour(a, b, t) {
+  if (t <= 0) return a;
+  if (t >= 1) return b;
+  const rgb = c => c.startsWith('#') ? c.slice(1).match(/../g).map(x => parseInt(x,16)) : c.split(',').map(Number);
+  return `rgb(${rgb(a).map((v,i) => Math.round(v+(rgb(b)[i]-v)*t)).join(',')})`;
+}
 function haloRgb(style, dark) {
-  return dark > 0.5 ? style.colours.darkRgb : style.colours.paperRgb;
+  if (dark <= 0) return style.colours.paperRgb;
+  if (dark >= 1) return style.colours.darkRgb;
+  return style.colours.paperRgb.split(',').map((v,i) => Math.round(+v+(+style.colours.darkRgb.split(',')[i]-v)*dark)).join(',');
 }
 
 function paintHalo(ctx, style, dark) {
@@ -280,7 +289,7 @@ function paintChinese(ctx, text, dark, alpha, style) {
         ctx.strokeText(sg, xx, style.band.cnY);
         ctx.shadowColor = 'transparent';
       } else {
-        ctx.fillStyle = acc ? style.colours.accent : (dark > 0.5 ? style.colours.darkInk : style.colours.ink);
+        ctx.fillStyle = acc ? mixColour(style.colours.accent, style.colours.darkAccent, dark) : mixColour(style.colours.ink, style.colours.darkInk, dark);
         ctx.fillText(sg, xx, style.band.cnY);
       }
       xx += w;
@@ -301,7 +310,7 @@ function paintEnglish(ctx, text, dark, alpha, style) {
   paintHalo(ctx, style, dark);
   ctx.strokeText(text, style.frame.cx, style.band.enY);
   ctx.shadowColor = 'transparent';
-  ctx.fillStyle = dark > 0.5 ? style.colours.darkInk : style.colours.ink;
+  ctx.fillStyle = mixColour(style.colours.ink, style.colours.darkInk, dark);
   ctx.fillText(text, style.frame.cx, style.band.enY);
   ctx.restore();
 }
@@ -316,15 +325,16 @@ function paperRgbOf(paper, style, dark) {
 }
 
 export function safeFade(ctx, paper = PAPER, dark = 0, preset = ACTIVE) {
+  if (dark >= 1) return;
   const style = asPreset(preset);
   const { fadeTop, fadeEnd } = style.band;
-  const rgb = paperRgbOf(paper, style, dark);
+  const rgb = paperRgbOf(paper, style, 0);
   const ease = style.fade.extend === 'ease';
   const gradBottom = ease ? style.frame.h : fadeEnd;
   const fillBottom = style.fade.extend === 'short' ? fadeEnd : style.frame.h;
   const g = ctx.createLinearGradient(0, fadeTop, 0, gradBottom);
   for (const stop of style.fade.stops) {
-    g.addColorStop(stop.t, `rgba(${rgb},${stop.a})`);
+    g.addColorStop(stop.t, `rgba(${rgb},${stop.a * (1-dark)})`);
   }
   const h = fillBottom - fadeTop;
   if (!(h > 0)) return;
