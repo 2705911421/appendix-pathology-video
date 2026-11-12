@@ -1,0 +1,3010 @@
+OpenAI Codex v0.163.0
+--------
+workdir: /workspace/病理科普视频/v5
+model: gpt-6.1-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, /workspace/病理科普视频, /workspace/garden-skills] (network access enabled)
+reasoning effort: none
+reasoning summaries: none
+session id: 01a1cd78-a7e1-71e2-a96e-1dfc4069f369
+--------
+user
+# v6 a01（Codex）：整片粗剪 v1（真实配音 + 双语字幕 + S08 成片画面 + 其余占位）
+
+工作目录 /workspace/病理科普视频/v5，分支 v6-fresh，基于提交 66ff9d4（S08 定稿，tag v6-s08-final）。不许 git commit。
+
+硬约束：
+- 锁定文件（engine/lib/he.js、he_detail.js、wash.js、ann.js、scope.js、camera.js、parity_r4/chapters/04.js）开工和结束都做 sha256 校验，不得改动；也不改 v4_mix/。
+- S08 的画面内容不得改变：在同一画面状态下，新渲染的帧与 qa/v6/b10/ 七帧必须逐像素一致（MAE<0.5）。只允许改时间轴（film/timeline.js），也就是"什么时刻到达哪个画面状态"。
+- 不得打印或改动 /workspace/病理科普视频/配音/.mimo.env。不新增任何数字上屏。
+
+任务：
+1. 时间绑定：真实时间轴在 /workspace/病理科普视频/配音/全稿_v3/timeline.json（lines[n].start/end，单位秒，n=句号）。现在 film/timeline.js 的句 29–34 是每句 6 s 的占位。改成读取真实时长：S08 片段从句 29 开始，到句 34 结束后保留约 0.8 s，片段内的时间以句 29 的起点为 0。低倍→中倍的推进仍放在 s30 之前，各句画面状态（s30–s34）与对应句同步。如果某句太短，推进动作放不下，写进报告，不要擅自删掉画面状态。
+2. 把 S08 片段渲染成 1920×1080、30 fps 的视频，使用 /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs（先查看它支持的视频或帧序列输出方式；不支持视频就输出 PNG 序列，再用 ffmpeg 编码）。
+3. 整片画面底板：长度等于 timeline.json 的 duration（约 327.8 s），底色 #F4EFE6。S08 视频放在句 29 起点对应的真实时刻。其余时段是占位：每个场景（按 分镜/分镜_v1.md 的 S01–S21 句号范围）在左上角用小号灰字写"草稿占位 S0x ／句 aa–bb"，只在粗剪里出现，并且必须在 y<950 之内。
+4. 合成：用 assembly/pipeline/assemble.sh（先读 assembly/pipeline/README.md），--scene-video 用上一步的底板，配音用 /workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav，字幕的时间来自真实时间轴（确认 loadCues 用的是 timeline.json 或 lines.json 的真实 start/end，不是估算公式；如果需要，就把真实时间轴生成一个 cues 快照传给 --cues）。不配音乐。保留片尾。--out-dir 用 /workspace/病理科普视频/v5/qa/v6/animatic，--out-name 用 粗剪_v1。同时导出一份 720p 预览。
+5. 自检，写入 qa/v6/animatic/自检.md：
+   - 总时长。
+   - 字幕与配音的对齐抽查：句 01、31、34、50、77 的字幕出现时刻与 timeline.json 的差值。
+   - S08 各画面状态与 b10 七帧的 MAE。
+   - 渲染命令。
+   - sha256 校验结果。
+   另做一张 contact_sheet.png：从整片每 20 s 取一帧，并加上 S08 段内的 6 帧。
+
+2026-11-12T01:56:40.799348Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer realm=\"OAuth\", resource_metadata=\"https://mcp.notion.com/.well-known/oauth-protected-resource/mcp\", scope=\"default\"" })
+codex
+我会先检查时间轴、渲染和合成脚本，并记录锁定文件的哈希；随后完成 S08 时间绑定、整片粗剪、720p 预览和自检报告。不会提交 Git。
+
+exec
+/bin/bash -lc "pwd; git status --short; git branch --show-current; rg --files -g 'AGENTS.md' -g '*timeline*' -g 'README.md' -g '*assemble*' -g '*分镜*' -g '*b10*'" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+/workspace/病理科普视频/v5
+ M assembly/endcard/data/endcard.json
+ M assembly/endcard/endcard.js
+ M assembly/endcard/static-preview.py
+ M assembly/endcard/样帧_片尾.png
+?? assembly/.gitignore
+?? assembly/package-lock.json
+?? assembly/package.json
+?? assembly/pipeline/
+?? assembly/qa/
+?? assembly/subtitle/
+?? qa/briefs/run_v6_a01_animatic.log
+?? qa/briefs/v6_a01_animatic.md
+v6-fresh
+assembly/pipeline/assemble.sh
+assembly/pipeline/assemble.mjs
+assembly/pipeline/README.md
+assembly/endcard/README.md
+qa/v6/b10/低倍_b09_vs_b10.png
+qa/v6/b10/s34_b09_vs_b10.png
+assembly/subtitle/README.md
+qa/v6/samples/README.md
+qa/briefs/v6_b10_pus.md
+qa/briefs/run_v6_b10_pus.log
+engine/lib/timeline.js
+分镜/分镜_v1.md
+film/timeline.js
+
+exec
+/bin/bash -lc 'cat assembly/pipeline/README.md; cat film/timeline.js; cat /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+# v5 final assembly
+
+Builds a 1920×1080 H.264 film: scene plate, bilingual subtitle band, 12 s endcard, stereo 48 kHz AAC. The endcard directory is only read. Old-film music from `v4_mix` is not used.
+
+```
+./pipeline/assemble.sh \
+  --scene-video <path> \          # optional; else a #F4EFE6 plate
+  --cues <snapshot.json> \        # optional; else loadCues()
+  --voice <wav> \                 # optional; else 配音/全稿_v3/旁白_v3.wav if it exists, else silence
+  --music <wav> \                 # optional; else silence
+  --endcard-dir ../endcard \      # default: assembly/endcard
+  --fps 30 \
+  --out-dir qa \
+  --out-name dryrun_测试 \
+  --content-duration 18 \         # optional; pad or trim the picture to this many seconds
+  --max-cues 5 \                  # optional; keep the first N cues
+  --blind                         # also write <out-name>_盲审.mp4 (default on)
+```
+
+`--xfade` turns on hard-cut subtitle switches. `--no-blind` skips the stripped copy. `--keep-tmp` leaves `qa/tmp/`.
+
+## Steps
+
+1. Load cues (`subtitle/loadCues.js`). Content length is the last cue's end, or `--content-duration`. The endcard is always 12 s after that.
+2. Scene. A missing plate becomes a 1920×1080 30 fps `#F4EFE6` video. A provided plate is trimmed or padded with paper frames and scaled or cropped only when it is not already 1920×1080.
+3. Subtitles. Headless Chrome (MixSans loaded before any `measureText`) paints a transparent PNG sequence. Picture content may extend to y < 950 (`BAND.safeTop` in `subtitle/config.js`). From that line the frame is a soft paper scrim — it peaks just above the Chinese halo and fades out by the bottom of the frame, not a solid slab — plus one Chinese line (52 px) and one English card (30 px). `ffmpeg overlay=0:0` puts that band on the scene. Identical frames are hard-linked. `xfade` defaults off.
+4. Endcard. `pipeline/render_endcard.mjs` opens `endcard/index.html` at `http://endcard.local/`, waits for `window.READY`, and calls `window.render(t)` for `t` in `[0, 12)` at 30 fps. The page fills the paper itself. The clip is concatenated after the content.
+5. Audio. Voice starts at t=0 and is trimmed or padded so it never plays over the endcard. Music may cover content + endcard and fades out over the last 0.8 s. Music is ducked under the voice with `sidechaincompress=threshold=0.05:ratio=8:attack=50:release=300`, then `amix`. Missing inputs are silent tracks of the right length. The mix targets −14 LUFS and true peak ≤ −1 dBTP (two-pass `loudnorm`). If both inputs are silence, loudnorm is skipped. Output is stereo 48 kHz AAC, `+faststart`, `yuv420p`.
+6. Writes `<out-name>.mp4`, `<out-name>_720p.mp4` (1280×720), and a JSON report next to the markdown dry-run report.
+
+## Blind review
+
+`pipeline/blind_review.sh INPUT OUTPUT PROBE STRINGS [files...]` re-encodes with `-map_metadata -1`, bitexact flags, and a filter that drops SEI type 6, then clears the `avc1` compressor-name field (ffmpeg 7 still writes `Lavc libx264` there). `qa/blind_ffprobe.txt` is `ffprobe -hide_banner -show_format -show_streams` with structural `DISPOSITION:` rows removed, plus `RESULT: PASS` or `FAIL`.
+
+`qa/blind_strings.txt` scans `endcard.json` (read only), the cue snapshot, and other emitted JSON for `三峡`, `Sharpton`, `Gisele`, `导师`, `指导`. `【待填】` is not a failure.
+
+## Intermediates
+
+Frames are written under `qa/tmp/sub/` and `qa/tmp/endcard/` and deleted after the mp4s exist. Pass `--keep-tmp` to inspect them. The three sample PNGs in `qa/frames/` are kept.
+
+## Dry run
+
+```
+./pipeline/assemble.sh --content-duration 18 --max-cues 5 --out-dir qa --out-name dryrun_测试
+```
+
+That keeps sentences 01–05 (estimate end 17.40 s), holds paper until 18.00 s, then appends the 12 s endcard (30 s total).
+export const sentences=Array.from({length:6},(_,i)=>({id:29+i,start:i*6,end:(i+1)*6}));
+export const T={at:id=>sentences[id-29].start,end:id=>sentences[id-29].end,frac:(id,f)=>sentences[id-29].start+6*f};
+#!/usr/bin/env node
+// Frame-accurate renderer for pages that expose the render(t) contract:
+//   window.DUR = 15;              // seconds (optional if --duration is given)
+//   window.render = (t) => {...}; // draw the frame at t seconds; deterministic; may return a Promise
+//   window.READY = true;          // set once fonts / images / models are loaded
+// Optional: window.RENDER_CONTEXT = true lets render(t, { frameTime, fps }) keep
+// discrete copy/cuts on the output frame while motion uses sub-sample time t.
+//
+// Video
+//   node render.mjs <project> [--out out/video.mp4] [--size 1920x1080] [--fps 30] [--workers 3]
+//                   [--start 0] [--duration D] [--subframes 1] [--shutter 0.5] [--dpr 1]
+//                   [--audio audio/music.wav] [--grain 0] [--crf 16] [--png] [--q "k=v&k2=v2"]
+// Stills (review frames, PNG) and contact sheet
+//   node render.mjs <project> --still 0.5,2,7.25 [--out qa/stills] [--sheet]
+//   node render.mjs <project> --range 0:15:1 [--out qa/stills] [--sheet]
+// Poster frame (step 7)
+//   node render.mjs <project> --poster 14.5 [--out out/poster.png]
+// Style-frame directions (step 3): one key frame per ?dir=<name>, side by side with labels
+//   node render.mjs <project> --directions a,b,c --at 14.5,2,0 [--out qa/directions.png] [--dir-param dir]
+//   (--at: one time per direction, or one time for all; singles go next to the sheet in qa/directions/)
+// Determinism check (same t rendered in different orders must be pixel-identical)
+//   node render.mjs <project> --determinism
+// Text framing (review material, never pass/fail): text cut by the frame edge, two different strings on top of each
+// other, text in the platform safe zone, text too small for a phone. Canvas 2D and DOM/SVG text; issues that last ≥ 0.3 s.
+//   node render.mjs <project> --text-check [--every 0.2] [--safe auto|none|T,R,B,L] [--out qa/text]
+//   (--safe: fractions of the frame (0.12) or pixels; auto = 12 % top and bottom on vertical frames, none on landscape)
+//
+// --subframes N blends N samples per frame (motion blur; render time × N). --shutter 0.5 = 180°.
+// --dpr 2 supersamples (renders 2× and downsizes with lanczos): crisper hairlines / 3D edges, ~3× slower.
+// --grain N adds temporal film grain in ffmpeg (keeps page frames compressible). 0 = none.
+import fs from 'node:fs';
+import path from 'node:path';
+import { spawn, execFileSync } from 'node:child_process';
+import { loadChromium, launch, serve, resolveTarget, openPage, warnSoftwareGL, parseSize, args, die } from './lib/browser.mjs';
+import { textHook } from './lib/text-hook.mjs';
+
+// Anything that must be undone on failure or interruption (ffmpeg children, temp dirs, output lock).
+const cleanups = [];
+const runCleanups = () => { while (cleanups.length) { try { cleanups.pop()(); } catch {} } };
+const fail = msg => { console.error(msg); runCleanups(); process.exit(1); };
+process.on('exit', runCleanups);
+for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) process.on(sig, () => fail(`interrupted (${sig}); partial output removed`));
+process.on('unhandledRejection', e => fail(`render failed: ${String(e?.message || e).split('\n')[0]}`));
+
+const { pos, opt } = args(process.argv.slice(2));
+const target = resolveTarget(pos[0]);
+const { w: W, h: H } = parseSize(opt.size);
+const FPS = +(opt.fps || 30);
+const DPR = +(opt.dpr || 1);
+if (!(FPS > 0 && FPS <= 240)) die(`bad --fps ${opt.fps}`);
+if (!(DPR >= 1 && DPR <= 4)) die(`bad --dpr ${opt.dpr} (1–4)`);
+const QUERY = typeof opt.q === 'string' ? opt.q : '';
+const fmt = opt.png ? 'png' : 'jpeg';
+
+const chromium = await loadChromium(target.root);
+const { server, port } = await serve(target.root);
+const browser = await launch(chromium);
+const open = (query = QUERY, init = null) => openPage(browser, { port, rel: target.rel, w: W, h: H, dpr: DPR, query, init });
+const finish = async code => { await browser.close().catch(() => {}); server.close(); process.exit(code); };
+cleanups.push(() => server.close());
+
+async function shoot(page, t, type = fmt, frameTime = t) {
+  await page.evaluate(({ t, frameTime, fps }) => window.RENDER_CONTEXT === true
+    ? window.render(t, { frameTime, fps })
+    : window.render(t), { t, frameTime, fps: FPS });
+  return await page.screenshot({ type, ...(type === 'jpeg' ? { quality: 95 } : {}), clip: { x: 0, y: 0, width: W, height: H } });
+}
+
+if (opt.poster !== undefined) await poster();
+else if (opt.directions !== undefined) await directions();
+else if (opt.still || opt.range) await stills();
+else if (opt.determinism) await determinism();
+else if (opt['text-check']) await textCheck();
+else await video();
+await finish(0);
+
+// ───────────────────────────── text framing ─────────────────────────────
+function safeZone() {
+  const v = opt.safe === undefined || opt.safe === true ? 'auto' : String(opt.safe);
+  if (v === 'none') return null;
+  if (v === 'auto') return H > W ? { t: 0.12 * H, r: 0, b: 0.12 * H, l: 0 } : null;
+  const n = v.split(',').map(Number);
+  if (n.length !== 4 || n.some(x => !(x >= 0))) die(`bad --safe ${v}: auto | none | top,right,bottom,left (fractions like 0.12, or pixels)`);
+  const px = (x, d) => (x < 1 ? x * d : x);
+  return { t: px(n[0], H), r: px(n[1], W), b: px(n[2], H), l: px(n[3], W) };
+}
+async function textCheck() {
+  const every = +(opt.every || 0.2);
+  if (!(every > 0)) die(`bad --every ${opt.every}`);
+  const out = path.resolve(typeof opt.out === 'string' ? opt.out.replace(/\.json$/, '') : path.join(target.root, 'qa', 'text'));
+  fs.mkdirSync(path.dirname(out), { recursive: true });
+  const page = await open(QUERY, textHook);
+  if (!(await page.evaluate(() => !!window.__msrText))) die('the text hook did not load in the page');
+  const dur = +(opt.duration || await page.evaluate(() => window.DUR));
+  if (!(dur > 0)) die('window.DUR is missing; pass --duration');
+  const safe = safeZone(), BLEED = 0.12 * H, TINY = 0.016 * H;
+  const area = b => Math.max(0, b.x1 - b.x0) * Math.max(0, b.y1 - b.y0);
+  const inter = (a, b) => ({ x0: Math.max(a.x0, b.x0), y0: Math.max(a.y0, b.y0), x1: Math.min(a.x1, b.x1), y1: Math.min(a.y1, b.y1) });
+  const frame = { x0: 0, y0: 0, x1: W, y1: H };
+  const same = (a, b) => a.text.replace(/\s+/g, '') === b.text.replace(/\s+/g, '');
+  const issues = new Map();                       // key → { kind, what, times: [], boxes: { t: [box] } }
+  const note = (key, kind, what, t, bxs) => { let e = issues.get(key); if (!e) issues.set(key, (e = { kind, what, times: [], boxes: {} })); e.times.push(t); e.boxes[t] = bxs; };
+  const times = []; for (let t = 0; t < dur - 1e-6; t += every) times.push(+t.toFixed(4));
+  for (const t of times) {
+    const boxes = await page.evaluate(t => { window.__msrText.reset(); return Promise.resolve(window.render(t)).then(() => window.__msrText.collect()); }, t);
+    const seen = boxes.filter(b => area(b) > 1 && area(inter(b, frame)) > 0 && b.alpha >= 0.15);
+    for (const b of seen) {
+      const vis = area(inter(b, frame)) / area(b), q = JSON.stringify(b.text);
+      if (vis < 0.98 && Math.max(-b.x0, -b.y0, b.x1 - W, b.y1 - H) > 2) {
+        if (b.size >= BLEED) note(`bleed ${b.text}`, 'bleed', `${q} runs off the frame edge (display size: fine if it is a deliberate bleed)`, t, [b]);
+        else note(`cut ${b.text}`, 'cut', `${q} is cut by the frame edge`, t, [b]);
+      }
+      if (safe && b.size < BLEED) {
+        const zone = safe.t && b.y0 < safe.t ? 'top' : safe.b && b.y1 > H - safe.b ? 'bottom' : safe.l && b.x0 < safe.l ? 'left' : safe.r && b.x1 > W - safe.r ? 'right' : null;
+        if (zone) note(`safe ${b.text}`, 'safe', `${q} sits in the ${zone} safe zone (platform UI covers it)`, t, [b]);
+      }
+      if (b.size < TINY) note(`tiny ${b.text}`, 'tiny', `${q} is ${b.size.toFixed(0)}px (${(100 * b.size / H).toFixed(1)}% of the frame height): unreadable on a phone unless it is a deliberate micro-annotation`, t, [b]);
+    }
+    const solid = seen.filter(b => !b.clip && b.alpha >= 0.3);
+    for (let i = 0; i < solid.length; i++) for (let j = i + 1; j < solid.length; j++) {
+      const a = solid[i], c = solid[j];
+      if (same(a, c)) continue;
+      if (area(inter(a, c)) >= 0.3 * Math.min(area(a), area(c))) {
+        const [p, s] = [a.text, c.text].sort();
+        note(`overlap ${p}|${s}`, 'overlap', `${JSON.stringify(p)} and ${JSON.stringify(s)} are drawn on top of each other`, t, [a, c]);
+      }
+    }
+  }
+  // keep what lasts: consecutive samples, ≥ 0.3 s (a single sample counts when samples are that far apart)
+  const minRun = every >= 0.3 ? 1 : Math.ceil(0.3 / every) + 1;
+  const found = [];
+  for (const e of issues.values()) {
+    let run = [e.times[0]];
+    const flush = () => { if (run.length >= minRun) found.push({ kind: e.kind, what: e.what, t0: run[0], t1: +(run.at(-1) + every).toFixed(3), boxes: e.boxes[run[0]] }); };
+    for (const t of e.times.slice(1)) { if (t - run.at(-1) <= every * 1.5) run.push(t); else { flush(); run = [t]; } }
+    flush();
+  }
+  found.sort((a, b) => a.t0 - b.t0);
+  // one picture per moment, with the boxes drawn in
+  const shots = [...new Set(found.map(f => f.t0))].slice(0, 12);
+  const files = [];
+  for (const t of shots) {
+    const marks = found.filter(f => f.t0 === t).flatMap(f => f.boxes.map(b => ({ ...b, kind: f.kind })));
+    await page.evaluate(async ([t, marks, safe, W, H]) => {
+      window.__msrText.reset(); await window.render(t);
+      const d = document.createElement('div'); d.id = '__msr_marks';
+      d.style.cssText = `position:fixed;left:0;top:0;width:${W}px;height:${H}px;pointer-events:none;z-index:2147483647`;
+      const col = { cut: '#ff2d2d', overlap: '#ff2df0', safe: '#ffb000', tiny: '#2dd4ff', bleed: '#9aa0a6' };
+      if (safe) for (const [y, h] of [[0, safe.t], [H - safe.b, safe.b]]) if (h) d.insertAdjacentHTML('beforeend', `<div style="position:absolute;left:0;top:${y}px;width:${W}px;height:${h}px;background:rgba(255,176,0,.18)"></div>`);
+      for (const m of marks) d.insertAdjacentHTML('beforeend', `<div style="position:absolute;left:${m.x0}px;top:${m.y0}px;width:${m.x1 - m.x0}px;height:${m.y1 - m.y0}px;outline:3px solid ${col[m.kind]};outline-offset:2px"></div>`);
+      document.body.appendChild(d);
+    }, [t, marks, safe, W, H]);
+    const file = `${out}-t${t.toFixed(2)}.png`;
+    await page.screenshot({ path: file, clip: { x: 0, y: 0, width: W, height: H } });
+    await page.evaluate(() => document.getElementById('__msr_marks')?.remove());
+    files.push(file);
+  }
+  fs.writeFileSync(`${out}.json`, JSON.stringify({ size: `${W}x${H}`, every, safe, issues: found.map(({ boxes, ...f }) => f) }, null, 1));
+  console.log(`text framing · ${times.length} frames every ${every}s · safe zone: ${safe ? `top ${safe.t.toFixed(0)} / bottom ${safe.b.toFixed(0)} / left ${safe.l.toFixed(0)} / right ${safe.r.toFixed(0)} px` : 'not checked'}`);
+  if (!found.length) console.log('  no lasting text-framing problems found (WebGL / image text is not seen: look at those frames yourself)');
+  for (const f of found) console.log(`  [${f.t0.toFixed(2)}–${f.t1.toFixed(2)}s] ${f.kind.toUpperCase().padEnd(7)} ${f.what}`);
+  if (files.length) console.log(`  marked frames: ${files.join(', ')}${shots.length < new Set(found.map(f => f.t0)).size ? ' (first 12)' : ''}`);
+  console.log(`  ${out}.json  (review material: look at each marked frame and decide; deliberate bleeds and micro-annotations are fine)`);
+}
+
+// ───────────────────────────── poster / directions ─────────────────────────────
+function writePng(file, buf) {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, buf);
+  if (!fs.statSync(file).size) fail(`empty image written: ${file}`);
+  console.log(file);
+}
+async function poster() {
+  const t = +opt.poster;
+  if (opt.poster === true || !Number.isFinite(t) || t < 0) die('--poster needs a time in seconds, e.g. --poster 14.5');
+  const out = path.resolve(typeof opt.out === 'string' ? (opt.out.endsWith('.png') ? opt.out : path.join(opt.out, 'poster.png')) : path.join(target.root, 'out', 'poster.png'));
+  const page = await open();
+  await warnSoftwareGL(page);
+  writePng(out, await shoot(page, t, 'png'));
+}
+async function directions() {
+  const names = String(opt.directions === true ? '' : opt.directions).split(',').map(s => s.trim()).filter(Boolean);
+  if (!names.length) die('--directions needs names, e.g. --directions a,b,c --at 14.5,2,0');
+  if (opt.at === undefined || opt.at === true) die('--directions needs --at <seconds>: one per direction (--at 14.5,2,0) or one for all (--at 3)');
+  const ats = String(opt.at).split(',').map(Number);
+  if (ats.some(v => !Number.isFinite(v) || v < 0)) die(`bad --at ${opt.at}`);
+  if (ats.length !== 1 && ats.length !== names.length) die(`--at has ${ats.length} times for ${names.length} directions (give one per direction, or one for all)`);
+  const key = typeof opt['dir-param'] === 'string' ? opt['dir-param'] : 'dir';
+  const sheet = path.resolve(typeof opt.out === 'string' ? (opt.out.endsWith('.png') ? opt.out : opt.out + '.png') : path.join(target.root, 'qa', 'directions.png'));
+  const singles = sheet.replace(/\.png$/, '');
+  const shots = [];
+  for (const [i, name] of names.entries()) {
+    const q = new URLSearchParams(QUERY); q.set(key, name);
+    const page = await open(q.toString());                 // a fresh page per direction: no state shared between them
+    await warnSoftwareGL(page);
+    const t = ats.length === 1 ? ats[0] : ats[i], buf = await shoot(page, t, 'png');
+    await page.close();
+    writePng(path.join(singles, `${name}_t${t.toFixed(2)}.png`), buf);
+    shots.push({ t, buf, label: `${name.toUpperCase()} · ${t.toFixed(2)}s` });
+  }
+  fs.mkdirSync(path.dirname(sheet), { recursive: true });
+  await contactSheet(shots, sheet, { below: true });
+  console.log(`${sheet}  (${names.length} directions side by side: send this one image and ask which to take, or how to mix)`);
+}
+
+// ───────────────────────────────── stills ─────────────────────────────────
+async function stills() {
+  let times = [];
+  if (opt.still) times = String(opt.still).split(',').map(Number);
+  if (opt.range) {
+    const [a, b, s] = String(opt.range).split(':').map(Number);
+    if (!(s > 0)) die('--range a:b:step needs a positive step');
+    for (let t = a; t <= b + 1e-9; t += s) times.push(+t.toFixed(4));
+  }
+  if (times.some(Number.isNaN)) die('bad --still / --range values');
+  const out = path.resolve(typeof opt.out === 'string' ? opt.out : path.join(target.root, 'qa', 'stills'));
+  fs.mkdirSync(out, { recursive: true });
+  const page = await open();
+  await warnSoftwareGL(page);
+  const shots = [];
+  for (const t of times) {
+    const buf = await shoot(page, t, 'png');
+    const file = path.join(out, `t_${t.toFixed(2).padStart(6, '0')}.png`);
+    fs.writeFileSync(file, buf);
+    if (!fs.statSync(file).size) fail(`empty still written: ${file}`);
+    shots.push({ t, file, buf });
+    console.log(file);
+  }
+  if (opt.sheet) {
+    const file = path.join(out, 'sheet.png');
+    await contactSheet(shots, file);
+    console.log(file);
+  }
+}
+
+// below: captions in a strip under each cell instead of over its top-left corner (keeps the whole frame visible)
+async function contactSheet(shots, file, { below = false } = {}) {
+  const cols = shots.length <= 4 ? shots.length : shots.length <= 9 ? 3 : 4;
+  const cw = Math.round(1600 / cols), ch = Math.round(cw * H / W);
+  const cells = shots.map(s => `<figure><img src="data:image/png;base64,${s.buf.toString('base64')}"><figcaption>${s.label ?? s.t.toFixed(2) + 's'}</figcaption></figure>`).join('');
+  const page = await browser.newPage({ viewport: { width: cols * (cw + 8) + 8, height: 200 } });
+  const cap = below ? 'padding:8px 2px 2px;font-size:16px' : 'position:absolute;left:6px;top:6px;background:#000c;padding:4px 6px;border-radius:3px';
+  await page.setContent(`<style>body{margin:0;background:#111;font:600 14px/1 ui-monospace,Menlo,monospace;color:#ddd}
+    main{display:grid;grid-template-columns:repeat(${cols},${cw}px);gap:8px;padding:8px}figure{margin:0;position:relative}
+    img{width:${cw}px;height:${ch}px;display:block;object-fit:cover;background:#000}
+    figcaption{${cap}}</style><main>${cells}</main>`);
+  await page.evaluate(() => Promise.all([...document.images].map(i => i.decode())));
+  await page.screenshot({ path: file, fullPage: true });
+  await page.close();
+}
+
+// ───────────────────────────── determinism ─────────────────────────────
+async function determinism() {
+  const probe = await open();
+  const start = +(opt.start || 0);
+  const dur = +(opt.duration || ((await probe.evaluate(() => window.DUR)) - start));
+  if (!(dur > 0)) die('window.DUR is missing; pass --duration');
+  const ts = [0.11, 0.37, 0.5, 0.73, 0.93].map(k => +(start + k * dur).toFixed(3)).concat(+(start + Math.max(0, dur - 1 / FPS)).toFixed(3));
+  const a = [];
+  for (const t of ts) a.push(await shoot(probe, t, 'png'));
+  const fresh = await open();
+  const b = new Array(ts.length);
+  for (const i of [...ts.keys()].reverse()) {
+    await fresh.evaluate(t => window.render(t), start + ((ts[i] - start) * 0.61 + 0.17) % dur); // render something unrelated first
+    b[i] = await shoot(fresh, ts[i], 'png');
+  }
+  // GPU canvas rasterisation may differ by a level or two on antialiased edges between pages: tolerate that.
+  const cmp = await browser.newPage();
+  const bad = [];
+  for (let i = 0; i < ts.length; i++) {
+    if (a[i].equals(b[i])) continue;
+    const d = await cmp.evaluate(async ([x, y]) => {
+      const load = s => new Promise(r => { const im = new Image(); im.onload = () => r(im); im.src = 'data:image/png;base64,' + s; });
+      const [A, B] = await Promise.all([load(x), load(y)]), c = document.createElement('canvas');
+      c.width = A.width; c.height = A.height; const g = c.getContext('2d', { willReadFrequently: true });
+      g.drawImage(A, 0, 0); const pa = g.getImageData(0, 0, c.width, c.height).data;
+      g.clearRect(0, 0, c.width, c.height); g.drawImage(B, 0, 0); const pb = g.getImageData(0, 0, c.width, c.height).data;
+      let n = 0; for (let k = 0; k < pa.length; k += 4) if (Math.max(Math.abs(pa[k] - pb[k]), Math.abs(pa[k + 1] - pb[k + 1]), Math.abs(pa[k + 2] - pb[k + 2])) > 24) n++;
+      return n / (pa.length / 4);
+    }, [a[i].toString('base64'), b[i].toString('base64')]);
+    if (d > 0.0005) bad.push(`${ts[i]}s (${(d * 100).toFixed(2)}% pixels differ)`);
+  }
+  if (bad.length) {
+    console.error(`NOT deterministic at ${bad.join(', ')}.\nSomething depends on render order: state carried between frames, Math.random()/Date.now()/performance.now(), CSS transitions/animations, requestAnimationFrame, or async loads finishing late.`);
+    await finish(1);
+  }
+  console.log(`deterministic: ${ts.length} frames match across render orders (${ts.join(', ')} s)`);
+}
+
+// ───────────────────────────────── video ─────────────────────────────────
+async function video() {
+  const probe = await open();
+  await warnSoftwareGL(probe);
+  const start = +(opt.start || 0);
+  const pageDur = await probe.evaluate(() => window.DUR);
+  const dur = +(opt.duration || (pageDur ? pageDur - start : NaN));
+  await probe.close();
+  if (!(dur > 0)) die('window.DUR is missing; set it in the page or pass --duration');
+  const SUB = Math.max(1, +(opt.subframes || 1) | 0);
+  const SHUTTER = Math.min(1, Math.max(0, +(opt.shutter ?? 0.5)));
+  const WK = +(opt.workers || 3);
+  if (!(Number.isInteger(WK) && WK >= 1 && WK <= 16)) fail(`bad --workers ${opt.workers} (integer 1–16)`);
+  const CRF = +(opt.crf ?? 16);
+  if (!(CRF >= 0 && CRF <= 51)) fail(`bad --crf ${opt.crf} (0–51)`);
+  const GRAIN = +(opt.grain || 0);
+  const audio = typeof opt.audio === 'string' ? path.resolve(opt.audio) : null;
+  if (audio && !fs.existsSync(audio)) die(`audio not found: ${audio}`);
+  const out = path.resolve(typeof opt.out === 'string' ? opt.out : path.join(target.root, 'out', 'video.mp4'));
+  fs.mkdirSync(path.dirname(out), { recursive: true });
+  // one writer per output file: a second render to the same --out is refused (stale locks from dead pids are taken over)
+  const lock = out + '.lock';
+  const alive = pid => { try { process.kill(pid, 0); return true; } catch (e) { return e.code === 'EPERM'; } };
+  try { fs.writeFileSync(lock, String(process.pid), { flag: 'wx' }); }
+  catch {
+    const other = +fs.readFileSync(lock, 'utf8');
+    if (other && other !== process.pid && alive(other)) die(`another render (pid ${other}) is writing ${out}. Use a different --out, or wait for it.`);
+    fs.writeFileSync(lock, String(process.pid));
+  }
+  cleanups.push(() => fs.rmSync(lock, { force: true }));
+  const tmp = fs.mkdtempSync(path.join(path.dirname(out), '.segs-'));
+  cleanups.push(() => fs.rmSync(tmp, { recursive: true, force: true }));
+  const procs = new Set();
+  cleanups.push(() => { for (const p of procs) p.kill('SIGKILL'); });
+  let aborted = null;
+
+  const TOTAL = Math.round(dur * FPS), per = Math.ceil(TOTAL / WK), t0 = Date.now();
+  // sample time of sub-sample j of frame f, centred on the frame time
+  const sampleT = (f, j) => start + (f + (SUB > 1 ? SHUTTER * ((j + 0.5) / SUB - 0.5) : 0)) / FPS;
+  const vf = [];
+  if (SUB > 1) vf.push(`tmix=frames=${SUB}:weights=${Array(SUB).fill(1).join(' ')}`, `select='eq(mod(n\\,${SUB})\\,${SUB - 1})'`);
+  vf.push(`setpts=N/(${FPS}*TB)`);
+  if (DPR !== 1) vf.push(`scale=${W}:${H}:flags=lanczos`);
+  if (GRAIN > 0) vf.push(`noise=c0s=${GRAIN}:allf=t`);
+  vf.push('scale=out_color_matrix=bt709:out_range=tv', 'format=yuv420p');
+  let done = 0;
+  console.log(`rendering ${TOTAL} frames × ${SUB} sample(s) @ ${W}x${H} ${FPS}fps with ${WK} worker(s)…`);
+
+  await Promise.all([...Array(WK)].map(async (_, k) => {
+    const a = k * per, b = Math.min(TOTAL, a + per);
+    if (a >= b) return;
+    const page = await open();
+    const ff = spawn('ffmpeg', ['-v', 'error', '-y', '-f', 'image2pipe', '-c:v', fmt === 'png' ? 'png' : 'mjpeg', '-framerate', String(FPS * SUB), '-i', '-',
+      '-vf', vf.join(','), '-r', String(FPS), '-c:v', 'libx264', '-preset', 'medium', '-crf', String(CRF),
+      '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', `seg_${k}.mp4`], { cwd: tmp, stdio: ['pipe', 'inherit', 'inherit'] });
+    procs.add(ff);
+    let failed = null, exited = false;
+    const closed = new Promise(r => ff.on('close', code => { exited = true; procs.delete(ff); if (code !== 0) failed ??= `ffmpeg exited with code ${code}`; r(code); }));
+    ff.on('error', e => { failed = e.code === 'ENOENT' ? 'ffmpeg not found on PATH' : e.message; });
+    ff.stdin.on('error', () => { failed ??= 'ffmpeg closed its input early'; });
+    for (let f = a; f < b && !failed && !aborted; f++) {
+      for (let j = 0; j < SUB && !failed && !exited; j++) {
+        const buf = await shoot(page, sampleT(f, j), fmt, start + f / FPS);
+        if (!ff.stdin.write(buf)) await Promise.race([new Promise(r => ff.stdin.once('drain', r)), closed]);
+      }
+      if (exited && f < b - 1) failed ??= 'ffmpeg stopped before all frames were written';
+      if (++done % Math.max(1, Math.round(TOTAL / 10)) === 0) console.log(`  ${done}/${TOTAL} frames  ${((Date.now() - t0) / 1000).toFixed(0)}s`);
+    }
+    ff.stdin.end();
+    const code = await closed;
+    await page.close().catch(() => {});
+    if (failed || code !== 0) aborted ??= `encoder failed in worker ${k}: ${failed || 'exit ' + code}`;   // stops the other workers too
+  }));
+  if (aborted) fail(aborted + ' (nothing written)');
+
+  const segs = [...Array(WK).keys()].filter(k => k * per < TOTAL).map(k => `file 'seg_${k}.mp4'`).join('\n');
+  fs.writeFileSync(path.join(tmp, 'list.txt'), segs);
+  const cmd = ['-v', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', 'list.txt'];
+  if (audio) cmd.push('-ss', String(start), '-i', audio, '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '256k', '-af', 'apad', '-t', String(TOTAL / FPS));
+  else cmd.push('-c', 'copy');
+  cmd.push('-movflags', '+faststart', 'joined.mp4');
+  try { execFileSync('ffmpeg', cmd, { cwd: tmp, stdio: ['ignore', 'inherit', 'inherit'] }); }
+  catch { fail('ffmpeg could not join the segments'); }
+  // verify before publishing: frame count and duration must match what was asked for
+  const joined = path.join(tmp, 'joined.mp4');
+  let got = 0;
+  try { got = parseInt(execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-count_packets', '-show_entries', 'stream=nb_read_packets', '-of', 'csv=p=0', joined]).toString(), 10); } catch {}
+  if (!Number.isFinite(got) || Math.abs(got - TOTAL) > 1) fail(`output has ${got} frames, expected ${TOTAL}; not published`);
+  fs.renameSync(joined, out);
+  const secs = (Date.now() - t0) / 1000;
+  console.log(`done ${out}\n  ${TOTAL} frames, ${(TOTAL / FPS).toFixed(2)}s, ${secs.toFixed(1)}s wall (${(secs * 1000 / TOTAL / SUB).toFixed(0)} ms/sample)${audio ? ', audio muxed' : ''}`);
+}
+
+exec
+/bin/bash -lc 'find .. -name AGENTS.md -print; ls film; ls qa/v6/b10; cat film/index.html; cat film/main.js; cat assembly/subtitle/loadCues.js; cat 分镜/分镜_v1.md' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+brief.md
+chapters
+fonts
+index.html
+lib
+lib_ext
+main.js
+timeline.js
+vendor
+check_low_determinism.mjs
+determinism.log
+determinism_low.log
+determinism_low_stdout.log
+gap_path.json
+gap_sampling_mask.png
+metrics.json
+mucosa_ROI.png
+render.log
+review_sheet.png
+s08_high_s30.png
+s08_high_s30_200pct.png
+s08_high_s31.png
+s08_high_s31_200pct.png
+s08_high_s32.png
+s08_high_s32_200pct.png
+s08_high_s33.png
+s08_high_s33_200pct.png
+s08_high_s34.png
+s08_high_s34_200pct.png
+s08_low.png
+s08_low_200pct.png
+s08_mid.png
+s08_mid_200pct.png
+s34_b09_vs_b10.png
+sha256_开工.txt
+sha256_校验.log
+sha256_结束.txt
+sheet.png
+t_001.00.png
+t_003.80.png
+t_009.00.png
+t_015.00.png
+t_021.00.png
+t_027.00.png
+t_033.00.png
+verify.log
+verify.py
+低倍_b09_vs_b10.png
+自检.md
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>疼会“搬家”的7厘米盲管</title>
+<style>
+@font-face{font-family:"MixSans";src:url(fonts/MixSans-Regular.woff2) format("woff2");font-weight:400 500}
+@font-face{font-family:"MixSans";src:url(fonts/MixSans-Bold.woff2) format("woff2");font-weight:600 900}
+html,body{margin:0;background:#F4EFE6;overflow:hidden}canvas{display:block}#bake{display:none}
+</style></head><body>
+<canvas id="c"></canvas><div id="bake"></div>
+<script src="vendor/p5.min.js"></script><script src="vendor/p5.brush.js"></script><script src="vendor/rough.js"></script>
+<script type="module" src="./main.js"></script>
+</body></html>
+import {initBaker,bake} from './lib/wash.js';
+import {bakeHE} from './lib/he.js';
+import scene from './chapters/s08.js';
+import {T} from './timeline.js';
+const c=document.getElementById('c');c.width=1920;c.height=1080;const ctx=c.getContext('2d');
+await document.fonts.load('500 32px MixSans');await initBaker();bakeHE((k,r,o)=>bake(k,r,{...o,hd:true,soft:true,grain:.12,edge:.3,bleed:.5}));
+scene.prepare();window.DUR=T.end(34);window.render=t=>scene.draw(ctx,t,T);window.READY=true;
+// Node cue loader. Priority: narration.json → sentences.tsv → 定稿 estimate.
+// Browser code should fetch a snapshot instead of importing this file.
+import fs from 'node:fs';
+import path from 'node:path';
+
+export const DEFAULT_PATHS = {
+  narration: '/workspace/病理科普视频/配音/全稿_v3/narration.json',
+  sentences: '/workspace/病理科普视频/配音/全稿_v3/sentences.tsv',
+  lines: '/workspace/病理科普视频/配音/全稿_v3/lines.json',
+  script: '/workspace/病理科普视频/解说词_v2/解说词_定稿.md',
+};
+
+/** duration_i = hanzi_i * 0.22 + 0.4 seconds. Evaluated in whole milliseconds. */
+export const ESTIMATE_FORMULA = 'duration_i = hanzi_i * 0.22 + 0.4; start_0 = 0; end_i = start_i + duration_i; start_{i+1} = end_i';
+
+function exists(p) {
+  if (!p) return false;
+  try {
+    const st = fs.statSync(p);
+    return st.isFile() && st.size > 0;
+  } catch {
+    return false;
+  }
+}
+
+function readText(p) {
+  return fs.readFileSync(p, 'utf8');
+}
+
+export function countHanzi(text) {
+  const stripped = String(text ?? '').replace(/\[\d+\]/g, '');
+  const m = stripped.match(/[\u4e00-\u9fff]/g);
+  return m ? m.length : 0;
+}
+
+/** Milliseconds. hanzi * 220 + 400 === (hanzi * 0.22 + 0.4) * 1000, nearest ms. */
+export function estimateDurationMs(hanzi) {
+  return Math.round(hanzi * 220 + 400);
+}
+
+export function cardsFromEn(en) {
+  const s = String(en ?? '').trim();
+  if (!s) return [];
+  if (s.includes(' | ')) return s.split(' | ').map((c) => c.trim()).filter(Boolean);
+  return [s];
+}
+
+export function joinCards(cards) {
+  return (cards || []).join(' | ');
+}
+
+function padId(n) {
+  return String(n).padStart(2, '0');
+}
+
+function usable(cues) {
+  return Array.isArray(cues) && cues.length > 0 && cues.every((c) => Number.isFinite(c.start) && Number.isFinite(c.end) && c.end > c.start && String(c.text || '').trim());
+}
+
+/** English cards from a 定稿「对应画面建议」 cell. Tolerates <br> and fullwidth colons. */
+export function englishFromScene(scene) {
+  const norm = String(scene ?? '').replace(/<br\s*\/?>/gi, '\n');
+  const cards = [];
+  const re = /英文续卡[：:]\s*([^\n]+)|英文[：:]\s*([^\n]+)/g;
+  let m;
+  while ((m = re.exec(norm))) {
+    const text = (m[1] || m[2] || '').trim();
+    if (text) cards.push(text);
+  }
+  return cards;
+}
+
+/** Parse the 77-row narration table. Later tables in the same file are ignored. */
+export function parseDinggao(md) {
+  const rows = [];
+  for (const line of String(md).split(/\r?\n/)) {
+    if (!/^\|\s*\d+\s*\|/.test(line)) continue;
+    const cells = line.split('|').slice(1, -1).map((s) => s.trim());
+    if (cells.length < 5) continue;
+    if (!/^\d+$/.test(cells[0]) || !/^\d+$/.test(cells[3])) continue;
+    const n = Number(cells[0]);
+    if (n < 1 || n > 77) continue;
+    // The teacher-checklist table also starts with a number, but its 4th cell is not 字数.
+    rows.push({
+      n,
+      id: padId(n),
+      chapter: cells[1],
+      text: cells[2],
+      hanzi: Number(cells[3]),
+      cards: englishFromScene(cells[4]),
+    });
+  }
+  return rows;
+}
+
+function parseTsv(text) {
+  const lines = String(text).replace(/^\uFEFF/, '').split(/\r?\n/).filter((l) => l.trim());
+  if (!lines.length) return [];
+  const header = lines[0].split('\t').map((s) => s.trim());
+  const col = (name, fallback) => {
+    const i = header.indexOf(name);
+    return i >= 0 ? i : fallback;
+  };
+  const iCh = col('段', 0);
+  const iStart = col('起', 1);
+  const iEnd = col('止', 2);
+  const iText = col('句子', 4);
+  const iEn = col('en', 5);
+  const rows = [];
+  for (const line of lines.slice(1)) {
+    const c = line.split('\t');
+    const ch = (c[iCh] || '').trim();
+    const start = Number((c[iStart] || '').trim());
+    const end = Number((c[iEnd] || '').trim());
+    const text = (c[iText] || '').trim();
+    const en = c.length > iEn ? (c[iEn] || '').trim() : '';
+    rows.push({ ch, start, end, text, en });
+  }
+  return rows;
+}
+
+function parseNarration(json) {
+  const segs = (json && json.segments) || [];
+  return segs.map((s, i) => ({
+    ch: s.ch != null ? String(s.ch) : '',
+    start: Number(s.start),
+    end: Number(s.end),
+    text: s.text != null ? String(s.text) : '',
+    en: s.en != null ? String(s.en).trim() : '',
+    rawId: s.id != null ? String(s.id) : '',
+    i,
+  }));
+}
+
+function readLines(p) {
+  if (!exists(p)) return [];
+  const data = JSON.parse(readText(p));
+  return Array.isArray(data) ? data : [];
+}
+
+function readDinggaoRows(p) {
+  if (!exists(p)) return [];
+  return parseDinggao(readText(p));
+}
+
+function finishCue(partial, i) {
+  const cards = partial.englishCards && partial.englishCards.length
+    ? partial.englishCards.map((c) => String(c).trim()).filter(Boolean)
+    : cardsFromEn(partial.en);
+  const id = partial.id && /^\d+$/.test(String(partial.id)) ? padId(Number(partial.id)) : padId(i + 1);
+  return {
+    i,
+    id,
+    ch: partial.ch || '',
+    seg: partial.seg || '',
+    start: partial.start,
+    end: partial.end,
+    text: partial.text,
+    en: joinCards(cards),
+    englishCards: cards.length ? cards : (partial.en ? cardsFromEn(partial.en) : []),
+    ...(partial.hanzi != null ? { hanzi: partial.hanzi } : {}),
+  };
+}
+
+function lookupEn(i, text, lines, dinggao) {
+  const byIndex = lines[i];
+  if (byIndex && byIndex.en && (byIndex.text === text || Number(byIndex.n) === i + 1)) return { en: String(byIndex.en).trim(), via: 'lines.json' };
+  const byText = lines.find((l) => l && l.text === text && l.en);
+  if (byText) return { en: String(byText.en).trim(), via: 'lines.json' };
+  const d = dinggao.find((r) => r.text === text) || dinggao[i];
+  if (d && d.cards && d.cards.length && (d.text === text || d.n === i + 1)) return { en: joinCards(d.cards), via: '定稿' };
+  return null;
+}
+
+function enrichChapter(cue, i, lines, dinggao) {
+  const line = lines[i];
+  const row = dinggao.find((r) => r.text === cue.text) || dinggao[i];
+  const title = (row && row.chapter) || (line && line.chapter) || '';
+  const segFromLine = line && line.seg ? String(line.seg) : '';
+  const segFromCh = /^\d{1,2}$/.test(String(cue.ch || '').trim()) ? padId(Number(cue.ch)) : '';
+  const seg = segFromLine || segFromCh || cue.seg || '';
+  if (title && seg) cue.ch = `${seg} ${title}`;
+  else if (title && !cue.ch) cue.ch = title;
+  else if (title && cue.ch && !String(cue.ch).includes(title)) cue.ch = `${cue.ch} ${title}`.trim();
+  if (seg) cue.seg = seg;
+}
+
+function attachEnglish(cues, lines, dinggao, mismatches) {
+  let merged = 0;
+  for (const cue of cues) {
+    enrichChapter(cue, cue.i, lines, dinggao);
+    if (cue.en && cue.englishCards.length) continue;
+    const found = lookupEn(cue.i, cue.text, lines, dinggao);
+    if (found && found.en) {
+      cue.englishCards = cardsFromEn(found.en);
+      cue.en = joinCards(cue.englishCards);
+      merged += 1;
+    }
+  }
+  if (mismatches && merged) mismatches.push({ kind: 'en-merged', count: merged });
+  return merged;
+}
+
+function fromTimedRows(rows, source, lines, dinggao) {
+  const mismatches = [];
+  const cues = rows.map((r, i) => finishCue({
+    id: padId(i + 1),
+    ch: r.ch,
+    start: r.start,
+    end: r.end,
+    text: r.text,
+    en: r.en || '',
+  }, i));
+  const merged = attachEnglish(cues, lines, dinggao, mismatches);
+  const note = merged ? `${source} (some en merged from lines.json / 定稿)` : source;
+  return {
+    cues,
+    source: note,
+    formula: null,
+    duration: cues[cues.length - 1].end,
+    mismatches,
+    count: cues.length,
+    finalAudioTiming: true,
+  };
+}
+
+function fromEstimate(dinggao, lines) {
+  const mismatches = [];
+  if (lines.length && lines.length !== dinggao.length) {
+    mismatches.push({ kind: 'count', dinggao: dinggao.length, lines: lines.length });
+  }
+  let ms = 0;
+  const cues = dinggao.map((r, i) => {
+    const line = lines[i];
+    if (line && line.text !== r.text) {
+      mismatches.push({ kind: 'zh', i, id: r.id, dinggao: r.text, lines: line.text });
+    }
+    const cards = r.cards.slice();
+    const en = joinCards(cards);
+    if (line && line.en && line.en.trim() !== en) {
+      mismatches.push({ kind: 'en', i, id: r.id, dinggao: en, lines: String(line.en).trim() });
+    }
+    const computed = countHanzi(r.text);
+    if (r.hanzi !== computed) {
+      mismatches.push({ kind: 'hanzi', i, id: r.id, column: r.hanzi, computed });
+    }
+    const hanzi = Number.isFinite(r.hanzi) ? r.hanzi : computed;
+    const durMs = estimateDurationMs(hanzi);
+    const start = ms / 1000;
+    ms += durMs;
+    const end = ms / 1000;
+    const seg = line && line.seg ? String(line.seg) : '';
+    const title = r.chapter || (line && line.chapter) || '';
+    return finishCue({
+      id: r.id,
+      ch: seg && title ? `${seg} ${title}` : (title || seg),
+      seg,
+      start,
+      end,
+      text: r.text,
+      en,
+      englishCards: cards,
+      hanzi,
+    }, i);
+  });
+  return {
+    cues,
+    source: '定稿+estimate',
+    formula: ESTIMATE_FORMULA,
+    duration: cues.length ? cues[cues.length - 1].end : 0,
+    mismatches,
+    count: cues.length,
+    finalAudioTiming: false,
+    note: 'NOT final audio timing. hanzi is the 定稿 字数 column (Chinese characters, excluding ASCII, punctuation, and [n]). Each duration is rounded to the nearest millisecond.',
+  };
+}
+
+function loadExplicit(file) {
+  const raw = JSON.parse(readText(file));
+  if (Array.isArray(raw)) {
+    const cues = raw.map((c, i) => finishCue(c, i));
+    return { cues, source: `file:${file}`, formula: null, duration: cues.length ? cues[cues.length - 1].end : 0, mismatches: [], count: cues.length, finalAudioTiming: null };
+  }
+  const cues = (raw.cues || raw.segments || []).map((c, i) => finishCue({
+    id: c.id,
+    ch: c.ch,
+    seg: c.seg,
+    start: Number(c.start),
+    end: Number(c.end),
+    text: c.text,
+    en: c.en,
+    englishCards: c.englishCards,
+    hanzi: c.hanzi,
+  }, i));
+  return {
+    cues,
+    source: raw.source || `file:${file}`,
+    formula: raw.formula || null,
+    duration: raw.duration ?? (cues.length ? cues[cues.length - 1].end : 0),
+    mismatches: raw.mismatches || [],
+    count: cues.length,
+    finalAudioTiming: raw.finalAudioTiming ?? null,
+    note: raw.note || null,
+  };
+}
+
+export function loadCuesFromFs(options = {}) {
+  const paths = { ...DEFAULT_PATHS, ...(options.paths || {}) };
+  if (options.cuesPath) paths.cues = options.cuesPath;
+  if (options.cues && typeof options.cues === 'string') paths.cues = options.cues;
+  if (options.narration) paths.narration = options.narration;
+  if (options.sentences) paths.sentences = options.sentences;
+  if (options.lines) paths.lines = options.lines;
+  if (options.script) paths.script = options.script;
+
+  let result;
+  if (paths.cues && exists(paths.cues)) {
+    result = loadExplicit(paths.cues);
+  } else {
+    const lines = readLines(paths.lines);
+    const dinggao = readDinggaoRows(paths.script);
+    let picked = null;
+    if (exists(paths.narration)) {
+      try {
+        const rows = parseNarration(JSON.parse(readText(paths.narration)));
+        if (usable(rows)) picked = fromTimedRows(rows, 'narration.json', lines, dinggao);
+      } catch (err) {
+        picked = null;
+        result = { error: `narration.json unusable: ${err.message}` };
+      }
+    }
+    if (!picked && exists(paths.sentences)) {
+      try {
+        const rows = parseTsv(readText(paths.sentences));
+        if (usable(rows)) picked = fromTimedRows(rows, 'sentences.tsv', lines, dinggao);
+      } catch (err) {
+        if (!result) result = { error: `sentences.tsv unusable: ${err.message}` };
+      }
+    }
+    if (!picked) {
+      if (dinggao.length !== 77) {
+        throw new Error(`定稿 parse produced ${dinggao.length} sentences, expected 77 (${paths.script})`);
+      }
+      picked = fromEstimate(dinggao, lines);
+      if (result && result.error) picked.loadNotes = [result.error];
+    }
+    result = picked;
+  }
+
+  if (options.snapshot) writeSnapshot(options.snapshot, result);
+  return result;
+}
+
+export function writeSnapshot(file, result) {
+  const body = {
+    source: result.source,
+    formula: result.formula,
+    finalAudioTiming: result.finalAudioTiming,
+    note: result.note || null,
+    count: result.cues.length,
+    duration: result.duration,
+    mismatches: result.mismatches || [],
+    cues: result.cues,
+  };
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, JSON.stringify(body, null, 2) + '\n');
+}
+
+export async function loadCues(options = {}) {
+  return loadCuesFromFs(options);
+}
+# 新视频分镜 v3：一根“香肠”的变质日记：阑尾的红→黄→黑
+
+## 任务边界与依据
+
+这是拟建于 `/workspace/病理科普视频/v5/` 的全新视频设计。旧 `film` 仅提供画风和基础绘制能力；不迁移 `chapters/01–07.js` 的叙事、镜头、章节结构、相机关键帧或旧音频。本次仅产出本分析文档，不创建 v5、不改代码。
+
+依据：
+
+- `/workspace/病理科普视频/解说词_v2/解说词_定稿.md`：文件正文自标“解说词 v3”，以该文件的 77 句及逐句画面建议为唯一新口播依据，目录名不代表稿件版本。
+- `/workspace/病理科普视频/老师意见/老师意见.md`：老师条目作为画面核对依据。涉及数据和医学表述时，以定稿已处理的证据边界为准，不把老师意见中的旧数据重新加入。
+- `/workspace/病理科普视频/v4_mix/qa/style/风格规范_v1.md`：继承手绘线条、水彩、HE 细胞形态；安全区及字幕要求由本次约束和定稿覆盖。
+- 实际核对旧 `lib/*.js`、`main.js`、`chapters/index.js`、`chapters/04.js`、`data/sentences.tsv`。规范提及的参考分支与当前 film 有差异：当前存在 `lib/detail.js`，HE 有简笔、detail、ch04 多条路径，迁移须明确选择。
+
+本文句号均指新定稿的人类编号 01—77；场景 S01 等是制作编号，不上屏。没有新时间轴，因此不指定秒数、总片长、疾病阶段持续时间或倒计时。
+
+## 统一版式与视觉规则
+
+画布 1920×1080。以下坐标、字号、分辨率都是工程参数，不是画面上显示的医学数字。
+
+- 左说明栏：`x=60—520，y=60—770`，宽 460；右主画面：`x=570—1860，y=50—780`。两区之间留白，不让引线压住左栏文字。
+- 内容及标注的完整包围盒（包含描边、光晕、引线、动画最大位移）必须满足 `y<810`；建议以 780 作为日常底线。字幕区从 y=810 起独立占用。禁止靠渐隐遮住越界内容。
+- 中文字幕一行在上，64px 起；英文一行在下，44px 起。建议基线分别为 y=910、995，按实测字体校准。逐句原文保留；英文续卡依次替换，不堆叠，不自动另写翻译。第 33 句定义按定稿分两卡。字幕是唯一允许进入下方字幕区的文字。
+- 单主体构图优先：主标本占右区主要宽度；单镜下视野可用中心 `(1210,405)`、半径 350；圆缘底部 755。标本与 CT 对照时，右区改为两个大窗，单窗约 610×620；局部细节不清时切换单窗大特写，不在角落塞小圆图。
+- 章节、路径、阶段/时间语义、研究说明、诊断名、定义、治疗说明卡统一在左栏。右侧只保留指向结构的短标签、锚点和描线；CT 的“CT表现示意”作为图像属性紧贴图窗上缘，左栏同步说明其用途。所有长解释回左侧。
+- 单纯性：朱红充血、轻肿；化脓性：灰黄色斑驳脓苔，不将整幅 HE 染黄；坏疽性：局部暗红/黑伴出血，不将整根阑尾涂黑。红→黄→黑是观察导航，不是患者必经进度条。
+- 继承墨色 `#2A2A35`、朱红 `#D6453A`、HE 紫 `#6B4C9A`、伊红 `#D98BA8`、大体脓苔 `#CDB98A`。纸色变化不改变病理染色。镜下不使用排线、表面呼吸、细胞漂浮等装饰动态；用镜头推拉/对焦及教学状态切换表现。
+- 每次只展开一个主知识点。左栏长术语按语义换行或续卡，不能缩成小字。右区配对图只保留当前所讲的对应关系。
+
+## 场景分组与逐组设计
+
+下表所有“借用”均指函数能力与画法，不代表搬用旧镜头。函数均在当前旧库中存在；“新写”名称是 v5 拟建模块，尚不存在。各组连续覆盖 77 句，无重叠、无遗漏。
+
+| 场景／句号 | 画面内容与左栏 + 右主画面构图 | 关键动作与转场 | 可借用旧 lib（文件 + 函数名） | 需要新写的绘制模块 |
+|---|---|---|---|---|
+| S01／01—05 | 左：片名分行出现，颜色导航及“变质”关键词；右：人体腹部定位→盲管大标本→红黄黑三种外观横向并列。三外观无串行箭头，不画食品腐败。 | 01 定位后放大阑尾；02 三外观依次显现；03 推入壁局部；04 片名在左完整建立；05 点亮“变质”，定义留到 33。 | `figure.js: drawInsitu, specimenOutline`；`wash.js: bake, drawWash`；`ann.js: label, leader`。 | `gross_appendix.js` 正常/红/黄/黑大体状态；`intro.js` 新定位与片名构图；颜色导航组件。 |
+| S02／06—10 | 左：“身体信号”“持续加重，及时就医”，10 换“相似症状需鉴别”；右：大人物腹部疼痛定位、医生问诊与查体。发热只用温度计图形，不显示体温数值。 | 07 疼痛亮点从脐周移至右下腹；08 医生操作示意，不示范观众自行按压；09 人物停止活动并就医；10 同一腹部淡出其他可能来源的模糊定位，不新增疾病诊断清单。 | `figure.js: drawFigure, drawArmR, painPt`；`icons.js: iconThermo, iconHospital`；`ann.js: leader`。 | `clinical.js` 医生、查体、问诊姿态与就医动作；原人物坐标重新适配右区。 |
+| S03／11—13 | 左：“典型／非典型”对照标题，继而按顺序显示“问诊、查体、化验”；右：两个等大的症状表现窗，随后合成一个问诊大图及简化化验单。 | 对照只表达症状可能不同，不虚构非典型发生率、人群或新症状；化验单只有文字与勾选符号，不出现化验数值。接着由医生视线引到影像工具。 | `figure.js: drawFigure`；`ann.js: label, line, arrow`；`ink.js: ink`。 | `symptom_compare.js` 典型/非典型对照；`clinical.js` 无数值化验单。 |
+| S04／14—19 | 左：先“CT是辅助工具／并非人人必须”，再研究卡“增强螺旋CT”；右：医生评估后才出现超声与 CT 选择图，随后自绘 CT 大窗，最后临床、影像与病理的证据关系图。 | 16—17 研究卡逐项揭示，数据用原值直接出现，不滚动计数；18 只突出检出线索；19 聚合临床证据。病理图作证据概念，不在此提前宣称完成术后分型。 | `ann.js: label, line, arrow`；`ink.js: ink`；`wash.js: drawWash`。旧库无 CT 成品能力。 | `ct_schematic.js` 自绘横断腹部与阑尾；`research_card.js`；`clinical.js` 检查选择图。 |
+| S05／20—22 | 左：纵向“单纯性→化脓性（蜂窝织炎性）→坏疽性”，22 加非固定路径分支；右：当前节点对应的大体形态依次替换，保留完整阑尾体形。 | 三句合读为一段前提，21 保持镜头；22 分支从主链分出，终点用留白/省略表达个体差异，不捏造治疗结局或发生概率。无进展计时。 | `ann.js: arrow, dashed, label, dot`；`figure.js: specimenOutline`；`wash.js: drawWash`。 | `path_branch.js` 典型路径及非固定分支；左栏路径组件。 |
+| S06／23—24 | 左：“第一幕红／单纯性阑尾炎”“充血、轻度肿胀”；右：红色大体特写，再切到壁内扩张血管的大示意。 | 保留同一部位定位锚点，血管由窄到宽、红细胞通过增多；只表达相对变化，不显示流速或管径数字。 | `figure.js: specimenOutline`；`wash.js: bake, drawWash`；`alive.js: drawAliveWash`（仅大体/血管）；`ann.js: leader`。 | `vascular_response.js` 血管扩张与血流教学示意；`gross_appendix.js` 红色状态。 |
+| S07／25—30 | 左：依次列“液体”“蛋白质”“白细胞”，30 合为“渗出”；右：大血管与组织间隙，液体/蛋白质外出、水肿、白细胞游出及受损组织。 | 25—26 先画液体/蛋白质外出；27 再画完整白细胞穿壁；28 防御指向损伤处；29 展示组织受损；30 保持三种成分的去向。不是脓液直接从血管流出。 | `he.js: drawNeutrophil`（用于教学细胞符号）；`ann.js: arrow, label`；`wash.js: bake, drawWash`；`motion.js: tween, seg`。 | `vascular_response.js` 跨壁路径、水肿与损伤反馈；这里为机制示意，不伪装实时 HE 录像。 |
+| S08／31—34 | 左：层次说明与“主要在黏膜、黏膜下层”；33 定义卡“变质：变性、坏死”；右：清晰大 HE 层次视野，随后局部上皮损伤放大。 | 31—32 连续保持层次图，中性粒细胞集中于前两层，肌层仅散在几个；34 只局部上皮脱落，完整区域仍在。用边框定位后切大图，不加小到难辨的 inset。 | `he.js: drawHE, drawLens, fieldToScreen`；`he_detail.js: detailedNeutrophil, chromatin`；`he_guide.js: tissueTexture`；`ann.js: leader, brace`。 | `he_acute.js` 单纯性独立细胞分布与局灶上皮损伤；统一 HE 样式适配，不能直接沿用旧全层细胞板。 |
+| S09／35—36 | 左：“CT与组织变化对应”，分项“管径增粗、壁增厚、周围脂肪轻度模糊”；右：CT 表现示意与壁水肿两个大窗。 | 35 两窗同步框选阑尾壁；36 扩到周围脂肪。只有视觉对应，不显示测量数值，不将 CT 直接盖章为病理分型。 | `ann.js: ring, leader, label`；`he.js: drawLens`；`wash.js: drawWash`。 | `ct_schematic.js` 单纯性相关表现预设；`compare_view.js` 对照布局与同步定位。 |
+| S10／37—42 | 左：“第二幕黄”，38 两个名称同卡作为同义名；随后“全层炎症”“脓液成分”“脓细胞”；右：全层 HE 大图→脓液混合物→变性坏死中性粒细胞大特写。 | 37 浸润覆盖整层；39 以分阶段细胞形态替换表示变性坏死；40 同时见组织碎屑与液体；41 回到肿胀壁；42 切脓细胞特写。不要把全片细胞染黄或把所有中性粒都画成死细胞。 | `he.js: drawHE, drawLens, drawNeutrophil`；`he_detail.js: detailedNeutrophil, chromatin`；`wash.js: drawWash`；`ann.js: leader`。 | `he_acute.js` 全层化脓状态；`pus_exudate.js` 脓细胞、组织碎屑、液体混合物与退变形态。 |
+| S11／43—46 | 左：“纤维蛋白原→纤维素网”“纤维脓性渗出物”；46 使用定稿指定浆膜面措辞分行显示；右：网与脓细胞/碎屑混合的大图，接浆膜斑驳灰黄色脓苔特写。 | 43 先示意蛋白原渗出后成网；44 加入脓细胞和碎屑；45 以成分分别高亮说明黄色是混合来源；46 镜头停在浆膜外侧，不把纤维素单独等同脓苔。 | `he_detail.js: fibrinMesh, detailedNeutrophil`；`he_guide.js: tissueTexture`；`wash.js: bake, drawWash`；`ann.js: label, leader`。 | `pus_exudate.js` 成网、混合渗出物；`gross_appendix.js` 灰黄色脓苔及浆膜放大形态。 |
+| S12／47—48 | 左：“壁增厚强化／周围渗出明显”；右：化脓相关 CT 表现示意与全层炎症双大窗。 | 47 依次描出壁和周围组织；48 保持画面连读并框选内外对应区域，不另起一套分型结论。 | `ann.js: leader, ring`；`he.js: drawLens`。 | `ct_schematic.js` 化脓相关表现预设；`compare_view.js`。 |
+| S13／49—53 | 左：“终局黑”，接“受压／血栓→缺血”；右：腔压示意→受压及血栓两路血管→局部坏死出血→局部暗红发黑的大体特写。 | 用收窄、阻断的血流符号表现机制；腔压用无刻度挤压箭头；52—53 连读，坏死与血红蛋白分解共同对应变色，不补充分解产物浓度或固定反应时长。 | `figure.js: specimenOutline`；`he_detail.js: prepareGangrene, gangrene`（借用缺血/出血形态）；`wash.js: bake, drawWash`；`ann.js: arrow`。 | `ischemia.js` 受压/血栓机制图；`gross_appendix.js` 局部暗红黑斑；血红蛋白分解的非数值示意。 |
+| S14／54—57 | 左：回扣“变质：大片组织坏死”，55 并列“变质／渗出”，56 命名“坏疽性阑尾炎”，57 加“可能穿孔”；右：大 HE 坏死与边缘炎症→大体切面→局灶穿孔及腹腔扩散示意。 | 坏死区结构淡失、核碎屑及出血，活细胞集中于边缘；57 独立展示可能分支，不能让所有坏疽标本自动破洞。腹腔扩散为局部示意，不夸张喷射。 | `he_detail.js: prepareGangrene, gangrene, fadeSeams`；`he.js: drawLens`；`ann.js: ring, leader`；`wash.js: drawWash`。 | `he_acute.js` 坏死场景的局部参数化；`perforation.js` 可选局灶穿孔与扩散。 |
+| S15／58—59 | 左：“壁强化缺损：警惕坏死”“腔外气体、脓肿：警惕穿孔”；右：坏疽/穿孔相关 CT 表现示意与对应壁病变两大窗。 | 58 只点亮局部强化中断；59 再显示腔外气体、脓肿。每次一条对应引线；不使用“CT确诊三型”字样。 | `ann.js: leader, ring, label`；`he.js: drawLens`。 | `ct_schematic.js` 壁强化缺损、腔外气体及脓肿预设；`compare_view.js`。 |
+| S16／60—62 | 左：“评估治疗紧迫性”，61 “切除后病理确认分型”，62 “影像发现并发症”；右：医生综合评估→切除标本送检及切片→CT 并发症线索大图。 | 61 完整表现切除后送病理的方向；这是全片唯一一次术后病理确认分型的明确结论。62 复用新 CT 资产的不同局部，左侧列定稿所载文献年份与引文。 | `ann.js: arrow, label`；`he.js: drawLens`；`icons.js: iconHospital`。 | `specimen_pathology.js` 送检链路；`clinical.js` 综合评估；引用脚注组件。 |
+| S17／63—65 | 左：蜂窝织炎性、坏疽性手术切除卡，随后“具体方案／是否马上手术，由医生评估”；右：医生与患者及简洁切除示意，避免血腥器械演出。 | 63 手术图形出现；64—65 病情资料汇入医生评估，卡片换成手术时机说明。不得给出固定小时数，也不把病理三型直接映射为临床复杂性分组。 | `figure.js: drawFigure`；`ann.js: label, arrow`；`ink.js: ink`。 | `surgery_timing.js` 急性治疗与评估卡；`clinical.js` 医患及切除示意。 |
+| S18／66—68 | 左：“反复发作→可转慢性”，再顺序显示“急性：变质、渗出”“慢性：增生”；右：反复发作的非计数回环符号，接急性/慢性组织对照大图。 | 不用日历、天数、次数刻度；67—68 连读完整保留老师原话。只有进入慢性语义后才显示纤维组织增生，不复用旧“三种动作交织”的叙述。 | `ann.js: arrow, label, dashed`；`he.js: drawLens`；`he_guide.js: tissueTexture`。 | `chronic_transition.js` 非时间表回环；`he_chronic.js` 慢性纤维化基础组织。 |
+| S19／69—70 | 左：“阑尾壁：纤维组织增生、纤维化”，再“慢性炎细胞：淋巴细胞、浆细胞”；右：大 HE 慢性组织视野→淋巴细胞/浆细胞两个大特写替换，保留母图定位。 | 纤维束粉红、细胞核紫；先定位纤维化，再分别指出淋巴细胞与浆细胞形态。保持镜下稳定，不把细胞画成脓细胞；不标“全壁”或“大量”。 | `he_guide.js: tissueTexture`、`he_detail.js: chromatin` 可作纹理/核细节参考；`he.js: drawLens, fieldToScreen` 仅借用视野框架；`ann.js: leader`。 | `he_chronic.js` 纤维组织、纤维化及慢性浸润分布；`chronic_cells.js` 淋巴细胞、偏位核浆细胞；旧库没有可直接替用的完整慢性切片。 |
+| S20／71—74 | 左：先“正规评估”，后两路“症状缓解期：择期切除／急性发作期：视情况急诊手术”；右：慢性组织淡出接人物间歇疼痛与医生评估，随后两个清晰治疗情境窗。 | 71—72 从组织回到患者；73—74 连读老师完整原话，左侧分支按语义依次展开；不让两个手术情境同时抢字幕，也不画居家自诊。 | `figure.js: drawFigure`；`ann.js: arrow, label`；`icons.js: iconHospital`。 | `surgery_timing.js` 慢性两路卡与医生决策姿态；`path_branch.js` 分支布局。 |
+| S21／75—77 | 左：红黄黑观察导航与非固定分支，接“持续右下腹痛、发热，请及时就诊”，末态参考文献入口；右：三色罗盘→就医人物大图。 | 75 三色汇成无数值罗盘，76 转向医院图形，不展示病情演变时钟；77 就医落点停稳。参考文献入口不挤进字幕区、不新增来源，片尾展示时长待新音轨决定。 | `ann.js: ring, arrow, label`；`icons.js: iconHospital`；`figure.js: drawFigure`；`wash.js: drawWash`。 | `closing.js` 三色罗盘与就医收束；`reference_entry.js` 定稿原有参考文献入口。 |
+
+## 上屏数据与证据边界
+
+只使用定稿原文（含画面建议）中的数字。场景号、句号、工程坐标和下述资产排序号均不上屏；不加入显微计数、尺度条、血流值、管径阈值、体温、化验参考范围、发病小时数或分期概率。
+
+| 使用位置 | 可上屏原值 | 定稿来源及限制 |
+|---|---|---|
+| S04 研究卡 | 2023、8篇、1602人、敏感度95%、特异度94% | 16 的画面建议及 17 正文。标题写“增强螺旋CT”，标引文 [1]；不改为 MDCT 专属结果，不作为三型分型准确度。 |
+| S16 文献提示 | 2023、2026 | 62 的画面建议；仅按定稿标 [3][4]，不凭年份补写未核对的论文作者、题名或单篇结果。 |
+| 引用标记 | [1]—[5] 中各句原有标记 | 17、34、59、62、63、70 继承原引用关系。全文参考文献从定稿链接的 refs.md 原样核对后接入，不据本文重建书目。 |
+
+研究卡下方在左栏分卡提示“并非三型分型准确度／仍需结合临床”；正文数据读完后再切边界提示，不将全部说明挤在同屏。63 相关卡保留定稿证据边界：[5] 为条件性推荐，具体时机结合临床评估；老师原话与指南口径不混作同一句指南引文。教材版次、年份及页码尚待核实，不补造。本分析不新增医学结论，故不另引外部数据改变定稿。
+
+## v5 新项目结构与渲染方案
+
+建议直接以 `/workspace/病理科普视频/v5/` 为新项目根目录，后续实施时创建；本次未创建。结构建议：
+
+```text
+v5/
+  index.html
+  main.js                     # 新场景调度与纯时间渲染入口
+  data/
+    script.json               # 原句号、中文、英文卡、画面提示、引用标记
+    scene-manifest.json       # S01—S21 与句号范围
+    timeline.preview.json     # 预览估时，明确标识非成片时间轴
+    evidence.json             # 上屏数字与定稿位置的逐项映射
+  audio/
+    narration.json            # 新音轨句号时间边界；不得沿用旧数据
+    narration.*               # 新项目音轨
+  scenes/
+    index.js                  # 新 manifest 注册
+    s01_intro.js ... s21_closing.js
+  lib/
+    tokens.js, ink.js, wash.js, motion.js, ann.js
+    layout.js, sidebar.js, subtitle_bilingual.js, timeline.js
+    camera.js, he.js, he_detail.js, he_guide.js, figure.js, icons.js
+    alive.js                  # 可选，仅大体/人物/血管
+    gross_appendix.js, vascular_response.js, he_acute.js
+    ct_schematic.js, compare_view.js, pus_exudate.js, ischemia.js
+    perforation.js, clinical.js, symptom_compare.js, research_card.js
+    specimen_pathology.js, surgery_timing.js, path_branch.js
+    chronic_transition.js, he_chronic.js, chronic_cells.js
+    closing.js, reference_entry.js
+  assets/
+    wash/                     # 可复用配方生成的新烘焙资产
+    fonts/                    # 核对字形覆盖后的字体
+    references/               # 定稿所链接、已核对的原有文献资料
+  vendor/                     # Rough.js、p5 与 p5.brush 依赖
+  tools/                      # 截帧、确定性与安全区检查
+  qa/                         # 样帧、联系表、手机预览、核对记录
+```
+
+每场景独立文件，不与旧七章建立对应关系。建议文件及覆盖范围如下；可由场景表直接生成 manifest：
+
+| 新 scenes 文件 | 句号 | 新 scenes 文件 | 句号 | 新 scenes 文件 | 句号 |
+|---|---|---|---|---|---|
+| s01_intro.js | 01—05 | s08_red_histology.js | 31—34 | s15_black_ct.js | 58—59 |
+| s02_signals.js | 06—10 | s09_red_ct.js | 35—36 | s16_assessment.js | 60—62 |
+| s03_clinical.js | 11—13 | s10_yellow_wall.js | 37—42 | s17_acute_treatment.js | 63—65 |
+| s04_ct_evidence.js | 14—19 | s11_yellow_surface.js | 43—46 | s18_chronic_transition.js | 66—68 |
+| s05_pathway.js | 20—22 | s12_yellow_ct.js | 47—48 | s19_chronic_histology.js | 69—70 |
+| s06_red_gross.js | 23—24 | s13_black_ischemia.js | 49—53 | s20_chronic_timing.js | 71—74 |
+| s07_exudation.js | 25—30 | s14_black_necrosis.js | 54—57 | s21_closing.js | 75—77 |
+
+### 渲染器需要重新建立的约定
+
+1. 保留 `window.render(t)`、`window.READY`、`window.DUR` 这类可离线抽帧契约；入口重写场景调度，不复用旧 `chapterAt` 或章号推断。场景建议导出 `bake()`、`renderMain()`、`renderAnnotations()`、`sidebarState()`、`exitState()`；名称为拟定接口。
+2. 新时间轴以稳定句号 `01`—`77` 为键。旧 `T.at/end/frac` 数组是零基索引，不能直接传入本文句号；新适配层建议提供 `T.atId/endId/fracId`，内部统一映射。校验缺句、重句、倒序、负时长及文本不符；发现错误应显式报错，不能因句数相等而静默套用旧音轨。
+3. 新音轨未就绪时可用明确标为 preview 的估时开发单场景；不输出伪精确秒表。最终每个动作、续卡和转场绑定新句号时间。20—22、67—68、73—74 按连续口播处理，不在组内插章标题停顿。英语续卡先按语义绑定句内进度，再按实际音轨和阅读量核定。
+4. 绘制顺序：纸/网格→右区裁切后的主画面→屏幕坐标短标注→固定左栏→独立字幕。相机仅影响右区，字幕及左栏不继承漂移、缩放或震动。标注位置经主画面坐标转换后检查包围盒。
+5. 右区相机、暗底与 HE 视野参数独立于旧章号。镜下 `boil:false`、`drift:false`，旧 HE 内部微动也要审查关闭；动态由教学状态及推拉/对焦承担。大体可选 `alive`，不对 CT 使用表面起伏。
+6. 不规则形状加载时用固定种子生成；水彩只在 bake 生成，画面随机保持确定性。新场景交接用显式出口状态或在新时间轴末句边界重画上一场末态，不能跨 import 依赖旧 `EXIT_04` 等常量。
+7. 成片时长从新音轨及明确片尾策略推导，不继承旧入口固定片尾时长。READY 应等待字体、烘焙、数据与全部场景资源就绪。
+
+### 旧库迁移清单与必须修改处
+
+| 旧模块／能力 | 迁移建议与改动 |
+|---|---|
+| `tokens.js: C, FONT, W, H, SAFE` | 迁移色板、画布及字体约定；重设 contentBottom、字幕区上沿与中英基线，删除旧 fadeTop=900 的布局假设。字号和两栏尺寸集中定义。 |
+| `motion.js: rng, hash, noise2, fbm, tween, ease, seg` | 优先迁移纯函数；使用固定种子；不依赖上一帧。不把内部种子或细胞计数显示到画面。 |
+| `ink.js: shape, draw, ink, grid, setBoil` | 迁移 Rough.js 风格与缓存；按场景命名缓存键，保留圆头和标准线宽。镜下关闭 boil，网格裁在内容区。 |
+| `wash.js: initBaker, bake, drawWash, get` | 迁移烘焙和高分辨率选项及 vendor 依赖；新建配方/键。近景优先 hd，依据最终屏幕像素检查是否放大超出纹理分辨率；旧 he.bands 不直接拉大使用。检查 scaleBrushes 连乘及初始化隔离。 |
+| `ann.js: label, leader, ring, arrow, line, brace, setDark` | 迁移屏幕字号、光晕和折线能力；外层增加两栏测量/换行/安全区约束。`label` 本身不会自动排长卡；`counter`、`scalebar` 本片无必要，不为装饰加数字。暗色状态每场恢复，避免污染下一场。 |
+| `he.js: drawHE, drawLens, fieldToScreen, drawNeutrophil, bakeHE` | 保留视野与细胞 API 思路，拆出旧固定 CELLS、ULCER、VESSELS 等场景几何；三型和慢性各用新几何与分布。明确 detail 与 style:'ch04' 的调用路径，不能混用默认简笔结果冒充细节版。 |
+| `he_detail.js: detailedNeutrophil, chromatin, fibrinMesh, tissueTexture, prepareGangrene, gangrene, fadeSeams` | 作为目标 HE 画法基础；坏疽准备与绘制需按新视野解耦全局缓存/固定坐标。`pushDisc`、`drawBlood`、`drawZahn` 为文件内部函数，不能当现成导出调用；如要血管机制复用，应新封装公开接口。 |
+| `he_guide.js: detailedNeutrophil, drawVessels, tissueTexture` | 保留组织结构及血管画法参考；与 he_detail 统一一个细胞风格入口，避免同名函数被误选。正常背景保留淋巴滤泡、生发中心、双层肌与管状隐窝；正常淋巴滤泡不能直接当慢性浸润证据。 |
+| `figure.js: drawFigure, drawArmR, drawInsitu, painPt, specimenOutline` | 迁移人物和标本轮廓能力；将 FIG、INSITU、HAND_R 等旧绝对坐标改成局部几何/锚点参数。痛点轨迹重新适配新人体，不能整体平移后任其越过 y=810。新标本另建独立模块。 |
+| `icons.js: iconHospital, iconThermo` | 按新比例迁移必要图标；不使用 iconClock 构造病情时间表；不搬与新稿无关的图标和医学情节。 |
+| `camera.js: camAt, apply, toScreen, toWorld` | 改为以右侧 viewport 中心为相机基准；旧 apply 以全画布中心计算，不能原封不动套两栏。 |
+| `alive.js: aliveXform, drawAliveWash` | 可选迁移，限 gross/figure/vessel；扩大安全区检查到最大形变，禁止用于 HE 和 CT。 |
+| `detail.js: weighted, hatch, shadeSide` | 可选，只在新人物需要线条粗细/排线时迁移；镜下禁排线。该文件在当前 film 存在，不将其误说为风格参考分支的既有要求。 |
+| `timeline.js: loadTimeline` | 重写加载与验证；不得继续自动读取旧 audio/narration.json 或旧 TSV 作后备，不再由旧章号切场景。保留句内 frac 思路。 |
+| `subtitle.js: split, linesFor, draw, safeFade` | 仅参考字形/光晕方式；新写双语字幕。旧 18 字切行、删句末标点、单语 44px、单基线和旧安全区逻辑都不适用定稿。 |
+| `mood.js: moodAt`、`scope.js: scopeAt, drawSurround, drawPointer`、`chapter.js: titleBlock` | 不整模块搬用旧调度。纸色/暗底/标题样式可提炼；按新 scene 状态重写，去除旧句号、全屏镜位与章节节奏。 |
+
+迁移配套须包含 Rough.js、p5、p5.brush 及必要字体；新字幕增加英文和新中文，字体子集应重新核对字形。既有章节生成脚本若假定旧章号，也须新写，不能直接生成覆盖新 scenes。
+
+## 左侧说明栏：统一放入 lib
+
+建议 `lib/sidebar.js` 负责组合，`lib/layout.js` 负责测量、换行、边界检查；各场景只传语义状态，不重复写绝对坐标。
+
+- 宽度 460，内边距 24，正文可用宽度 412；栏顶起于 y=60、底部不超过 770。标题 48—56px、诊断名 44—52px、正文 36—40px、引文及边界文字 30—32px；研究百分比可用 56px。所有字号为屏幕像素，字重沿用 500/700/800。长词优先断行或续卡，不压缩至难读。
+- 顶部固定颜色/主题导航，中部只放当前一张主卡，底部按需放来源或证据边界。卡片高度由实测字形与行距计算；溢出时切换整张卡，不裁掉语义、不叠卡、不向字幕区延伸。
+- 内容类型：章节色卡、典型路径及分支、病理层次索引、定义卡、CT 所见要点、研究卡、治疗时机卡、来源卡。时间语义只使用稿件已有“缓解期／急性发作期”等文字，不加钟表/日历或时间数值。
+- 拟定接口：`drawSidebar(ctx, {theme, heading, card, source, progress}, layout)`；card 按 type 区分 definition/path/research/compare/timing/source。progress 只指当前叙事高亮，不画患者病程完成比例。研究数据须带 evidenceKey 才能渲染，且直接呈现最终值。
+- 所有卡片先测量再画；卡片出现只用淡入/短距离揭示，左栏位置固定。长病名如“化脓性（蜂窝织炎性）阑尾炎”分语义行，保持同义名关系。
+- 右侧若需解释多个标签，左栏设对应短词行，右区用引线和结构短标签；不能把右侧主画面变成第二个说明栏。
+
+## 新资产清单：按预计工作量由高到低
+
+工作量为相对制作复杂度判断，不作虚构工时报价。“可先做”指不依赖正式新时间轴即可制作与审图；最终动态节奏、字幕续卡和转场仍需新音轨。
+
+| 排序／资产 | 工作量与主要风险 | 覆盖场景 | 不依赖新时间轴可先做的部分 | 待新时间轴完成的部分 |
+|---|---|---|---|---|
+| A／新急性 HE 组织状态库 | 最高：正常组织基底、单纯性层次分布、全层化脓、坏疽出血及局灶穿孔须互相一致；旧细胞板不能直接代表三型。 | S08、S10、S14 及 CT 配对 | **可先做**四类静态样板与局部细胞放大，确定分布、细胞大小和坏死边缘形态。 | 场景内推拉、对焦、状态揭示和出口状态。 |
+| B／三型相关 CT 自绘示意库 | 高：腹部断面、同一阑尾定位、壁强化及周围组织灰阶关系要清晰；容易被误解成真实临床影像或精准分型。 | S04、S09、S12、S15、S16 | **可先做**三类表现预设、CT表现示意标记、对应病理锚点及清晰大窗。不要加 HU、尺寸、测量刻度。 | 逐句高亮、与病理双窗同步、并发症复现顺序。 |
+| C／慢性 HE 与慢性炎细胞库 | 高：新增纤维化组织、淋巴细胞与浆细胞形态，避免把正常滤泡或急性脓细胞误作慢性浸润。 | S18—S19 | **可先做**慢性全景、纤维束及两类细胞样板，母图到特写定位。 | 69—70 的揭示顺序与切换。 |
+| D／新大体阑尾及局部特写库 | 高：正常、轻肿充血、灰黄混合脓苔、局部暗红黑斑、可选穿孔需统一形体与水彩质感。 | S01、S05—S06、S11、S13—S14、S21 | **可先做**新轮廓、断面及高分辨率烘焙；红黄黑并列样帧。 | 定位放大、形态切换及镜头交接。 |
+| E／血管反应与缺血机制库 | 中高：液体/蛋白质/白细胞路径、腔压、受压/血栓与损伤关联需逐项讲清。 | S06—S07、S13 | **可先做**局部几何、成分符号、独立动作的标准化进度演示。 | 对应每句的动作起止与镜头保持。 |
+| F／纤维脓性渗出物库 | 中高：脓细胞退变、组织碎屑、液体、粗细纤维素网及浆膜覆盖为一套混合资产。 | S10—S11 | **可先做**成分样板、混合物与浆膜大特写。 | 成网→混合→黄色来源高亮节奏。 |
+| G／临床人物、症状对照、送检及手术图形 | 中：新增医生与患者互动；症状非典型不能靠编造新临床事实填充。 | S02—S04、S16—S17、S20—S21 | **可先做**人物姿态、典型/非典型无数值版、无数值化验单、送检和简洁切除图。 | 连读镜头衔接、疼痛迁移与就医动作时间。 |
+| H／两栏布局、双窗、左栏与双语字幕组件 | 中：全片共用，需尽早完成；主要风险是长病名和英文挤压图像及安全区。 | 全片 | **可先做**所有卡型、长文本压力样帧、字幕字体与区域模板。 | 正式字幕时码、英文续卡切换及连续原话跨句显示。 |
+| I／路径分支、手术时机、研究与来源卡 | 中低：图形简单但措辞和证据边界要求严格。 | S04—S05、S17—S18、S20 | **可先做**按定稿静态卡、数字来源映射、条件说明与非固定路径布局。 | 多卡依次显现及停留长度。 |
+| J／片名、三色罗盘、片尾入口 | 较低：维持颜色主线并落在及时就医，不引入时钟暗示。 | S01、S21 | **可先做**片名分行、无刻度罗盘和就医末态样帧；参考书目须先核对定稿链接原文件。 | 入片/收束节奏及片尾持续时间。 |
+
+优先实施顺序可先 H 的布局样板，再并行制作 A—G 的静态资产，最后接正式时间轴。上表按工作量排序，实施顺序按共用依赖调整；不要求先生成整条音轨才能开展资产工作。
+
+## 后续制作验收点
+
+- 句号映射严格覆盖 01—77；场景边界来自本表，不借旧 TSV 的句序或秒数。对 20—22、67—68、73—74 检查连续朗读与原文完整性。
+- 为每组至少留一张关键静态样帧，另检查每次转场中点、最大相机放大、最大形变和全部左栏续卡；全文本包围盒、引线及主图必须在 y<810。
+- 手机预览核对中文与英文同时可读；主图/CT/HE 双窗无法清楚辨认时改为同一组内的单窗大特写，不能靠缩小字体维持塞满版面。
+- 单纯性肌层只散在几个中性粒细胞；化脓性为全层浸润，浆膜混合渗出含脓细胞；坏疽局部暗红黑、坏死伴出血，穿孔仅为可能分支；慢性明确纤维化及淋巴细胞/浆细胞，不写“全壁”“大量”。
+- 全部 CT 图窗有“CT表现示意”，只作病变线索与病理对应，不承诺独立确认三型；先临床、再辅助检查；术后病理确认分型的明确结论只在 61 出现一次。
+- 上屏数字逐项回查定稿；不将旧规范里的细胞计数、比例尺数字、旧片时间信息或老师原始旧统计值搬进画面。
+- 烘焙资产按最大屏幕尺寸审查清晰度；随机与缓存经换序抽帧核对确定性；字幕、左栏不跟随镜头晃动。这里只提出未来验收要求，本次未渲染新视频或运行画面测试。
+
+EXIT 0
+
+exec
+/bin/bash -lc "cat assembly/pipeline/assemble.mjs; cat qa/briefs/v6_b10_pus.md; python - <<'PY'
+import json
+p='/workspace/病理科普视频/配音/全稿_v3/timeline.json'
+d=json.load(open(p)); print(type(d),str(d)[:1800]);print('duration',d.get('duration'));print(d['lines'][28:34])
+PY" in /workspace/病理科普视频/v5
+ exited 127 in 0ms:
+#!/usr/bin/env node
+// Final assembly: cues + scene video + bilingual subtitle overlay + 12 s endcard + audio.
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+import fsp from 'node:fs/promises';
+import path from 'node:path';
+import { spawn } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { loadCuesFromFs, writeSnapshot } from '../subtitle/loadCues.js';
+import { subtitleState, linesFor, cardsFor, BAND, CN_SIZE, EN_SIZE, EN_FLOOR, EN_MAX_W, MAX, WEIGHT_CN, WEIGHT_EN, FADE, HALO } from '../subtitle/subtitle.js';
+import { canvasPng, withPage } from './browser.mjs';
+import { renderEndcard } from './render_endcard.mjs';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const DEFAULT_VOICE = '/workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav';
+const ENDCARD_SECONDS = 12;
+
+function parseArgs(argv) {
+  const o = {
+    sceneVideo: null,
+    cues: null,
+    voice: null,
+    music: null,
+    endcardDir: path.join(root, 'endcard'),
+    fps: 30,
+    outDir: path.join(root, 'qa'),
+    outName: 'dryrun_测试',
+    contentDuration: null,
+    maxCues: null,
+    blind: true,
+    xfade: false,
+    keepTmp: false,
+  };
+  for (let i = 2; i < argv.length; i++) {
+    const a = argv[i];
+    const nxt = () => {
+      if (i + 1 >= argv.length) throw new Error('missing value for ' + a);
+      return argv[++i];
+    };
+    if (a === '--scene-video') o.sceneVideo = nxt();
+    else if (a === '--cues') o.cues = nxt();
+    else if (a === '--voice') o.voice = nxt();
+    else if (a === '--music') o.music = nxt();
+    else if (a === '--endcard-dir') o.endcardDir = path.resolve(nxt());
+    else if (a === '--fps') o.fps = Number(nxt());
+    else if (a === '--out-dir') o.outDir = path.resolve(nxt());
+    else if (a === '--out-name') o.outName = nxt();
+    else if (a === '--content-duration') o.contentDuration = Number(nxt());
+    else if (a === '--max-cues') o.maxCues = Number(nxt());
+    else if (a === '--blind') o.blind = true;
+    else if (a === '--no-blind') o.blind = false;
+    else if (a === '--xfade') o.xfade = true;
+    else if (a === '--keep-tmp') o.keepTmp = true;
+    else throw new Error('Unknown argument ' + a);
+  }
+  if (!o.voice && fs.existsSync(DEFAULT_VOICE)) o.voice = DEFAULT_VOICE;
+  return o;
+}
+
+function run(cmd, args) {
+  return new Promise((resolve, reject) => {
+    const p = spawn(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'] });
+    let out = '';
+    let err = '';
+    p.stdout.on('data', (d) => { out += d; });
+    p.stderr.on('data', (d) => { err += d; });
+    p.on('close', (code) => {
+      if (code === 0) resolve({ out, err });
+      else reject(new Error(`${cmd} ${args.map((x) => (/\s/.test(x) ? JSON.stringify(x) : x)).join(' ')}\n${err.slice(-4000)}`));
+    });
+  });
+}
+
+function sha256(file) {
+  return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+}
+
+function exists(p) {
+  try { return fs.statSync(p).isFile() && fs.statSync(p).size > 0; } catch { return false; }
+}
+
+async function probe(file) {
+  const { out } = await run('ffprobe', ['-hide_banner', '-print_format', 'json', '-show_format', '-show_streams', file]);
+  return JSON.parse(out);
+}
+
+function visualKey(state) {
+  if (!state) return 'none';
+  const q = (a) => (a >= 0.999 ? 1 : a <= 0.001 ? 0 : Math.round(a * 1000) / 1000);
+  return `${state.cn}\t${state.en}\t${q(state.cnA)}\t${q(state.enA)}`;
+}
+
+async function linkOrCopy(src, dest) {
+  try { await fsp.link(src, dest); } catch { await fsp.copyFile(src, dest); }
+}
+
+async function rawPixels(png, pixFmt) {
+  return new Promise((resolve, reject) => {
+    const p = spawn('ffmpeg', ['-v', 'error', '-i', png, '-f', 'rawvideo', '-pix_fmt', pixFmt, 'pipe:1'], { stdio: ['ignore', 'pipe', 'pipe'] });
+    const chunks = [];
+    let err = '';
+    p.stdout.on('data', (d) => chunks.push(d));
+    p.stderr.on('data', (d) => { err += d; });
+    p.on('close', (code) => (code === 0 ? resolve(Buffer.concat(chunks)) : reject(new Error(err || 'raw decode failed'))));
+  });
+}
+
+function checkFullFrame(buf) {
+  const w = 1920;
+  const h = 1080;
+  const paper = [0xf4, 0xef, 0xe6];
+  let above = 0;
+  let minAbove = null;
+  let ink = 0;
+  let minInk = null;
+  for (let y = 0; y < h; y++) {
+    const row = y * w * 3;
+    for (let x = 0; x < w; x++) {
+      const i = row + x * 3;
+      const diff = Math.abs(buf[i] - paper[0]) + Math.abs(buf[i + 1] - paper[1]) + Math.abs(buf[i + 2] - paper[2]);
+      if (diff <= 12) continue;
+      if (y < BAND.fadeTop) {
+        above++;
+        if (minAbove == null) minAbove = y;
+      } else {
+        ink++;
+        if (minInk == null) minInk = y;
+      }
+    }
+  }
+  return { above, minAbove, ink, minInk };
+}
+
+function checkOverlay(buf) {
+  const w = 1920;
+  const h = 1080;
+  let above = 0;
+  let minAbove = null;
+  let opaque = 0;
+  for (let y = 0; y < h; y++) {
+    const row = y * w * 4;
+    for (let x = 0; x < w; x++) {
+      const a = buf[row + x * 4 + 3];
+      if (y < BAND.fadeTop) {
+        if (a !== 0) {
+          above++;
+          if (minAbove == null) minAbove = y;
+        }
+      } else if (a === 255) opaque++;
+    }
+  }
+  return { above, minAbove, opaque };
+}
+
+function pngSize(buf) {
+  if (buf.toString('ascii', 1, 4) !== 'PNG') throw new Error('not a png');
+  return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) };
+}
+
+function lastJson(text) {
+  const i = text.lastIndexOf('{');
+  const j = text.lastIndexOf('}');
+  if (i < 0 || j < i) throw new Error('no JSON in ffmpeg output\n' + text.slice(-1800));
+  return JSON.parse(text.slice(i, j + 1));
+}
+
+async function maxVolumeDb(file) {
+  const { err } = await run('ffmpeg', ['-hide_banner', '-i', file, '-af', 'volumedetect', '-f', 'null', '-']);
+  const m = err.match(/max_volume:\s*(-?[\d.]+|-?inf)\s*dB/i);
+  if (!m) return null;
+  if (m[1] === '-inf') return -Infinity;
+  return Number(m[1]);
+}
+
+async function buildAudio({ voice, music, contentDur, totalDur, outWav }) {
+  const voiceOk = voice && exists(voice);
+  const musicOk = music && exists(music);
+  let voiceSilent = !voiceOk;
+  let musicSilent = !musicOk;
+  if (voiceOk) {
+    const peak = await maxVolumeDb(voice);
+    voiceSilent = peak == null || peak <= -70;
+  }
+  if (musicOk) {
+    const peak = await maxVolumeDb(music);
+    musicSilent = peak == null || peak <= -70;
+  }
+  const report = {
+    voice: voiceOk ? voice : null,
+    music: musicOk ? music : null,
+    voiceSilent,
+    musicSilent,
+  };
+  if (voiceSilent && musicSilent) {
+    await run('ffmpeg', [
+      '-y', '-hide_banner', '-loglevel', 'error',
+      '-f', 'lavfi', '-i', 'anullsrc=channel_layout=stereo:sample_rate=48000',
+      '-t', totalDur.toFixed(6),
+      '-c:a', 'pcm_s16le', outWav,
+    ]);
+    report.loudnorm = 'skipped';
+    report.reason = 'Both voice and music are missing or digital silence. loudnorm is skipped because it misbehaves on digital silence.';
+    report.integratedLufs = null;
+    report.truePeak = null;
+    return report;
+  }
+
+  const c = contentDur.toFixed(6);
+  const tot = totalDur.toFixed(6);
+  const fadeAt = Math.max(0, totalDur - 0.8).toFixed(6);
+  const vIn = voiceOk ? ['-i', voice] : ['-f', 'lavfi', '-t', tot, '-i', 'anullsrc=channel_layout=stereo:sample_rate=48000'];
+  const mIn = musicOk ? ['-i', music] : ['-f', 'lavfi', '-t', tot, '-i', 'anullsrc=channel_layout=stereo:sample_rate=48000'];
+  const graph = [
+    `[0:a]aformat=sample_rates=48000:channel_layouts=stereo,atrim=0:${c},asetpts=PTS-STARTPTS,apad=whole_dur=${tot},atrim=0:${tot}[voice]`,
+    `[1:a]aformat=sample_rates=48000:channel_layouts=stereo,atrim=0:${tot},asetpts=PTS-STARTPTS,apad=whole_dur=${tot},afade=t=out:st=${fadeAt}:d=0.8[music]`,
+    `[music][voice]sidechaincompress=threshold=0.05:ratio=8:attack=50:release=300[ducked]`,
+    `[ducked][voice]amix=inputs=2:duration=longest:dropout_transition=0:normalize=0,atrim=0:${tot},asetpts=PTS-STARTPTS[mix]`,
+  ].join(';');
+  const mixed = outWav.replace(/\.wav$/, '.mixed.wav');
+  await run('ffmpeg', ['-y', '-hide_banner', '-loglevel', 'error', ...vIn, ...mIn, '-filter_complex', graph, '-map', '[mix]', '-c:a', 'pcm_s16le', mixed]);
+  const pass1 = await run('ffmpeg', ['-hide_banner', '-i', mixed, '-af', 'loudnorm=I=-14:TP=-1:LRA=11:print_format=json', '-f', 'null', '-']);
+  const measured = lastJson(pass1.err);
+  const af = [
+    'loudnorm=I=-14:TP=-1:LRA=11',
+    `measured_I=${measured.input_i}`,
+    `measured_TP=${measured.input_tp}`,
+    `measured_LRA=${measured.input_lra}`,
+    `measured_thresh=${measured.input_thresh}`,
+    `offset=${measured.target_offset}`,
+    'linear=true',
+  ].join(':');
+  await run('ffmpeg', ['-y', '-hide_banner', '-loglevel', 'error', '-i', mixed, '-af', af, '-ar', '48000', '-ac', '2', '-c:a', 'pcm_s16le', outWav]);
+  const pass2 = await run('ffmpeg', ['-hide_banner', '-i', outWav, '-af', 'loudnorm=I=-14:TP=-1:LRA=11:print_format=json', '-f', 'null', '-']);
+  const after = lastJson(pass2.err);
+  await fsp.rm(mixed, { force: true });
+  report.loudnorm = 'two-pass';
+  report.integratedLufs = Number(after.input_i);
+  report.truePeak = Number(after.input_tp);
+  report.target = { integratedLufs: -14, truePeakMax: -1 };
+  return report;
+}
+
+async function makeScene({ sceneVideo, frames, fps, out }) {
+  const dur = frames / fps;
+  if (!sceneVideo) {
+    await run('ffmpeg', [
+      '-y', '-hide_banner', '-loglevel', 'error',
+      '-f', 'lavfi', '-i', `color=c=0xF4EFE6:s=1920x1080:r=${fps}`,
+      '-frames:v', String(frames), '-r', String(fps),
+      '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'veryfast', '-crf', '16', '-bf', '0', '-g', String(fps),
+      '-an', out,
+    ]);
+    return 'placeholder #F4EFE6';
+  }
+  const info = await probe(sceneVideo);
+  const v = info.streams.find((s) => s.codec_type === 'video');
+  const same = Number(v.width) === 1920 && Number(v.height) === 1080;
+  const prep = same
+    ? `fps=${fps},setpts=PTS-STARTPTS,trim=duration=${dur.toFixed(6)}`
+    : `scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,fps=${fps},setpts=PTS-STARTPTS,trim=duration=${dur.toFixed(6)}`;
+  const d = dur.toFixed(6);
+  await run('ffmpeg', [
+    '-y', '-hide_banner', '-loglevel', 'error',
+    '-i', sceneVideo,
+    '-f', 'lavfi', '-i', `color=c=0xF4EFE6:s=1920x1080:r=${fps}:d=${d}`,
+    '-filter_complex', `[0:v]${prep}[v];[1:v]fps=${fps},trim=duration=${d},setpts=PTS-STARTPTS[p];[p][v]overlay=eof_action=pass,format=yuv420p`,
+    '-frames:v', String(frames), '-r', String(fps),
+    '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'veryfast', '-crf', '16', '-bf', '0', '-g', String(fps),
+    '-an', out,
+  ]);
+  return sceneVideo;
+}
+
+function cueWindow(cues) {
+  return cues.map((c) => ({
+    id: c.id,
+    ch: c.ch,
+    start: round3(c.start),
+    end: round3(c.end),
+    hanzi: c.hanzi,
+    text: c.text,
+    en: c.en,
+    englishCards: c.englishCards,
+    lines: linesFor(c).map((l) => ({ text: l.text, start: round3(l.start), end: round3(l.end) })),
+    cards: cardsFor(c).map((l) => ({ text: l.text, start: round3(l.start), end: round3(l.end) })),
+  }));
+}
+
+function round3(n) {
+  return Math.round(n * 1000) / 1000;
+}
+
+function fmtBytes(n) {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / 1024 / 1024).toFixed(2)} MB`;
+}
+
+async function main() {
+  const opt = parseArgs(process.argv);
+  if (!(opt.fps > 0)) throw new Error('fps must be positive');
+  await fsp.mkdir(opt.outDir, { recursive: true });
+  const tmp = path.join(opt.outDir, 'tmp');
+  const subDir = path.join(tmp, 'sub');
+  const endDir = path.join(tmp, 'endcard');
+  await fsp.rm(tmp, { recursive: true, force: true });
+  await fsp.mkdir(subDir, { recursive: true });
+  await fsp.mkdir(path.join(opt.outDir, 'frames'), { recursive: true });
+
+  const endcardJson = path.join(opt.endcardDir, 'data/endcard.json');
+  const watched = ['data/endcard.json', 'endcard.js', 'index.html', 'render.mjs'].map((rel) => path.join(opt.endcardDir, rel));
+  const hashesBefore = Object.fromEntries(watched.map((f) => [f, sha256(f)]));
+  if (!fs.readFileSync(endcardJson, 'utf8').includes('【待填】')) {
+    throw new Error('endcard.json is missing 【待填】 before assembly; refusing to continue');
+  }
+
+  const loaded = loadCuesFromFs({ cues: opt.cues || undefined });
+  const snapName = String(loaded.source || '').includes('estimate') ? 'cues_estimate.json' : 'cues_loaded.json';
+  const snapPath = path.join(opt.outDir, snapName);
+  writeSnapshot(snapPath, loaded);
+
+  console.log(`cues ${loaded.count} source=${loaded.source} duration=${loaded.duration}`);
+  if (loaded.count !== 77 && String(loaded.source).includes('estimate')) {
+    throw new Error(`expected 77 estimated cues, got ${loaded.count}`);
+  }
+
+  let clip = loaded.cues.slice();
+  if (opt.maxCues) clip = clip.slice(0, opt.maxCues);
+  let contentDur = clip[clip.length - 1].end;
+  if (opt.contentDuration != null) {
+    contentDur = opt.contentDuration;
+    clip = clip.filter((c) => c.start < contentDur).map((c) => (c.end > contentDur ? { ...c, end: contentDur } : { ...c }));
+  }
+  const contentFrames = Math.round(contentDur * opt.fps);
+  const endFrames = Math.round(ENDCARD_SECONDS * opt.fps);
+  const contentDurExact = contentFrames / opt.fps;
+  const totalDur = (contentFrames + endFrames) / opt.fps;
+  const clipPath = path.join(opt.outDir, 'cues_dryrun.json');
+  fs.writeFileSync(clipPath, JSON.stringify({
+    source: loaded.source,
+    formula: loaded.formula,
+    contentDuration: contentDurExact,
+    lastCueEnd: clip[clip.length - 1].end,
+    cues: clip,
+  }, null, 2) + '\n');
+
+  const c1 = clip.find((c) => c.id === '01') || clip[0];
+  const c3 = clip.find((c) => c.id === '03');
+  if (!c3) throw new Error('dry-run window has no sentence 03');
+  const t1 = (c1.start + c1.end) / 2;
+  const t3 = (c3.start + c3.end) / 2;
+  const framesDir = path.join(opt.outDir, 'frames');
+  const stills = [
+    { t: t1, file: path.join(framesDir, '帧_01_句01中点.png'), kind: 'subtitle' },
+    { t: t3, file: path.join(framesDir, '帧_02_最长英文_s03.png'), kind: 'subtitle' },
+  ];
+
+  console.log(`content ${contentDurExact}s (${contentFrames} frames) + endcard ${ENDCARD_SECONDS}s → ${totalDur}s`);
+  console.log(`still t01=${t1} t03=${t3} endcardLocal=3 file=${contentDurExact + 3}`);
+
+  const audioPath = path.join(tmp, 'audio.wav');
+  const audioReport = await buildAudio({
+    voice: opt.voice,
+    music: opt.music,
+    contentDur: contentDurExact,
+    totalDur,
+    outWav: audioPath,
+  });
+  console.log('audio', audioReport.loudnorm, audioReport.reason || '');
+
+  const scenePath = path.join(tmp, 'scene.mp4');
+  const sceneNote = await makeScene({ sceneVideo: opt.sceneVideo, frames: contentFrames, fps: opt.fps, out: scenePath });
+  console.log('scene', sceneNote);
+
+  const runs = [];
+  for (let i = 0; i < contentFrames; i++) {
+    const t = i / opt.fps;
+    const key = visualKey(subtitleState(t, clip, { xfade: opt.xfade }));
+    const last = runs[runs.length - 1];
+    if (last && last.key === key) last.count += 1;
+    else runs.push({ key, t, index: i, count: 1 });
+  }
+  console.log(`subtitle unique frames ${runs.length} / ${contentFrames}`);
+
+  const measurePath = path.join(opt.outDir, 'english_measure.json');
+  let measured = null;
+  let overlayCheck = null;
+  let qaPaths = null;
+  let qaMeta = null;
+  await withPage(path.join(root, 'subtitle'), 'http://subtitle.local', async (page) => {
+    measured = await page.evaluate((cues) => window.measureCards(cues), loaded.cues);
+    await page.evaluate(({ cues, xfade }) => { window.CUES = cues; window.XFADE = xfade; }, { cues: clip, xfade: opt.xfade });
+    for (const still of stills) {
+      const png = await canvasPng(page, still.t, 'full');
+      await fsp.writeFile(still.file, png);
+      console.log('still', still.file);
+    }
+    const extras = await page.evaluate((t) => window.buildQaStills(t), t3);
+    const qaNames = {
+      compare: '对比_字幕字号.png',
+      phone: '预览_手机竖屏.png',
+      strip: '预览_手机竖屏_条.png',
+    };
+    qaPaths = {};
+    for (const [key, name] of Object.entries(qaNames)) {
+      const file = path.join(framesDir, name);
+      const url = extras[key];
+      const comma = url.indexOf(',');
+      if (comma < 0) throw new Error('QA still ' + name + ' was not a PNG');
+      await fsp.writeFile(file, Buffer.from(url.slice(comma + 1), 'base64'));
+      qaPaths[key] = file;
+      console.log('qa', file);
+    }
+    qaMeta = extras.meta;
+    let n = 0;
+    let holdChecked = false;
+    for (const run of runs) {
+      const png = await canvasPng(page, run.t, 'overlay');
+      const first = path.join(subDir, `f_${String(n).padStart(5, '0')}.png`);
+      await fsp.writeFile(first, png);
+      if (!holdChecked) {
+        const st = subtitleState(run.t, clip, { xfade: opt.xfade });
+        if (st && st.cn && st.cnA >= 0.999 && st.en && st.enA >= 0.999) {
+          const raw = await rawPixels(first, 'rgba');
+          overlayCheck = checkOverlay(raw);
+          holdChecked = true;
+          console.log('overlay alpha check', overlayCheck);
+        }
+      }
+      n += 1;
+      for (let k = 1; k < run.count; k++) {
+        await linkOrCopy(first, path.join(subDir, `f_${String(n).padStart(5, '0')}.png`));
+        n += 1;
+      }
+      if (n % 120 === 0 || n === contentFrames) console.log(`subtitle frames ${n}/${contentFrames}`);
+    }
+    if (n !== contentFrames) throw new Error(`subtitle frames ${n} != ${contentFrames}`);
+  });
+  fs.writeFileSync(measurePath, JSON.stringify(measured, null, 2) + '\n');
+
+  const dead = (measured.rows || []).filter((r) => r.text && !(r.width > 0));
+  if (dead.length) throw new Error('MixSans measureText returned 0 for ' + dead[0].text);
+
+  const contentPath = path.join(tmp, 'content.mp4');
+  console.log('overlay encode');
+  await run('ffmpeg', [
+    '-y', '-hide_banner', '-loglevel', 'error',
+    '-i', scenePath,
+    '-framerate', String(opt.fps), '-start_number', '0', '-i', path.join(subDir, 'f_%05d.png'),
+    '-filter_complex', '[1:v]format=rgba[s];[0:v][s]overlay=0:0:format=auto,format=yuv420p',
+    '-frames:v', String(contentFrames), '-r', String(opt.fps),
+    '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'veryfast', '-crf', '14', '-bf', '0', '-g', String(opt.fps),
+    '-an', contentPath,
+  ]);
+  await fsp.rm(subDir, { recursive: true, force: true });
+
+  const endcardPath = path.join(tmp, 'endcard.mp4');
+  const endStill = path.join(framesDir, '帧_03_片尾A_t3.png');
+  console.log('endcard render');
+  await renderEndcard({
+    endcardDir: opt.endcardDir,
+    frameDir: endDir,
+    videoPath: endcardPath,
+    fps: opt.fps,
+    duration: ENDCARD_SECONDS,
+    stills: [{ t: 3, file: endStill }],
+  });
+  await fsp.rm(endDir, { recursive: true, force: true });
+
+  const out1080 = path.join(opt.outDir, `${opt.outName}.mp4`);
+  const out720 = path.join(opt.outDir, `${opt.outName}_720p.mp4`);
+  const outBlind = path.join(opt.outDir, `${opt.outName}_盲审.mp4`);
+  console.log('mux', out1080);
+  await run('ffmpeg', [
+    '-y', '-hide_banner', '-loglevel', 'error',
+    '-i', contentPath,
+    '-i', endcardPath,
+    '-i', audioPath,
+    '-filter_complex', '[0:v][1:v]concat=n=2:v=1:a=0[v]',
+    '-map', '[v]', '-map', '2:a:0',
+    '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-r', String(opt.fps), '-preset', 'veryfast', '-crf', '16', '-bf', '0', '-g', String(opt.fps),
+    '-c:a', 'aac', '-b:a', '160k', '-ar', '48000', '-ac', '2',
+    '-movflags', '+faststart',
+    out1080,
+  ]);
+  console.log('720p');
+  await run('ffmpeg', [
+    '-y', '-hide_banner', '-loglevel', 'error',
+    '-i', out1080,
+    '-vf', 'scale=1280:720',
+    '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'veryfast', '-crf', '18', '-bf', '0',
+    '-c:a', 'copy',
+    '-movflags', '+faststart',
+    out720,
+  ]);
+
+  const hashesAfter = Object.fromEntries(watched.map((f) => [f, sha256(f)]));
+  const endcardUntouched = watched.every((f) => hashesBefore[f] === hashesAfter[f]);
+  const pendingStill = fs.readFileSync(endcardJson, 'utf8').includes('【待填】');
+
+  const inkReports = [];
+  for (const still of stills) {
+    const buf = fs.readFileSync(still.file);
+    const size = pngSize(buf);
+    const raw = await rawPixels(still.file, 'rgb24');
+    const ink = checkFullFrame(raw);
+    inkReports.push({ file: still.file, ...size, t: still.t, ...ink, pass: size.w === 1920 && size.h === 1080 && ink.above === 0 && ink.ink > 0 && ink.minInk >= BAND.fadeTop });
+  }
+  const endBuf = fs.readFileSync(endStill);
+  const endSize = pngSize(endBuf);
+
+  const p1080 = await probe(out1080);
+  const p720 = await probe(out720);
+  const v1080 = p1080.streams.find((s) => s.codec_type === 'video');
+  const a1080 = p1080.streams.find((s) => s.codec_type === 'audio');
+  const dur1080 = Number(p1080.format.duration);
+  const dur720 = Number(p720.format.duration);
+
+  const shrinks = (measured.rows || []).filter((r) => r.size < EN_SIZE && !r.overflow);
+  const overflows = (measured.rows || []).filter((r) => r.overflow);
+  const widest = (measured.rows || []).reduce((a, b) => (!a || b.width > a.width ? b : a), null);
+
+  const blockers = [];
+  if (!endcardUntouched) blockers.push('endcard files changed during the run');
+  if (!pendingStill) blockers.push('【待填】 missing from endcard.json');
+  if (loaded.count !== 77) blockers.push(`cue count ${loaded.count}, expected 77 for this dry run`);
+  for (const ink of inkReports) if (!ink.pass) blockers.push(`ink/safe-area fail ${path.basename(ink.file)} above=${ink.above} minInk=${ink.minInk}`);
+  if (!overlayCheck || overlayCheck.above !== 0 || overlayCheck.opaque < 1000) blockers.push('transparent subtitle band failed the alpha check');
+  if (!(dur1080 >= 29 && dur1080 <= 31)) blockers.push(`duration ${dur1080}s is outside 29–31`);
+  if (Number(v1080.width) !== 1920 || Number(v1080.height) !== 1080) blockers.push('master is not 1920x1080');
+  if (v1080.pix_fmt !== 'yuv420p') blockers.push('master pix_fmt is ' + v1080.pix_fmt);
+  if (!a1080) blockers.push('master has no audio stream');
+  else if (Number(a1080.sample_rate) !== 48000 || Number(a1080.channels) !== 2) blockers.push('audio is not stereo 48 kHz');
+  if (endSize.w !== 1920 || endSize.h !== 1080) blockers.push('endcard still is not 1920x1080');
+  const qaSize = {};
+  if (!qaPaths || !qaMeta) blockers.push('comparison and phone stills were not written');
+  else {
+    for (const [key, file] of Object.entries(qaPaths)) {
+      qaSize[key] = pngSize(fs.readFileSync(file));
+    }
+    const expect = {
+      compare: qaMeta.compare,
+      phone: qaMeta.phone,
+      strip: qaMeta.strip,
+    };
+    for (const key of Object.keys(expect)) {
+      const got = qaSize[key];
+      const want = expect[key];
+      if (!got || got.w !== want.w || got.h !== want.h) blockers.push(`QA frame ${key} is ${got ? got.w + 'x' + got.h : 'missing'}, expected ${want.w}x${want.h}`);
+    }
+    if (qaMeta.phone.w !== 390) blockers.push('phone preview is not 390 px wide');
+    if (qaMeta.safeTop !== BAND.safeTop) blockers.push('phone/compare safeTop does not match BAND');
+  }
+
+  let blind = { skipped: !opt.blind };
+  if (opt.blind) {
+    const probeTxt = path.join(opt.outDir, 'blind_ffprobe.txt');
+    const stringsTxt = path.join(opt.outDir, 'blind_strings.txt');
+    const scan = [endcardJson, snapPath, clipPath, measurePath];
+    const script = path.join(root, 'pipeline/blind_review.sh');
+    const proc = await runCapture(script, [out1080, outBlind, probeTxt, stringsTxt, ...scan]);
+    blind = {
+      skipped: false,
+      exitCode: proc.code,
+      probe: probeTxt,
+      strings: stringsTxt,
+      pass: proc.code === 0 && fs.readFileSync(probeTxt, 'utf8').includes('RESULT: PASS') && fs.readFileSync(stringsTxt, 'utf8').includes('RESULT: PASS'),
+      stderr: proc.err.slice(-1500),
+    };
+    if (!blind.pass) blockers.push('blind review FAIL');
+  }
+
+  const fileInfo = (file) => {
+    const st = fs.statSync(file);
+    return { file, bytes: st.size, size: fmtBytes(st.size) };
+  };
+  const info1080 = fileInfo(out1080);
+  const info720 = fileInfo(out720);
+  const infoBlind = opt.blind && exists(outBlind) ? fileInfo(outBlind) : null;
+
+  const windowTable = cueWindow(clip);
+  const state1 = subtitleState(t1, clip, { xfade: opt.xfade });
+  const state3 = subtitleState(t3, clip, { xfade: opt.xfade });
+  const mismatches = loaded.mismatches || [];
+
+  const report = {
+    source: loaded.source,
+    formula: loaded.formula,
+    finalAudioTiming: loaded.finalAudioTiming,
+    note: loaded.note || null,
+    cueCount: loaded.count,
+    first: loaded.cues[0] && loaded.cues[0].text,
+    last: loaded.cues[loaded.cues.length - 1] && loaded.cues[loaded.cues.length - 1].text,
+    mismatches,
+    contentDuration: contentDurExact,
+    lastCueEnd: clip[clip.length - 1].end,
+    endcardDuration: ENDCARD_SECONDS,
+    totalDurationExpected: totalDur,
+    duration1080: dur1080,
+    duration720: dur720,
+    video: { width: v1080.width, height: v1080.height, pix_fmt: v1080.pix_fmt, codec: v1080.codec_name },
+    audio: a1080 ? { codec: a1080.codec_name, sampleRate: a1080.sample_rate, channels: a1080.channels } : null,
+    files: { master: info1080, p720: info720, blind: infoBlind },
+    audioReport,
+    typography: { CN_SIZE, EN_SIZE, EN_FLOOR, EN_MAX_W, MAX, weightCn: WEIGHT_CN, weightEn: WEIGHT_EN, halo: HALO, fade: FADE },
+    BAND,
+    pictureSafeTop: BAND.safeTop,
+    xfade: opt.xfade,
+    scene: sceneNote,
+    english: {
+      cards: measured.rows.length,
+      shrinks,
+      overflows: overflows.length ? overflows : measured.overflow,
+      widest,
+    },
+    stills: { t1, t3, endcardT: 3, fileTime: contentDurExact + 3, state1, state3, inkReports, endSize, overlayCheck, qaPaths, qaMeta, qaSize },
+    window: windowTable,
+    endcardUntouched,
+    pendingStill,
+    blind,
+    blockers,
+  };
+  const jsonPath = path.join(opt.outDir, `${opt.outName}_report.json`);
+  fs.writeFileSync(jsonPath, JSON.stringify(report, null, 2) + '\n');
+  const mdPath = path.join(opt.outDir, 'dryrun_report.md');
+  fs.writeFileSync(mdPath, renderMarkdown(report));
+  console.log('report', mdPath);
+
+  if (!opt.keepTmp) await fsp.rm(tmp, { recursive: true, force: true });
+  if (blockers.length) {
+    console.error('BLOCKERS:\n' + blockers.map((b) => '- ' + b).join('\n'));
+    process.exitCode = 1;
+  } else {
+    console.log('dry run OK');
+  }
+}
+
+function runCapture(cmd, args) {
+  return new Promise((resolve) => {
+    const p = spawn(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'] });
+    let out = '';
+    let err = '';
+    p.stdout.on('data', (d) => { out += d; });
+    p.stderr.on('data', (d) => { err += d; });
+    p.on('close', (code) => resolve({ code, out, err }));
+  });
+}
+
+function renderMarkdown(r) {
+  const lines = [];
+  lines.push('# v5 assembly dry run');
+  lines.push('');
+  lines.push(`Cue source: \`${r.source}\`. Count: **${r.cueCount}**.`);
+  lines.push(`First: ${r.first}`);
+  lines.push(`Last: ${r.last}`);
+  lines.push('');
+  if (r.formula) {
+    lines.push(`Estimate formula: \`${r.formula}\`.`);
+    lines.push('Each duration is rounded to the nearest millisecond (`hanzi * 220 + 400` ms). This is not final audio timing.');
+    lines.push('');
+  }
+  lines.push(`Mismatches vs lines.json / 字数 column: ${r.mismatches.length}.`);
+  if (r.mismatches.length) {
+    lines.push('');
+    lines.push('```');
+    lines.push(JSON.stringify(r.mismatches.slice(0, 30), null, 2));
+    lines.push('```');
+  }
+  lines.push('');
+  lines.push('## Typography');
+  lines.push('');
+  lines.push('| Item | Value |');
+  lines.push('|---|---|');
+  lines.push(`| Chinese | ${r.typography.CN_SIZE} px, weight ${r.typography.weightCn} |`);
+  lines.push(`| English | ${r.typography.EN_SIZE} px, weight ${r.typography.weightEn}, floor ${r.typography.EN_FLOOR} px |`);
+  lines.push(`| English max width | ${r.typography.EN_MAX_W} px |`);
+  lines.push(`| Chinese wrap budget | ${r.typography.MAX} visual characters |`);
+  lines.push(`| fadeTop / safeTop | ${r.BAND.fadeTop} |`);
+  lines.push(`| fadeEnd | ${r.BAND.fadeEnd} |`);
+  lines.push(`| cnY | ${r.BAND.cnY} |`);
+  lines.push(`| enY | ${r.BAND.enY} |`);
+  lines.push(`| fade extend | ${r.typography.fade.extend} |`);
+  lines.push(`| fade stops | ${r.typography.fade.stops.map((s) => `${s.t}→${s.a}`).join(', ')} |`);
+  lines.push(`| halo | stroke ${r.typography.halo.stroke}, blur ${r.typography.halo.blur}, shadow ${r.typography.halo.shadowAlpha}, stroke alpha ${r.typography.halo.strokeAlpha} |`);
+  lines.push(`| xfade | ${r.xfade} |`);
+  lines.push('');
+  lines.push(`Picture safe-area top: **y=${r.pictureSafeTop}**. Scene art may extend down through y < ${r.pictureSafeTop}. This is the number to give mini.`);
+  const peak = r.typography.fade.stops.reduce((a, s) => (s.a > a.a ? s : a), r.typography.fade.stops[0]);
+  lines.push(`The backing is a soft scrim (${r.typography.fade.extend}) from y=${r.BAND.fadeTop}. Peak opacity ${peak.a} is at fadeEnd y=${r.BAND.fadeEnd}, just above the dense Chinese halo. It eases out instead of becoming a solid paper slab.`);
+  lines.push(`Chinese baseline cnY=${r.BAND.cnY}. English baseline enY=${r.BAND.enY}. Ink and the halo stay at y ≥ ${r.pictureSafeTop}.`);
+  lines.push('');
+  lines.push('## Timing of the dry-run window');
+  lines.push('');
+  lines.push(`Content duration ${r.contentDuration} s (last cue ends ${r.lastCueEnd} s; the gap is a paper hold). Endcard ${r.endcardDuration} s. Expected total ${r.totalDurationExpected} s.`);
+  lines.push('');
+  lines.push('| id | ch | start | end | zh lines | en cards |');
+  lines.push('|---|---|---:|---:|---:|---:|');
+  for (const c of r.window) {
+    lines.push(`| ${c.id} | ${c.ch} | ${c.start} | ${c.end} | ${c.lines.length} | ${c.cards.length} |`);
+  }
+  lines.push('');
+  for (const c of r.window) {
+    lines.push(`**${c.id}** ${c.text}`);
+    lines.push('');
+    for (const l of c.lines) lines.push(`- 中 ${l.start}–${l.end} ${l.text}`);
+    for (const l of c.cards) lines.push(`- EN ${l.start}–${l.end} ${l.text}`);
+    lines.push('');
+  }
+  lines.push('## English measure');
+  lines.push('');
+  lines.push(`Cards measured: ${r.english.cards}. Widest: ${r.english.widest ? `${r.english.widest.id} card ${r.english.widest.card} “${r.english.widest.text}” ${r.english.widest.width}px at ${r.english.widest.size}px` : 'n/a'}.`);
+  const shrinkN = r.english.shrinks.length;
+  const overflowN = (r.english.overflows || []).length;
+  lines.push(`Shrinks below ${r.typography.EN_SIZE} px: ${shrinkN}. Overflows at the ${r.typography.EN_FLOOR} px floor: ${overflowN}.`);
+  if (shrinkN === 0 && overflowN === 0) {
+    lines.push(`Every English card fits at ${r.typography.EN_SIZE} px. None shrink below ${r.typography.EN_SIZE}, and none overflow at ${r.typography.EN_FLOOR} px.`);
+  }
+  if (r.english.shrinks.length) {
+    for (const s of r.english.shrinks) lines.push(`- shrink ${s.id}: ${s.size}px ${s.width}px ${s.text}`);
+  }
+  if (r.english.overflows && r.english.overflows.length) {
+    for (const s of r.english.overflows) lines.push(`- overflow ${s.id || s.i}: ${s.size}px ${s.width}px ${s.text}`);
+  }
+  lines.push('');
+  lines.push('## Sample frames');
+  lines.push('');
+  lines.push(`- 帧_01_句01中点.png at t=${round3(r.stills.t1)} shows “${r.stills.state1 && r.stills.state1.cn}” / “${r.stills.state1 && r.stills.state1.en}”.`);
+  lines.push(`- 帧_02_最长英文_s03.png at t=${round3(r.stills.t3)} shows “${r.stills.state3 && r.stills.state3.en}”.`);
+  lines.push(`- 帧_03_片尾A_t3.png is endcard local t=3 (file time ≈ ${round3(r.stills.fileTime)} s), ${r.stills.endSize.w}×${r.stills.endSize.h}.`);
+  lines.push('');
+  lines.push(`Safe-area scan (non-paper pixels above y=${r.pictureSafeTop} fail; ink must exist at y≥${r.pictureSafeTop}):`);
+  lines.push('');
+  for (const ink of r.stills.inkReports) {
+    lines.push(`- ${path.basename(ink.file)} ${ink.w}×${ink.h} above=${ink.above} minInkY=${ink.minInk} inkPixels=${ink.ink} ${ink.pass ? 'PASS' : 'FAIL'}`);
+  }
+  if (r.stills.overlayCheck) {
+    lines.push(`- Overlay alpha: pixels above y=${r.pictureSafeTop} with alpha≠0: ${r.stills.overlayCheck.above}; opaque pixels in the band: ${r.stills.overlayCheck.opaque}.`);
+  }
+  const inkOk = r.stills.inkReports.every((ink) => ink.pass) && r.stills.overlayCheck && r.stills.overlayCheck.above === 0;
+  lines.push('');
+  lines.push(inkOk
+    ? `Ink and halo stay at y ≥ ${r.pictureSafeTop}. Full-frame ink starts at or below the safe area, and the subtitle overlay has no alpha above it.`
+    : `Ink or halo crossed y < ${r.pictureSafeTop}. See the scan above.`);
+  lines.push('');
+  if (r.stills.qaPaths) {
+    lines.push('Comparison and phone preview:');
+    lines.push('');
+    const q = r.stills.qaPaths;
+    const s = r.stills.qaSize || {};
+    const m = r.stills.qaMeta || {};
+    lines.push(`- ${q.compare}${s.compare ? ` (${s.compare.w}×${s.compare.h})` : ''}`);
+    if (m.labels) lines.push(`  - ${m.labels.old}`);
+    if (m.labels) lines.push(`  - ${m.labels.current}`);
+    lines.push(`- ${q.phone}${s.phone ? ` (${s.phone.w}×${s.phone.h})` : ''} — 1920×1080 frame scaled to 390 px wide.`);
+    if (q.strip) lines.push(`- ${q.strip}${s.strip ? ` (${s.strip.w}×${s.strip.h})` : ''} — subtitle band from y=${r.pictureSafeTop}, same scale.`);
+    lines.push('');
+  }
+  lines.push('## Outputs');
+  lines.push('');
+  lines.push(`Scene: ${r.scene}.`);
+  lines.push(`Master: ${r.files.master.file} ${r.files.master.size}, ${r.duration1080.toFixed(3)} s, ${r.video.width}×${r.video.height} ${r.video.pix_fmt} ${r.video.codec}, audio ${r.audio ? `${r.audio.codec} ${r.audio.sampleRate} Hz ${r.audio.channels} ch` : 'MISSING'}.`);
+  lines.push(`720p: ${r.files.p720.file} ${r.files.p720.size}, ${r.duration720.toFixed(3)} s.`);
+  if (r.files.blind) lines.push(`Blind: ${r.files.blind.file} ${r.files.blind.size}.`);
+  lines.push('');
+  lines.push('## Loudness');
+  lines.push('');
+  if (r.audioReport.loudnorm === 'skipped') {
+    lines.push(r.audioReport.reason);
+    lines.push('The programme is a valid silent stereo 48 kHz AAC stream.');
+  } else {
+    lines.push(`loudnorm ${r.audioReport.loudnorm}. Integrated ${r.audioReport.integratedLufs} LUFS, true peak ${r.audioReport.truePeak} dBTP. Target -14 LUFS, true peak ≤ -1 dBTP.`);
+  }
+  lines.push(`Voice file: ${r.audioReport.voice || 'none'}. Music file: ${r.audioReport.music || 'none (v4 music is not reused)'}.`);
+  lines.push('');
+  lines.push('## Blind review');
+  lines.push('');
+  lines.push(`Endcard files unchanged: ${r.endcardUntouched}. 【待填】 still present: ${r.pendingStill}.`);
+  lines.push(`Blind result: ${r.blind.skipped ? 'skipped' : (r.blind.pass ? 'PASS' : 'FAIL')}.`);
+  if (!r.blind.skipped) {
+    lines.push(`Probe: ${r.blind.probe}`);
+    lines.push(`Strings: ${r.blind.strings}`);
+  }
+  lines.push('');
+  lines.push('## Blockers');
+  lines.push('');
+  if (!r.blockers.length) lines.push('None.');
+  else for (const b of r.blockers) lines.push(`- ${b}`);
+  lines.push('');
+  lines.push('Intermediate PNG sequences live in `qa/tmp/` during the run and are deleted after a successful encode. The three sample frames are kept.');
+  lines.push('');
+  return lines.join('\n');
+}
+
+main().catch((err) => {
+  console.error(err && err.stack || err);
+  process.exit(1);
+});
+# v6 b10（Codex）：s34 缺口外加"逸散的脓液"
+
+基于提交 67b4b96（b09）。锁定文件、出图程序（/workspace/garden-skills/skills/motion-showreel/scripts/render.mjs）、determinism 检查、开工和结束时的 sha256 校验都照旧，不许 git commit。低倍 t=1、中倍 t=3.8、s30–s33（9、15、21、27 秒）必须与 b09 逐像素一致（MAE<0.5）。b09 缺口里已有的 20 个中性粒细胞和纤维素保留不动。
+
+1. s34（t=33）：老师指出画面"缺少逸散的脓液"。现在渗出物紧贴在缺口处，像一团，缺少脓液从溃疡口溢出、向管腔（画面下方的淡色区域）散开的样子。
+   - 从缺口向管腔方向画一片逸散的脓性渗出：一层不规则、边缘渐淡的淡粉到浅黄粉色水彩薄层（沿用 04.js 的水彩参数，soft、bleed 偏大），像一股往外流、逐渐扩散变淡的羽状或扇形区域。横向比缺口宽，可延伸到管腔内约 1/4 视野深度，不能是规则椭圆或半圆。
+   - 薄层里散布 25–40 个中性粒细胞和脓细胞（detailedNeutrophil 的视觉语言，部分核固缩、碎裂、颜色更深、胞质模糊，表示退变的脓细胞），近缺口处密，越往管腔越稀、越小，彼此离散，最远处只剩零星几个。另加少量淡粉纤维素丝和几颗红细胞，混在里面。
+   - 整体保持通透，不得出现深色实心团块，不得遮住断口两侧的紫色残端；断口紫色占比仍要 <5%（沿用 b08/b09 的采样方法）。
+   - 左侧注释的引导线不能被脓液盖住。
+2. 输出到 qa/v6/b10/：七帧静帧、review_sheet.png、`s34_b09_vs_b10.png`（附 200% 局部）、自检.md（写明新增细胞数量、扩散范围的屏幕像素尺寸、紫色占比、各帧 MAE、determinism、sha256）。
+/bin/bash: line 1: python: command not found
+
+exec
+/bin/bash -lc "cat film/chapters/s08.js | rg -n 'T\\.|t[ <>=]|frac|at\\('; cat qa/v6/b10/sha256_开工.txt; cat assembly/pipeline/assemble.sh; rg -n 'contentDur|renderSub|snapshot|scenePath|scene-video' assembly/pipeline/assemble.mjs; rg '"'^'"\\| S[0-9]' 分镜/分镜_v1.md" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+1:import {bake,drawWash} from '../lib/wash.js';
+2:import {drawHE,CELLS} from '../lib/he.js';
+3:import {detailedNeutrophil} from '../lib/he_detail.js';
+4:import {rng} from '../lib/motion.js';
+5:import {drawHE as drawMucosa} from '../lib_ext/he_mucosa.js';
+6:import {cryptNucleus,columnar,erythrocyte,cell,follicle} from '../lib_ext/cells_ext.js';
+7:const R=rng(40802),TAU=Math.PI*2;let map,source,lowBase,ulcerMap;
+8:export function point(x,y){const a=x/620-Math.PI/2,r=620+y+12*Math.sin(a*3)+9*Math.sin(a*5),u=1.6*Math.cos(a)*r,v=Math.sin(a)*r;return [u*Math.cos(.14)-v*Math.sin(.14),u*Math.sin(.14)+v*Math.cos(.14)];}
+9:export default {prepare(){bake('s08.congestion',(b,P)=>{P.fill(b,P.blob(0,0,75,18,.3,47),'#C86A87',130,.2);},{seed:47,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});bake('s08.lumen', (b,P)=>{P.fill(b,P.blob(0,0,300,22,.2,43),'#DCA4B2',200,.15);},{seed:43,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});bake('s08.pus.escape',(b,P)=>{const fan=[[-75,150],[-100,90],[-165,22],[-222,-60],[-255,-145],[-184,-210],[-130,-185],[-65,-245],[8,-213],[75,-250],[145,-190],[227,-162],[185,-82],[140,-25],[111,52],[68,130],[38,180],[-15,198]];P.fill(b,fan,'#E9B4B7',85,.65);P.fill(b,fan.map(([x,y])=>[x*.72+12,y*.82+28]),'#E7C5A4',70,.7);},{seed:40720,hd:true,soft:true,grain:.12,edge:.18,bleed:.85});source=buildSource('original');lowBase=buildSource('low');const ulcerSource=buildSource('ulcer');ulcerMap=mapSource(ulcerSource);const c=source.getContext('2d');
+11:},draw(c,t,T){c.setTransform(1,0,0,1,0,0);c.fillStyle='#111114';c.fillRect(0,0,1920,1080);const id=Math.min(34,29+Math.floor(t/(T.end(29)-T.at(29))));const targets={30:[-270,-80],31:[-200,-226],32:[-170,70],33:[-65,-215],34:[10,-285]};const keys=[[T.at(29),[0,0,.48]],[T.frac(29,.28),[0,0,.48]],[T.frac(29,.64),[...point(-90,-5),.82]],[T.end(29),[...point(...targets[30]),2.7]]];for(let s=30;s<=34;s++){keys.push([T.frac(s,.32),[...point(...targets[s]),2.7]],[T.end(s),[...point(...targets[s]),2.7]]);}let v=keys[0][1];for(let i=1;i<keys.length;i++){if(t>=keys[i][0]){v=keys[i][1];continue;}const a=keys[i-1],b=keys[i],k=Math.max(0,(t-a[0])/(b[0]-a[0]));v=a[1].map((x,j)=>x+(b[1][j]-x)*k);break;}const [x,y,z]=v;c.save();c.beginPath();c.arc(1110,475,425,0,TAU);c.clip();c.fillStyle='#F6EEF0';c.fill();c.translate(1110,475);c.scale(z,z);c.translate(-x,-y);if(t<T.frac(29,.63)) drawLow(c,t,T); else c.drawImage(id===34?ulcerMap:map,-1600,-1050);c.restore();c.strokeStyle='#4C4555';c.lineWidth=1.6;c.beginPath();c.arc(1110,475,431,0,TAU);c.stroke();c.fillStyle='#E8DDE9';c.font='500 30px MixSans';c.fillText(t<T.frac(29,.32)?'低倍':t<T.frac(29,.86)?'中倍':'高倍',1030,35);
+12:const text={29:['正常阑尾参照','隐窝 · 固有层','黏膜肌层 · 淋巴滤泡','内环肌 / 外纵肌 · 浆膜'],30:['黏膜下层','血管扩张、充血','中性粒细胞沿血管壁游出'],31:['黏膜与固有层','中性粒细胞浸润','淋巴细胞与浆细胞参照'],32:['固有肌层','内环行肌：长梭形核','外纵行肌：圆点核','中性粒细胞仅少量'],33:['返回黏膜','经过受损的隐窝与上皮'],34:['局灶上皮缺损','结构连续性中断','病变以黏膜、黏膜下层为主']};const phase=(t-T.at(id))/(T.end(id)-T.at(id));c.save();c.globalAlpha=Math.max(0,Math.min(1,phase/.1,(1-phase)/.1));text[id].forEach((s,i)=>{c.font=`${i?400:700} ${i?27:36}px MixSans`;c.fillText(s,75,320+i*56);});c.strokeStyle='#BFA9CB';c.lineWidth=1.6;c.beginPath();c.moveTo(475,410);c.lineTo(630,410);
+13:const target=id===29?[-90,-55]:targets[id];
+14:let tip=point(...target);
+15:if(t<T.frac(29,.63)) {let q=Math.max(0,Math.min(1,(t-T.frac(29,.28))/(T.frac(29,.63)-T.frac(29,.28))));q=q*q*(3-2*q);const a=point(-90,-5),m=lowPoint(-90,-5,q),sc=1+.2*(1-q),p=lowPoint(...target,q);tip=[sc*(p[0]+(a[0]-m[0])*q)+a[0]*(1-sc)*q,sc*(p[1]+(a[1]-m[1])*q)+a[1]*(1-sc)*q];}
+17:if(new URLSearchParams(location.search).has('cells')){c.fillStyle='#F6EEF0';c.fillRect(0,0,1920,940);c.save();c.translate(180,220);c.scale(2,2);['lymph','plasma','dot','meso'].forEach((s,i)=>cell(c,i*130,0,s,1,0,i));detailedNeutrophil(c,520,0,{lobes:3,rot:0,sz:1},1);c.restore();c.fillStyle='#51336F';c.font='28px MixSans';['淋巴细胞','浆细胞','外纵行肌核','间皮','引擎中性粒细胞'].forEach((s,i)=>c.fillText(s,110+i*260,300));}}
+22:let lowSource, lowCells, lowCache;
+24:  const w=840,h=620,im=lowBase.getContext('2d').getImageData(0,0,w,h);
+25:  const d=im.data,pristine=new Uint8ClampedArray(d),mask=new Uint8Array(w*h),seen=new Uint8Array(w*h);
+26:  for(let i=0;i<mask.length;i++)mask[i]=d[i*4]<155 && d[i*4+1]<125 && d[i*4+2]>d[i*4+1]*1.08 ? 1:0;
+28:  for(let i=0;i<mask.length;i++) {
+30:    const queue=[i];seen[i]=1;let x0=w,y0=h,x1=0,y1=0;
+31:    for(let k=0;k<queue.length;k++) {const n=queue[k],x=n%w,y=Math.floor(n/w);x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y);
+32:      for(const q of [n-1,n+1,n-w,n+w])if(q>=0&&q<w*h&&!seen[q]&&mask[q]&&Math.abs(q%w-x)<=1){seen[q]=1;queue.push(q);}}
+36:    const tile=document.createElement('canvas');tile.width=x1-x0+1;tile.height=y1-y0+1;
+38:    const coverage=new Set();
+39:    for(const n of queue)for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++) {
+40:      const xx=n%w+dx,yy=Math.floor(n/w)+dy;
+43:    const tc=tile.getContext('2d'),ti=tc.getImageData(0,0,tile.width,tile.height);
+44:    for(let yy=0;yy<tile.height;yy++)for(let xx=0;xx<tile.width;xx++)if(!coverage.has((yy+y0)*w+xx+x0))ti.data[(yy*tile.width+xx)*4+3]=0;
+47:    // Inpaint only the small local crop; preserve the original baked wash.
+48:    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++) {
+50:      let best=-1,dist=1e9;
+51:      for(let dy=-6;dy<=6;dy+=2)for(let dx=-6;dx<=6;dx+=2){const xx=Math.max(0,Math.min(w-1,x+dx)),yy=Math.max(0,Math.min(h-1,y+dy)),q=yy*w+xx;if(!mask[q]&&!coverage.has(q)&&dx*dx+dy*dy<dist){best=q;dist=dx*dx+dy*dy;}}
+52:      if(best>=0)for(let ch=0;ch<3;ch++)d[(y*w+x)*4+ch]=pristine[best*4+ch];
+58:  const rot=.14+(Math.PI/6-.14)*(1-k);
+59:  // Extra lumen irregularity fades with depth, leaving the b02b target exact.
+60:  const wobble=12*Math.sin(a*3)+9*Math.sin(a*5)+(1-k)*22*Math.sin(a*4+.7);
+65: const ys=[-320,-290,-150,-10,230,280],rs=[145,170,390,610,850,900];
+66: let i=0;while(i<4&&y>ys[i+1])i++;
+67: const r=rs[i]+(y-ys[i])/(ys[i+1]-ys[i])*(rs[i+1]-rs[i]);
+71: const ys=[-320,-290,-150,-10,230,280];let i=0;
+76:  const a=x/620-Math.PI/2,{rot,wobble}=lowGeometry(a,k),r=lowRadius(y,k)+wobble;
+77:  const u=1.6*Math.cos(a)*r,v=Math.sin(a)*r;
+82:  let k=Math.max(0,Math.min(1,(t-T.frac(29,.28))/(T.frac(29,.63)-T.frac(29,.28))));
+85:    const canvas=document.createElement('canvas');canvas.width=3200;canvas.height=2100;
+86:    const ctx=canvas.getContext('2d'),out=ctx.createImageData(3200,2100),d=out.data,src=lowSource.data;
+87:    const rot=.14+(Math.PI/6-.14)*(1-k),co=Math.cos(rot),si=Math.sin(rot);
+88:    for(let j=0;j<2100;j++)for(let i=0;i<3200;i++) {
+89:      const u=i-1600,v=j-1050,x=(u*co+v*si)/1.6,y=-u*si+v*co,a=Math.atan2(y,x);
+90:      const fy=lowInverse(Math.hypot(x,y)-lowGeometry(a,k).wobble,k);
+93:      let fx=((a+Math.PI/2)/TAU*3500+420)%700;if(fx<0)fx+=700;
+94:      const row=Math.floor(fy+320)*840,q=(row+Math.floor(fx))*4,n=(j*3200+i)*4;
+95:      let w=Math.max(0,1-fx/140);w=w*w*(3-2*w);
+96:      const q2=(row+Math.floor(fx+700))*4;
+97:      for(let ch=0;ch<4;ch++)d[n+ch]=src[q+ch]*(1-w)+(w?src[q2+ch]*w:0);
+100:    // Repeat the identical source population around the wall as in b02b.
+101:    for(let turn=-3;turn<=3;turn++)for(const p of lowCells) {
+102:      const sx=p.x+420;
+103:      let opacity=1;if(sx<140){let w=1-sx/140;opacity=1-w*w*(3-2*w);}else if(sx>=700){let w=1-(sx-700)/140;opacity=w*w*(3-2*w);}
+104:      const x=(p.x+turn*700)*TAU*620/3500,a=x/620-Math.PI/2;if(a< -Math.PI||a>=Math.PI)continue;
+105:      const centre=lowPoint(x,p.y,k),dx=lowPoint(x+.5,p.y,k),dy=lowPoint(x,p.y+.5,k);
+106:      const angle=Math.atan2(dx[1]-centre[1],dx[0]-centre[0]);
+108:      // Local rigid frame at low power; approach the original map Jacobian.
+116:  // Same wall segment as the original camera; affine recentering keeps the
+118:  const anchor=point(-90,-5),moved=lowPoint(-90,-5,k),scale=1+.2*(1-k);
+129:function buildSource(mode){const source=document.createElement('canvas');source.width=840;source.height=620;const c=source.getContext('2d'),R=rng(40802);c.translate(420,320);(mode==='original'?drawHE:drawMucosa)(c,{ulcer:.16,neut:0,fibrin:0,t:0,detail:1,crypts:mode!=='low',gap:mode==='ulcer'?[-25,45]:null});
+130:const copy=document.createElement('canvas');copy.width=840;copy.height=620;copy.getContext('2d').drawImage(source,0,0);
+132:for(let i=0;i<150;i++){const x=-410+R()*820,y=-280+R()*120,sz=.7+R()*.2,rot=R()*TAU;if(mode==='ulcer'&&x>-31&&x<51&&y<-273)continue;cell(c,x,y,i%7?'lymph':'plasma',sz,rot,i);}
+133:[-390,40,360].forEach(x=>{c.save();c.translate(x,-55);c.scale(.78,.78);follicle(c,0,0);c.restore();});for(let i=0;i<85;i++)cell(c,-410+R()*820,148+R()*76,'dot',.9,R()*TAU,i);for(let i=0;i<62;i++)cell(c,-414+i*13.5,274+Math.sin(i*.4)*2,'meso',.8,0,i);
+134:let n=0;for(const p of CELLS){if(p.kind!=='inf'||p.y>138||p.y< -290)continue;if(mode==='ulcer'&&p.x>-31&&p.x<51&&p.y<-273)continue;if(p.y>0&&n++%35!==0)continue;if(p.y<0&&n++%4!==0)continue;detailedNeutrophil(c,p.x,p.y,p,1);}for(let i=0;i<7;i++)detailedNeutrophil(c,-270+Math.cos(i*.55)*(26+i*3),-80+Math.sin(i*.55)*(23+i*3),{lobes:2+i%4,rot:i*.8,sz:.9},1);
+135:if(mode==='ulcer'){const extended=document.createElement('canvas');extended.width=840;extended.height=750;const e=extended.getContext('2d');e.drawImage(source,0,130);e.translate(420,450);escapedPus(e);ulcerDetail(e);return extended;}return source;}
+137:function mapSource(src){const c=src.getContext('2d');const im=c.getImageData(0,0,840,src.height);const top=src.height===750?450:320;const result=document.createElement('canvas');result.width=3200;result.height=2100;const mc=result.getContext('2d'),out=mc.createImageData(3200,2100);for(let j=0;j<2100;j++)for(let i=0;i<3200;i++){const u=i-1600,v=j-1050,x=(u*Math.cos(.14)+v*Math.sin(.14))/1.6,y=-u*Math.sin(.14)+v*Math.cos(.14),a=Math.atan2(y,x),fy=Math.hypot(x,y)-620-12*Math.sin(a*3)-9*Math.sin(a*5);if(fy< -top||fy>=280)continue;let fx=((a+Math.PI/2)*620+420)%840;if(fx<0)fx+=840;const si=(Math.floor(fy+top)*840+Math.floor(fx))*4,di=(j*3200+i)*4;out.data.set(im.data.subarray(si,si+4),di);}mc.putImageData(out,0,0);return result;}
+139:// (6–12 screen pixels at the low-power camera's 0.576 scale).
+141: const G=rng(40711);let index=0;
+142: for(let a=-Math.PI;a<Math.PI;a+=.105+G()*.065){
+143:  const cross=index++%3===0,depth=cross?-215+(G()-.5)*65:-220+(G()-.5)*20;
+144:  const x=(a+Math.PI/2)*620,p=lowPoint(x,depth,k),rad=lowPoint(x,depth+1,k);
+145:  const angle=Math.atan2(rad[1]-p[1],rad[0]-p[0])-Math.PI/2+(G()-.5)*(cross?1.8:.55);
+146:  const w=12+G()*9,h=cross?13+G()*13:35+G()*30,bend=(G()-.5)*12,phase=G()*TAU;
+148:  const contour=(inset)=>{ctx.beginPath();for(let i=0;i<=64;i++){const t=i/64*TAU,yy=Math.sin(t)*(h-inset),xx=Math.cos(t)*(w-inset)*(1+.08*Math.sin(t*3+phase))+bend*(yy/h)**2;i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);}ctx.closePath();};
+151:  const n=Math.round((w+h)*.58);for(let j=0;j<n;j++){const t=j/n*TAU,yy=Math.sin(t)*(h-2),xx=Math.cos(t)*(w-2)*(1+.08*Math.sin(t*3+phase))+bend*(yy/h)**2;cryptNucleus(ctx,xx,yy,.37+G()*.09,t-.5,index+j);}
+156: const U=rng(40712);
+158: for(const [x,sign] of [[-27,1],[47,-1]])for(let j=0;j<3;j++)columnar(c,x+sign*(j*1.8),-290-j*3.5,.48+U()*.15,sign*(.4+j*.28),j,'fray');
+160: for(let i=0;i<13;i++)erythrocyte(c,-18+U()*55,-278+U()*20,.65,U()*TAU,i);
+162: for(let i=0;i<52;i++){const x=-24+U()*62,y=-294+U()*4;c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x+5,y-3,x+5+U()*7,y+U()*4-1);c.stroke();}
+165: for(let i=0;i<58;i++){const x=-33+U()*88,y=-337+U()*36;c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x+4,y-4,x+8+U()*5,y+5);c.stroke();}
+166: const exudate=[[-39,-303],[-23,-302],[-10,-300],[4,-301],[19,-300],[34,-302],[51,-304],
+169: for(let i=0;i<exudate.length;i++){const [x,y]=exudate[i];detailedNeutrophil(c,x,y,{lobes:2+i%4,rot:U()*TAU,sz:.80+U()*.08},1);}
+172:// Lumen-only additions use an independent stream; b09 ulcerDetail stays unchanged.
+174: const E=rng(40721);
+176: const pts=[[-53,-344],[-34,-348],[-12,-350],[12,-351],[35,-346],[57,-345],[77,-349],[-67,-360],[-45,-367],[-23,-363],[0,-370],[23,-368],[47,-364],[70,-369],[-76,-382],[-51,-383],[-26,-386],[4,-386],[32,-384],[62,-389],[87,-380],[-62,-401],[-34,-408],[-4,-405],[27,-409],[55,-406],[-81,-417],[-42,-428],[3,-424],[41,-429],[-14,-441],[67,-438]];
+177: for(let i=0;i<pts.length;i++){
+178:  const x=pts[i][0]*1.18+(E()-.5)*7,y=-340+(pts[i][1]+340)*.62+(E()-.5)*5,d=Math.max(0,(-y-342)/65),sz=.70-d*.31,rot=E()*TAU;
+184:   for(let j=0;j<4;j++){c.beginPath();c.ellipse(-4+j*2.6,(j%2?2:-2)+E()*2,1.1+E()*.7,1.5+E(),j*.7,0,TAU);c.fillStyle=j%2?'#50345F':'#64416E';c.fill();}
+189: for(let i=0;i<27;i++){const y=-345-E()*52,x=12+(E()-.5)*(140+(-y-345)*.9);c.beginPath();c.moveTo(x,y);c.bezierCurveTo(x+6,y-3,x-3,y-7,x+7,y-12);c.stroke();}
+190: for(const [i,x,y] of [[0,-57,-353],[1,48,-365],[2,-26,-379],[3,88,-382]]){c.save();c.globalAlpha=.45;erythrocyte(c,x,y,.38,E()*TAU,i);c.restore();}
+a2e658fc107c4a43c689607337db996fe8da13ea7e4b730f76d9789442b771bf  engine/lib/he.js
+899d24ba596208caa026512c824025a5eb648b86d6bdfd7bc4920bab143544d0  engine/lib/he_detail.js
+889bacbc5c54cd57b7c6018afa33fb1df6bbcb9e8a3b744efece3539826308b9  engine/lib/wash.js
+a1168fc75660bf23424cffff32533dc7289672ffe943537bc6276d6d04742ed6  engine/lib/ann.js
+6c6079ad8a12ded36b5c203f9a3416d51d83c46c757a50d06768dda6bac9a0b2  engine/lib/scope.js
+25ada270e774274d72d5eb0789f9f9c8e5167cd49b28e3b16b55c6bf7c59ee83  engine/lib/camera.js
+4f83add26190441d4c71ed39f2ba83a950fef9933cbdaae95cabda2106542fb4  parity_r4/chapters/04.js
+b35c3ddc93f5e6c91c0db170110f028bd31d311b514763d4719b42fb7afbc636  /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs
+#!/bin/sh
+# Assemble the v5 film: scene + bilingual subtitles + 12 s endcard + audio.
+# See README.md for flags. Does not modify endcard/ or anything outside assembly/.
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
+cd "$ROOT"
+exec node pipeline/assemble.mjs "$@"
+28:    contentDuration: null,
+40:    if (a === '--scene-video') o.sceneVideo = nxt();
+48:    else if (a === '--content-duration') o.contentDuration = Number(nxt());
+175:async function buildAudio({ voice, music, contentDur, totalDur, outWav }) {
+208:  const c = contentDur.toFixed(6);
+329:  let contentDur = clip[clip.length - 1].end;
+330:  if (opt.contentDuration != null) {
+331:    contentDur = opt.contentDuration;
+332:    clip = clip.filter((c) => c.start < contentDur).map((c) => (c.end > contentDur ? { ...c, end: contentDur } : { ...c }));
+334:  const contentFrames = Math.round(contentDur * opt.fps);
+336:  const contentDurExact = contentFrames / opt.fps;
+342:    contentDuration: contentDurExact,
+358:  console.log(`content ${contentDurExact}s (${contentFrames} frames) + endcard ${ENDCARD_SECONDS}s → ${totalDur}s`);
+359:  console.log(`still t01=${t1} t03=${t3} endcardLocal=3 file=${contentDurExact + 3}`);
+365:    contentDur: contentDurExact,
+371:  const scenePath = path.join(tmp, 'scene.mp4');
+372:  const sceneNote = await makeScene({ sceneVideo: opt.sceneVideo, frames: contentFrames, fps: opt.fps, out: scenePath });
+448:    '-i', scenePath,
+595:    contentDuration: contentDurExact,
+616:    stills: { t1, t3, endcardT: 3, fileTime: contentDurExact + 3, state1, state3, inkReports, endSize, overlayCheck, qaPaths, qaMeta, qaSize },
+694:  lines.push(`Content duration ${r.contentDuration} s (last cue ends ${r.lastCueEnd} s; the gap is a paper hold). Endcard ${r.endcardDuration} s. Expected total ${r.totalDurationExpected} s.`);
+| S01／01—05 | 左：片名分行出现，颜色导航及“变质”关键词；右：人体腹部定位→盲管大标本→红黄黑三种外观横向并列。三外观无串行箭头，不画食品腐败。 | 01 定位后放大阑尾；02 三外观依次显现；03 推入壁局部；04 片名在左完整建立；05 点亮“变质”，定义留到 33。 | `figure.js: drawInsitu, specimenOutline`；`wash.js: bake, drawWash`；`ann.js: label, leader`。 | `gross_appendix.js` 正常/红/黄/黑大体状态；`intro.js` 新定位与片名构图；颜色导航组件。 |
+| S02／06—10 | 左：“身体信号”“持续加重，及时就医”，10 换“相似症状需鉴别”；右：大人物腹部疼痛定位、医生问诊与查体。发热只用温度计图形，不显示体温数值。 | 07 疼痛亮点从脐周移至右下腹；08 医生操作示意，不示范观众自行按压；09 人物停止活动并就医；10 同一腹部淡出其他可能来源的模糊定位，不新增疾病诊断清单。 | `figure.js: drawFigure, drawArmR, painPt`；`icons.js: iconThermo, iconHospital`；`ann.js: leader`。 | `clinical.js` 医生、查体、问诊姿态与就医动作；原人物坐标重新适配右区。 |
+| S03／11—13 | 左：“典型／非典型”对照标题，继而按顺序显示“问诊、查体、化验”；右：两个等大的症状表现窗，随后合成一个问诊大图及简化化验单。 | 对照只表达症状可能不同，不虚构非典型发生率、人群或新症状；化验单只有文字与勾选符号，不出现化验数值。接着由医生视线引到影像工具。 | `figure.js: drawFigure`；`ann.js: label, line, arrow`；`ink.js: ink`。 | `symptom_compare.js` 典型/非典型对照；`clinical.js` 无数值化验单。 |
+| S04／14—19 | 左：先“CT是辅助工具／并非人人必须”，再研究卡“增强螺旋CT”；右：医生评估后才出现超声与 CT 选择图，随后自绘 CT 大窗，最后临床、影像与病理的证据关系图。 | 16—17 研究卡逐项揭示，数据用原值直接出现，不滚动计数；18 只突出检出线索；19 聚合临床证据。病理图作证据概念，不在此提前宣称完成术后分型。 | `ann.js: label, line, arrow`；`ink.js: ink`；`wash.js: drawWash`。旧库无 CT 成品能力。 | `ct_schematic.js` 自绘横断腹部与阑尾；`research_card.js`；`clinical.js` 检查选择图。 |
+| S05／20—22 | 左：纵向“单纯性→化脓性（蜂窝织炎性）→坏疽性”，22 加非固定路径分支；右：当前节点对应的大体形态依次替换，保留完整阑尾体形。 | 三句合读为一段前提，21 保持镜头；22 分支从主链分出，终点用留白/省略表达个体差异，不捏造治疗结局或发生概率。无进展计时。 | `ann.js: arrow, dashed, label, dot`；`figure.js: specimenOutline`；`wash.js: drawWash`。 | `path_branch.js` 典型路径及非固定分支；左栏路径组件。 |
+| S06／23—24 | 左：“第一幕红／单纯性阑尾炎”“充血、轻度肿胀”；右：红色大体特写，再切到壁内扩张血管的大示意。 | 保留同一部位定位锚点，血管由窄到宽、红细胞通过增多；只表达相对变化，不显示流速或管径数字。 | `figure.js: specimenOutline`；`wash.js: bake, drawWash`；`alive.js: drawAliveWash`（仅大体/血管）；`ann.js: leader`。 | `vascular_response.js` 血管扩张与血流教学示意；`gross_appendix.js` 红色状态。 |
+| S07／25—30 | 左：依次列“液体”“蛋白质”“白细胞”，30 合为“渗出”；右：大血管与组织间隙，液体/蛋白质外出、水肿、白细胞游出及受损组织。 | 25—26 先画液体/蛋白质外出；27 再画完整白细胞穿壁；28 防御指向损伤处；29 展示组织受损；30 保持三种成分的去向。不是脓液直接从血管流出。 | `he.js: drawNeutrophil`（用于教学细胞符号）；`ann.js: arrow, label`；`wash.js: bake, drawWash`；`motion.js: tween, seg`。 | `vascular_response.js` 跨壁路径、水肿与损伤反馈；这里为机制示意，不伪装实时 HE 录像。 |
+| S08／31—34 | 左：层次说明与“主要在黏膜、黏膜下层”；33 定义卡“变质：变性、坏死”；右：清晰大 HE 层次视野，随后局部上皮损伤放大。 | 31—32 连续保持层次图，中性粒细胞集中于前两层，肌层仅散在几个；34 只局部上皮脱落，完整区域仍在。用边框定位后切大图，不加小到难辨的 inset。 | `he.js: drawHE, drawLens, fieldToScreen`；`he_detail.js: detailedNeutrophil, chromatin`；`he_guide.js: tissueTexture`；`ann.js: leader, brace`。 | `he_acute.js` 单纯性独立细胞分布与局灶上皮损伤；统一 HE 样式适配，不能直接沿用旧全层细胞板。 |
+| S09／35—36 | 左：“CT与组织变化对应”，分项“管径增粗、壁增厚、周围脂肪轻度模糊”；右：CT 表现示意与壁水肿两个大窗。 | 35 两窗同步框选阑尾壁；36 扩到周围脂肪。只有视觉对应，不显示测量数值，不将 CT 直接盖章为病理分型。 | `ann.js: ring, leader, label`；`he.js: drawLens`；`wash.js: drawWash`。 | `ct_schematic.js` 单纯性相关表现预设；`compare_view.js` 对照布局与同步定位。 |
+| S10／37—42 | 左：“第二幕黄”，38 两个名称同卡作为同义名；随后“全层炎症”“脓液成分”“脓细胞”；右：全层 HE 大图→脓液混合物→变性坏死中性粒细胞大特写。 | 37 浸润覆盖整层；39 以分阶段细胞形态替换表示变性坏死；40 同时见组织碎屑与液体；41 回到肿胀壁；42 切脓细胞特写。不要把全片细胞染黄或把所有中性粒都画成死细胞。 | `he.js: drawHE, drawLens, drawNeutrophil`；`he_detail.js: detailedNeutrophil, chromatin`；`wash.js: drawWash`；`ann.js: leader`。 | `he_acute.js` 全层化脓状态；`pus_exudate.js` 脓细胞、组织碎屑、液体混合物与退变形态。 |
+| S11／43—46 | 左：“纤维蛋白原→纤维素网”“纤维脓性渗出物”；46 使用定稿指定浆膜面措辞分行显示；右：网与脓细胞/碎屑混合的大图，接浆膜斑驳灰黄色脓苔特写。 | 43 先示意蛋白原渗出后成网；44 加入脓细胞和碎屑；45 以成分分别高亮说明黄色是混合来源；46 镜头停在浆膜外侧，不把纤维素单独等同脓苔。 | `he_detail.js: fibrinMesh, detailedNeutrophil`；`he_guide.js: tissueTexture`；`wash.js: bake, drawWash`；`ann.js: label, leader`。 | `pus_exudate.js` 成网、混合渗出物；`gross_appendix.js` 灰黄色脓苔及浆膜放大形态。 |
+| S12／47—48 | 左：“壁增厚强化／周围渗出明显”；右：化脓相关 CT 表现示意与全层炎症双大窗。 | 47 依次描出壁和周围组织；48 保持画面连读并框选内外对应区域，不另起一套分型结论。 | `ann.js: leader, ring`；`he.js: drawLens`。 | `ct_schematic.js` 化脓相关表现预设；`compare_view.js`。 |
+| S13／49—53 | 左：“终局黑”，接“受压／血栓→缺血”；右：腔压示意→受压及血栓两路血管→局部坏死出血→局部暗红发黑的大体特写。 | 用收窄、阻断的血流符号表现机制；腔压用无刻度挤压箭头；52—53 连读，坏死与血红蛋白分解共同对应变色，不补充分解产物浓度或固定反应时长。 | `figure.js: specimenOutline`；`he_detail.js: prepareGangrene, gangrene`（借用缺血/出血形态）；`wash.js: bake, drawWash`；`ann.js: arrow`。 | `ischemia.js` 受压/血栓机制图；`gross_appendix.js` 局部暗红黑斑；血红蛋白分解的非数值示意。 |
+| S14／54—57 | 左：回扣“变质：大片组织坏死”，55 并列“变质／渗出”，56 命名“坏疽性阑尾炎”，57 加“可能穿孔”；右：大 HE 坏死与边缘炎症→大体切面→局灶穿孔及腹腔扩散示意。 | 坏死区结构淡失、核碎屑及出血，活细胞集中于边缘；57 独立展示可能分支，不能让所有坏疽标本自动破洞。腹腔扩散为局部示意，不夸张喷射。 | `he_detail.js: prepareGangrene, gangrene, fadeSeams`；`he.js: drawLens`；`ann.js: ring, leader`；`wash.js: drawWash`。 | `he_acute.js` 坏死场景的局部参数化；`perforation.js` 可选局灶穿孔与扩散。 |
+| S15／58—59 | 左：“壁强化缺损：警惕坏死”“腔外气体、脓肿：警惕穿孔”；右：坏疽/穿孔相关 CT 表现示意与对应壁病变两大窗。 | 58 只点亮局部强化中断；59 再显示腔外气体、脓肿。每次一条对应引线；不使用“CT确诊三型”字样。 | `ann.js: leader, ring, label`；`he.js: drawLens`。 | `ct_schematic.js` 壁强化缺损、腔外气体及脓肿预设；`compare_view.js`。 |
+| S16／60—62 | 左：“评估治疗紧迫性”，61 “切除后病理确认分型”，62 “影像发现并发症”；右：医生综合评估→切除标本送检及切片→CT 并发症线索大图。 | 61 完整表现切除后送病理的方向；这是全片唯一一次术后病理确认分型的明确结论。62 复用新 CT 资产的不同局部，左侧列定稿所载文献年份与引文。 | `ann.js: arrow, label`；`he.js: drawLens`；`icons.js: iconHospital`。 | `specimen_pathology.js` 送检链路；`clinical.js` 综合评估；引用脚注组件。 |
+| S17／63—65 | 左：蜂窝织炎性、坏疽性手术切除卡，随后“具体方案／是否马上手术，由医生评估”；右：医生与患者及简洁切除示意，避免血腥器械演出。 | 63 手术图形出现；64—65 病情资料汇入医生评估，卡片换成手术时机说明。不得给出固定小时数，也不把病理三型直接映射为临床复杂性分组。 | `figure.js: drawFigure`；`ann.js: label, arrow`；`ink.js: ink`。 | `surgery_timing.js` 急性治疗与评估卡；`clinical.js` 医患及切除示意。 |
+| S18／66—68 | 左：“反复发作→可转慢性”，再顺序显示“急性：变质、渗出”“慢性：增生”；右：反复发作的非计数回环符号，接急性/慢性组织对照大图。 | 不用日历、天数、次数刻度；67—68 连读完整保留老师原话。只有进入慢性语义后才显示纤维组织增生，不复用旧“三种动作交织”的叙述。 | `ann.js: arrow, label, dashed`；`he.js: drawLens`；`he_guide.js: tissueTexture`。 | `chronic_transition.js` 非时间表回环；`he_chronic.js` 慢性纤维化基础组织。 |
+| S19／69—70 | 左：“阑尾壁：纤维组织增生、纤维化”，再“慢性炎细胞：淋巴细胞、浆细胞”；右：大 HE 慢性组织视野→淋巴细胞/浆细胞两个大特写替换，保留母图定位。 | 纤维束粉红、细胞核紫；先定位纤维化，再分别指出淋巴细胞与浆细胞形态。保持镜下稳定，不把细胞画成脓细胞；不标“全壁”或“大量”。 | `he_guide.js: tissueTexture`、`he_detail.js: chromatin` 可作纹理/核细节参考；`he.js: drawLens, fieldToScreen` 仅借用视野框架；`ann.js: leader`。 | `he_chronic.js` 纤维组织、纤维化及慢性浸润分布；`chronic_cells.js` 淋巴细胞、偏位核浆细胞；旧库没有可直接替用的完整慢性切片。 |
+| S20／71—74 | 左：先“正规评估”，后两路“症状缓解期：择期切除／急性发作期：视情况急诊手术”；右：慢性组织淡出接人物间歇疼痛与医生评估，随后两个清晰治疗情境窗。 | 71—72 从组织回到患者；73—74 连读老师完整原话，左侧分支按语义依次展开；不让两个手术情境同时抢字幕，也不画居家自诊。 | `figure.js: drawFigure`；`ann.js: arrow, label`；`icons.js: iconHospital`。 | `surgery_timing.js` 慢性两路卡与医生决策姿态；`path_branch.js` 分支布局。 |
+| S21／75—77 | 左：红黄黑观察导航与非固定分支，接“持续右下腹痛、发热，请及时就诊”，末态参考文献入口；右：三色罗盘→就医人物大图。 | 75 三色汇成无数值罗盘，76 转向医院图形，不展示病情演变时钟；77 就医落点停稳。参考文献入口不挤进字幕区、不新增来源，片尾展示时长待新音轨决定。 | `ann.js: ring, arrow, label`；`icons.js: iconHospital`；`figure.js: drawFigure`；`wash.js: drawWash`。 | `closing.js` 三色罗盘与就医收束；`reference_entry.js` 定稿原有参考文献入口。 |
+| S04 研究卡 | 2023、8篇、1602人、敏感度95%、特异度94% | 16 的画面建议及 17 正文。标题写“增强螺旋CT”，标引文 [1]；不改为 MDCT 专属结果，不作为三型分型准确度。 |
+| S16 文献提示 | 2023、2026 | 62 的画面建议；仅按定稿标 [3][4]，不凭年份补写未核对的论文作者、题名或单篇结果。 |
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+import json
+p='/workspace/病理科普视频/配音/全稿_v3/'
+d=json.load(open(p+'timeline.json')); print('keys',d.keys(),'duration',d['duration']); print(d['lines'][28:34]); l=json.load(open(p+'lines.json')); print('lines',str(l)[:900])
+PY
+cat qa/v6/b10/自检.md | head -65; sed -n '1,95p' film/chapters/s08.js; sed -n '300,410p' assembly/pipeline/assemble.mjs" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+keys dict_keys(['duration', 'ffmpeg', 'pyloudnorm', 'rail', 'lines']) duration 327.8315
+[{'n': 29, 'seg': '04', 'chapter': '红·单纯性', 'start': 116.61454166666672, 'end': 120.71216666666672, 'dur': 4.097625, 'text': '然而战况一旦失控，也可能伤及自身组织。', 'en': "An excessive response can also damage the | body's own tissue."}, {'n': 30, 'seg': '04', 'chapter': '红·单纯性', 'start': 121.16216666666672, 'end': 125.55695833333338, 'dur': 4.394791666666666, 'text': '液体、蛋白质和白细胞外出，叫渗出。', 'en': 'These changes are called exudation.'}, {'n': 31, 'seg': '04', 'chapter': '红·单纯性', 'start': 126.00695833333339, 'end': 130.09441666666672, 'dur': 4.087458333333333, 'text': '单纯性时，中性粒细胞主要驻守在', 'en': 'In simple appendicitis, neutrophils are | mainly found'}, {'n': 32, 'seg': '04', 'chapter': '红·单纯性', 'start': 130.5444166666667, 'end': 134.93608333333339, 'dur': 4.391666666666667, 'text': '黏膜及黏膜下层，组织损伤相对较轻。', 'en': 'in the mucosa and submucosa, with | relatively mild damage.'}, {'n': 33, 'seg': '04', 'chapter': '红·单纯性', 'start': 135.38608333333337, 'end': 138.3009166666667, 'dur': 2.914833333333333, 'text': '变质，就是细胞组织的变性、坏死。', 'en': 'Alteration means cell degeneration and | necrosis.'}, {'n': 34, 'seg': '04', 'chapter': '红·单纯性', 'start': 138.75091666666668, 'end': 141.81645833333334, 'dur': 3.065541666666667, 'text': '此时，黏膜上皮已局部受损脱落。[2]', 'en': 'Mucosal epithelium is locally injured | and shed.'}]
+lines [{'n': 1, 'chapter': '开场', 'text': '这根形似小香肠的盲管，就是阑尾。', 'speak': '这根形似小香肠的盲管，就是阑尾。', 'hanzi': 14, 'declared': 14, 'en': 'This small sausage-shaped tube is the | appendix.', 'chunks': ['这根形似小香肠的盲管，', '就是阑尾。'], 'seg': '01', 'cue': '好奇开场，像把一个小东西递到朋友眼前，明亮、轻轻上扬。盲管的管是管道的管，第三声，不要读成果。'}, {'n': 2, 'chapter': '开场', 'text': '发起炎来，它可能染上红、黄、黑。', 'speak': '发起炎来，它可能染上红、黄、黑。', 'hanzi': 12, 'declared': 12, 'en': 'When inflamed, it may turn red, yellow, | then black.', 'chunks': ['发起炎来，它可能染上红、黄、黑。'], 'seg': '01', 'cue': '带着画面感，红、黄、黑三个颜色依次点出来，轻松，一点都不吓人。'}, {'n': 3, 'chapter': '开场', 'text': '每一次颜色流转，都记录着组织的伤痕。', 'speak': '每一次颜色流转，都记录着组织的伤痕。', 'hanzi': 16, 'declared': 16, 'en': 'These colors reveal how tissue is injured.', 'chunks': ['每一次颜色流转，', '都记录着组织的伤痕。'], 'seg': '01', 'cue': '语气收一点，认真但轻，像故事刚要展开。'}, {'n': 4, 'chapter': '开场', 'text': '循着这抹色彩，我们走进炎症的现场。', 'speak': '循着这抹色彩，我们走进炎症的现场。', 'hanzi': 15, 'declared
+# v6 b10 自检
+
+基线：67b4b96（b09）。本轮仅修改 film/chapters/s08.js，未执行 git commit；保留开工时已有的 assembly 等工作区改动。指定出图程序未修改。
+
+## s34 新增内容
+
+新增 **32 个细胞：21 个 detailedNeutrophil、11 个退变脓细胞**。后者保留相同胞体尺度与淡粉胞质，以模糊胞质和更深、固缩且断开的核碎片表示退变。细胞向管腔逐渐变小、变淡、变稀，位置带固定种子扰动；最远处仅少量零星细胞。另加 27 条低透明度淡粉纤维素丝、4 个低透明度红细胞。
+
+b09 的 ulcerDetail 函数逐字符比对基线一致，原有 **20 个中性粒细胞及全部纤维素原样保留**。扩展素材顶部透明留白以容纳逸散物，组织原图保持完整平移，映射中的坐标补偿对应改变。
+
+水彩薄层使用原 bake / drawWash 流程和 04.js 同系水彩参数：hd=true、soft=true、grain=.12、edge=.18、bleed=.85，绘制 soft=.8。两层淡粉 / 浅黄粉颜料，不规则多边形在缺口处收窄，向管腔展开为不对称扇形；边缘渐淡，无深色实心底块。新增材料先绘制，原缺口细胞与纤维素后绘制；注释引导线仍最后叠加。
+
+## 屏幕尺寸与断口
+
+1920×1080，DPR=1。对 b09 / b10 最终 RGB 帧直接逐像素差分，新增材料非零变化范围为 **x=[880,1270)、y=[545,830)，390×285 px**；排除每通道差异≤2 的微弱边缘后为 **383×278 px**。最远可见细胞止于约 y=810，水彩渐淡边缘止于 y=830，保留底部管腔空白。厚度约为 850 px 圆形视野的 1/3；主体扩散深度约 1/4，边缘与零星细胞更远。薄层横向宽于原缺口。
+
+沿用 b08 / b09 的 gap_path.json 和 15 px 采样带，局部 x∈[-20,40]、两端排除 5 单位，共 **2139 像素**。阈值 R<165、G<135、B>1.08G。b09 与 b10 紫色占比均为 **0.3740065%（8 像素）**，低于 5%。两侧紫色残端未覆盖。新增变化最上沿为 y=545，左侧引导线终点 y=475，保持清晰。
+
+## 各帧 MAE（相对 b09，全帧 RGB）
+
+| t（秒） | MAE | 结果 |
+| --- | --- | --- |
+| 1 | 0.000000000 | 逐像素一致，通过 |
+| 3.8 | 0.000000000 | 逐像素一致，通过 |
+| 9 | 0.000000000 | 逐像素一致，通过 |
+| 15 | 0.000000000 | 逐像素一致，通过 |
+| 21 | 0.000000000 | 逐像素一致，通过 |
+| 27 | 0.000000000 | 逐像素一致，通过 |
+| 33 | 0.597289738 | 允许变化的 s34 |
+
+## Determinism 与 SHA-256
+
+指定 /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs 完成七帧与 sheet 输出。默认六时点跨页面逆序检测通过，见 determinism.log；七个交付时点乱序重复、PNG 字节完全一致，见 determinism_low.log 和 check_low_determinism.mjs。
+
+七个锁定文件 SHA-256 开工=结束，且与 b09 记录一致；出图程序 SHA-256 开工=结束。完整记录见 sha256_开工.txt、sha256_结束.txt、sha256_校验.log。
+
+```text
+a2e658fc107c4a43c689607337db996fe8da13ea7e4b730f76d9789442b771bf  engine/lib/he.js
+899d24ba596208caa026512c824025a5eb648b86d6bdfd7bc4920bab143544d0  engine/lib/he_detail.js
+889bacbc5c54cd57b7c6018afa33fb1df6bbcb9e8a3b744efece3539826308b9  engine/lib/wash.js
+a1168fc75660bf23424cffff32533dc7289672ffe943537bc6276d6d04742ed6  engine/lib/ann.js
+6c6079ad8a12ded36b5c203f9a3416d51d83c46c757a50d06768dda6bac9a0b2  engine/lib/scope.js
+25ada270e774274d72d5eb0789f9f9c8e5167cd49b28e3b16b55c6bf7c59ee83  engine/lib/camera.js
+4f83add26190441d4c71ed39f2ba83a950fef9933cbdaae95cabda2106542fb4  parity_r4/chapters/04.js
+b35c3ddc93f5e6c91c0db170110f028bd31d311b514763d4719b42fb7afbc636  /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs
+```
+
+交付：七帧 t_*.png、review_sheet.png、s34_b09_vs_b10.png（原帧左右对比，下方 200% 局部，覆盖完整新增区域）、各帧独立 200% 局部，以及采样路径、采样蒙版、metrics.json、复验脚本与日志。git diff --check 通过。
+import {bake,drawWash} from '../lib/wash.js';
+import {drawHE,CELLS} from '../lib/he.js';
+import {detailedNeutrophil} from '../lib/he_detail.js';
+import {rng} from '../lib/motion.js';
+import {drawHE as drawMucosa} from '../lib_ext/he_mucosa.js';
+import {cryptNucleus,columnar,erythrocyte,cell,follicle} from '../lib_ext/cells_ext.js';
+const R=rng(40802),TAU=Math.PI*2;let map,source,lowBase,ulcerMap;
+export function point(x,y){const a=x/620-Math.PI/2,r=620+y+12*Math.sin(a*3)+9*Math.sin(a*5),u=1.6*Math.cos(a)*r,v=Math.sin(a)*r;return [u*Math.cos(.14)-v*Math.sin(.14),u*Math.sin(.14)+v*Math.cos(.14)];}
+export default {prepare(){bake('s08.congestion',(b,P)=>{P.fill(b,P.blob(0,0,75,18,.3,47),'#C86A87',130,.2);},{seed:47,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});bake('s08.lumen', (b,P)=>{P.fill(b,P.blob(0,0,300,22,.2,43),'#DCA4B2',200,.15);},{seed:43,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});bake('s08.pus.escape',(b,P)=>{const fan=[[-75,150],[-100,90],[-165,22],[-222,-60],[-255,-145],[-184,-210],[-130,-185],[-65,-245],[8,-213],[75,-250],[145,-190],[227,-162],[185,-82],[140,-25],[111,52],[68,130],[38,180],[-15,198]];P.fill(b,fan,'#E9B4B7',85,.65);P.fill(b,fan.map(([x,y])=>[x*.72+12,y*.82+28]),'#E7C5A4',70,.7);},{seed:40720,hd:true,soft:true,grain:.12,edge:.18,bleed:.85});source=buildSource('original');lowBase=buildSource('low');const ulcerSource=buildSource('ulcer');ulcerMap=mapSource(ulcerSource);const c=source.getContext('2d');
+map=mapSource(source);
+},draw(c,t,T){c.setTransform(1,0,0,1,0,0);c.fillStyle='#111114';c.fillRect(0,0,1920,1080);const id=Math.min(34,29+Math.floor(t/(T.end(29)-T.at(29))));const targets={30:[-270,-80],31:[-200,-226],32:[-170,70],33:[-65,-215],34:[10,-285]};const keys=[[T.at(29),[0,0,.48]],[T.frac(29,.28),[0,0,.48]],[T.frac(29,.64),[...point(-90,-5),.82]],[T.end(29),[...point(...targets[30]),2.7]]];for(let s=30;s<=34;s++){keys.push([T.frac(s,.32),[...point(...targets[s]),2.7]],[T.end(s),[...point(...targets[s]),2.7]]);}let v=keys[0][1];for(let i=1;i<keys.length;i++){if(t>=keys[i][0]){v=keys[i][1];continue;}const a=keys[i-1],b=keys[i],k=Math.max(0,(t-a[0])/(b[0]-a[0]));v=a[1].map((x,j)=>x+(b[1][j]-x)*k);break;}const [x,y,z]=v;c.save();c.beginPath();c.arc(1110,475,425,0,TAU);c.clip();c.fillStyle='#F6EEF0';c.fill();c.translate(1110,475);c.scale(z,z);c.translate(-x,-y);if(t<T.frac(29,.63)) drawLow(c,t,T); else c.drawImage(id===34?ulcerMap:map,-1600,-1050);c.restore();c.strokeStyle='#4C4555';c.lineWidth=1.6;c.beginPath();c.arc(1110,475,431,0,TAU);c.stroke();c.fillStyle='#E8DDE9';c.font='500 30px MixSans';c.fillText(t<T.frac(29,.32)?'低倍':t<T.frac(29,.86)?'中倍':'高倍',1030,35);
+const text={29:['正常阑尾参照','隐窝 · 固有层','黏膜肌层 · 淋巴滤泡','内环肌 / 外纵肌 · 浆膜'],30:['黏膜下层','血管扩张、充血','中性粒细胞沿血管壁游出'],31:['黏膜与固有层','中性粒细胞浸润','淋巴细胞与浆细胞参照'],32:['固有肌层','内环行肌：长梭形核','外纵行肌：圆点核','中性粒细胞仅少量'],33:['返回黏膜','经过受损的隐窝与上皮'],34:['局灶上皮缺损','结构连续性中断','病变以黏膜、黏膜下层为主']};const phase=(t-T.at(id))/(T.end(id)-T.at(id));c.save();c.globalAlpha=Math.max(0,Math.min(1,phase/.1,(1-phase)/.1));text[id].forEach((s,i)=>{c.font=`${i?400:700} ${i?27:36}px MixSans`;c.fillText(s,75,320+i*56);});c.strokeStyle='#BFA9CB';c.lineWidth=1.6;c.beginPath();c.moveTo(475,410);c.lineTo(630,410);
+const target=id===29?[-90,-55]:targets[id];
+let tip=point(...target);
+if(t<T.frac(29,.63)) {let q=Math.max(0,Math.min(1,(t-T.frac(29,.28))/(T.frac(29,.63)-T.frac(29,.28))));q=q*q*(3-2*q);const a=point(-90,-5),m=lowPoint(-90,-5,q),sc=1+.2*(1-q),p=lowPoint(...target,q);tip=[sc*(p[0]+(a[0]-m[0])*q)+a[0]*(1-sc)*q,sc*(p[1]+(a[1]-m[1])*q)+a[1]*(1-sc)*q];}
+c.lineTo(1110+(tip[0]-x)*z,475+(tip[1]-y)*z);c.stroke();c.restore();
+if(new URLSearchParams(location.search).has('cells')){c.fillStyle='#F6EEF0';c.fillRect(0,0,1920,940);c.save();c.translate(180,220);c.scale(2,2);['lymph','plasma','dot','meso'].forEach((s,i)=>cell(c,i*130,0,s,1,0,i));detailedNeutrophil(c,520,0,{lobes:3,rot:0,sz:1},1);c.restore();c.fillStyle='#51336F';c.font='28px MixSans';['淋巴细胞','浆细胞','外纵行肌核','间皮','引擎中性粒细胞'].forEach((s,i)=>c.fillText(s,110+i*260,300));}}
+};
+
+// Low-only reconstruction. Dark connected components retain their own local
+// coordinates; only their centres follow the annulus. No source RNG is consumed.
+let lowSource, lowCells, lowCache;
+function lowMaterial() {
+  const w=840,h=620,im=lowBase.getContext('2d').getImageData(0,0,w,h);
+  const d=im.data,pristine=new Uint8ClampedArray(d),mask=new Uint8Array(w*h),seen=new Uint8Array(w*h);
+  for(let i=0;i<mask.length;i++)mask[i]=d[i*4]<155 && d[i*4+1]<125 && d[i*4+2]>d[i*4+1]*1.08 ? 1:0;
+  lowCells=[];
+  for(let i=0;i<mask.length;i++) {
+    if(!mask[i]||seen[i])continue;
+    const queue=[i];seen[i]=1;let x0=w,y0=h,x1=0,y1=0;
+    for(let k=0;k<queue.length;k++) {const n=queue[k],x=n%w,y=Math.floor(n/w);x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y);
+      for(const q of [n-1,n+1,n-w,n+w])if(q>=0&&q<w*h&&!seen[q]&&mask[q]&&Math.abs(q%w-x)<=1){seen[q]=1;queue.push(q);}}
+    // Continuous epithelium and vessel contours remain structural paths.
+    if(x1-x0>65||y1-y0>65||queue.length<2)continue;
+    x0=Math.max(0,x0-2);y0=Math.max(0,y0-2);x1=Math.min(w-1,x1+2);y1=Math.min(h-1,y1+2);
+    const tile=document.createElement('canvas');tile.width=x1-x0+1;tile.height=y1-y0+1;
+    tile.getContext('2d').drawImage(lowBase,x0,y0,tile.width,tile.height,0,0,tile.width,tile.height);
+    const coverage=new Set();
+    for(const n of queue)for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++) {
+      const xx=n%w+dx,yy=Math.floor(n/w)+dy;
+      if(xx>=x0&&xx<=x1&&yy>=y0&&yy<=y1&&dx*dx+dy*dy<=5)coverage.add(yy*w+xx);
+    }
+    const tc=tile.getContext('2d'),ti=tc.getImageData(0,0,tile.width,tile.height);
+    for(let yy=0;yy<tile.height;yy++)for(let xx=0;xx<tile.width;xx++)if(!coverage.has((yy+y0)*w+xx+x0))ti.data[(yy*tile.width+xx)*4+3]=0;
+    tc.putImageData(ti,0,0);
+    lowCells.push({tile,x:(x0+x1)/2-420,y:(y0+y1)/2-320});
+    // Inpaint only the small local crop; preserve the original baked wash.
+    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++) {
+      if(!coverage.has(y*w+x))continue;
+      let best=-1,dist=1e9;
+      for(let dy=-6;dy<=6;dy+=2)for(let dx=-6;dx<=6;dx+=2){const xx=Math.max(0,Math.min(w-1,x+dx)),yy=Math.max(0,Math.min(h-1,y+dy)),q=yy*w+xx;if(!mask[q]&&!coverage.has(q)&&dx*dx+dy*dy<dist){best=q;dist=dx*dx+dy*dy;}}
+      if(best>=0)for(let ch=0;ch<3;ch++)d[(y*w+x)*4+ch]=pristine[best*4+ch];
+    }
+  }
+  lowSource=im;
+}
+function lowGeometry(a,k) {
+  const rot=.14+(Math.PI/6-.14)*(1-k);
+  // Extra lumen irregularity fades with depth, leaving the b02b target exact.
+  const wobble=12*Math.sin(a*3)+9*Math.sin(a*5)+(1-k)*22*Math.sin(a*4+.7);
+  return {rot,wobble};
+}
+// Continuous radial allocation: lumen 170; thick mucosa and submucosa.
+function lowRadius(y,k) {
+ const ys=[-320,-290,-150,-10,230,280],rs=[145,170,390,610,850,900];
+ let i=0;while(i<4&&y>ys[i+1])i++;
+ const r=rs[i]+(y-ys[i])/(ys[i+1]-ys[i])*(rs[i+1]-rs[i]);
+ return r*(1-k)+(620+y)*k;
+}
+function lowInverse(r,k) {
+ const ys=[-320,-290,-150,-10,230,280];let i=0;
+ while(i<4&&r>lowRadius(ys[i+1],k))i++;
+ return ys[i]+(r-lowRadius(ys[i],k))/(lowRadius(ys[i+1],k)-lowRadius(ys[i],k))*(ys[i+1]-ys[i]);
+}
+function lowPoint(x,y,k) {
+  const a=x/620-Math.PI/2,{rot,wobble}=lowGeometry(a,k),r=lowRadius(y,k)+wobble;
+  const u=1.6*Math.cos(a)*r,v=Math.sin(a)*r;
+  return [u*Math.cos(rot)-v*Math.sin(rot),u*Math.sin(rot)+v*Math.cos(rot)];
+}
+function drawLow(c,t,T) {
+  if(!lowSource)lowMaterial();
+  let k=Math.max(0,Math.min(1,(t-T.frac(29,.28))/(T.frac(29,.63)-T.frac(29,.28))));
+  k=k*k*(3-2*k);
+  if(!lowCache||lowCache.k!==k) {
+    const canvas=document.createElement('canvas');canvas.width=3200;canvas.height=2100;
+    const ctx=canvas.getContext('2d'),out=ctx.createImageData(3200,2100),d=out.data,src=lowSource.data;
+    const rot=.14+(Math.PI/6-.14)*(1-k),co=Math.cos(rot),si=Math.sin(rot);
+    for(let j=0;j<2100;j++)for(let i=0;i<3200;i++) {
+      const u=i-1600,v=j-1050,x=(u*co+v*si)/1.6,y=-u*si+v*co,a=Math.atan2(y,x);
+      const fy=lowInverse(Math.hypot(x,y)-lowGeometry(a,k).wobble,k);
+      if(fy< -320||fy>=280)continue;
+      // Five complete repeats; 140px smooth overlap makes every layer periodic.
+      let fx=((a+Math.PI/2)/TAU*3500+420)%700;if(fx<0)fx+=700;
+      const row=Math.floor(fy+320)*840,q=(row+Math.floor(fx))*4,n=(j*3200+i)*4;
+      let w=Math.max(0,1-fx/140);w=w*w*(3-2*w);
+  const opt = parseArgs(process.argv);
+  if (!(opt.fps > 0)) throw new Error('fps must be positive');
+  await fsp.mkdir(opt.outDir, { recursive: true });
+  const tmp = path.join(opt.outDir, 'tmp');
+  const subDir = path.join(tmp, 'sub');
+  const endDir = path.join(tmp, 'endcard');
+  await fsp.rm(tmp, { recursive: true, force: true });
+  await fsp.mkdir(subDir, { recursive: true });
+  await fsp.mkdir(path.join(opt.outDir, 'frames'), { recursive: true });
+
+  const endcardJson = path.join(opt.endcardDir, 'data/endcard.json');
+  const watched = ['data/endcard.json', 'endcard.js', 'index.html', 'render.mjs'].map((rel) => path.join(opt.endcardDir, rel));
+  const hashesBefore = Object.fromEntries(watched.map((f) => [f, sha256(f)]));
+  if (!fs.readFileSync(endcardJson, 'utf8').includes('【待填】')) {
+    throw new Error('endcard.json is missing 【待填】 before assembly; refusing to continue');
+  }
+
+  const loaded = loadCuesFromFs({ cues: opt.cues || undefined });
+  const snapName = String(loaded.source || '').includes('estimate') ? 'cues_estimate.json' : 'cues_loaded.json';
+  const snapPath = path.join(opt.outDir, snapName);
+  writeSnapshot(snapPath, loaded);
+
+  console.log(`cues ${loaded.count} source=${loaded.source} duration=${loaded.duration}`);
+  if (loaded.count !== 77 && String(loaded.source).includes('estimate')) {
+    throw new Error(`expected 77 estimated cues, got ${loaded.count}`);
+  }
+
+  let clip = loaded.cues.slice();
+  if (opt.maxCues) clip = clip.slice(0, opt.maxCues);
+  let contentDur = clip[clip.length - 1].end;
+  if (opt.contentDuration != null) {
+    contentDur = opt.contentDuration;
+    clip = clip.filter((c) => c.start < contentDur).map((c) => (c.end > contentDur ? { ...c, end: contentDur } : { ...c }));
+  }
+  const contentFrames = Math.round(contentDur * opt.fps);
+  const endFrames = Math.round(ENDCARD_SECONDS * opt.fps);
+  const contentDurExact = contentFrames / opt.fps;
+  const totalDur = (contentFrames + endFrames) / opt.fps;
+  const clipPath = path.join(opt.outDir, 'cues_dryrun.json');
+  fs.writeFileSync(clipPath, JSON.stringify({
+    source: loaded.source,
+    formula: loaded.formula,
+    contentDuration: contentDurExact,
+    lastCueEnd: clip[clip.length - 1].end,
+    cues: clip,
+  }, null, 2) + '\n');
+
+  const c1 = clip.find((c) => c.id === '01') || clip[0];
+  const c3 = clip.find((c) => c.id === '03');
+  if (!c3) throw new Error('dry-run window has no sentence 03');
+  const t1 = (c1.start + c1.end) / 2;
+  const t3 = (c3.start + c3.end) / 2;
+  const framesDir = path.join(opt.outDir, 'frames');
+  const stills = [
+    { t: t1, file: path.join(framesDir, '帧_01_句01中点.png'), kind: 'subtitle' },
+    { t: t3, file: path.join(framesDir, '帧_02_最长英文_s03.png'), kind: 'subtitle' },
+  ];
+
+  console.log(`content ${contentDurExact}s (${contentFrames} frames) + endcard ${ENDCARD_SECONDS}s → ${totalDur}s`);
+  console.log(`still t01=${t1} t03=${t3} endcardLocal=3 file=${contentDurExact + 3}`);
+
+  const audioPath = path.join(tmp, 'audio.wav');
+  const audioReport = await buildAudio({
+    voice: opt.voice,
+    music: opt.music,
+    contentDur: contentDurExact,
+    totalDur,
+    outWav: audioPath,
+  });
+  console.log('audio', audioReport.loudnorm, audioReport.reason || '');
+
+  const scenePath = path.join(tmp, 'scene.mp4');
+  const sceneNote = await makeScene({ sceneVideo: opt.sceneVideo, frames: contentFrames, fps: opt.fps, out: scenePath });
+  console.log('scene', sceneNote);
+
+  const runs = [];
+  for (let i = 0; i < contentFrames; i++) {
+    const t = i / opt.fps;
+    const key = visualKey(subtitleState(t, clip, { xfade: opt.xfade }));
+    const last = runs[runs.length - 1];
+    if (last && last.key === key) last.count += 1;
+    else runs.push({ key, t, index: i, count: 1 });
+  }
+  console.log(`subtitle unique frames ${runs.length} / ${contentFrames}`);
+
+  const measurePath = path.join(opt.outDir, 'english_measure.json');
+  let measured = null;
+  let overlayCheck = null;
+  let qaPaths = null;
+  let qaMeta = null;
+  await withPage(path.join(root, 'subtitle'), 'http://subtitle.local', async (page) => {
+    measured = await page.evaluate((cues) => window.measureCards(cues), loaded.cues);
+    await page.evaluate(({ cues, xfade }) => { window.CUES = cues; window.XFADE = xfade; }, { cues: clip, xfade: opt.xfade });
+    for (const still of stills) {
+      const png = await canvasPng(page, still.t, 'full');
+      await fsp.writeFile(still.file, png);
+      console.log('still', still.file);
+    }
+    const extras = await page.evaluate((t) => window.buildQaStills(t), t3);
+    const qaNames = {
+      compare: '对比_字幕字号.png',
+      phone: '预览_手机竖屏.png',
+      strip: '预览_手机竖屏_条.png',
+    };
+    qaPaths = {};
+    for (const [key, name] of Object.entries(qaNames)) {
+      const file = path.join(framesDir, name);
+      const url = extras[key];
+      const comma = url.indexOf(',');
+      if (comma < 0) throw new Error('QA still ' + name + ' was not a PNG');
+      await fsp.writeFile(file, Buffer.from(url.slice(comma + 1), 'base64'));
+
+codex
+真实时间轴中，S08 从 116.615 s 开始，句 34 在 141.816 s 结束。现有场景代码还用“每句 6 秒”计算状态编号；我会只在 `film/timeline.js` 做时间映射，保留原绘制代码，再用七帧 MAE 验证画面。
+
+字幕加载器默认可能回退到估算时间，因此本次会生成真实 start/end 的 cues 快照，并显式传给合成脚本。
+
+exec
+/bin/bash -lc "mkdir -p qa/v6/animatic; sha256sum engine/lib/{he,he_detail,wash,ann,scope,camera}.js parity_r4/chapters/04.js > qa/v6/animatic/sha256_开工.txt; git rev-parse HEAD; cat assembly/pipeline/assemble.sh; rg '"'^'"\\| S0[1-8]／' 分镜/分镜_v1.md | cut -d '|' -f2; cat assembly/subtitle/timing.js 2>/dev/null; ls assembly/subtitle" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+66ff9d4d36cc78208a43a3e4763456f101c2b367
+#!/bin/sh
+# Assemble the v5 film: scene + bilingual subtitles + 12 s endcard + audio.
+# See README.md for flags. Does not modify endcard/ or anything outside assembly/.
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
+cd "$ROOT"
+exec node pipeline/assemble.mjs "$@"
+ S01／01—05 
+ S02／06—10 
+ S03／11—13 
+ S04／14—19 
+ S05／20—22 
+ S06／23—24 
+ S07／25—30 
+ S08／31—34 
+README.md
+config.js
+fonts
+index.html
+loadCues.js
+render.mjs
+subtitle.js
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+import json,pathlib
+p=pathlib.Path('qa/v6/animatic'); d=json.load(open('/workspace/病理科普视频/配音/全稿_v3/timeline.json')); rows=d['lines'][28:34]
+source='''// Real narration timing; preserve the approved scene through its legacy clock.
+import scene from './chapters/s08.js';
+const timing = ROWS;
+export const origin = timing[0].start;
+export const sentences = timing.map(s => ({id:s.n,start:s.start-origin,end:s.end-origin}));
+export const duration = sentences.at(-1).end + 0.8;
+export const T = {
+  at: id => sentences[id-29].start,
+  end: id => id===34 ? duration : sentences[id-29].end,
+  frac: (id,f) => sentences[id-29].start + (sentences[id-29].end-sentences[id-29].start)*f,
+};
+const legacy = {at:id=>(id-29)*6,end:id=>(id-28)*6,frac:(id,f)=>(id-29+f)*6};
+export function sceneTime(t) {
+  const s = sentences.find(s=>t<s.end) || sentences.at(-1);
+  if(t>=sentences.at(-1).end) return 33; // retain the approved final state for the tail
+  return (s.id-29)*6 + Math.max(0,(t-s.start)/(s.end-s.start))*6;
+}
+const draw = scene.draw;
+scene.draw = (ctx,t) => draw.call(scene,ctx,sceneTime(t),legacy);
+'''.replace('ROWS',json.dumps(rows,ensure_ascii=False))
+pathlib.Path('film/timeline.js').write_text(source)
+cues=[dict(i=i,id=f'{r[\"n\"]:02}',ch=r['chapter'],seg=r['seg'],start=r['start'],end=r['end'],text=r['text'],en=r['en'],englishCards=r['en'].split(' | ')) for i,r in enumerate(d['lines'])]
+(p/'cues_real.json').write_text(json.dumps(dict(source='全稿_v3/timeline.json real start/end',formula=None,finalAudioTiming=True,duration=d['duration'],cues=cues),ensure_ascii=False,indent=2))
+# Inverse mapping of the approved seven states.
+times=[rows[0]['start']-rows[0]['start']+rows[0]['dur']*v/6 for v in [1,3.8]]+[(r['start']-rows[0]['start'])+r['dur']/2 for r in rows[1:]]
+(p/'timing.json').write_text(json.dumps(dict(origin=rows[0]['start'],duration=rows[-1]['end']-rows[0]['start']+.8,states=times),indent=2))
+print('duration',rows[-1]['end']-rows[0]['start']+.8,'stills',','.join(map(str,times)))
+PY" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+duration 26.00191666666662 stills 0.6829375,2.5951625,6.74502083333333,11.43614583333333,16.125708333333314,20.228958333333317,23.669145833333292
+
+exec
+/bin/bash -lc 'node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --still 0.6829375,2.5951625,6.74502083333333,11.43614583333333,16.125708333333314,20.228958333333317,23.669145833333292 --out qa/v6/animatic/s08_states --size 1920x1080 > qa/v6/animatic/stills.log 2>&1' in /workspace/病理科普视频/v5
+exec
+/bin/bash -lc 'node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --duration 26.00191666666662 --out qa/v6/animatic/S08.mp4 --size 1920x1080 --fps 30 --workers 3 --png > qa/v6/animatic/render.log 2>&1' in /workspace/病理科普视频/v5
+exec
+/bin/bash -lc "rg -n 'fade|start|active' assembly/subtitle/subtitle.js | head -28; fc-list :lang=zh file | head -3; df -h .; tail -4 qa/v6/animatic/render.log; rg -n '29–31|dur1080 >= ' assembly/pipeline/assemble.mjs" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+2:// Sizes, baselines, fade, halo, and colours come from ./config.js.
+101:  const key = `${s.i}|${s.start}|${s.end}|${src}`;
+104:  const span = s.end - s.start;
+108:    out = [{ text: ls[0] || src, start: s.start, end: s.end }];
+110:    let t = s.start;
+113:      const o = { text, start: t, end: i === ls.length - 1 ? s.end : t + d };
+139:  const key = `${s.i}|${s.start}|${s.end}|${cards.join('\u0001')}`;
+145:  const span = s.end - s.start;
+147:  let t = s.start;
+150:    const o = { text, start: t, end: i === cards.length - 1 ? s.end : t + d };
+159:function itemAlpha(t, item, index, list, xfade) {
+160:  if (xfade) {
+163:      index === 0 ? (t - item.start) / 0.12 : 1,
+167:  return Math.max(0, Math.min(1, (t - item.start) / 0.12, (item.end - t) / 0.08));
+226:    if (t >= s.start && t < s.end) return s;
+320:  const { fadeTop, fadeEnd } = style.band;
+322:  const ease = style.fade.extend === 'ease';
+323:  const gradBottom = ease ? style.frame.h : fadeEnd;
+324:  const fillBottom = style.fade.extend === 'short' ? fadeEnd : style.frame.h;
+325:  const g = ctx.createLinearGradient(0, fadeTop, 0, gradBottom);
+326:  for (const stop of style.fade.stops) {
+329:  const h = fillBottom - fadeTop;
+332:  ctx.fillRect(0, fadeTop, style.frame.w, h);
+336: * Draw the paper fade, the current Chinese line, and the current English card.
+338: * Chinese line fades and English card fades are independent unless xfade is set.
+341:export function drawSubtitles(ctx, t, cues, { dark = 0, xfade = false, paper = PAPER, preset = ACTIVE } = {}) {
+350:  const li = lines.findIndex((l) => t >= l.start && t < l.end);
+352:  const ci = cards.findIndex((c) => t >= c.start && t < c.end);
+/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc: 
+/usr/share/fonts/opentype/noto/NotoSerifCJK-Regular.ttc: 
+/usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc: 
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vdb        128G   65G   63G  51% /workspace/病理科普视频/v5
+529:  if (!(dur1080 >= 29 && dur1080 <= 31)) blockers.push(`duration ${dur1080}s is outside 29–31`);
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('assembly/pipeline/assemble.mjs');s=p.read_text();s=s.replace(\"if ("'!(dur1080 >= 29 && dur1080 <= 31)) blockers.push(`duration ${dur1080}s is outside 29–31`);","if (Math.abs(dur1080 - totalDur) > 1 / opt.fps + 0.01) blockers.push(`duration ${dur1080}s differs from expected ${totalDur}s`);")
+p.write_text(s)
+PY' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+ succeeded in 19502ms:
+exec
+/bin/bash -lc "cat > qa/v6/animatic/build_plate.py <<'PY'
+import json,re,subprocess,pathlib
+p=pathlib.Path(__file__).resolve().parent
+root=p.parents[2]
+d=json.load(open('/workspace/病理科普视频/配音/全稿_v3/timeline.json')); timing=json.load(open(p/'timing.json'))
+filters=[]
+for scene,a,b in re.findall(r'"'^'"\\| (S\\d{2})／(\\d+)—(\\d+) ',(root/'分镜/分镜_v1.md').read_text(),re.M):
+ a,b=int(a),int(b)
+ if scene=='S08':continue
+ start=0 if a==1 else d['lines'][a-1]['start']
+ end=d['lines'][b]['start'] if b<77 else d['duration']
+ text=f'草稿占位 {scene} ／句 {a:02}–{b:02}'
+ filters.append(f\"drawtext=fontfile=/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc:text='{text}':x=65:y=65:fontsize=28:fontcolor=0x8A8680:enable='gte(t,{start})*lt(t,{end})'\")
+# S08 overrides the storyboard's S07 sentences 29–30, as explicitly requested.
+origin=timing['origin'];end=origin+timing['duration']
+f='[0:v]'+','.join(filters)+'[base];[1:v]setpts=PTS-STARTPTS+'+str(origin)+'/TB[s];[base][s]overlay=eof_action=pass:enable=\\'gte(t,'+str(origin)+')*lt(t,'+str(end)+')\\'[v]'
+cmd=['ffmpeg','-y','-v','error','-f','lavfi','-i',f\"color=c=0xF4EFE6:s=1920x1080:r=30:d={d['duration']}\",'-i',str(p/'S08.mp4'),'-filter_complex',f,'-map','[v]','-t',str(d['duration']),'-r','30','-c:v','libx264','-preset','veryfast','-crf','16','-pix_fmt','yuv420p','-an',str(p/'scene_plate.mp4')]
+(p/'plate_command.json').write_text(json.dumps(cmd,ensure_ascii=False,indent=2));subprocess.run(cmd,check=True)
+PY
+cat qa/v6/animatic/stills.log; tail -3 qa/v6/animatic/render.log" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5/qa/v6/animatic/s08_states/t_000.68.png
+/workspace/病理科普视频/v5/qa/v6/animatic/s08_states/t_002.60.png
+/workspace/病理科普视频/v5/qa/v6/animatic/s08_states/t_006.75.png
+/workspace/病理科普视频/v5/qa/v6/animatic/s08_states/t_011.44.png
+/workspace/病理科普视频/v5/qa/v6/animatic/s08_states/t_016.13.png
+/workspace/病理科普视频/v5/qa/v6/animatic/s08_states/t_020.23.png
+/workspace/病理科普视频/v5/qa/v6/animatic/s08_states/t_023.67.png
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+rendering 780 frames × 1 sample(s) @ 1920x1080 30fps with 3 worker(s)…
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from PIL import Image
+import numpy as np,json,pathlib
+p=pathlib.Path('qa/v6/animatic'); rows=[]
+for old,new in zip([1,3.8,9,15,21,27,33],sorted((p/'s08_states').glob('t_*.png'))):
+ a=np.array(Image.open(f'qa/v6/b10/t_{old:06.2f}.png').convert('RGB')).astype(float);b=np.array(Image.open(new).convert('RGB')).astype(float)
+ rows.append(dict(old=old,new=new.name,mae=float(abs(a-b).mean())))
+print(rows);(p/'mae.json').write_text(json.dumps(rows,indent=2))
+PY" in /workspace/病理科普视频/v5
+ succeeded in 1131ms:
+[{'old': 1, 'new': 't_000.68.png', 'mae': 0.0}, {'old': 3.8, 'new': 't_002.60.png', 'mae': 0.0}, {'old': 9, 'new': 't_006.75.png', 'mae': 0.0}, {'old': 15, 'new': 't_011.44.png', 'mae': 0.0}, {'old': 21, 'new': 't_016.13.png', 'mae': 0.0}, {'old': 27, 'new': 't_020.23.png', 'mae': 0.0}, {'old': 33, 'new': 't_023.67.png', 'mae': 0.0}]
+
+exec
+/bin/bash -lc 'tail -3 qa/v6/animatic/render.log; git diff --check' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+rendering 780 frames × 1 sample(s) @ 1920x1080 30fps with 3 worker(s)…
+
+codex
+七个画面状态已完成重渲染，与 b10 的全帧 RGB MAE 全部为 0。S08 保留了所有状态；句 29 的推进动作压缩到真实时长约 4.10 s 内，能在句 30 前完成。
+
+另外，合成脚本的时长检查写死了“29–31 秒”。我已改为核对本次实际预期时长，避免整片被误报失败。
+
+exec
+/bin/bash -lc "sed -n '155,175p' assembly/subtitle/subtitle.js; cat assembly/package.json; du -sh qa/v6/animatic" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+  cardCache.set(key, out);
+  return out;
+}
+
+function itemAlpha(t, item, index, list, xfade) {
+  if (xfade) {
+    return Math.max(0, Math.min(
+      1,
+      index === 0 ? (t - item.start) / 0.12 : 1,
+      index === list.length - 1 ? (item.end - t) / 0.08 : 1,
+    ));
+  }
+  return Math.max(0, Math.min(1, (t - item.start) / 0.12, (item.end - t) / 0.08));
+}
+
+const enCache = new Map();
+const overflowLog = [];
+const overflowSeen = new Set();
+
+function fitEnglish(ctx, text, style) {
+  const key = `${style.id}\u0000${text}`;
+{
+  "name": "pathology-v5-assembly",
+  "private": true,
+  "type": "module",
+  "description": "Standalone bilingual subtitles and final assembly for the v5 pathology film.",
+  "scripts": {
+    "stills": "node subtitle/render.mjs",
+    "assemble": "node pipeline/assemble.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.65.0"
+  }
+}
+3.7M	qa/v6/animatic
+
+exec
+/bin/bash -lc "ps -eo pid,etime,pcpu,comm,args | rg 'render.mjs film|chrome.*type=renderer|ffmpeg.*seg_' | cut -c1-220; tail -3 qa/v6/animatic/render.log" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+      1       00:00 33.3 codex           codex-linux-sandbox --sandbox-policy-cwd /workspace/病理科普视频/v5 --command-cwd /workspace/病理科普视频/v5 --permission-profile {"type":"managed","file_system":{"typ
+      2       00:00  0.0 bash            /bin/bash -c ps -eo pid,etime,pcpu,comm,args | rg 'render.mjs film|chrome.*type=renderer|ffmpeg.*seg_' | cut -c1-220; tail -3 qa/v6/animatic/render.log
+      4       00:00  0.0 rg              rg render.mjs film|chrome.*type=renderer|ffmpeg.*seg_
+rendering 780 frames × 1 sample(s) @ 1920x1080 30fps with 3 worker(s)…
+  78/780 frames  25s
+  156/780 frames  36s
+
+exec
+/bin/bash -lc "sed -n '225,265p' assembly/subtitle/subtitle.js; rg '"'^export'"' assembly/subtitle/subtitle.js" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+    const s = cues[i];
+    if (t >= s.start && t < s.end) return s;
+  }
+  return null;
+}
+
+function accentSegments(text) {
+  const segs = [];
+  let rest = text;
+  while (rest) {
+    let best = null;
+    for (const w of ACCENT) {
+      const j = rest.indexOf(w);
+      if (j >= 0 && (!best || j < best.j || (j === best.j && w.length > best.w.length))) best = { j, w };
+    }
+    if (!best) {
+      segs.push([rest, 0]);
+      break;
+    }
+    if (best.j) segs.push([rest.slice(0, best.j), 0]);
+    segs.push([best.w, 1]);
+    rest = rest.slice(best.j + best.w.length);
+  }
+  return segs;
+}
+
+function haloRgb(style, dark) {
+  return dark > 0.5 ? style.colours.darkRgb : style.colours.paperRgb;
+}
+
+function paintHalo(ctx, style, dark) {
+  const rgb = haloRgb(style, dark);
+  ctx.shadowColor = `rgba(${rgb},${style.halo.shadowAlpha})`;
+  ctx.shadowBlur = style.halo.blur;
+  ctx.lineWidth = style.halo.stroke;
+  ctx.strokeStyle = `rgba(${rgb},${style.halo.strokeAlpha})`;
+  ctx.lineJoin = 'round';
+}
+
+function paintChinese(ctx, text, dark, alpha, style) {
+  if (!text || alpha <= 0) return;
+export {
+export const ACCENT = ['急性蜂窝织炎性阑尾炎', '急性阑尾炎', '化脓性炎', '中性粒细胞', '右下腹', '肚脐周围', '脓苔', '脓液', '纤维素', '炎症', '麦氏点'];
+export function stripCitations(text) {
+export function split(text) {
+export function linesFor(s) {
+export function rawCards(s) {
+export function cardsFor(s) {
+export function measureEnglish(ctx, s, preset = ACTIVE) {
+export function consumeOverflow() {
+export function safeFade(ctx, paper = PAPER, dark = 0, preset = ACTIVE) {
+export function drawSubtitles(ctx, t, cues, { dark = 0, xfade = false, paper = PAPER, preset = ACTIVE } = {}) {
+export function subtitleState(t, cues, { xfade = false } = {}) {
+export async function loadCues(options = {}) {
+
+exec
+/bin/bash -lc "sed -n '375,412p' assembly/subtitle/subtitle.js; tail -4 qa/v6/animatic/render.log" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+    id: s.id,
+    cn: line ? line.text : '',
+    en: card ? card.text : '',
+    cnA: line ? itemAlpha(t, line, li, lines, xfade) : 0,
+    enA: card ? itemAlpha(t, card, ci, cards, xfade) : 0,
+  };
+}
+
+export async function loadCues(options = {}) {
+  if (Array.isArray(options.cues)) {
+    const cues = options.cues;
+    return {
+      cues,
+      source: options.source || 'provided',
+      duration: cues.length ? cues[cues.length - 1].end : 0,
+      formula: options.formula || null,
+    };
+  }
+  const isNode = typeof process !== 'undefined' && process.versions && process.versions.node;
+  if (!isNode) {
+    const url = options.url || options.snapshot || 'cues.json';
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`Cannot fetch cues: ${url}`);
+    const data = await r.json();
+    const cues = data.cues || data;
+    return {
+      cues,
+      source: data.source || String(url),
+      duration: data.duration ?? (cues.length ? cues[cues.length - 1].end : 0),
+      formula: data.formula || null,
+      mismatches: data.mismatches || [],
+    };
+  }
+  const { loadCuesFromFs } = await import('./loadCues.js');
+  return loadCuesFromFs(options);
+}
+rendering 780 frames × 1 sample(s) @ 1920x1080 30fps with 3 worker(s)…
+  78/780 frames  25s
+  156/780 frames  36s
+  234/780 frames  48s
+
+exec
+/bin/bash -lc 'while [ ! -f qa/v6/animatic/S08.mp4 ]; do sleep 2; done
+python3 qa/v6/animatic/build_plate.py > qa/v6/animatic/plate.log 2>&1 && assembly/pipeline/assemble.sh --scene-video /workspace/病理科普视频/v5/qa/v6/animatic/scene_plate.mp4 --cues /workspace/病理科普视频/v5/qa/v6/animatic/cues_real.json --voice /workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav --content-duration 327.8315 --fps 30 --out-dir /workspace/病理科普视频/v5/qa/v6/animatic --out-name 粗剪_v1 --no-blind > qa/v6/animatic/assembly.log 2>&1' in /workspace/病理科普视频/v5
+exec
+/bin/bash -lc "cat > qa/v6/animatic/check_alignment.mjs <<'JS'
+import fs from 'node:fs';
+import {subtitleState} from '../../../assembly/subtitle/subtitle.js';
+const root=new URL('./',import.meta.url);
+const {cues}=JSON.parse(fs.readFileSync(new URL('cues_real.json',root)));
+const result=[1,31,34,50,77].map(n=>{
+ const cue=cues[n-1];let frame=Math.floor(cue.start*30);
+ while(true){const s=subtitleState(frame/30,cues);if(s?.id===cue.id&&s.cnA>0&&s.enA>0)break;frame++;}
+ return {n,start:cue.start,firstVisibleFrame:frame,appears:frame/30,delta:frame/30-cue.start,snapshotDelta:0,previous:subtitleState((frame-1)/30,cues),state:subtitleState(frame/30,cues)};
+});
+fs.writeFileSync(new URL('alignment.json',root),JSON.stringify(result,null,2));console.log(result.map(({n,start,appears,delta})=>({n,start,appears,delta})));
+JS
+node qa/v6/animatic/check_alignment.mjs" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+[
+  {
+    n: 1,
+    start: 0,
+    appears: 0.03333333333333333,
+    delta: 0.03333333333333333
+  },
+  {
+    n: 31,
+    start: 126.00695833333339,
+    appears: 126.03333333333333,
+    delta: 0.026374999999944748
+  },
+  {
+    n: 34,
+    start: 138.75091666666668,
+    appears: 138.76666666666668,
+    delta: 0.015749999999997044
+  },
+  {
+    n: 50,
+    start: 212.15308333333317,
+    appears: 212.16666666666666,
+    delta: 0.013583333333485825
+  },
+  {
+    n: 77,
+    start: 323.88229166666616,
+    appears: 323.9,
+    delta: 0.017708333333814608
+  }
+]
+
+exec
+/bin/bash -lc "cat > qa/v6/animatic/final_check.py <<'PY'
+from pathlib import Path
+import json,subprocess,math,hashlib
+from PIL import Image,ImageDraw,ImageFont
+p=Path(__file__).resolve().parent;root=p.parents[2]
+probe=lambda f:json.loads(subprocess.check_output(['ffprobe','-v','error','-show_format','-show_streams','-of','json',str(f)]))
+master=p/'粗剪_v1.mp4'; info=probe(master);dur=float(info['format']['duration']);timing=json.load(open(p/'timing.json'));alignment=json.load(open(p/'alignment.json'));mae=json.load(open(p/'mae.json'))
+# Full-film samples plus six S08 states (mid power and five high power states).
+times=list(range(0,math.ceil(dur),20))+[timing['origin']+t for t in timing['states'][1:]]
+out=p/'contact_frames';out.mkdir(exist_ok=True)
+font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',18)
+cw,ch=480,300; sheet=Image.new('RGB',(cw*4,ch*math.ceil(len(times)/4)), '#29292d');draw=ImageDraw.Draw(sheet)
+for i,t in enumerate(times):
+ file=out/f'{i:02}_{t:.3f}.png'
+ subprocess.run(['ffmpeg','-v','error','-y','-ss',str(t),'-i',str(master),'-frames:v','1','-vf','scale=480:270',str(file)],check=True)
+ x,y=i%4*cw,i//4*ch;sheet.paste(Image.open(file).convert('RGB'),(x,y));draw.text((x+8,y+274),f'{t:.3f} s'+(' / S08' if i>=len(range(0,math.ceil(dur),20)) else ''),font=font,fill='white')
+sheet.save(p/'contact_sheet.png')
+locked=['engine/lib/'+s+'.js' for s in ['he','he_detail','wash','ann','scope','camera']]+['parity_r4/chapters/04.js']
+final=''.join(hashlib.sha256((root/f).read_bytes()).hexdigest()+'  '+f+'\\n' for f in locked)
+(p/'sha256_结束.txt').write_text(final);ok=final==(p/'sha256_开工.txt').read_text();(p/'sha256_校验.log').write_text('PASS: all seven hashes unchanged\\n' if ok else 'FAIL\\n')
+report=json.load(open(p/'粗剪_v1_report.json'))
+text=f'''# 整片粗剪 v1 自检
+
+基线 66ff9d4，分支 v6-fresh；未执行 git commit。保留开工时已有工作区改动，未改 v4_mix/、S08 绘制代码或锁定文件，未读取或修改 .mimo.env。无新增医学数字上屏；粗剪占位场景/句号编号按任务要求显示。
+
+总时长：**{dur:.6f} s**（1080p 与 720p 同长）；内容 {report['contentDuration']:.6f} s，真实 timeline.json duration=327.831500 s，30 fps 取整误差 {report['contentDuration']-327.8315:+.6f} s；保留片尾 12 s。主片 1920×1080、30 fps、H.264；音频 AAC、48 kHz、双声道，无音乐。
+
+S08 全局起点 {timing['origin']:.9f} s；句34结束 141.816458333 s；尾留 0.8 s；请求片段长 {timing['duration']:.9f} s，编码为26.000000 s。嵌入底板按全局时间戳定位，30 fps 最多一帧量化误差。
+
+## 真实时间绑定
+
+仅 film/timeline.js 改动 S08 时序：读取自真实时间轴生成的六句数据快照，以句29起点为0，把每句真实 start/end 映射到原6秒状态区间；句间0.45秒空隙停在下一句起始状态。绘制函数在该模块包装，所有原画笔、相机关键状态与标注保持原代码。句34结束后定格在 b10 的 s34 检查状态。
+
+句29长4.097625秒，低倍保持1.147335秒，低→中推进约1.475145秒，高倍在句29结束前到位，早于句30。各句原状态完整保留，没有因时长删状态。s33最短2.914833秒，镜头推进约0.932747秒，仍保留约1.98秒稳定状态。
+
+分镜表S07为25–30、S08为31–34；本任务明确要求S08成片从29开始，因此S08实际视频覆盖29–34，优先覆盖S07末两句。其余场景按分镜范围显示占位。占位文字左上角x65/y65、28px灰字，完整位于y<950。
+
+## 字幕与配音对齐
+
+loadCues默认没有优先读取timeline.json，存在估算回退。本次显式传入 cues_real.json：77句中英文来自真实timeline.json，start/end逐字段一致，formula=null、finalAudioTiming=true；配音从0开始、不变速。实际合成使用同一subtitleState和30fps采样。下表“出现”指中英alpha都大于0的首个视频帧；0.12秒淡入导致恰在start的alpha为0，故首句首个可见帧为1/30秒。差值均不超过一帧，非估算对齐。
+
+|句|真实start / s|快照差值 / s|首个可见帧时间 / s|差值 / s|
+|---|---:|---:|---:|---:|
+'''
+for a in alignment:text+=f\"|{a['n']:02}|{a['start']:.9f}|0|{a['appears']:.9f}|{a['delta']:+.9f}|\\n\"
+text+='\\n## S08 七状态 MAE\\n\\n比较新渲染原始1920×1080 PNG与qa/v6/b10七帧，全帧RGB通道平均绝对误差（视频经过有损H.264编码，验收用编码前PNG）。\\n\\n|b10旧时刻 / s|新片段时刻 / s|MAE|\\n|---|---:|---:|\\n'
+for m,t in zip(mae,timing['states']):text+=f\"|{m['old']}|{t:.9f}|{m['mae']:.9f}|\\n\"
+text+='\\n七帧全部逐像素一致，MAE=0<0.5。contact_sheet.png含整片每20秒18帧（0–340秒）及S08中倍、s30–s34共6帧。\\n\\n## 命令\\n\\n"'```bash'"\\nnode /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --duration 26.00191666666662 --out qa/v6/animatic/S08.mp4 --size 1920x1080 --fps 30 --workers 3 --png\\nnode /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --still 0.6829375,2.5951625,6.74502083333333,11.43614583333333,16.125708333333314,20.228958333333317,23.669145833333292 --out qa/v6/animatic/s08_states --size 1920x1080\\npython3 qa/v6/animatic/build_plate.py\\nassembly/pipeline/assemble.sh --scene-video /workspace/病理科普视频/v5/qa/v6/animatic/scene_plate.mp4 --cues /workspace/病理科普视频/v5/qa/v6/animatic/cues_real.json --voice /workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav --content-duration 327.8315 --fps 30 --out-dir /workspace/病理科普视频/v5/qa/v6/animatic --out-name 粗剪_v1 --no-blind\\nnode qa/v6/animatic/check_alignment.mjs\\npython3 qa/v6/animatic/final_check.py\\n"'```'"\\n\\n底板完整ffmpeg参数见plate_command.json，渲染/合成日志见render.log、assembly.log。assemble脚本已修正固定29–31秒的试片时长检查，改为核对实际预期时长。\\n\\n## SHA-256\\n\\n'+('PASS：' if ok else 'FAIL：')+'七个锁定文件开工=结束；记录见sha256_开工.txt、sha256_结束.txt、sha256_校验.log。\\n\\n"'```text'"\\n'+final+'"'```'"\\n\\n合成脚本检查结果：'+str(report['blockers'])+'。片尾保持本次开工前状态，合成期间未修改。\\n'
+(p/'自检.md').write_text(text)
+print('Duration',dur,'SHA PASS',ok,'blockers',report['blockers'])
+PY
+tail -4 qa/v6/animatic/render.log" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+  468/780 frames  81s
+  546/780 frames  91s
+  624/780 frames  112s
+  702/780 frames  123s
+
+ succeeded in 146916ms:
+codex
+S08 视频渲染接近完成，随后会自动生成底板并进入整片合成。字幕抽查的五句已核对：时间快照与真实时间轴的差值均为 0；按 30 fps 和现有淡入规则，首个可见字幕帧比句起点晚约 13.6–33.3 ms，均不超过一帧。
+
+exec
+/bin/bash -lc 'tail -4 qa/v6/animatic/render.log; tail -4 qa/v6/animatic/assembly.log 2>/dev/null; cat qa/v6/animatic/plate.log 2>/dev/null' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+  702/780 frames  123s
+  780/780 frames  133s
+done /workspace/病理科普视频/v5/qa/v6/animatic/S08.mp4
+  780 frames, 26.00s, 133.5s wall (171 ms/sample)
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+p='film/timeline.js'
+s=open(p).read().replace('// Real narration timing; preserve the approved scene through its legacy clock.','// Timing snapshot generated from /workspace/病理科普视频/配音/全稿_v3/timeline.json\\n// (lines n=29–34, real start/end seconds; no estimated durations).\\n// Preserve the approved scene through its legacy clock.')
+open(p,'w').write(s)
+PY
+ls -lh qa/v6/animatic/*.mp4; tail -5 qa/v6/animatic/assembly.log 2>/dev/null" in /workspace/病理科普视频/v5
+ exited 1 in 0ms:
+-rw-r--r-- 1 box box 6.1M Nov 12 10:00 qa/v6/animatic/S08.mp4
+-rw-r--r-- 1 box box 5.6M Nov 12 10:00 qa/v6/animatic/scene_plate.mp4
+
+exec
+/bin/bash -lc 'tail -6 qa/v6/animatic/assembly.log 2>/dev/null; tail -3 qa/v6/animatic/plate.log; git diff --stat; ffprobe -v error -show_entries format=duration -of csv=p=0 qa/v6/animatic/S08.mp4' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+cues 77 source=全稿_v3/timeline.json real start/end duration=327.8315
+content 327.8333333333333s (9835 frames) + endcard 12s → 339.8333333333333s
+still t01=2.0604583333333335 t03=10.364729166666667 endcardLocal=3 file=330.8333333333333
+ assembly/endcard/data/endcard.json |  26 +++++++++++---------------
+ assembly/endcard/endcard.js        |   2 +-
+ assembly/endcard/static-preview.py |   6 ++++--
+ assembly/endcard/样帧_片尾.png     | Bin 1001237 -> 1044750 bytes
+ film/timeline.js                   |  23 +++++++++++++++++++++--
+ 5 files changed, 37 insertions(+), 20 deletions(-)
+26.000000
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+p='qa/v6/animatic/final_check.py';s=open(p).read().replace('每20秒18帧（0–340秒）','每20秒17帧（0–320秒）');open(p,'w').write(s)
+PY
+cat > qa/v6/animatic/check_encoded_alignment.py <<'PY'
+# Preserve encoded frame pairs around each requested sentence boundary for review.
+import json,subprocess,pathlib
+p=pathlib.Path(__file__).resolve().parent
+for a in json.load(open(p/'alignment.json')):
+ for label,n in [('before',a['firstVisibleFrame']-1),('visible',a['firstVisibleFrame'])]:
+  out=p/'alignment_frames';out.mkdir(exist_ok=True)
+  subprocess.run(['ffmpeg','-y','-v','error','-ss',str(n/30),'-i',str(p/'粗剪_v1.mp4'),'-frames:v','1',str(out/f\"s{a['n']:02}_{label}.png\")],check=True)
+PY
+tail -5 qa/v6/animatic/assembly.log" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+cues 77 source=全稿_v3/timeline.json real start/end duration=327.8315
+content 327.8333333333333s (9835 frames) + endcard 12s → 339.8333333333333s
+still t01=2.0604583333333335 t03=10.364729166666667 endcardLocal=3 file=330.8333333333333
+
+exec
+/bin/bash -lc 'tail -8 qa/v6/animatic/assembly.log; du -sh qa/v6/animatic; cat qa/v6/animatic/plate.log; git diff --numstat -- film/chapters/s08.js engine/lib parity_r4/chapters/04.js' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+cues 77 source=全稿_v3/timeline.json real start/end duration=327.8315
+content 327.8333333333333s (9835 frames) + endcard 12s → 339.8333333333333s
+still t01=2.0604583333333335 t03=10.364729166666667 endcardLocal=3 file=330.8333333333333
+audio two-pass 
+88M	qa/v6/animatic
+
+codex
+S08 已输出为 1920×1080、30 fps 视频，整片底板也已生成。合成预计总长 339.833 s：正文按 30 fps 取整为 327.833 s，随后保留 12 s 片尾。目前正在处理真实配音和字幕，之后会导出 720p 预览与联系表。
+
+exec
+/bin/bash -lc 'tail -8 qa/v6/animatic/assembly.log; ls -lh qa/v6/animatic/tmp/*.mp4 2>/dev/null' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+qa /workspace/病理科普视频/v5/qa/v6/animatic/frames/预览_手机竖屏_条.png
+overlay alpha check { above: 0, minAbove: null, opaque: 11353 }
+subtitle frames 3360/9835
+subtitle frames 4920/9835
+subtitle frames 9240/9835
+subtitle frames 9720/9835
+subtitle frames 9835/9835
+overlay encode
+-rw-r--r-- 1 box box 3.3M Nov 12 10:01 qa/v6/animatic/tmp/content.mp4
+-rw-r--r-- 1 box box 9.8M Nov 12 10:01 qa/v6/animatic/tmp/scene.mp4
+
+exec
+/bin/bash -lc 'git diff --check; sha256sum -c qa/v6/animatic/sha256_开工.txt; ffprobe -v error -show_entries format=duration:stream=width,height,r_frame_rate -of json qa/v6/animatic/scene_plate.mp4' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+engine/lib/he.js: OK
+engine/lib/he_detail.js: OK
+engine/lib/wash.js: OK
+engine/lib/ann.js: OK
+engine/lib/scope.js: OK
+engine/lib/camera.js: OK
+parity_r4/chapters/04.js: OK
+{
+    "programs": [
+
+    ],
+    "stream_groups": [
+
+    ],
+    "streams": [
+        {
+            "width": 1920,
+            "height": 1080,
+            "r_frame_rate": "30/1"
+        }
+    ],
+    "format": {
+        "duration": "327.833333"
+    }
+}
+
+exec
+/bin/bash -lc 'tail -6 qa/v6/animatic/assembly.log; ls -lh qa/v6/animatic/tmp/content.mp4' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+subtitle frames 3360/9835
+subtitle frames 4920/9835
+subtitle frames 9240/9835
+subtitle frames 9720/9835
+subtitle frames 9835/9835
+overlay encode
+-rw-r--r-- 1 box box 24M Nov 12 10:02 qa/v6/animatic/tmp/content.mp4
+
+codex
+77 句双语字幕已全部生成，字幕透明层检查通过，当前正在编码正文画面。七个锁定文件的哈希复查也全部一致；成片和预览导出后，我会完成抽帧与自检报告。
+
+exec
+/bin/bash -lc 'tail -7 qa/v6/animatic/assembly.log; ls -lh qa/v6/animatic/tmp/content.mp4' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+subtitle frames 4920/9835
+subtitle frames 9240/9835
+subtitle frames 9720/9835
+subtitle frames 9835/9835
+overlay encode
+endcard render
+mux /workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v1.mp4
+-rw-r--r-- 1 box box 28M Nov 12 10:02 qa/v6/animatic/tmp/content.mp4
+
+exec
+/bin/bash -lc 'while [ ! -f qa/v6/animatic/粗剪_v1_report.json ]; do sleep 2; done
+python3 qa/v6/animatic/final_check.py > qa/v6/animatic/final_check.log 2>&1 && python3 qa/v6/animatic/check_encoded_alignment.py > qa/v6/animatic/alignment_frames.log 2>&1' in /workspace/病理科普视频/v5
+ succeeded in 230075ms:
+ succeeded in 18406ms:
+exec
+/bin/bash -lc 'tail -6 qa/v6/animatic/assembly.log; ls -lh qa/v6/animatic/粗剪*.mp4' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+overlay encode
+endcard render
+mux /workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v1.mp4
+720p
+report /workspace/病理科普视频/v5/qa/v6/animatic/dryrun_report.md
+dry run OK
+-rw-r--r-- 1 box box 30M Nov 12 10:02 qa/v6/animatic/粗剪_v1.mp4
+-rw-r--r-- 1 box box 13M Nov 12 10:02 qa/v6/animatic/粗剪_v1_720p.mp4
+
+exec
+/bin/bash -lc 'cat qa/v6/animatic/final_check.log; ls -lh qa/v6/animatic/contact_sheet.png; cat qa/v6/animatic/alignment_frames.log 2>/dev/null; git diff --check' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+Duration 339.833333 SHA PASS True blockers []
+-rw-r--r-- 1 box box 796K Nov 12 10:02 qa/v6/animatic/contact_sheet.png
+
+codex
+1080p 成片和 720p 预览均已导出，合成检查无阻断项。联系表已生成并检查，包含整片每 20 秒抽帧及 S08 内 6 帧；总长为 339.833 s，七状态 MAE 均为 0，七个锁定文件开工与结束哈希一致。
+
+exec
+/bin/bash -lc "git diff --check; git rev-parse --short HEAD; cat qa/v6/animatic/sha256_校验.log; python3 - <<'PY'
+import json
+p='qa/v6/animatic/'
+r=json.load(open(p+'粗剪_v1_report.json'));print('master',r['duration1080'],'preview',r['duration720'],'blockers',r['blockers'],'endcardUntouched',r['endcardUntouched']);print('audio',r['audioReport'])
+PY" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+66ff9d4
+PASS: all seven hashes unchanged
+master 339.833333 preview 339.833333 blockers [] endcardUntouched True
+audio {'voice': '/workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav', 'music': None, 'voiceSilent': False, 'musicSilent': True, 'loudnorm': 'two-pass', 'integratedLufs': -14, 'truePeak': -2.24, 'target': {'integratedLufs': -14, 'truePeakMax': -1}}
+
+codex
+已完成，未执行 git commit。
+
+- [1080p 粗剪](/workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v1.mp4)
+- [720p 预览](/workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v1_720p.mp4)
+- [联系表](/workspace/病理科普视频/v5/qa/v6/animatic/contact_sheet.png)
+- [自检报告](/workspace/病理科普视频/v5/qa/v6/animatic/自检.md)
+
+总长 **339.833 秒**，含 12 秒片尾。真实配音、双语字幕已合成，无音乐。S08 七状态 MAE 全部为 **0**；锁定文件 SHA-256 开工与结束一致，合成检查通过。
+tokens used
+64,971
+已完成，未执行 git commit。
+
+- [1080p 粗剪](/workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v1.mp4)
+- [720p 预览](/workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v1_720p.mp4)
+- [联系表](/workspace/病理科普视频/v5/qa/v6/animatic/contact_sheet.png)
+- [自检报告](/workspace/病理科普视频/v5/qa/v6/animatic/自检.md)
+
+总长 **339.833 秒**，含 12 秒片尾。真实配音、双语字幕已合成，无音乐。S08 七状态 MAE 全部为 **0**；锁定文件 SHA-256 开工与结束一致，合成检查通过。
