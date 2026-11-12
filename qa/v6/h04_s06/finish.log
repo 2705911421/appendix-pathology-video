@@ -1,0 +1,116 @@
+{
+  "1080p": {
+    "outside_window_MAE": {
+      "0": 0.0,
+      "600": 0.0,
+      "2400": 0.0,
+      "2719": 0.0,
+      "3024": 0.0,
+      "3300": 0.0,
+      "4800": 0.0,
+      "6600": 0.0,
+      "8400": 0.0,
+      "9300": 0.0,
+      "10194": 0.0
+    },
+    "outside_gop_packets_identical": 9891,
+    "boundary_outside_window_frames_exact": 0,
+    "audio_hash": "SHA256=e741c403c580eb387a466cbeb8104655660e2c1ad1e39516789759386748e6f6",
+    "subtitle_band_MAE": {
+      "s23_start": 0.0,
+      "s23_transition": 0.0,
+      "s23_red": 0.0,
+      "s24_anchor": 0.0,
+      "s24_before": 0.0,
+      "s24_after": 0.0
+    },
+    "frame_count": 10195,
+    "window": {
+      "start_frame": 2720,
+      "end_frame": 3024,
+      "gop_start": 2720,
+      "gop_end": 3024,
+      "fps": 30
+    }
+  },
+  "_720p": {
+    "outside_window_MAE": {
+      "0": 0.0,
+      "600": 0.0,
+      "2400": 0.0,
+      "2719": 0.0,
+      "3024": 0.0,
+      "3049": 0.0,
+      "3050": 0.0,
+      "3300": 0.0,
+      "4800": 0.0,
+      "6600": 0.0,
+      "8400": 0.0,
+      "9300": 0.0,
+      "10194": 0.0
+    },
+    "outside_gop_packets_identical": 9865,
+    "boundary_outside_window_frames_exact": 26,
+    "audio_hash": "SHA256=e741c403c580eb387a466cbeb8104655660e2c1ad1e39516789759386748e6f6",
+    "subtitle_band_MAE": {
+      "s23_start": 0.0,
+      "s23_transition": 0.0,
+      "s23_red": 0.0,
+      "s24_anchor": 0.0,
+      "s24_before": 0.0,
+      "s24_after": 0.0
+    },
+    "frame_count": 10195,
+    "window": {
+      "start_frame": 2720,
+      "end_frame": 3024,
+      "gop_start": 2720,
+      "gop_end": 3050,
+      "fps": 30
+    }
+  },
+  "insertion": {
+    "s23_start": {
+      "frame": 2724,
+      "picture_MAE_against_still": 3.4129944058641977
+    },
+    "s23_transition": {
+      "frame": 2789,
+      "picture_MAE_against_still": 3.6905740740740742
+    },
+    "s23_red": {
+      "frame": 2865,
+      "picture_MAE_against_still": 4.092287808641975
+    },
+    "s24_anchor": {
+      "frame": 2930,
+      "picture_MAE_against_still": 3.4929261188271603
+    },
+    "s24_before": {
+      "frame": 2939,
+      "picture_MAE_against_still": 3.4920570987654322
+    },
+    "s24_after": {
+      "frame": 3008,
+      "picture_MAE_against_still": 3.8353645833333334
+    }
+  }
+}
+Safe area passed 304 frames 4
+{'s08': [{'frame': 't_001.00.png', 'MAE': 0.0}, {'frame': 't_003.80.png', 'MAE': 0.0}, {'frame': 't_009.00.png', 'MAE': 0.0}, {'frame': 't_015.00.png', 'MAE': 0.0}, {'frame': 't_021.00.png', 'MAE': 0.0}, {'frame': 't_027.00.png', 'MAE': 0.0}, {'frame': 't_033.00.png', 'MAE': 0.0}], 's10': [{'frame': 's37_open_low.png', 'MAE': 0.0}, {'frame': 'low_to_mid.png', 'MAE': 0.0009032600308641975}, {'frame': 's37.png', 'MAE': 0.0}, {'frame': 's38.png', 'MAE': 0.0}, {'frame': 's39.png', 'MAE': 0.0}, {'frame': 's40.png', 'MAE': 0.0}, {'frame': 's41.png', 'MAE': 0.0}, {'frame': 's42.png', 'MAE': 0.0}], 's11': [{'frame': 's42_to_43.png', 'MAE': 2.7166923868312758e-05}, {'frame': 's43_start.png', 'MAE': 0.012789030349794239}, {'frame': 's43_middle.png', 'MAE': 0.012795299639917695}, {'frame': 's43_end.png', 'MAE': 0.014428851594650205}, {'frame': 's44.png', 'MAE': 0.0}, {'frame': 's45_fibrin.png', 'MAE': 0.0}, {'frame': 's45_pus.png', 'MAE': 0.0}, {'frame': 's46.png', 'MAE': 0.0}], 's19': [{'frame': 's69_low.png', 'MAE': 0.0}, {'frame': 's69_middle.png', 'MAE': 0.0}, {'frame': 's69_fibrosis.png', 'MAE': 0.0}, {'frame': 's70_lymph.png', 'MAE': 0.0}, {'frame': 's70_plasma.png', 'MAE': 0.0}], 's14': [{'frame': 's54_low.png', 'MAE': 0.0}, {'frame': 's54_middle.png', 'MAE': 0.0}, {'frame': 's55.png', 'MAE': 0.0}, {'frame': 's56.png', 'MAE': 0.0}, {'frame': 's57.png', 'MAE': 0.0}]}
+Traceback (most recent call last):
+  File "/workspace/病理科普视频/v5/qa/v6/h04_s06/check_stills.py", line 10, in <module>
+    assert all(x['MAE']==0 for s,frames in r.items() if s!='s11' for x in frames)
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+Traceback (most recent call last):
+  File "/workspace/病理科普视频/v5/qa/v6/h04_s06/finish_s06.py", line 8, in <module>
+    run('check_stills.py')
+    ~~~^^^^^^^^^^^^^^^^^^^
+  File "/workspace/病理科普视频/v5/qa/v6/h04_s06/finish_s06.py", line 5, in run
+    def run(name):subprocess.run(['python3',str(p/name)],check=True)
+                  ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['python3', '/workspace/病理科普视频/v5/qa/v6/h04_s06/check_stills.py']' returned non-zero exit status 1.
