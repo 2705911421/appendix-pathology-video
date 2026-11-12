@@ -8,9 +8,9 @@ import {
   STATES, META,
 } from '../lib_ext/gross_appendix.js';
 
-const POSE = { x: 1210, y: 400, rot: -.16, sc: 1.48 };
+const POSE = { x: 1210, y: 390, rot: -.16, sc: 1.42 };
 
-function paper(ctx) {
+function paper(ctx, { ruled = true } = {}) {
   // Reset clip / composite leftovers from a previous render(t). Assigning width clears the stack.
   ctx.canvas.width = 1920;
   ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -18,7 +18,12 @@ function paper(ctx) {
   ctx.globalCompositeOperation = 'source-over';
   ctx.fillStyle = C.paper;
   ctx.fillRect(0, 0, 1920, 1080);
-  ctx.save(); ctx.globalAlpha = .85; grid(ctx, -40, -40, 1960, 1120, 40); ctx.restore();
+  if (ruled) { ctx.save(); ctx.globalAlpha = .85; grid(ctx, -40, -40, 1960, 1120, 40); ctx.restore(); }
+}
+
+function viewMode() {
+  try { return new URLSearchParams(location.search).get('view') || ''; }
+  catch { return ''; }
 }
 
 function drawOne(ctx, state) {
@@ -70,6 +75,13 @@ function drawGrid(ctx) {
 export default {
   prepare() { bakeGross(); },
   draw(ctx, t) {
+    // view=morph: continuous stage = t (0–3), specimen only, no labels and no digits.
+    if (viewMode() === 'morph') {
+      paper(ctx, { ruled: false });
+      const stage = Math.max(0, Math.min(3, t));
+      drawAppendix(ctx, stage, { x: 960, y: 500, rot: -.16, sc: 1.28 });
+      return;
+    }
     paper(ctx);
     const i = Math.min(4, Math.max(0, Math.floor(t + 1e-9)));
     if (i < 4) drawOne(ctx, STATES[i]);
