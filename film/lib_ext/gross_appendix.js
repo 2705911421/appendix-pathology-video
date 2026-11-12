@@ -1,8 +1,8 @@
 // Resected appendix — four gross states on one rig.
 // stage 0 normal · 1 red · 2 yellow · 3 black. In-between values (0.5, 1.5, …)
-// smoothstep the serosal palette and the pus / necrosis / hemorrhage layers.
-// Spine and shaft width come from figure.js. The blind end is a round cap — figure.js
-// leaves specimenOutline's tip array empty and pinches s>0.9 to a point, so the cap is built here.
+// smoothstep the serosal palette, the swelling, and the pus / necrosis / hemorrhage layers.
+// Spine comes from figure.js; halfW takes a swell factor, so the radius grows continuously
+// from the normal wall to the tense purulent one. The blind end is a round cap built here.
 // No Math.random. Ink via ink.js. Watercolour via wash.js (hd / soft / grain .12 / edge .3 / bleed .5).
 import { C } from '../lib/tokens.js';
 import { bake, get } from '../lib/wash.js';
@@ -13,11 +13,11 @@ import * as A from '../lib/ann.js';
 
 export const PUS = '#CDB98A';
 export const STATES = ['normal', 'red', 'yellow', 'black'];
-// Identical contour and pose in all states, including fractional stages.
-// Congestion and swelling are conveyed by colour and surface lighting.
-const SWELL_K = [1, 1, 1, 1];
+// Radius multiplier: stage 0 is the thin normal appendix, 1 is clearly swollen,
+// 2 is the widest (maximal wall tension), 3 stays swollen while the necrotic wall sags.
+const SWELL_K = [0.80, 1.08, 1.30, 1.20];
 export const SWELL = { normal: SWELL_K[0], red: SWELL_K[1], yellow: SWELL_K[2], black: SWELL_K[3] };
-
+const DENT_K = 0.10;            // local sag of the lit wall at the gangrenous pole
 const CAP_S = 0.9;
 const MESO_TIP = 0.8;
 const N_SHAFT = 40;
@@ -25,25 +25,28 @@ const WASH = { hd: true, soft: true, grain: .12, edge: .3, bleed: .5 };
 
 export const META = {
   normal: { name: '正常', diag: '正常阑尾', sub: '灰粉色 · 浆膜光滑有光泽', tone: C.ink },
-  red:    { name: '红',   diag: '单纯性阑尾炎', sub: '朱红充血 · 轻度肿胀', tone: C.red },
-  yellow: { name: '黄',   diag: '化脓性阑尾炎', sub: '肿胀增粗 · 斑驳灰黄脓苔', tone: '#8A7348' },
-  black:  { name: '黑',   diag: '坏疽性阑尾炎', sub: '局部坏死发黑 · 周围仍有红黄', tone: '#3A2438' },
+  red:    { name: '红',   diag: '单纯性阑尾炎', sub: '朱红充血 · 明显肿胀增粗', tone: C.red },
+  yellow: { name: '黄',   diag: '化脓性阑尾炎', sub: '最粗、张力最大 · 斑驳灰黄脓苔', tone: '#8A7348' },
+  black:  { name: '黑',   diag: '坏疽性阑尾炎', sub: '保持肿胀 · 局部坏死发黑', tone: '#3A2438' },
 };
 
 // Serosal lighting. base is the opaque midtone of the cylinder (t≈0.5 across the tube).
 // shadow is the mesenteric side, gloss is the serosal band on the lit side. All three are mixed
 // into solid colours — a multiply gradient leaves 1px gaps that read as stripes.
 const LOOK = [
-  { base: [198, 154, 144], shadow: [64, 36, 34], gloss: [246, 234, 228] },
+  { base: [198, 154, 144], shadow: [64, 36, 34], gloss: [248, 238, 230] },
   { base: [206, 64, 56],   shadow: [58, 12, 18], gloss: [255, 228, 220] },
   { base: [196, 56, 50],   shadow: [52, 10, 16], gloss: [255, 224, 216] },
   { base: [184, 50, 46],   shadow: [44, 8, 14],  gloss: [248, 214, 208] },
 ];
+const GLOSS_FADE = [1, .78, .30, .18];   // how much of the painted gloss band survives per stage
+const GLOSS_A = [.96, .48, .09, .02];    // wet-highlight strokes painted over the surface
 
 const smooth = t => { const x = Math.max(0, Math.min(1, t)); return x * x * (3 - 2 * x); };
 const lerp = (a, b, t) => a + (b - a) * t;
 const mix3 = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
 const css = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 function ramp(stage, a, b) {
   if (stage <= a) return 0;
   if (stage >= b) return 1;
@@ -63,28 +66,44 @@ export function asStage(state) {
   return i < 0 ? 0 : i;
 }
 export function swellAt(stage) { return knot(asStage(stage), SWELL_K); }
+export function dentAt(stage) { return ramp(asStage(stage), 2.15, 3) * DENT_K; }
 
 export function frameAt(s) {
   const p = spine(s), q = spine(Math.min(1, s + .01)), r = spine(Math.max(0, s - .01));
   const dx = q[0] - r[0], dy = q[1] - r[1], L = Math.hypot(dx, dy) || 1;
   return { p, tx: dx / L, ty: dy / L, nx: -dy / L, ny: dx / L };
 }
+// Fixed low-amplitude silhouette variation, identical in every state, so the shaft is not a
+// machined cylinder. It multiplies the radius and never changes between stages.
+function silhouette(s) {
+  return 1 + .013 * Math.sin(s * 16.3 + 1.2) + .007 * Math.sin(s * 33.7 + 0.4);
+}
 // Shaft uses halfW. Past 0.8 the radius eases so it meets the round cap without a kink.
 export function tubeRadius(s, swell) {
   const u = Math.max(0, Math.min(CAP_S, s));
-  if (u <= 0.8) return halfW(u, swell);
+  const j = silhouette(u);
+  if (u <= 0.8) return halfW(u, swell) * j;
   const w0 = halfW(0.8, swell), w1 = halfW(CAP_S, swell);
   const e = smooth((u - 0.8) / (CAP_S - 0.8));
-  return w0 + (w1 - w0) * e;
+  return (w0 + (w1 - w0) * e) * j;
+}
+// The lit wall sags a little where the gangrene has destroyed the tissue (dent ∈ 0…1).
+function dentShape(s) {
+  const u = (s - 0.62) / 0.24;
+  if (u <= 0 || u >= 1) return 0;
+  return Math.sin(Math.PI * u) ** 2;
+}
+export function litRadius(s, swell, dent = 0) {
+  return tubeRadius(s, swell) * (1 - dent * dentShape(clamp(s, 0, CAP_S)));
 }
 function addN(f, w) { return [f.p[0] + f.nx * w, f.p[1] + f.ny * w]; }
 
-export function tubeOutline(swell) {
+export function tubeOutline(swell, dent = 0) {
   const L = [], R = [];
   for (let i = 0; i <= N_SHAFT; i++) {
-    const s = CAP_S * (i / N_SHAFT), f = frameAt(s), w = tubeRadius(s, swell);
-    L.push(addN(f, w));
-    R.push(addN(f, -w));
+    const s = CAP_S * (i / N_SHAFT), f = frameAt(s);
+    L.push(addN(f, tubeRadius(s, swell)));
+    R.push(addN(f, -litRadius(s, swell, dent)));
   }
   const f = frameAt(CAP_S), rad = tubeRadius(CAP_S, swell), arc = [];
   for (let i = 1; i < 14; i++) {
@@ -114,9 +133,12 @@ export function mesoHang(s) {
   const u = Math.max(0, s) / MESO_TIP;
   const belly = Math.sin(Math.PI * Math.min(u * 0.96, 1)) ** 0.62;
   let h = 44 + 78 * belly;
-  h += 16 * (0.5 + 0.5 * Math.sin(u * Math.PI * 3.15 + 0.35)) ** 1.35;
+  h += 15 * (0.5 + 0.5 * Math.sin(u * Math.PI * 3.15 + 0.35)) ** 1.35;
   h += 8 * Math.sin(u * Math.PI * 6.5 + 1.05);
   h += 4 * Math.sin(u * 20.5 + 0.4);
+  // Two soft scallops so the free edge is not one regular wave.
+  h -= 15 * Math.max(0, Math.sin(u * Math.PI * 2.6 + 1.9)) ** 3;
+  h -= 8 * Math.max(0, Math.sin(u * Math.PI * 4.4 + 0.4)) ** 4;
   if (u > 0.76) h *= Math.cos(((u - 0.76) / 0.24) * Math.PI * 0.5);
   return Math.max(0, h);
 }
@@ -155,7 +177,36 @@ function path(ctx, pts, close = true) {
   pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
   if (close) ctx.closePath();
 }
-
+function centroid(pts) {
+  let x = 0, y = 0;
+  for (const p of pts) { x += p[0]; y += p[1]; }
+  return [x / pts.length, y / pts.length];
+}
+function scaleAbout(pts, k, c) {
+  return pts.map(p => [c[0] + (p[0] - c[0]) * k, c[1] + (p[1] - c[1]) * k]);
+}
+function fillPoly(ctx, pts, col, a) {
+  if (a <= 0.002) return;
+  ctx.fillStyle = Array.isArray(col) ? css(col, a) : col;
+  path(ctx, pts); ctx.fill();
+}
+// Irregular patch on the tube surface: `v` is the fraction of the radius (−1 lit, +1 mesenteric),
+// rx/ry are pixels along the tangent / across the tube.
+function surfaceBlob(s, v, rx, ry, seed, { n = 56, jitter = .24, lobes = 3, amp = .17, swell = 1 } = {}) {
+  const f = frameAt(clamp(s, 0, CAP_S)), w = tubeRadius(clamp(s, 0, CAP_S), swell);
+  const R = rng(seed | 0);
+  const phase = R() * Math.PI * 2;
+  const pts = [];
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2;
+    const rr = 1 + amp * Math.sin(a * lobes + phase) + (R() - .5) * jitter;
+    const u = Math.cos(a) * rx * rr;
+    const vv = Math.sin(a) * ry * rr;
+    const across = w * v + vv;
+    pts.push([f.p[0] + f.tx * u + f.nx * across, f.p[1] + f.ty * u + f.ny * across]);
+  }
+  return pts;
+}
 function along(b, P, col, a, rK, seed, step) {
   const sw = 1;
   for (let u = 0; u <= CAP_S; u += step) {
@@ -163,38 +214,225 @@ function along(b, P, col, a, rK, seed, step) {
     P.fill(b, P.blob(p[0], p[1], tubeRadius(u, sw) * rK, 20, .32, seed + u * 100), col, a, .2, [.4, .5]);
   }
 }
-function smearPoly(s, vFrac, len, wid, seed) {
-  const sw = 1, f = frameAt(s), w = tubeRadius(Math.min(s, CAP_S), sw);
-  const R = rng(seed | 0);
-  const n = 36 + (seed % 4);
-  const pts = [];
+
+// ── mesentery fat clumps (deterministic geometry in s / height-fraction space) ─────────────
+const FAT_TONES = ['#EFD28C', '#E6C274', '#DDAA5C', '#F4DD9C', '#D2A858'];
+const LOBULES = (() => {
+  const R = rng(31017), out = [];
+  for (let i = 0; i < 84; i++) {
+    const s = 0.012 + R() * 0.80;
+    const h = mesoHang(s);
+    if (h < 12) continue;
+    const hf = 0.08 + R() * 0.88;
+    const r = 7 + R() * 12;
+    out.push({
+      s, hf, r,
+      rot: (R() - .5) * 1.6,
+      tone: (R() * FAT_TONES.length) | 0,
+      alpha: 0.30 + R() * 0.34,
+      top: R() < 0.16,
+    });
+  }
+  return out;
+})();
+function lobuleCenter(L, swell) {
+  return mesoPt(L.s, swell, mesoHang(L.s) * L.hf);
+}
+function hexA(hex, a) {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+}
+// Irregular plaque sprite: hard-ish body of layered rings (so the rim is visible but feathered),
+// the baked wash multiplied inside for pigment grain, and a broken darker dry edge.
+let PUS_SPRITE = null, NECRO_SPRITE = null;
+function blobPts(cx, cy, r, seed, { n = 64, lobes = 3, amp = .15, jit = .12 } = {}) {
+  const R = rng(seed | 0), ph = R() * Math.PI * 2, pts = [];
   for (let i = 0; i < n; i++) {
     const a = (i / n) * Math.PI * 2;
-    const jag = 0.86 + 0.14 * Math.sin(a * 5 + seed) + (R() - 0.5) * 0.25;
-    const spike = R() > 0.9 ? 1.14 : 1;
-    const u = Math.cos(a) * len * jag * spike;
-    const v = Math.sin(a) * wid * (0.5 + R());
-    const across = w * vFrac + v;
-    pts.push([f.p[0] + f.tx * u + f.nx * across, f.p[1] + f.ty * u + f.ny * across]);
+    const rr = r * (1 + amp * Math.sin(a * lobes + ph) + (R() - .5) * jit);
+    pts.push([cx + Math.cos(a) * rr, cy + Math.sin(a) * rr]);
   }
   return pts;
 }
+function makePlaqueSprite(color, seed, texKey, { core = null, rings = [[1.15, .12], [1.0, .93]] } = {}) {
+  const S = 640, cv = document.createElement('canvas');
+  cv.width = cv.height = S;
+  const c = cv.getContext('2d');
+  const pts = blobPts(S / 2, S / 2, S * .35, seed);
+  const cen = [S / 2, S / 2];
+  rings.forEach(([k, a], i) => {
+    c.save();
+    c.filter = i === 0 ? 'blur(12px)' : 'blur(2.5px)';
+    fillPoly(c, scaleAbout(pts, k, cen), hexA(color, a), 1);
+    c.restore();
+  });
+  const tex = PIX.get(texKey);
+  if (tex) {
+    c.save();
+    c.globalCompositeOperation = 'multiply';
+    c.globalAlpha = .55;
+    c.drawImage(tex, 0, 0, S, S);
+    c.restore();
+  }
+  // Uneven thickness: dull ochre spits and a lighter raised shoulder.
+  const R = rng(seed + 91);
+  for (let i = 0; i < 5; i++) {
+    const p = [S * (.34 + R() * .32), S * (.34 + R() * .32)];
+    const rad = 22 + R() * 34;
+    const g = c.createRadialGradient(p[0], p[1], 1, p[0], p[1], rad);
+    const dark = i % 2 === 0;
+    g.addColorStop(0, dark ? 'rgba(146, 124, 82, .20)' : 'rgba(232, 219, 188, .18)');
+    g.addColorStop(1, dark ? 'rgba(146, 124, 82, 0)' : 'rgba(232, 219, 188, 0)');
+    c.fillStyle = g; c.beginPath(); c.arc(p[0], p[1], rad, 0, Math.PI * 2); c.fill();
+  }
+  if (core) {
+    const inner = blobPts(S / 2 + 12, S / 2 - 8, S * .16, seed + 5, { n: 34, amp: .22, jit: .26 });
+    fillPoly(c, inner, hexA(core, .55), 1);
+    const inner2 = blobPts(S * .44, S * .47, S * .08, seed + 9, { n: 30, amp: .26, jit: .28 });
+    fillPoly(c, inner2, hexA(core, .78), 1);
+  }
+  return cv;
+}
+let FAT_SPRITES = [];
+function makeFatSprites() {
+  FAT_SPRITES = FAT_TONES.map((tone, si) => {
+    const S = 160, cv = document.createElement('canvas');
+    cv.width = cv.height = S;
+    const c = cv.getContext('2d');
+    const blob = (ox, oy, rr, a0) => {
+      const g = c.createRadialGradient(S / 2 + ox, S / 2 + oy, 2, S / 2 + ox, S / 2 + oy, rr);
+      g.addColorStop(0, `rgba(255, 248, 220, ${.44 * a0})`);
+      g.addColorStop(.34, hexA(tone, .52 * a0));
+      g.addColorStop(.72, hexA(tone, .26 * a0));
+      g.addColorStop(1, hexA(tone, 0));
+      c.fillStyle = g;
+      c.beginPath(); c.arc(S / 2 + ox, S / 2 + oy, rr, 0, Math.PI * 2); c.fill();
+    };
+    blob(0, 0, S * 0.40, 1);
+    blob(-S * 0.16, S * 0.12, S * 0.27, .85);
+    blob(S * 0.19, -S * 0.10, S * 0.24, .7);
+    // Broken golden crescent instead of a full outline.
+    c.strokeStyle = `rgba(150, 96, 28, ${.15 + si * .012})`;
+    c.lineWidth = 2.8;
+    c.beginPath();
+    c.arc(S / 2, S / 2, S * 0.33, 1.55 + si * .32, 2.35 + si * .32);
+    c.stroke();
+    return cv;
+  });
+}
 
-// Irregular serosal sheets. Gaps stay red. Same polygons at every stage; alpha carries the mix.
+// ── vessel tree: trunk near the free edge, branches turning into the appendiceal wall ─────
+function trunkHF(s) {
+  return clamp(0.70 + 0.085 * Math.sin(s * 8.5 + 1.3) + 0.02 * Math.sin(s * 23.7), 0.52, 0.86);
+}
+const VESSEL = (() => {
+  const trunk = [];
+  for (let s = 0.02; s <= 0.755; s += 0.032) trunk.push({ s, hf: trunkHF(s) });
+  const branches = [], twigs = [], vein = [];
+  const R = rng(12007);
+  let s0 = 0.055;
+  while (s0 < 0.71) {
+    const h0 = trunkHF(s0);
+    const drift = 0.03 + R() * 0.05;
+    const jog = (R() - .5) * 0.02;
+    branches.push([
+      { s: s0, hf: h0 },
+      { s: s0 + drift * 0.34 + jog, hf: h0 * (0.58 + R() * 0.12) },
+      { s: s0 + drift * 0.74, hf: h0 * (0.20 + R() * 0.10) },
+      { s: s0 + drift, hf: 0.035 },
+    ]);
+    twigs.push([
+      { s: s0 + drift * 0.34 + jog, hf: h0 * 0.62 },
+      { s: s0 + drift * 0.82, hf: h0 * (0.28 + R() * 0.12) },
+      { s: s0 + drift + 0.015 + R() * 0.02, hf: 0.08 + R() * 0.06 },
+    ]);
+    s0 += 0.085 + R() * 0.08;
+  }
+  for (let s = 0.02; s <= 0.70; s += 0.045) {
+    vein.push({ s, hf: Math.max(0.05, trunkHF(s) - 0.09 + 0.02 * Math.sin(s * 17)) });
+  }
+  return { trunk, branches, twigs, vein };
+})();
+function vesselPts(spec, swell) {
+  const out = [];
+  for (let i = 0; i < spec.length; i++) {
+    if (i === 0) {
+      const q = spec[0];
+      out.push(mesoPt(q.s, swell, Math.max(1.2, mesoHang(q.s) * q.hf)));
+      continue;
+    }
+    const a = spec[i - 1], b = spec[i];
+    for (let k = 1; k <= 3; k++) {
+      const t = k / 3;
+      const s = lerp(a.s, b.s, t);
+      const hf = lerp(a.hf, b.hf, t) + .022 * Math.sin(t * Math.PI) * Math.sin(i * 3.1 + k * 1.7);
+      out.push(mesoPt(s, swell, Math.max(1.2, mesoHang(s) * hf)));
+    }
+  }
+  return out;
+}
+function strokeTapered(ctx, pts, w0, w1, col, alpha) {
+  if (alpha <= 0.005) return;
+  ctx.save();
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.strokeStyle = css(col, alpha);
+  const n = pts.length;
+  for (let i = 0; i < n - 1; i++) {
+    const t = n > 2 ? i / (n - 2) : 0;
+    ctx.lineWidth = lerp(w0, w1, t);
+    ctx.beginPath();
+    ctx.moveTo(pts[i][0], pts[i][1]);
+    ctx.lineTo(pts[i + 1][0], pts[i + 1][1]);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// ── pathology layouts (s / radius fraction, stage-independent) ────────────────────────────
+// Gaps stay red; patches overlap so the plaque is thick in the middle and thin at the rim.
 const PUS_PATCHES = [
-  [0.16, -0.22, 48, 18], [0.28, 0.18, 34, 15], [0.38, -0.42, 56, 20],
-  [0.48, 0.02, 40, 17], [0.56, -0.28, 32, 13], [0.64, 0.26, 46, 16],
-  [0.72, -0.08, 28, 13], [0.24, 0.46, 20, 10], [0.44, -0.58, 22, 9],
-  [0.60, 0.48, 16, 8], [0.33, -0.02, 18, 11], [0.68, -0.40, 24, 11],
-];
-// Distal, mostly the lit serosa — the mesenteric side of the tip stays red and yellow.
-const NEC_PATCHES = [
-  [0.73, -0.38, 44, 22, '#161018'],
-  [0.80, -0.06, 52, 26, '#1C1224'],
-  [0.86, -0.30, 32, 16, '#24182C'],
-  [0.77, 0.18, 18, 11, '#100C14'],
+  [.175, -.30, 28, 16, .25], [.265, -.02, 22, 13, -.28], [.325, -.49, 31, 16, .12],
+  [.415, -.20, 40, 19, .04], [.495, .10, 24, 13, -.20], [.555, -.44, 22, 12, .38],
+  [.625, -.13, 38, 18, .08], [.695, -.35, 20, 12, -.24], [.455, .31, 15, 10, .18],
+  [.305, .25, 17, 10, -.10], [.735, .04, 24, 13, .30], [.385, -.62, 18, 10, -.35],
+  [.205, -.62, 13, 8, .22], [.585, -.62, 12, 8, -.18],
+  [.145, -.05, 12, 8, .10], [.535, -.70, 10, 7, .30], [.665, .22, 14, 9, -.20],
 ];
 
+const BLEEDS = (() => {
+  const R = rng(6301), out = [];
+  // Scattered spots of mixed size, some grouped.
+  for (let i = 0; i < 16; i++) {
+    const s = 0.08 + R() * 0.80;
+    const v = -0.74 + R() * 1.30;
+    const rx = 4 + R() * 15;
+    out.push({ s, v, rx, ry: rx * (0.45 + R() * 0.55), seed: 6400 + i * 13, a: 0.62 + R() * 0.34 });
+  }
+  // Four clusters of pin-point petechiae.
+  const anchors = [[.19, -.36], [.37, -.55], [.54, -.24], [.70, -.44]];
+  anchors.forEach(([s0, v0], ai) => {
+    for (let k = 0; k < 6; k++) {
+      const s = s0 + (R() - .5) * 0.05;
+      const v = v0 + (R() - .5) * 0.22;
+      const rx = 1.4 + R() * 2.6;
+      out.push({ s, v, rx, ry: rx * (0.7 + R() * 0.5), seed: 6600 + ai * 40 + k * 7, a: 0.45 + R() * 0.4 });
+    }
+  });
+  // A few elongated sheets following the tube.
+  [[.16, -.18], [.34, -.08], [.58, -.34], [.68, -.05]].forEach(([s, v], i) => {
+    out.push({ s, v, rx: 15 + R() * 9, ry: 4.5 + R() * 3, seed: 6800 + i * 23, a: 0.5 + R() * 0.3 });
+  });
+  return out;
+})();
+
+const NECRO = [
+  { s: .752, v: -.22, rx: 30, ry: 23, seed: 7101 },
+  { s: .800, v: -.05, rx: 36, ry: 27, seed: 7102 },
+  { s: .845, v: -.26, rx: 25, ry: 19, seed: 7103 },
+  { s: .785, v: .20, rx: 19, ry: 14, seed: 7104 },
+];
+
+// ── baked pigment ────────────────────────────────────────────────────────────────────────
 const PIX = new Map();
 function pin(k) {
   const src = get(k); if (!src) return null;
@@ -205,39 +443,36 @@ function pin(k) {
   PIX.set(k, held);
   return held;
 }
-// keepWhite used to leave opaque paper-white brush streaks. Pus is only #CDB98A;
-// near-white pixels are dropped, and the dry edge stays a darker ochre, not a white rim.
+// Pus is only #CDB98A. Keep the wash's own alpha (soft, uneven edges), drop near-white
+// paper speckle, and let its luminance modulate the ochre so thick and thin crust differ.
 function lockPus(cv) {
   const ctx = cv.getContext('2d', { willReadFrequently: true });
   const im = ctx.getImageData(0, 0, cv.width, cv.height), d = im.data;
   const pr = 0xCD, pg = 0xB9, pb = 0x8A, pLum = (pr + pg + pb) / 3;
   for (let i = 0; i < d.length; i += 4) {
     const a = d[i + 3] / 255;
-    if (a < 0.025) { d[i + 3] = 0; continue; }
+    if (a < 0.02) { d[i + 3] = 0; continue; }
     const lum = (d[i] + d[i + 1] + d[i + 2]) / 3;
     const chroma = Math.max(d[i], d[i + 1], d[i + 2]) - Math.min(d[i], d[i + 1], d[i + 2]);
-    if (lum > 208 && chroma < 32) { d[i + 3] = 0; continue; }
-    const dark = 0.78 + 0.22 * Math.max(0, Math.min(1, lum / pLum));
+    if (lum > 205 && chroma < 28) { d[i + 3] = 0; continue; }
+    const dark = 0.82 + 0.20 * clamp(lum / pLum, 0, 1);
     d[i] = pr * dark; d[i + 1] = pg * dark; d[i + 2] = pb * dark;
-    d[i + 3] = Math.min(255, a * 2.35 * 255);
+    d[i + 3] = Math.round(clamp(a * 1.42, 0, 1) * 255);
   }
   ctx.putImageData(im, 0, 0);
 }
-// Pull any red-brown fringe to purple-black. The interior is opaque so the red serosa
-// does not show through and turn the patch mahogany. Pale halos go away.
+// Gangrene: keep only the dark pigment, pull it to purple-black and preserve soft alpha.
 function lockNecro(cv) {
   const ctx = cv.getContext('2d', { willReadFrequently: true });
   const im = ctx.getImageData(0, 0, cv.width, cv.height), d = im.data;
-  const pr = 0x1A, pg = 0x12, pb = 0x1E;
   for (let i = 0; i < d.length; i += 4) {
     const a = d[i + 3] / 255;
-    if (a < 0.05) { d[i + 3] = 0; continue; }
+    if (a < 0.03) { d[i + 3] = 0; continue; }
     const lum = (d[i] + d[i + 1] + d[i + 2]) / 3;
-    if (lum > 140) { d[i + 3] = 0; continue; }
-    const k = 0.32 + 0.5 * Math.max(0, Math.min(1, lum / 80));
-    d[i] = pr * k; d[i + 1] = pg * k; d[i + 2] = pb * k;
-    const na = a > 0.18 ? 1 : (a - 0.05) / 0.13;
-    d[i + 3] = Math.round(Math.max(0, Math.min(1, na)) * 255);
+    if (lum > 132) { d[i + 3] = 0; continue; }
+    const t = clamp(lum / 84, 0, 1);
+    d[i] = 18 + 38 * t; d[i + 1] = 12 + 22 * t; d[i + 2] = 24 + 34 * t;
+    d[i + 3] = Math.round(clamp(a * 1.55, 0, 1) * 255);
   }
   ctx.putImageData(im, 0, 0);
 }
@@ -250,43 +485,13 @@ function drawPinned(ctx, key, x, y, size, { alpha = 1, blend = 'multiply' } = {}
   ctx.drawImage(img, -size / 2, -size / 2, size, size);
   ctx.restore();
 }
-
-// Exact #CDB98A sheets. The watercolour bake is only a mask: filling the live canvas
-// with destination-in would punch holes in the tube. Interior alpha is hardened so the
-// red serosa does not blush through, and the feather stays short and ochre, not white.
-let pusLayer = null;
-function buildPus() {
-  const src = PIX.get('g.pus');
-  if (!src) return;
-  const S = src.width;
-  const cv = document.createElement('canvas');
-  cv.width = S; cv.height = S;
-  const c = cv.getContext('2d', { willReadFrequently: true });
-  c.setTransform(S / 1024, 0, 0, S / 1024, S / 2, S / 2);
-  c.fillStyle = PUS;
-  PUS_PATCHES.forEach((spec, j) => {
-    path(c, smearPoly(spec[0], spec[1], spec[2], spec[3], 2400 + j * 17));
-    c.fill();
-  });
-  c.setTransform(1, 0, 0, 1, 0, 0);
-  c.globalCompositeOperation = 'destination-in';
-  c.drawImage(src, 0, 0);
-  const im = c.getImageData(0, 0, S, S), d = im.data;
-  for (let i = 0; i < d.length; i += 4) {
-    const a = d[i + 3] / 255;
-    const na = a > 0.2 ? 1 : a > 0.07 ? (a - 0.07) / 0.13 : 0;
-    d[i] = 0xCD; d[i + 1] = 0xB9; d[i + 2] = 0x8A;
-    d[i + 3] = Math.round(na * 255);
-  }
-  c.putImageData(im, 0, 0);
-  pusLayer = cv;
-}
-function drawPus(ctx, alpha) {
-  if (!pusLayer || alpha <= 0.001) return;
+function drawSprite(ctx, img, x, y, sx, sy, rot, alpha, blend = 'source-over') {
+  if (!img || alpha <= 0.002) return;
   ctx.save();
   ctx.globalAlpha *= alpha;
-  ctx.globalCompositeOperation = 'source-over';
-  ctx.drawImage(pusLayer, -512, -512, 1024, 1024);
+  ctx.globalCompositeOperation = blend;
+  ctx.translate(x, y); ctx.rotate(rot);
+  ctx.drawImage(img, -sx / 2, -sy / 2, sx, sy);
   ctx.restore();
 }
 
@@ -304,141 +509,149 @@ export function prepare() {
     along(b, P, '#6E1A24', 100, .72, 10, .1);
   }, { ...WASH, seed: 22, scale: 1 });
   pin('g.red');
-  bake('g.pus', (b, P) => {
-    PUS_PATCHES.forEach((spec, j) => {
-      P.fill(b, smearPoly(spec[0], spec[1], spec[2], spec[3], 2400 + j * 17), PUS, 200, .22, [.24, .34]);
-    });
-  }, { ...WASH, seed: 25, scale: 1 });
-  lockPus(pin('g.pus'));
-  bake('g.necro', (b, P) => {
-    NEC_PATCHES.forEach((spec, j) => {
-      P.fill(b, smearPoly(spec[0], spec[1], spec[2], spec[3], 4200 + j * 19), spec[4], 230, .18, [.3, .4]);
-    });
-  }, { ...WASH, seed: 27, scale: 1 });
-  lockNecro(pin('g.necro'));
-  bake('g.meso', (b, P) => {
-    P.fill(b, P.blob(0, 0, 240, 26, .34, 8), '#E2B45A', 150, .4, [.32, .42]);
-    P.fill(b, P.blob(-40, 16, 140, 18, .3, 9), '#C99840', 100, .35, [.28, .38]);
-    P.fill(b, P.blob(36, -12, 110, 16, .32, 10), '#E8C878', 80, .35, [.3, .4]);
-  }, { ...WASH, seed: 29, scale: 1 });
-  pin('g.meso');
-  buildPus();
+  // Crust sheet: several soft overlapping pigment bodies, not one clean disc.
+  bake('g.pusTile', (b, P) => {
+    P.fill(b, P.blob(0, 6, 210, 42, .30, 331), PUS, 195, .45, [.32, .42]);
+    P.fill(b, P.blob(-66, 34, 122, 30, .42, 332), PUS, 130, .52, [.3, .4]);
+    P.fill(b, P.blob(62, -46, 104, 26, .38, 333), PUS, 120, .48, [.3, .4]);
+    P.fill(b, P.blob(30, 66, 90, 24, .4, 334), PUS, 95, .5, [.3, .4]);
+  }, { ...WASH, seed: 33, scale: 1 });
+  const pusCv = pin('g.pusTile');
+  lockPus(pusCv);
+  bake('g.necroTile', (b, P) => {
+    P.fill(b, P.blob(-22, -12, 222, 40, .34, 351), '#2C1A32', 170, .40, [.3, .4]);
+    P.fill(b, P.blob(64, 48, 158, 30, .42, 352), '#160E1C', 150, .46, [.3, .4]);
+    P.fill(b, P.blob(-96, 48, 118, 24, .38, 353), '#3C284A', 110, .50, [.3, .4]);
+  }, { ...WASH, seed: 35, scale: 1 });
+  const necCv = pin('g.necroTile');
+  lockNecro(necCv);
+  // Pale ochre washes for the fat, multiplied over the yellow base.
+  bake('g.fat', (b, P) => {
+    P.fill(b, P.blob(-42, -30, 250, 32, .34, 51), '#D8AE58', 110, .5, [.34, .44]);
+    P.fill(b, P.blob(72, 42, 190, 28, .42, 52), '#C89A44', 95, .46, [.30, .40]);
+    P.fill(b, P.blob(8, 82, 150, 24, .38, 53), '#EFD08C', 85, .5, [.30, .40]);
+    P.fill(b, P.blob(-124, 62, 120, 22, .42, 54), '#E8C275', 80, .46, [.30, .40]);
+  }, { ...WASH, seed: 31, scale: 1 });
+  pin('g.fat');
+  // Neutral pigment grain: broken warm-grey blooms that break the digital cylinder gradient.
+  bake('g.grain', (b, P) => {
+    P.fill(b, P.blob(-120, -80, 300, 54, .52, 61), '#8B7A66', 34, .6, [.45, .55]);
+    P.fill(b, P.blob(150, 90, 260, 48, .56, 62), '#7A6A58', 26, .6, [.45, .55]);
+    P.fill(b, P.blob(40, -170, 220, 40, .5, 63), '#9A8A76', 22, .6, [.45, .55]);
+    P.fill(b, P.blob(-180, 150, 180, 36, .55, 64), '#8E7E6A', 20, .6, [.45, .55]);
+  }, { ...WASH, seed: 41, scale: 1 });
+  pin('g.grain');
+  makeFatSprites();
+  PUS_SPRITE = makePlaqueSprite('#CDB98A', 8123, 'g.pusTile');
+  NECRO_SPRITE = makePlaqueSprite('#241A2C', 8321, 'g.necroTile', {
+    core: '#0E0A12',
+    rings: [[1.14, .12], [1.0, .94]],
+  });
 }
 
-function paintMeso(ctx, swell) {
+// ── mesentery ────────────────────────────────────────────────────────────────────────────
+function paintMesoBase(ctx, swell) {
   const loop = mesoLoop(swell);
-  ctx.save();
-  path(ctx, loop); ctx.clip();
-  ctx.fillStyle = '#E2B85A';
+  ctx.fillStyle = '#E9C778';
   path(ctx, loop); ctx.fill();
-  const N = 26;
-  for (let i = 0; i < N; i++) {
-    const step = MESO_TIP / N;
-    const s0 = step * i, s1 = Math.min(MESO_TIP, step * (i + 1.25));
-    const h0 = mesoHang(s0), h1 = mesoHang(s1);
-    if (h0 < 4 && h1 < 4) continue;
-    const a = mesoPt(s0, swell, 0), b = mesoPt(s1, swell, 0);
-    const c = mesoPt(s1, swell, h1), d = mesoPt(s0, swell, h0);
-    const g = ctx.createLinearGradient(a[0], a[1], d[0], d[1]);
-    // Whole hang stays yellow fat. The old 0.8 stop (#F6E6BC) turned the lower two-thirds cream.
-    g.addColorStop(0, '#C4923E');
-    g.addColorStop(0.14, '#D4A84E');
-    g.addColorStop(0.48, '#E4BE62');
-    g.addColorStop(0.78, '#E8C56E');
-    g.addColorStop(1, '#D4A84E');
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(c[0], c[1]); ctx.lineTo(d[0], d[1]);
-    ctx.closePath(); ctx.fill();
-  }
-  for (let s = 0.04; s < MESO_TIP; s += 0.07) {
-    const h = mesoHang(s);
-    if (h < 20) continue;
-    const p = mesoPt(s, swell, h * 0.62);
-    drawPinned(ctx, 'g.meso', p[0], p[1], h * 0.55 / 240 * 1024, { alpha: 0.22, blend: 'multiply' });
-  }
-  ctx.restore();
+  // One smooth gradient across the hang (wall → free edge); the old 28 strips left seams.
+  const a = mesoPt(0.36, swell, 2), b = mesoPt(0.3, swell, 112);
+  const g = ctx.createLinearGradient(a[0], a[1], b[0], b[1]);
+  g.addColorStop(0, '#C08C3C');
+  g.addColorStop(0.14, '#D5A64E');
+  g.addColorStop(0.44, '#EAC97D');
+  g.addColorStop(0.74, '#F2D997');
+  g.addColorStop(0.9, '#EACE86');
+  g.addColorStop(1, '#D8AE57');
+  ctx.fillStyle = g;
+  path(ctx, loop); ctx.fill();
+  // Pigment blooms over the flat fill.
+  drawPinned(ctx, 'g.fat', 0, 20, 980, { alpha: .30, blend: 'multiply' });
+  drawPinned(ctx, 'g.fat', -60, -10, 720, { alpha: .14, blend: 'multiply' });
 }
-
-function vesselGeom(swell) {
-  const R = rng(12007);
-  const artery = [], vein = [];
-  let s = 0.04, fa = 0.62, fv = 0.4;
-  while (s < 0.74) {
-    const h = mesoHang(s);
-    artery.push(mesoPt(s, swell, Math.max(3, h * fa)));
-    vein.push(mesoPt(s, swell, Math.max(3, h * fv)));
-    s += 0.048;
-    fa = Math.max(0.3, Math.min(0.78, fa + (R() - 0.5) * 0.16));
-    fv = Math.max(0.22, Math.min(0.58, fv + (R() - 0.5) * 0.12));
-  }
-  const branches = [];
-  [0.14, 0.32, 0.5].forEach((s0, i) => {
-    const h = mesoHang(s0);
-    const f = frameAt(s0);
-    const start = mesoPt(s0, swell, h * (0.5 + 0.08 * i));
-    const mid = mesoPt(s0 + 0.03, swell, h * 0.28);
-    const end = mesoPt(s0 + 0.02, swell, h * 0.06);
-    // A small sideways jog so the branch is not a ruler line.
-    mid[0] += f.tx * (i % 2 ? 8 : -8);
-    mid[1] += f.ty * (i % 2 ? 8 : -8);
-    branches.push([start, mid, end]);
-  });
-  return { artery, vein, branches };
-}
-
-function lobules(swell) {
-  const out = [];
-  for (let i = 1; i < 36; i++) {
-    const s0 = MESO_TIP * (i - 1) / 36, s1 = MESO_TIP * i / 36, s2 = MESO_TIP * (i + 1) / 36;
-    const h1 = mesoHang(s1);
-    if (h1 >= mesoHang(s0) && h1 >= mesoHang(s2) && h1 > 56) out.push({ s: s1, h: h1 });
-  }
-  return out;
-}
-
-// Small warm caps on the free-edge bulges. No cream coins and no white centres.
-function paintLobules(ctx, swell, alpha) {
-  if (alpha <= 0) return;
-  ctx.save();
-  path(ctx, mesoLoop(swell)); ctx.clip();
-  lobules(swell).forEach(L => {
+// Fat cells: soft overlapping lobule sprites over the wash. No closed outlines — only the
+// broken golden crescent baked into each sprite keeps the clumps legible.
+function paintFatCells(ctx, swell, topOnly = false) {
+  LOBULES.forEach(L => {
+    if (!!L.top !== topOnly) return;
+    const c = lobuleCenter(L, swell);
     const f = frameAt(L.s);
-    const ang = Math.atan2(f.ty, f.tx);
-    const belly = mesoPt(L.s, swell, L.h * 0.8);
-    const lit = mesoPt(L.s, swell, L.h * 0.6);
-    ctx.fillStyle = `rgba(168, 112, 40, ${0.62 * alpha})`;
-    ctx.beginPath();
-    ctx.ellipse(belly[0], belly[1], L.h * 0.2, L.h * 0.12, ang, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = `rgba(226, 176, 78, ${0.78 * alpha})`;
-    ctx.beginPath();
-    ctx.ellipse(lit[0], lit[1], L.h * 0.16, L.h * 0.1, ang, 0, Math.PI * 2);
-    ctx.fill();
+    const ang = Math.atan2(f.ty, f.tx) + L.rot;
+    const r = L.r * 3.0;
+    const a = L.alpha * (topOnly ? .78 : .72);
+    drawSprite(ctx, FAT_SPRITES[L.tone], c[0], c[1], r, r * 0.9, ang, a);
+    // Second offset lobe: the clump is not a round coin.
+    const ox = f.tx * L.r * .42 + f.nx * L.r * .18;
+    const oy = f.ty * L.r * .42 + f.ny * L.r * .18;
+    drawSprite(ctx, FAT_SPRITES[(L.tone + 2) % FAT_SPRITES.length], c[0] + ox, c[1] + oy, r * .62, r * .56, ang + 1.25, a * .68);
   });
-  ctx.restore();
 }
-
-// Opaque yellow dabs laid across the artery so it dives through the fat instead of sitting on top.
-function paintFatDabs(ctx, swell) {
-  const R = rng(8801);
-  ctx.save();
-  path(ctx, mesoLoop(swell)); ctx.clip();
-  for (let i = 0; i < 11; i++) {
-    const s = 0.08 + i * 0.058;
+function paintMesoTint(ctx, swell, cong) {
+  if (cong <= 0.02) return;
+  const a = mesoPt(0.28, swell, 0), b = mesoPt(0.28, swell, 120);
+  const g = ctx.createLinearGradient(a[0], a[1], b[0], b[1]);
+  g.addColorStop(0, `rgba(190, 44, 40, ${.32 * cong})`);
+  g.addColorStop(.45, `rgba(202, 74, 52, ${.16 * cong})`);
+  g.addColorStop(1, 'rgba(210, 140, 70, 0)');
+  ctx.fillStyle = g;
+  path(ctx, mesoLoop(swell)); ctx.fill();
+}
+function paintVessels(ctx, swell, cong) {
+  const artCol = mix3([126, 52, 50], [198, 44, 40], cong);
+  const veinCol = mix3([86, 46, 54], [140, 42, 56], cong);
+  const halo = mix3([180, 96, 88], [230, 96, 84], cong);
+  const kW = 1 + 0.45 * cong;
+  const trunkPts = vesselPts(VESSEL.trunk, swell);
+  const veinPts = vesselPts(VESSEL.vein, swell);
+  // Soft flush beneath the vessels.
+  strokeTapered(ctx, trunkPts, 8 * kW, 5 * kW, halo, .09 * (.3 + cong));
+  VESSEL.branches.forEach(b => strokeTapered(ctx, vesselPts(b, swell), 6 * kW, 3 * kW, halo, .08 * (.3 + cong)));
+  // Vein sits deeper and slightly bluer.
+  strokeTapered(ctx, veinPts, 1.5 * kW, 1.0 * kW, veinCol, .68);
+  // Artery trunk + branches, tapering into the wall.
+  strokeTapered(ctx, trunkPts, 2.2 * kW, 1.3 * kW, artCol, .86);
+  VESSEL.branches.forEach((b, i) => {
+    const pts = vesselPts(b, swell);
+    strokeTapered(ctx, pts, 1.45 * kW, .55, artCol, .78);
+    const tw = vesselPts(VESSEL.twigs[i], swell);
+    strokeTapered(ctx, tw, .8 * kW, .38, artCol, .48);
+  });
+  // Fine caps near the serosa, more visible when congested.
+  const R = rng(77021);
+  for (let i = 0; i < 13; i++) {
+    const s = 0.05 + R() * 0.7;
     const h = mesoHang(s);
-    if (h < 22) continue;
-    const c = mesoPt(s, swell, h * (0.4 + R() * 0.28));
-    const f = frameAt(s);
-    const ang = Math.atan2(f.ty, f.tx) + (R() - 0.5) * 0.5;
-    ctx.fillStyle = i % 2 ? 'rgba(232, 196, 108, 0.9)' : 'rgba(210, 162, 62, 0.9)';
-    ctx.beginPath();
-    ctx.ellipse(c[0], c[1], 8 + R() * 12, 5 + R() * 5, ang, 0, Math.PI * 2);
-    ctx.fill();
+    if (h < 10) continue;
+    const p0 = mesoPt(s, swell, h * (0.04 + R() * 0.12));
+    const p1 = mesoPt(s + 0.02 + R() * 0.02, swell, h * (0.10 + R() * 0.16));
+    strokeTapered(ctx, [p0, p1], .8, .45, artCol, .30 + .35 * cong);
   }
-  ctx.restore();
+}
+function drawMesoInk(ctx, swell, px) {
+  const edge = mesoFreeEdge(swell);
+  inkStroke(ctx, 'g.mesoE', 'curve', [edge], { strokeWidth: 1.2 * px, roughness: .85, bowing: .46, seed: 61 }, 0.30);
+  const cap = [mesoPt(0, swell, 0), mesoPt(0, swell, mesoHang(0))];
+  inkStroke(ctx, 'g.mesoCap', 'linearPath', [cap], { strokeWidth: 1.1 * px, roughness: .85, bowing: .3, seed: 62 }, 0.24);
+  // Fat-lobule septa: short faint creases, not a wireframe.
+  const R = rng(4409);
+  for (let i = 0; i < 9; i++) {
+    const s = 0.08 + R() * 0.66;
+    const h = mesoHang(s);
+    if (h < 26) continue;
+    const hf = 0.22 + R() * 0.62;
+    const c = mesoPt(s, swell, h * hf);
+    const f = frameAt(s);
+    const len = 7 + R() * 11, ang = (R() - .5) * 1.5;
+    const dx = Math.cos(ang) * len, dy = Math.sin(ang) * len;
+    inkStroke(ctx, 'g.crease' + i, 'curve', [[
+      [c[0] - f.tx * dx - f.nx * dy, c[1] - f.ty * dx - f.ny * dy],
+      [c[0], c[1]],
+      [c[0] + f.tx * dx + f.nx * dy, c[1] + f.ty * dx + f.ny * dy],
+    ]], { strokeWidth: .7 * px, stroke: 'rgba(150, 104, 42, .55)', roughness: .62, bowing: .25, seed: 190 + i }, 0.20);
+  }
 }
 
+// ── cylinder ────────────────────────────────────────────────────────────────────────────
 // t = 0 on the mesenteric (shadow) wall, t = 1 on the lit serosa. Opaque, so overlaps do not darken.
 function crossColor(look, t) {
   const sh = look.shadow, base = look.base, gl = look.gloss;
@@ -449,9 +662,9 @@ function crossColor(look, t) {
     mix3(sh, base, 0.42),
     mix3(sh, base, 0.76),
     base,
-    mix3(base, gl, 0.32),
-    mix3(base, gl, 0.58),
-    mix3(base, gl, 0.16),
+    mix3(base, gl, 0.30),
+    mix3(base, gl, 0.55),
+    mix3(base, gl, 0.14),
   ];
   let i = 0;
   while (i < stops.length - 2 && u > stops[i + 1]) i++;
@@ -464,8 +677,8 @@ function quad(ctx, a, b, c, d) {
   ctx.closePath(); ctx.fill();
 }
 
-function paintCylinder(ctx, swell, look) {
-  const outline = tubeOutline(swell);
+function paintCylinder(ctx, swell, look, dent) {
+  const outline = tubeOutline(swell, dent);
   ctx.save();
   path(ctx, outline); ctx.clip();
   ctx.fillStyle = css(look.base);
@@ -477,38 +690,32 @@ function paintCylinder(ctx, swell, look) {
     const s0 = step * i;
     const s1 = Math.min(CAP_S, s0 + step * 1.22);
     const f0 = frameAt(s0), f1 = frameAt(s1);
-    const w0 = tubeRadius(s0, swell), w1 = tubeRadius(s1, swell);
-    const sh = addN(f0, w0), li = addN(f0, -w0);
+    const wS0 = tubeRadius(s0, swell), wS1 = tubeRadius(s1, swell);
+    const wL0 = litRadius(s0, swell, dent), wL1 = litRadius(s1, swell, dent);
+    const sh = addN(f0, wS0), li = addN(f0, -wL0);
     const g = ctx.createLinearGradient(sh[0], sh[1], li[0], li[1]);
     for (let k = 0; k <= 8; k++) g.addColorStop(k / 8, css(crossColor(look, k / 8)));
     ctx.fillStyle = g;
     quad(ctx,
-      addN(f0, w0), addN(f1, w1),
-      addN(f1, -w1), addN(f0, -w0));
+      addN(f0, wS0), addN(f1, wS1),
+      addN(f1, -wL1), addN(f0, -wL0));
   }
   paintCap(ctx, swell, look);
   ctx.restore();
   return outline;
 }
 
-// Blind end: chords parallel to the tangent, same cross-section colours as the shaft.
-// A triangle fan left radial spokes; a gradient of solid strips does not.
+// Blind end shares the shaft's continuous cross-wall gradient, without strip seams.
 function paintCap(ctx, swell, look) {
-  const f = frameAt(CAP_S), R = tubeRadius(CAP_S, swell), c = f.p;
-  const strips = 28;
-  const pt = (u, h) => [
-    c[0] + f.nx * u * R + f.tx * h,
-    c[1] + f.ny * u * R + f.ty * h,
-  ];
-  for (let i = 0; i < strips; i++) {
-    const a0 = i / strips;
-    const a1 = Math.min(1, (i + 1.28) / strips);
-    const u0 = 1 - 2 * a0, u1 = 1 - 2 * a1;
-    const h0 = Math.sqrt(Math.max(0, 1 - u0 * u0)) * R;
-    const h1 = Math.sqrt(Math.max(0, 1 - u1 * u1)) * R;
-    ctx.fillStyle = css(crossColor(look, (a0 + a1) / 2));
-    quad(ctx, pt(u0, 0), pt(u0, h0), pt(u1, h1), pt(u1, 0));
-  }
+  const f = frameAt(CAP_S), R = tubeRadius(CAP_S, swell);
+  const sh = addN(f, R), li = addN(f, -R);
+  const g = ctx.createLinearGradient(sh[0], sh[1], li[0], li[1]);
+  for (let k = 0; k <= 8; k++) g.addColorStop(k / 8, css(crossColor(look, k / 8)));
+  ctx.fillStyle = g;
+  const pt = (u, h) => [f.p[0] + f.nx * u + f.tx * h, f.p[1] + f.ny * u + f.ty * h];
+  // Overlap the final shaft segment slightly to avoid a raster seam.
+  path(ctx, [pt(R, -1), pt(R, R + 1), pt(-R, R + 1), pt(-R, -1)]);
+  ctx.fill();
 }
 
 function paintCut(ctx, swell, look) {
@@ -516,86 +723,197 @@ function paintCut(ctx, swell, look) {
   ctx.save();
   ctx.translate(f.p[0] - f.tx * w * 0.02, f.p[1] - f.ty * w * 0.02);
   ctx.rotate(Math.atan2(f.ny, f.nx));
-  ctx.fillStyle = css(look.shadow, 0.85);
+  ctx.fillStyle = css(look.shadow, 0.78);
   ctx.beginPath();
   ctx.ellipse(0, w * 0.02, w * 0.16, w * 0.055, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 }
 
-// Hemorrhage sits on the lit serosa so it does not melt into the congested shadow.
-const BLEEDS = [
-  { s: 0.18, v: -0.42, rx: 15, ry: 10, col: [122, 48, 56] },
-  { s: 0.32, v: -0.58, rx: 11, ry: 8, col: [142, 58, 62] },
-  { s: 0.44, v: -0.22, rx: 17, ry: 11, col: [168, 64, 78] },
-  { s: 0.56, v: -0.5, rx: 10, ry: 7, col: [154, 62, 72] },
-];
-function paintBleeds(ctx, swell, alpha) {
-  if (alpha <= 0.01) return;
-  const R = rng(6301);
+// ── pus: real crust, built from soft overlapping pigment sheets + fibrin + floc ───────────
+function fibrinStrands(ctx, c, ang, rx, ry, seed, alpha) {
+  const R = rng(seed | 0);
+  const ca = Math.cos(ang), sa = Math.sin(ang);
   ctx.save();
-  BLEEDS.forEach(b => {
-    const f = frameAt(b.s), w = tubeRadius(b.s, swell);
-    const c = [f.p[0] + f.nx * w * b.v, f.p[1] + f.ny * w * b.v];
-    const ang = Math.atan2(f.ty, f.tx);
-    ctx.fillStyle = css([b.col[0] * 0.62, b.col[1] * 0.55, b.col[2] * 0.55], 0.95 * alpha);
+  ctx.lineCap = 'round';
+  for (let k = 0; k < 3; k++) {
+    const ox = (R() - .5) * rx * .9, oy = (R() - .5) * ry * 1.1;
+    const len = rx * (0.35 + R() * 0.5);
+    const a0 = -0.5 + R();
+    const n = 4;
+    const pts = [];
+    for (let j = 0; j <= n; j++) {
+      const t = j / n, u = ox + (t - .5) * len, v = oy + Math.sin(t * 5 + k) * 2.2 + (R() - .5) * 2;
+      pts.push([c[0] + ca * u - sa * v, c[1] + sa * u + ca * v]);
+    }
+    ctx.strokeStyle = `rgba(214, 198, 166, ${.28 * alpha})`;
+    ctx.lineWidth = (.55 + R() * .5);
     ctx.beginPath();
-    ctx.ellipse(c[0], c[1], b.rx * 1.18, b.ry * 1.15, ang, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = css(b.col, 0.92 * alpha);
-    ctx.beginPath();
-    const jx = (R() - 0.5) * 3, jy = (R() - 0.5) * 2;
-    ctx.ellipse(c[0] + jx, c[1] + jy, b.rx, b.ry * (0.85 + R() * 0.2), ang, 0, Math.PI * 2);
-    ctx.fill();
-  });
+    pts.forEach((p, j) => j ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+    ctx.stroke();
+    // Dull highlight-free floc at the tip.
+    const tip = pts[n];
+    ctx.fillStyle = `rgba(214, 200, 170, ${.24 * alpha})`;
+    ctx.beginPath(); ctx.arc(tip[0] + (R() - .5) * 3, tip[1] + (R() - .5) * 3, .7 + R() * 1.4, 0, Math.PI * 2); ctx.fill();
+  }
   ctx.restore();
 }
+function paintPus(ctx, swell, alpha) {
+  const tile = PIX.get('g.pusTile');
+  if (!PUS_SPRITE || alpha <= 0.002) return;
+  PUS_PATCHES.forEach((p, i) => {
+    const [s, v, rx, ry, rot] = p;
+    const f = frameAt(clamp(s, 0, CAP_S)), w = tubeRadius(clamp(s, 0, CAP_S), swell);
+    const c = [f.p[0] + f.nx * w * v, f.p[1] + f.ny * w * v];
+    const ang = Math.atan2(f.ty, f.tx) + rot;
+    const R = rng(9000 + i * 31);
+    // Thin ochre halo stains the congested base so the rim is not a cut edge.
+    if (tile) drawSprite(ctx, tile, c[0] + (R() - .5) * 6, c[1] + (R() - .5) * 5, rx * 4.4, ry * 4.8, ang, .17 * alpha, 'multiply');
+    // Uneven thickness: two irregular sheets, the centre denser than the shoulder.
+    drawSprite(ctx, PUS_SPRITE, c[0], c[1], rx * 3.4, ry * 3.6, ang, .90 * alpha);
+    drawSprite(ctx, PUS_SPRITE, c[0] + (R() - .5) * rx * .7, c[1] + (R() - .5) * ry * .7, rx * 2.3, ry * 2.5, ang + (R() - .5) * 1.4, .44 * alpha);
+    // Pigment mottle inside the same footprint (keepWatercolour grain over the flat body).
+    drawSprite(ctx, PUS_SPRITE, c[0], c[1], rx * 3.3, ry * 3.5, ang, .14 * alpha, 'multiply');
+    fibrinStrands(ctx, c, ang, rx, ry, 9500 + i * 17, alpha * smooth(alpha / .6));
+  });
+}
 
+// ── hemorrhage ──────────────────────────────────────────────────────────────────────────
+function paintBleeds(ctx, swell, alpha) {
+  if (alpha <= 0.01) return;
+  const rings = [
+    { k: 1.60, col: [172, 92, 92], a: .13 },
+    { k: 1.22, col: [142, 58, 62], a: .26 },
+    { k: .88, col: [112, 34, 46], a: .46 },
+    { k: .55, col: [76, 20, 32], a: .56 },
+  ];
+  BLEEDS.forEach(b => {
+    rings.forEach((rg, j) => {
+      const pts = surfaceBlob(b.s, b.v, b.rx * rg.k, b.ry * rg.k, b.seed + j, {
+        swell, n: 24, jitter: .42, amp: .28, lobes: 3 + (j % 2),
+      });
+      fillPoly(ctx, pts, rg.col, rg.a * b.a * alpha);
+    });
+  });
+}
+
+// ── gangrene ────────────────────────────────────────────────────────────────────────────
+function paintNecro(ctx, swell, alpha) {
+  if (alpha <= 0.01) return;
+  const R = rng(8807);
+  // 1. Dark-red congested band around the necrotic pole.
+  ctx.save();
+  ctx.globalCompositeOperation = 'multiply';
+  NECRO.forEach(n => {
+    const band = surfaceBlob(n.s, n.v, n.rx * 1.95, n.ry * 2.05, n.seed + 5, { swell, jitter: .28, amp: .20 });
+    fillPoly(ctx, band, [140, 40, 44], .26 * alpha);
+  });
+  ctx.restore();
+  // 2. Dark-red transition band, not a smooth violet halo.
+  NECRO.forEach(n => {
+    fillPoly(ctx, surfaceBlob(n.s, n.v, n.rx * 1.52, n.ry * 1.6, n.seed + 7, { swell, jitter: .32, amp: .22 }), [122, 38, 40], .30 * alpha);
+  });
+  // 3. Sparse violet mottles where the wall is dying but not yet black.
+  [[.752, -.22, 9, 7, 7701], [.828, .09, 8, 6, 7702], [.792, .22, 7, 5, 7703], [.865, -.10, 6, 4.5, 7704]].forEach(([s, v, rx, ry, sd]) => {
+    fillPoly(ctx, surfaceBlob(s, v, rx, ry, sd, { swell, jitter: .45, amp: .3 }), [78, 46, 68], .28 * alpha);
+  });
+  // 4. Textured purple-black plaques (watercolour grain baked in).
+  if (NECRO_SPRITE) NECRO.forEach((n, i) => {
+    const f = frameAt(n.s), w = tubeRadius(n.s, swell);
+    const c = [f.p[0] + f.nx * w * n.v, f.p[1] + f.ny * w * n.v];
+    const ang = Math.atan2(f.ty, f.tx);
+    drawSprite(ctx, NECRO_SPRITE, c[0], c[1], n.rx * 3.4, n.ry * 3.6, ang + (R() - .5) * .9, .80 * alpha);
+    drawSprite(ctx, NECRO_SPRITE, c[0] + (R() - .5) * n.rx * .7, c[1] + (R() - .5) * n.ry * .6, n.rx * 2.2, n.ry * 2.4, ang + (R() - .5) * 1.4, .50 * alpha);
+  });
+  // 5. Sooty cores: small, irregular, plus one soft band tying them together.
+  fillPoly(ctx, surfaceBlob(.800, -.08, 30, 13, 7203, { swell, jitter: .42, amp: .24 }), [12, 8, 14], .44 * alpha);
+  NECRO.forEach((n, i) => {
+    fillPoly(ctx, surfaceBlob(n.s - .006, n.v - .03, n.rx * .34, n.ry * .34, n.seed + 11, { swell, jitter: .48, amp: .28 }), [10, 7, 12], .55 * alpha);
+  });
+  fillPoly(ctx, surfaceBlob(.818, -.10, 9, 5.5, 7721, { swell, jitter: .48, amp: .3 }), [12, 8, 14], .50 * alpha);
+  // 6. Small dull slough islands, low contrast inside the black.
+  fillPoly(ctx, surfaceBlob(.789, -.27, 6.5, 4.4, 7710, { swell, jitter: .45, amp: .28 }), [132, 118, 98], .30 * alpha);
+  fillPoly(ctx, surfaceBlob(.833, .05, 5.5, 3.6, 7711, { swell, jitter: .4, amp: .25 }), [146, 132, 112], .24 * alpha);
+}
+
+// A small slough-covered perforation near the necrotic pole; reads as a shallow crater.
 function paintPit(ctx, swell, alpha) {
   if (alpha <= 0.02) return;
-  const s = 0.8, f = frameAt(s), w = tubeRadius(s, swell);
-  const c = [f.p[0] + f.nx * w * -0.1, f.p[1] + f.ny * w * -0.1];
+  const s = 0.803, v = -0.17;
+  const f = frameAt(s), w = tubeRadius(s, swell);
+  const c = [f.p[0] + f.nx * w * v, f.p[1] + f.ny * w * v];
   ctx.save();
   ctx.translate(c[0], c[1]);
   ctx.rotate(Math.atan2(f.ty, f.tx));
   ctx.globalAlpha *= alpha;
-  const g = ctx.createRadialGradient(-3, -2, 1, 1, 1, 16);
-  g.addColorStop(0, '#07060A');
-  g.addColorStop(0.45, '#120E16');
-  g.addColorStop(0.78, '#3A2C44');
-  g.addColorStop(1, 'rgba(18, 12, 22, 0)');
+  const g = ctx.createRadialGradient(-2, -1, 1, 0, 0, 11);
+  g.addColorStop(0, '#060508');
+  g.addColorStop(0.42, '#160F18');
+  g.addColorStop(0.72, 'rgba(58, 34, 52, .55)');
+  g.addColorStop(1, 'rgba(58, 34, 52, 0)');
   ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.ellipse(0, 0, 15, 10, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(214, 196, 188, 0.55)';
-  ctx.lineWidth = 1.25;
-  ctx.beginPath();
-  ctx.ellipse(-1, -2, 9, 5, 0, Math.PI * 1.15, Math.PI * 1.9);
-  ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(0, 0, 11, 7, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(172, 154, 128, .30)';
+  ctx.lineWidth = 1.15;
+  ctx.beginPath(); ctx.ellipse(-1, -1.5, 6.2, 3.4, 0, Math.PI * 1.1, Math.PI * 1.95); ctx.stroke();
   ctx.restore();
 }
 
-function inkStroke(ctx, key, kind, args, o, alpha) {
-  if (alpha <= 0.01) return;
-  // fill:false — rough's toPaths sets fill to the string 'none', which is truthy, so ink.js
-  // would fill the path with whatever fillStyle is current (the paper). An open curve then
-  // closes and paints a paper ribbon across the fat.
-  inkDraw(ctx, shape(key, kind, args, { boil: false, ...o }, true), { alpha, fill: false });
+// ── wet sheen ───────────────────────────────────────────────────────────────────────────
+function paintGloss(ctx, swell, amount, px) {
+  if (amount <= 0.03) return;
+  const bands = [
+    [0.10, 0.28, 0.80, 10],
+    [0.30, 0.49, 0.78, 13],
+    [0.50, 0.69, 0.74, 11],
+    [0.68, 0.80, 0.66, 7],
+  ];
+  ctx.save();
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  bands.forEach(([a, b, off, wide], i) => {
+    const pts = [];
+    for (let j = 0; j <= 7; j++) {
+      const s = a + (b - a) * (j / 7), f = frameAt(s), w = litRadius(s, swell, 0);
+      pts.push([f.p[0] - f.nx * w * off, f.p[1] - f.ny * w * off]);
+    }
+    const layers = [
+      [wide * 2.4 * px, .13], [wide * 1.1 * px, .22], [wide * .42 * px, .26], [2.4 * px, .40],
+    ];
+    layers.forEach(([lw, la], k) => {
+      ctx.strokeStyle = `rgba(255, 252, 244, ${la * amount})`;
+      ctx.lineWidth = lw;
+      ctx.beginPath();
+      pts.forEach((p, j) => j ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+      ctx.stroke();
+    });
+  });
+  // Small specular at the cap crest.
+  const f = frameAt(0.885), w = tubeRadius(0.885, swell);
+  ctx.save();
+  ctx.translate(f.p[0] - f.nx * w * .48, f.p[1] - f.ny * w * .48);
+  ctx.rotate(Math.atan2(f.ty, f.tx));
+  const g = ctx.createRadialGradient(0, 0, 1, 0, 0, 12 * px);
+  g.addColorStop(0, `rgba(255, 253, 248, ${.5 * amount})`);
+  g.addColorStop(1, 'rgba(255, 253, 248, 0)');
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.ellipse(0, 0, 13 * px, 5 * px, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  ctx.restore();
 }
 
+// Fine congested serosal vessels, drawn after the pale/red serosal washes.
 const SURFACE = [];
 function surfacePaths() {
   if (SURFACE.length) return SURFACE;
   const R = rng(41011);
-  for (let i = 0; i < 7; i++) {
-    const s0 = 0.08 + R() * 0.5;
-    const len = 0.1 + R() * 0.14;
-    const side = i < 5 ? -1 : 1;
-    const inset0 = 0.22 + R() * 0.46;
+  for (let i = 0; i < 8; i++) {
+    const s0 = 0.07 + R() * 0.62;
+    const len = 0.08 + R() * 0.15;
+    const side = i < 6 ? -1 : 1;
+    const inset0 = 0.2 + R() * 0.5;
     const wob = [];
-    for (let k = 0; k <= 8; k++) wob.push((R() - 0.5) * 0.16);
-    SURFACE.push({ s0, len, side, inset0, wob, w: 0.7 + R() * 0.55 });
+    for (let k = 0; k <= 8; k++) wob.push((R() - 0.5) * 0.2);
+    SURFACE.push({ s0, len, side, inset0, wob, w: 0.6 + R() * 0.5, br: R() > .5 ? 0.4 + R() * .4 : 0 });
   }
   return SURFACE;
 }
@@ -608,68 +926,52 @@ function surfaceAt(swell) {
       const ins = Math.max(0.1, Math.min(0.88, v.inset0 + Math.sin(k * 0.85) * 0.1 + v.wob[k]));
       pts.push([f.p[0] + f.nx * w * ins * v.side, f.p[1] + f.ny * w * ins * v.side]);
     }
-    return { pts, w: v.w };
+    return { pts, w: v.w, br: v.br, s0: v.s0, len: v.len, side: v.side, swell };
   });
 }
-
-function drawMesoInk(ctx, swell, px) {
-  const edge = mesoFreeEdge(swell);
-  inkStroke(ctx, 'g.mesoE', 'curve', [edge], { strokeWidth: 1.7 * px, roughness: .62, bowing: .35, seed: 61 }, 0.78);
-  const cap = [mesoPt(0, swell, 0), mesoPt(0, swell, mesoHang(0))];
-  inkStroke(ctx, 'g.mesoCap', 'linearPath', [cap], { strokeWidth: 1.8 * px, roughness: .7, bowing: .3, seed: 62 }, 0.72);
-  // Creases only. The artery and vein are already under the lobule caps.
-  const lobes = lobules(swell);
-  lobes.slice(0, -1).forEach((L, i) => {
-    const nxt = lobes[i + 1];
-    if (!nxt || nxt.s - L.s > 0.22) return;
-    const a = mesoPt(L.s + (nxt.s - L.s) * 0.5, swell, mesoHang((L.s + nxt.s) / 2) * 0.55);
-    const f = frameAt((L.s + nxt.s) / 2);
-    const p1 = [a[0] - f.tx * 10 + f.nx * 4, a[1] - f.ty * 10 + f.ny * 4];
-    const p2 = [a[0] + f.tx * 12 + f.nx * 2, a[1] + f.ty * 12 + f.ny * 2];
-    inkStroke(ctx, 'g.crease' + i, 'curve', [[p1, a, p2]], { strokeWidth: 0.8 * px, roughness: .6, bowing: .25, seed: 190 + i }, 0.28);
-  });
-}
-
 function drawSurface(ctx, swell, px, cong) {
-  const col = css(mix3([176, 132, 126], [214, 69, 58], cong));
+  const col = css(mix3([178, 134, 128], [214, 66, 56], cong));
   surfaceAt(swell).forEach((v, i) => {
-    const show = i < 3 ? 0.28 + 0.55 * cong : cong;
-    inkStroke(ctx, 'g.sv' + i, 'curve', [v.pts], { stroke: col, strokeWidth: (v.w * (0.75 + 0.45 * cong)) * px, roughness: .55, bowing: .28, seed: 220 + i }, show * 0.8);
-  });
-}
-
-function drawGlossInk(ctx, swell, px, amount) {
-  if (amount <= 0.05) return;
-  [[0.14, 0.24, 201], [0.36, 0.46, 202], [0.56, 0.66, 203]].forEach(([a, b, seed], i) => {
-    const pts = [];
-    for (let j = 0; j <= 5; j++) {
-      const s = a + (b - a) * (j / 5), f = frameAt(s), w = tubeRadius(s, swell);
-      pts.push([f.p[0] - f.nx * w * 0.62, f.p[1] - f.ny * w * 0.62]);
+    const show = i < 4 ? 0.22 + 0.5 * cong : cong * 0.9;
+    inkStroke(ctx, 'g.sv' + i, 'curve', [v.pts], { stroke: col, strokeWidth: (v.w * (0.72 + 0.5 * cong)) * px, roughness: .58, bowing: .3, seed: 220 + i }, show * 0.75);
+    if (v.br) {
+      const p = v.pts[4], f = frameAt(v.s0 + v.len * .5), w = tubeRadius(v.s0 + v.len * .5, swell);
+      const q = [p[0] + f.tx * 14 + f.nx * w * .08 * v.side, p[1] + f.ty * 14 + f.ny * w * .08 * v.side];
+      inkStroke(ctx, 'g.svb' + i, 'curve', [[p, q]], { stroke: col, strokeWidth: .6 * px, roughness: .5, seed: 260 + i }, cong * smooth(cong / .5) * 0.45);
     }
-    inkStroke(ctx, 'g.hi' + i, 'curve', [pts], { stroke: '#FFFaf6', strokeWidth: 1.35 * px, roughness: .4, bowing: .2, seed }, amount);
   });
 }
 
-function drawTubeInk(ctx, swell, px, alpha) {
-  const wall = tubeOutline(swell);
+function inkStroke(ctx, key, kind, args, o, alpha) {
+  if (alpha <= 0.01) return;
+  // fill:false — rough's toPaths sets fill to the string 'none', which is truthy, so ink.js
+  // would fill the path with whatever fillStyle is current (the paper). An open curve then
+  // closes and paints a paper ribbon across the fat.
+  inkDraw(ctx, shape(key, kind, args, { boil: false, ...o }, true), { alpha, fill: false });
+}
+
+function drawTubeInk(ctx, swell, px, alpha, dent) {
+  const wall = tubeOutline(swell, dent);
   const closed = wall.concat([wall[0]]);
-  inkStroke(ctx, 'g.wall', 'linearPath', [closed], { strokeWidth: 2.6 * px, roughness: .9, bowing: .8, seed: 81 }, alpha);
-  inkStroke(ctx, 'g.wall2', 'linearPath', [closed], { strokeWidth: 1.2 * px, roughness: 1.15, bowing: 1.0, seed: 97 }, alpha * 0.5);
+  inkStroke(ctx, 'g.wall', 'linearPath', [closed], { strokeWidth: 2.5 * px, roughness: .92, bowing: .82, seed: 81 }, alpha);
+  inkStroke(ctx, 'g.wall2', 'linearPath', [closed], { strokeWidth: 1.15 * px, roughness: 1.18, bowing: 1.0, seed: 97 }, alpha * 0.45);
 }
 
 export function drawAppendix(ctx, state, pose, { alpha = 1 } = {}) {
   const stage = asStage(state);
   const swell = swellAt(stage);
+  const dent = dentAt(stage);
+  const base = knot(stage, LOOK.map(L => L.base));
   const look = {
-    base: knot(stage, LOOK.map(L => L.base)),
+    base,
     shadow: knot(stage, LOOK.map(L => L.shadow)),
-    gloss: knot(stage, LOOK.map(L => L.gloss)),
+    gloss: mix3(base, knot(stage, LOOK.map(L => L.gloss)), knot(stage, GLOSS_FADE)),
   };
   const cong = ramp(stage, 0, 1);
   const pusA = ramp(stage, 1, 2);
   const necA = ramp(stage, 2, 3);
-  const bleedA = ramp(stage, 2.1, 2.85);
-  const glossK = lerp(0.72, 0.28, Math.min(1, stage / 2));
+  const bleedA = ramp(stage, 1.9, 2.75);
+  const glossA = knot(stage, GLOSS_A);
   const px = 1 / pose.sc;
 
   ctx.save();
@@ -679,37 +981,45 @@ export function drawAppendix(ctx, state, pose, { alpha = 1 } = {}) {
   ctx.rotate(pose.rot);
   ctx.scale(pose.sc, pose.sc);
 
-  paintMeso(ctx, swell);
-  const { artery, vein, branches } = vesselGeom(swell);
-  const art = mix3([112, 32, 36], [158, 36, 42], cong);
-  // Vessels under the fat dabs, clipped to the meso, so they run inside the fat.
+  // Mesentery first; the tube covers the attachment seam.
   ctx.save();
   path(ctx, mesoLoop(swell)); ctx.clip();
-  inkStroke(ctx, 'g.veinB', 'curve', [vein], { stroke: '#5A2830', strokeWidth: (1.7 + 0.35 * cong) * px, roughness: .5, bowing: .2, seed: 142 }, 0.88);
-  inkStroke(ctx, 'g.artB', 'curve', [artery], { stroke: css(art), strokeWidth: (2.5 + 0.7 * cong) * px, roughness: .48, bowing: .22, seed: 141 }, 0.92);
-  branches.forEach((pts, i) => {
-    inkStroke(ctx, 'g.brB' + i, 'curve', [pts], { stroke: css(art), strokeWidth: (1.45 + 0.35 * cong) * px, roughness: .5, bowing: .2, seed: 171 + i }, 0.85);
-  });
+  paintMesoBase(ctx, swell);
+  paintFatCells(ctx, swell);
+  paintVessels(ctx, swell, cong);
+  // A few fat clumps sit in front of the vessels so the branching dives into the fat.
+  paintFatCells(ctx, swell, true);
+  // Pigment grain over the pale dabs, otherwise the sprites read as airbrush.
+  drawPinned(ctx, 'g.fat', 40, 10, 900, { alpha: .16, blend: 'multiply' });
+  paintMesoTint(ctx, swell, cong);
   ctx.restore();
-  paintFatDabs(ctx, swell);
-  paintLobules(ctx, swell, 1);
   drawMesoInk(ctx, swell, px);
 
-  paintCylinder(ctx, swell, look);
+  // Tube.
+  paintCylinder(ctx, swell, look, dent);
   ctx.save();
-  path(ctx, tubeOutline(swell)); ctx.clip();
+  path(ctx, tubeOutline(swell, dent)); ctx.clip();
+  // Mottled serosa: the baked washes give the flat gradient some watercolour grain.
   drawPinned(ctx, 'g.pink', 0, 0, 1024, { alpha: (1 - cong) * 0.28, blend: 'multiply' });
-  drawPinned(ctx, 'g.red', 0, 0, 1024, { alpha: cong * 0.4, blend: 'multiply' });
-  drawGlossInk(ctx, swell, px, glossK * (1 - pusA * 0.8) * 0.4);
+  drawPinned(ctx, 'g.pink', 70, 26, 760, { alpha: (1 - cong) * 0.14, blend: 'multiply' });
+  drawPinned(ctx, 'g.red', 0, 0, 1024, { alpha: cong * 0.38, blend: 'multiply' });
+  drawPinned(ctx, 'g.grain', -20, -60, 1200, { alpha: .15, blend: 'multiply' });
   drawSurface(ctx, swell, px, cong);
-  drawPus(ctx, pusA);
+  ctx.save();
+  ctx.filter = 'blur(1.2px)';
   paintBleeds(ctx, swell, bleedA);
-  drawPinned(ctx, 'g.necro', 0, 0, 1024, { alpha: necA, blend: 'source-over' });
+  ctx.restore();
+  paintPus(ctx, swell, pusA);
+  ctx.save();
+  ctx.filter = 'blur(1.6px)';
+  paintNecro(ctx, swell, necA);
+  ctx.restore();
   paintPit(ctx, swell, necA);
   paintCut(ctx, swell, look);
+  paintGloss(ctx, swell, glossA, px);
   ctx.restore();
 
-  drawTubeInk(ctx, swell, px, 1);
+  drawTubeInk(ctx, swell, px, 1, dent);
   ctx.restore();
 }
 
@@ -722,12 +1032,12 @@ const NOTES = {
   red: [
     { s: 0.28, side: -1, d: 8, label: '朱红充血', dir: 'up', col: C.red, shelf: 'left' },
     { s: 0.62, side: -1, d: 8, label: '表面血管扩张', dir: 'up', shelf: 'right' },
-    { s: 0.22, extra: 0.7, label: '轻度肿胀', dir: 'down', shelf: 'left' },
+    { s: 0.22, extra: 0.7, label: '肿胀增粗', dir: 'down', shelf: 'left' },
   ],
   yellow: [
-    { s: 0.4, side: -1, d: 8, label: '灰黄色脓苔', dir: 'up', shelf: 'left', lift: 48 },
-    { s: 0.64, side: -1, d: 8, label: '斑驳、片状', dir: 'up', shelf: 'right' },
-    { s: 0.24, extra: 0.62, label: '明显肿胀增粗', dir: 'down', shelf: 'left' },
+    { s: 0.4, side: -1, d: 8, label: '灰黄色脓苔', dir: 'up', shelf: 'right', lift: 48 },
+    { s: 0.64, side: -1, d: 8, label: '斑驳、片状', dir: 'up', shelf: 'left' },
+    { s: 0.24, extra: 0.62, label: '肿胀最粗、张力大', dir: 'down', shelf: 'left' },
   ],
   black: [
     { s: 0.82, side: -1, d: 10, label: '局部坏死发黑', dir: 'up', shelf: 'right' },
