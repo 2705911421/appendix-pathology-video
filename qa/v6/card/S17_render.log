@@ -1,0 +1,36 @@
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S17/stills/t_001.10.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S17/stills/t_003.11.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S17/stills/t_005.03.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S17/stills/t_006.72.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S17/stills/t_008.68.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S17/stills/t_010.60.png
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+deterministic: 6 frames match across render orders (1.224, 4.117, 5.564, 8.124, 10.349, 11.095 s)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+another render (pid 460) is writing /workspace/病理科普视频/v5_card_dev/qa/v6/card/S17/S17.mp4. Use a different --out, or wait for it.
+node:internal/errors:986
+  const err = new Error(message);
+              ^
+
+Error: Command failed: node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --q scene=s17 --out qa/v6/card/S17/S17.mp4 --crf 16 --fps 30 --workers 2
+    at genericNodeError (node:internal/errors:986:15)
+    at wrappedFn (node:internal/errors:540:14)
+    at checkExecSyncError (node:child_process:943:11)
+    at execFileSync (node:child_process:979:15)
+    at render (file:///workspace/%E7%97%85%E7%90%86%E7%A7%91%E6%99%AE%E8%A7%86%E9%A2%91/v5_card_dev/qa/v6/card/render_scene.mjs:9:23)
+    at file:///workspace/%E7%97%85%E7%90%86%E7%A7%91%E6%99%AE%E8%A7%86%E9%A2%91/v5_card_dev/qa/v6/card/render_scene.mjs:14:1
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  status: 1,
+  signal: null,
+  output: [ null, null, null ],
+  pid: 449,
+  stdout: null,
+  stderr: null
+}
+
+Node.js v24.22.1
