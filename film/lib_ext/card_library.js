@@ -50,9 +50,9 @@ export function doctor(c,x=1400,ground=GROUND,scale=.92){return personAt(c,{x,gr
 function records(c,px,dx,ground,sc,p){
  for(let i=0;i<3;i++){
   const k=Math.max(0,Math.min(1,(p-i*.2)/.55));if(k<=0)continue;
-  const e=ease(k),sx=px+96+i*14,sy=ground-250-i*30,ex=dx-58+(i-1)*10,ey=ground-322+i*24;
+  const e=ease(k),sx=px+96+i*14,sy=ground-272*sc-i*30*sc/.92,ex=dx-58+(i-1)*10,ey=ground-350*sc+i*24*sc/.92;
   const x=sx+(ex-sx)*e,y=sy+(ey-sy)*e-Math.sin(Math.PI*e)*52;
-  c.save();c.globalAlpha*=Math.min(1,k*2.2);c.translate(x,y);c.rotate((i-1)*.1*(1-e));
+  c.save();c.globalAlpha*=Math.min(1,k*2.2);c.translate(x,y);c.rotate((i-1)*.1*(1-e));c.scale(sc/.92,sc/.92);
   ink(c,'card.form'+i,'polygon',[[[-42,-52],[42,-52],[42,52],[-42,52]]],{fill:'#FBF7F0',fillStyle:'solid',stroke:'#AC98B7',strokeWidth:1.5,seed:90+i},{fill:true});
   line(c,[[-30,-28],[-2,-28]],'formline'+i);line(c,[[-30,-6],[22,-6]],'formlineB'+i);line(c,[[-30,16],[10,16]],'formlineC'+i);
   c.restore();}

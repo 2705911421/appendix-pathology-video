@@ -26,15 +26,15 @@ export default {async prepare(){prepareFigures();await prepare();},draw(c,t,T){
   // 64: records/lab slips leave the patient one by one and settle in the doctor's hands.
   card(c,'具体方案',['结合患者的','具体情况']);
   const p=ease((t-T.at(64))/(T.frac(64,.8)-T.at(64)));
-  assess(c,p,{px,dx,ground:G,scale:.92,pain:1});
+  assess(c,p,{px,dx,ground:650,scale:.72,pain:1});
   return;
  }
  // 65: two option windows open below the doctor; which one is highlighted switches once.
  card(c,'具体方案',['结合患者的','具体情况','是否马上手术','由医生评估决定']);
- people(c,{x:px,ground:G,pain:1,scale:.92});doctor(c,dx,G,.92);
+ people(c,{x:px,ground:650,pain:1,scale:.72});doctor(c,dx,650,.72);
  const a=ease((t-T.at(65))/(T.frac(65,.35)-T.at(65)));
  const sw=ease((t-T.frac(65,.5))/(T.frac(65,.82)-T.frac(65,.5)));
- const y=806,h=112;
+ const y=680,h=100;
  chip(c,{x:1000,y,w:400,h,label:'马上手术',on:a*(1-sw),alpha:a});
  chip(c,{x:1440,y,w:400,h,label:'观察后择期',on:a*sw,alpha:a});
 }};

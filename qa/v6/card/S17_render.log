@@ -11,21 +11,15 @@ deterministic: 6 frames match across render orders (1.224, 4.117, 5.564, 8.124, 
 [page] Failed to load resource: the server responded with a status of 404 (Not Found)
 [note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
 rendering 334 frames × 1 sample(s) @ 1920x1080 30fps with 1 worker(s)…
-  33/334 frames  7s
-  66/334 frames  12s
-  99/334 frames  18s
-  132/334 frames  22s
-  165/334 frames  26s
-  198/334 frames  29s
-  231/334 frames  32s
-  264/334 frames  36s
-  297/334 frames  39s
-  330/334 frames  42s
+  33/334 frames  9s
+  66/334 frames  14s
+  99/334 frames  19s
+  132/334 frames  23s
+  165/334 frames  27s
+  198/334 frames  31s
+  231/334 frames  34s
+  264/334 frames  37s
+  297/334 frames  41s
+  330/334 frames  44s
 done /workspace/病理科普视频/v5_card_dev/qa/v6/card/S17/S17_verified.mp4
-  334 frames, 11.13s, 43.3s wall (130 ms/sample)
-
---- card_fix01 重渲 S17（clin 人物库版）---
-node qa/v6/card/render_scene.mjs s17
-  334 frames, 11.13s, 54.8s wall (164 ms/sample)
-determinism: 6 frames match across render orders (1.224, 4.117, 5.564, 8.124, 10.349, 11.095 s)
-关键帧/200%局部按新裁切区 620,150-1820,940 重出；verify.py 通过。
+  334 frames, 11.13s, 45.4s wall (136 ms/sample)
