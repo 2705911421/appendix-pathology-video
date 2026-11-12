@@ -1,13 +1,13 @@
 // Resected appendix — four gross states on one rig.
 // stage 0 normal · 1 red · 2 yellow · 3 black. In-between values (0.5, 1.5, …)
 // smoothstep the serosal palette, the swelling, and the pus / necrosis / hemorrhage layers.
-// Spine comes from figure.js; halfW takes a swell factor, so the radius grows continuously
-// from the normal wall to the tense purulent one. The blind end is a round cap built here.
+// Spine comes from figure.js; an independent near-uniform radius preserves the long
+// vermiform shape. Swelling changes width; the rounded cap retains its axial extent.
 // No Math.random. Ink via ink.js. Watercolour via wash.js (hd / soft / grain .12 / edge .3 / bleed .5).
 import { C } from '../lib/tokens.js';
 import { bake, get } from '../lib/wash.js';
 import { shape, draw as inkDraw } from '../lib/ink.js';
-import { spine, halfW } from '../lib/figure.js';
+import { spine } from '../lib/figure.js';
 import { rng } from '../lib/motion.js';
 import * as A from '../lib/ann.js';
 
@@ -15,17 +15,18 @@ export const PUS = '#CDB98A';
 export const STATES = ['normal', 'red', 'yellow', 'black'];
 // Radius multiplier: stage 0 is the thin normal appendix, 1 is clearly swollen,
 // 2 is the widest (maximal wall tension), 3 stays swollen while the necrotic wall sags.
-const SWELL_K = [0.80, 1.08, 1.30, 1.20];
+const SWELL_K = [1, 1.16, 1.47, 1.34];
 export const SWELL = { normal: SWELL_K[0], red: SWELL_K[1], yellow: SWELL_K[2], black: SWELL_K[3] };
 const DENT_K = 0.10;            // local sag of the lit wall at the gangrenous pole
 const CAP_S = 0.9;
-const MESO_TIP = 0.8;
+const MESO_TIP = CAP_S;
+const NORMAL_RADIUS = 35; // Centreline arc + rounded ends / diameter ≈ 10.5.
 const N_SHAFT = 40;
 const WASH = { hd: true, soft: true, grain: .12, edge: .3, bleed: .5 };
 
 export const META = {
   normal: { name: '正常', diag: '正常阑尾', sub: '灰粉色 · 浆膜光滑有光泽', tone: C.ink },
-  red:    { name: '红',   diag: '单纯性阑尾炎', sub: '朱红充血 · 明显肿胀增粗', tone: C.red },
+  red:    { name: '红',   diag: '单纯性阑尾炎', sub: '朱红充血 · 轻度肿胀增粗', tone: C.red },
   yellow: { name: '黄',   diag: '化脓性阑尾炎', sub: '最粗、张力最大 · 斑驳灰黄脓苔', tone: '#8A7348' },
   black:  { name: '黑',   diag: '坏疽性阑尾炎', sub: '保持肿胀 · 局部坏死发黑', tone: '#3A2438' },
 };
@@ -78,14 +79,9 @@ export function frameAt(s) {
 function silhouette(s) {
   return 1 + .013 * Math.sin(s * 16.3 + 1.2) + .007 * Math.sin(s * 33.7 + 0.4);
 }
-// Shaft uses halfW. Past 0.8 the radius eases so it meets the round cap without a kink.
+// Nearly uniform vermiform shaft. Swelling changes width alone, never the spine.
 export function tubeRadius(s, swell) {
-  const u = Math.max(0, Math.min(CAP_S, s));
-  const j = silhouette(u);
-  if (u <= 0.8) return halfW(u, swell) * j;
-  const w0 = halfW(0.8, swell), w1 = halfW(CAP_S, swell);
-  const e = smooth((u - 0.8) / (CAP_S - 0.8));
-  return (w0 + (w1 - w0) * e) * j;
+  return NORMAL_RADIUS * swell * silhouette(clamp(s, 0, CAP_S));
 }
 // The lit wall sags a little where the gangrene has destroyed the tissue (dent ∈ 0…1).
 function dentShape(s) {
@@ -109,15 +105,15 @@ export function tubeOutline(swell, dent = 0) {
   for (let i = 1; i < 14; i++) {
     const a = Math.PI * (i / 14);
     arc.push([
-      f.p[0] + f.nx * Math.cos(a) * rad + f.tx * Math.sin(a) * rad,
-      f.p[1] + f.ny * Math.cos(a) * rad + f.ty * Math.sin(a) * rad,
+      f.p[0] + f.nx * Math.cos(a) * rad + f.tx * Math.sin(a) * NORMAL_RADIUS,
+      f.p[1] + f.ny * Math.cos(a) * rad + f.ty * Math.sin(a) * NORMAL_RADIUS,
     ]);
   }
   // Elliptical cut face: from the lit lip (−normal) back to the mesenteric lip, bulging out of the base.
   const f0 = frameAt(0), w0 = tubeRadius(0, swell), base = [];
   for (let i = 1; i < 8; i++) {
     const ang = Math.PI * (1 - i / 8);
-    const bulge = Math.sin(ang) * w0 * 0.34;
+    const bulge = Math.sin(ang) * NORMAL_RADIUS * 0.34;
     base.push([
       f0.p[0] + f0.nx * Math.cos(ang) * w0 - f0.tx * bulge,
       f0.p[1] + f0.ny * Math.cos(ang) * w0 - f0.ty * bulge,
@@ -220,7 +216,7 @@ const FAT_TONES = ['#EFD28C', '#E6C274', '#DDAA5C', '#F4DD9C', '#D2A858'];
 const LOBULES = (() => {
   const R = rng(31017), out = [];
   for (let i = 0; i < 84; i++) {
-    const s = 0.012 + R() * 0.80;
+    const s = 0.012 + R() * 0.88;
     const h = mesoHang(s);
     if (h < 12) continue;
     const hf = 0.08 + R() * 0.88;
@@ -303,7 +299,8 @@ function makeFatSprites() {
       const g = c.createRadialGradient(S / 2 + ox, S / 2 + oy, 2, S / 2 + ox, S / 2 + oy, rr);
       g.addColorStop(0, `rgba(255, 248, 220, ${.44 * a0})`);
       g.addColorStop(.34, hexA(tone, .52 * a0));
-      g.addColorStop(.72, hexA(tone, .26 * a0));
+      g.addColorStop(.62, hexA(tone, .42 * a0));
+      g.addColorStop(.78, hexA(tone,.17*a0));
       g.addColorStop(1, hexA(tone, 0));
       c.fillStyle = g;
       c.beginPath(); c.arc(S / 2 + ox, S / 2 + oy, rr, 0, Math.PI * 2); c.fill();
@@ -311,9 +308,18 @@ function makeFatSprites() {
     blob(0, 0, S * 0.40, 1);
     blob(-S * 0.16, S * 0.12, S * 0.27, .85);
     blob(S * 0.19, -S * 0.10, S * 0.24, .7);
+    // Off-centre translucent light and underside shade give each lobule soft volume.
+    const shade = c.createRadialGradient(85, 99, 3, 85, 99, 43);
+    shade.addColorStop(0, 'rgba(142,100,39,.19)');
+    shade.addColorStop(1, 'rgba(142,100,39,0)');
+    c.fillStyle=shade;c.fillRect(0,0,S,S);
+    const light = c.createRadialGradient(67, 61, 2, 67, 61, 31);
+    light.addColorStop(0,'rgba(255,249,217,.34)');
+    light.addColorStop(1,'rgba(255,249,217,0)');
+    c.fillStyle=light;c.fillRect(0,0,S,S);
     // Broken golden crescent instead of a full outline.
-    c.strokeStyle = `rgba(150, 96, 28, ${.15 + si * .012})`;
-    c.lineWidth = 2.8;
+    c.strokeStyle = `rgba(150, 96, 28, ${.09 + si * .008})`;
+    c.lineWidth = 1.3;
     c.beginPath();
     c.arc(S / 2, S / 2, S * 0.33, 1.55 + si * .32, 2.35 + si * .32);
     c.stroke();
@@ -351,7 +357,9 @@ const VESSEL = (() => {
   for (let s = 0.02; s <= 0.70; s += 0.045) {
     vein.push({ s, hf: Math.max(0.05, trunkHF(s) - 0.09 + 0.02 * Math.sin(s * 17)) });
   }
-  return { trunk, branches, twigs, vein };
+  const arcades = branches.slice(0,-1).map((b,i) => [b[1],
+    {s:(b[1].s+branches[i+1][1].s)*.5,hf:.27+.09*R()}, branches[i+1][1]]);
+  return { trunk, branches, twigs, vein, arcades };
 })();
 function vesselPts(spec, swell) {
   const out = [];
@@ -362,10 +370,12 @@ function vesselPts(spec, swell) {
       continue;
     }
     const a = spec[i - 1], b = spec[i];
-    for (let k = 1; k <= 3; k++) {
-      const t = k / 3;
-      const s = lerp(a.s, b.s, t);
-      const hf = lerp(a.hf, b.hf, t) + .022 * Math.sin(t * Math.PI) * Math.sin(i * 3.1 + k * 1.7);
+    for (let k = 1; k <= 10; k++) {
+      const t = k / 10;
+      const prev = spec[Math.max(0,i-2)], next = spec[Math.min(spec.length-1,i+1)];
+      const cat = key => .5*((2*a[key])+(-prev[key]+b[key])*t+(2*prev[key]-5*a[key]+4*b[key]-next[key])*t*t+(-prev[key]+3*a[key]-3*b[key]+next[key])*t*t*t);
+      const s = clamp(cat('s'),0,.89);
+      const hf = clamp(cat('hf'),.02,.94);
       out.push(mesoPt(s, swell, Math.max(1.2, mesoHang(s) * hf)));
     }
   }
@@ -578,7 +588,7 @@ function paintFatCells(ctx, swell, topOnly = false) {
     const f = frameAt(L.s);
     const ang = Math.atan2(f.ty, f.tx) + L.rot;
     const r = L.r * 3.0;
-    const a = L.alpha * (topOnly ? .78 : .72);
+    const a = L.alpha * (topOnly ? .88 : .92);
     drawSprite(ctx, FAT_SPRITES[L.tone], c[0], c[1], r, r * 0.9, ang, a);
     // Second offset lobe: the clump is not a round coin.
     const ox = f.tx * L.r * .42 + f.nx * L.r * .18;
@@ -616,6 +626,7 @@ function paintVessels(ctx, swell, cong) {
     const tw = vesselPts(VESSEL.twigs[i], swell);
     strokeTapered(ctx, tw, .8 * kW, .38, artCol, .48);
   });
+  VESSEL.arcades.forEach((b,i) => strokeTapered(ctx,vesselPts(b,swell),(.9-i*.08)*kW,.45,artCol,.48));
   // Fine caps near the serosa, more visible when congested.
   const R = rng(77021);
   for (let i = 0; i < 13; i++) {
@@ -634,7 +645,7 @@ function drawMesoInk(ctx, swell, px) {
   inkStroke(ctx, 'g.mesoCap', 'linearPath', [cap], { strokeWidth: 1.1 * px, roughness: .85, bowing: .3, seed: 62 }, 0.24);
   // Fat-lobule septa: short faint creases, not a wireframe.
   const R = rng(4409);
-  for (let i = 0; i < 9; i++) {
+  for (let i = 0; i < 28; i++) {
     const s = 0.08 + R() * 0.66;
     const h = mesoHang(s);
     if (h < 26) continue;
@@ -663,7 +674,7 @@ function crossColor(look, t) {
     mix3(sh, base, 0.76),
     base,
     mix3(base, gl, 0.30),
-    mix3(base, gl, 0.55),
+    mix3(base, gl, 0.35),
     mix3(base, gl, 0.14),
   ];
   let i = 0;
@@ -714,7 +725,7 @@ function paintCap(ctx, swell, look) {
   ctx.fillStyle = g;
   const pt = (u, h) => [f.p[0] + f.nx * u + f.tx * h, f.p[1] + f.ny * u + f.ty * h];
   // Overlap the final shaft segment slightly to avoid a raster seam.
-  path(ctx, [pt(R, -1), pt(R, R + 1), pt(-R, R + 1), pt(-R, -1)]);
+  path(ctx, [pt(R, -1), pt(R, NORMAL_RADIUS + 1), pt(-R, NORMAL_RADIUS + 1), pt(-R, -1)]);
   ctx.fill();
 }
 
@@ -736,7 +747,7 @@ function fibrinStrands(ctx, c, ang, rx, ry, seed, alpha) {
   const ca = Math.cos(ang), sa = Math.sin(ang);
   ctx.save();
   ctx.lineCap = 'round';
-  for (let k = 0; k < 3; k++) {
+  for (let k = 0; k < 7; k++) {
     const ox = (R() - .5) * rx * .9, oy = (R() - .5) * ry * 1.1;
     const len = rx * (0.35 + R() * 0.5);
     const a0 = -0.5 + R();
@@ -761,6 +772,12 @@ function fibrinStrands(ctx, c, ang, rx, ry, seed, alpha) {
 function paintPus(ctx, swell, alpha) {
   const tile = PIX.get('g.pusTile');
   if (!PUS_SPRITE || alpha <= 0.002) return;
+  // Connected, translucent fibrin veil under the raised islands, exposing red beneath.
+  for(let i=0;i<22;i++) {
+    const s=.14+i*.028, v=-.22+.13*Math.sin(i*1.8);
+    const pts=surfaceBlob(s,v,27,18+4*Math.sin(i),9800+i,{swell,n:44,jitter:.3,amp:.23});
+    fillPoly(ctx,pts,[205,185,138],.19*alpha);
+  }
   PUS_PATCHES.forEach((p, i) => {
     const [s, v, rx, ry, rot] = p;
     const f = frameAt(clamp(s, 0, CAP_S)), w = tubeRadius(clamp(s, 0, CAP_S), swell);
@@ -769,13 +786,60 @@ function paintPus(ctx, swell, alpha) {
     const R = rng(9000 + i * 31);
     // Thin ochre halo stains the congested base so the rim is not a cut edge.
     if (tile) drawSprite(ctx, tile, c[0] + (R() - .5) * 6, c[1] + (R() - .5) * 5, rx * 4.4, ry * 4.8, ang, .17 * alpha, 'multiply');
+    // Narrow underside shadow beneath the thick islands; thin veil remains transparent.
+    ctx.save();ctx.filter='blur(1.4px)';
+    drawSprite(ctx,PUS_SPRITE,c[0]+f.nx*2,c[1]+f.ny*2,rx*2.6,ry*2.8,ang,.18*alpha,'multiply');
+    ctx.restore();
     // Uneven thickness: two irregular sheets, the centre denser than the shoulder.
-    drawSprite(ctx, PUS_SPRITE, c[0], c[1], rx * 3.4, ry * 3.6, ang, .90 * alpha);
+    drawSprite(ctx, PUS_SPRITE, c[0], c[1], rx * 3.4, ry * 3.6, ang, .77 * alpha);
     drawSprite(ctx, PUS_SPRITE, c[0] + (R() - .5) * rx * .7, c[1] + (R() - .5) * ry * .7, rx * 2.3, ry * 2.5, ang + (R() - .5) * 1.4, .44 * alpha);
     // Pigment mottle inside the same footprint (keepWatercolour grain over the flat body).
     drawSprite(ctx, PUS_SPRITE, c[0], c[1], rx * 3.3, ry * 3.5, ang, .14 * alpha, 'multiply');
+    for(let j=0;j<24;j++) {
+      const u=(R()-.5)*rx*1.3,vv=(R()-.5)*ry*1.2;
+      const x=c[0]+Math.cos(ang)*u-Math.sin(ang)*vv,y=c[1]+Math.sin(ang)*u+Math.cos(ang)*vv;
+      ctx.fillStyle=j%3?'rgba(236,221,187,'+(.19*alpha)+')':'rgba(132,105,66,'+(.16*alpha)+')';
+      ctx.beginPath();ctx.ellipse(x,y,.4+R()*1.6,.25+R()*.7,ang,0,Math.PI*2);ctx.fill();
+    }
     fibrinStrands(ctx, c, ang, rx, ry, 9500 + i * 17, alpha * smooth(alpha / .6));
   });
+}
+
+// Surface pigment has clustered grains and short strokes following the tissue axis.
+function paintSerosalTooth(ctx, swell, cong) {
+  const R = rng(94031);
+  for(let i=0;i<3400;i++) {
+    const s=.012+R()*.89, v=-.97+R()*1.94, f=frameAt(s), w=tubeRadius(s,swell);
+    const x=f.p[0]+f.nx*w*v, y=f.p[1]+f.ny*w*v;
+    const cluster=.5+.5*Math.sin(s*83+v*9)*Math.sin(v*24+s*37);
+    const dark=R()>.28;
+    ctx.fillStyle=dark ? css(mix3([106,73,66],[122,32,34],cong),.025+cluster*.095) : 'rgba(252,232,214,.13)';
+    ctx.beginPath();ctx.ellipse(x,y,.18+R()*.65,.16+R()*.36,0,0,Math.PI*2);ctx.fill();
+    if(i%11===0) {
+      const len=1.4+R()*5;
+      ctx.strokeStyle=dark?'rgba(104,53,49,.10)':'rgba(249,226,210,.16)';ctx.lineWidth=.35+R()*.8;
+      ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+f.tx*len*.5+f.nx,y+f.ty*len*.5+f.ny,x+f.tx*len,y+f.ty*len);ctx.stroke();
+    }
+  }
+  for(let i=0;i<62;i++) {
+    const s=.025+R()*.85,v=-.85+R()*1.7;
+    const pts=surfaceBlob(s,v,4+R()*15,1.5+R()*4,94500+i,{swell,n:24,jitter:.32});
+    fillPoly(ctx,pts, i%3===0?[246,218,201]:mix3([134,92,82],[152,44,41],cong),.045+R()*.055);
+    if(i%3!==0){ctx.strokeStyle=css(mix3([121,83,74],[144,38,38],cong),.055);ctx.lineWidth=.45;ctx.beginPath();pts.slice(5,15).forEach((p,j)=>j?ctx.lineTo(...p):ctx.moveTo(...p));ctx.stroke();}
+  }
+}
+function paintNecroDamage(ctx,swell,alpha) {
+ const R=rng(94322);
+ ctx.save();ctx.globalAlpha*=alpha;
+ for(let i=0;i<30;i++) {
+  const s=.735+R()*.14,v=-.58+R()*.95,f=frameAt(s),w=tubeRadius(s,swell);
+  const x=f.p[0]+f.nx*w*v,y=f.p[1]+f.ny*w*v,len=2+R()*7;
+  ctx.strokeStyle='rgba(8,5,13,.48)';ctx.lineWidth=.35+R()*.65;
+  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+f.tx*len*.5+f.nx,y+f.ty*len*.5+f.ny);ctx.lineTo(x+f.tx*len-f.nx,y+f.ty*len-f.ny);ctx.stroke();
+  if(i%3===0){fillPoly(ctx,surfaceBlob(s,v,2+R()*4,1+R()*2,94700+i,{swell,n:20}),[8,7,13],.34);
+  ctx.strokeStyle='rgba(188,168,158,.19)';ctx.lineWidth=.55;ctx.beginPath();ctx.moveTo(x,y-1);ctx.lineTo(x+f.tx*len*.6,y+f.ty*len*.6-1);ctx.stroke();}
+ }
+ ctx.restore();
 }
 
 // ── hemorrhage ──────────────────────────────────────────────────────────────────────────
@@ -863,10 +927,10 @@ function paintPit(ctx, swell, alpha) {
 function paintGloss(ctx, swell, amount, px) {
   if (amount <= 0.03) return;
   const bands = [
-    [0.10, 0.28, 0.80, 10],
-    [0.30, 0.49, 0.78, 13],
-    [0.50, 0.69, 0.74, 11],
-    [0.68, 0.80, 0.66, 7],
+    [0.09, 0.15, 0.79, 6], [0.19, 0.25, 0.75, 8],
+    [0.32, 0.37, 0.82, 5], [0.41, 0.47, 0.74, 9],
+    [0.53, 0.56, 0.77, 5], [0.61, 0.67, 0.72, 7],
+    [0.73, 0.77, 0.69, 4],
   ];
   ctx.save();
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
@@ -881,10 +945,11 @@ function paintGloss(ctx, swell, amount, px) {
     ];
     layers.forEach(([lw, la], k) => {
       ctx.strokeStyle = `rgba(255, 252, 244, ${la * amount})`;
-      ctx.lineWidth = lw;
-      ctx.beginPath();
-      pts.forEach((p, j) => j ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
-      ctx.stroke();
+      for(let j=0;j<pts.length-1;j++) {
+        const t=(j+.5)/(pts.length-1);
+        ctx.lineWidth=lw*(.18+.82*Math.sin(Math.PI*t))*(.82+.18*Math.sin(j*2.7+i));
+        ctx.beginPath();ctx.moveTo(...pts[j]);ctx.lineTo(...pts[j+1]);ctx.stroke();
+      }
     });
   });
   // Small specular at the cap crest.
@@ -1004,6 +1069,7 @@ export function drawAppendix(ctx, state, pose, { alpha = 1 } = {}) {
   drawPinned(ctx, 'g.pink', 70, 26, 760, { alpha: (1 - cong) * 0.14, blend: 'multiply' });
   drawPinned(ctx, 'g.red', 0, 0, 1024, { alpha: cong * 0.38, blend: 'multiply' });
   drawPinned(ctx, 'g.grain', -20, -60, 1200, { alpha: .15, blend: 'multiply' });
+  paintSerosalTooth(ctx, swell, cong);
   drawSurface(ctx, swell, px, cong);
   ctx.save();
   ctx.filter = 'blur(1.2px)';
@@ -1014,6 +1080,7 @@ export function drawAppendix(ctx, state, pose, { alpha = 1 } = {}) {
   ctx.filter = 'blur(1.6px)';
   paintNecro(ctx, swell, necA);
   ctx.restore();
+  paintNecroDamage(ctx, swell, necA);
   paintPit(ctx, swell, necA);
   paintCut(ctx, swell, look);
   paintGloss(ctx, swell, glossA, px);
@@ -1030,7 +1097,7 @@ const NOTES = {
     { s: 0.16, extra: 0.45, label: '系膜血管细', dir: 'down', shelf: 'left' },
   ],
   red: [
-    { s: 0.28, side: -1, d: 8, label: '朱红充血', dir: 'up', col: C.red, shelf: 'left' },
+    { s: 0.28, side: -1, d: 8, label: '朱红充血', dir: 'up', col: C.red, shelf: 'right' },
     { s: 0.62, side: -1, d: 8, label: '表面血管扩张', dir: 'up', shelf: 'right' },
     { s: 0.22, extra: 0.7, label: '肿胀增粗', dir: 'down', shelf: 'left' },
   ],
@@ -1068,7 +1135,7 @@ export function drawNotes(ctx, state, pose) {
     const qx = right ? p[0] - 36 : p[0] + 36;
     const rx = right ? qx - shelf : qx + shelf;
     A.leader(ctx, p, [qx, qy], [rx, qy], { k: 1, elbow: true });
-    A.label(ctx, n.label, right ? rx : qx + 6, qy - 16, { size: 26, w: 700, col: n.col || C.ink, halo: true, align: right ? 'right' : 'left' });
+    A.label(ctx, n.label, right ? rx : qx + 6, qy - 16, { size: 26, w: 700, col: '#85718F', halo: true, align: right ? 'right' : 'left' });
   });
 }
 

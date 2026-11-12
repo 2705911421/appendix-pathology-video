@@ -69,7 +69,7 @@ function drawGrid(ctx) {
     A.label(ctx, m.diag, box.x + 18, box.y + 28, { size: 28, w: 800, col: m.tone, halo: true });
     A.label(ctx, m.sub, box.x + 18, box.y + 58, { size: 18, w: 500, alpha: .7, halo: true });
   });
-  A.label(ctx, '大体标本 · 四态', 96, 980, { size: 22, w: 500, alpha: .5 });
+  A.label(ctx, '大体标本 · 四态', 96, 930, { size: 22, w: 500, alpha: .5 });
 }
 
 export default {
