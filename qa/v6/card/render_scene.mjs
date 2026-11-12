@@ -11,6 +11,6 @@ if(!process.argv.includes('--video-only')){render(['--still',picks.map(p=>p.t.to
 for(const p of picks)fs.copyFileSync(`${P}/stills/t_${p.t.toFixed(2).padStart(6,'0')}.png`,`${P}/${p.name}.png`);
 run('python3',['qa/v6/card/sheet.py',P],{stdio:'inherit'});
 render(['--determinism']);}
-render(['--out',P+`/${scene.toUpperCase()}_verified.mp4`,'--crf','16','--fps','30','--workers','2']);
+render(['--out',P+`/${scene.toUpperCase()}_verified.mp4`,'--crf','16','--fps','30','--workers','1']);
 fs.renameSync(P+`/${scene.toUpperCase()}_verified.mp4`,P+`/${scene.toUpperCase()}.mp4`);
 run('ffmpeg',['-v','error','-y','-i',P+`/${scene.toUpperCase()}.mp4`,'-ss',String(origin),'-i','/workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav','-map','0:v','-map','1:a','-vf','scale=1280:720','-c:v','libx264','-crf','16','-c:a','aac','-b:a','192k','-t',String(duration),'-movflags','+faststart',P+`/${scene.toUpperCase()}_带配音_720p.mp4`],{stdio:'inherit'});
