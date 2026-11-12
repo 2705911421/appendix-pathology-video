@@ -1,0 +1,45 @@
+import pathlib,json,subprocess
+P=pathlib.Path(__file__).resolve().parent;k=json.loads((P/'keyframes.json').read_text());parity=json.loads((P/'parity.json').read_text());v=json.loads((P/'video_check.json').read_text());log=(P/'render.log').read_text();det=next(s for s in log.splitlines() if 'deterministic:' in s);(P/'determinism.log').write_text(det+'\n')
+rows='\n'.join(f"| {scene.upper()} | {len(frames)} | "+('全部为零' if all(f['MAE']==0 for f in frames) else '、'.join(f"{f['frame']}={f['MAE']:.12f}" for f in frames if f['MAE']))+' |' for scene,frames in parity.items())
+report=f'''# S06 h01 自检
+
+## 逐句对应
+
+- 句 23：纸底 #F4EFE6、墨色 #2A2A35，左栏“第一幕红”“单纯性阑尾炎”“充血、轻度肿胀”。右侧使用指定提交 1beff7c 的 gross r4 原文件，stage 从正常态连续过渡至红态；库内红态宽度为正常的 1.16 倍，未进入化脓态。浆膜面细血管随充血显现；浅紫“充血”标签配细引线、无底框。
+- 句 24：保留同一浆膜部位的圆形定位锚点，大体向上让位，细线连到壁内血管示意。内皮边界由窄变宽，红细胞数量与相对拥挤程度增加，中央淡染区可辨。没有白细胞、外渗、流速、箭头、刻度、管径数字。扩张标签在血管外，浅紫细引线、无底框。
+- 新增内容最高下缘低于 y=900；源粗剪字幕位于独立的底部字幕带，新场景不画字幕。保留 v10 的 light 字幕像素。
+
+## 时序与合成
+
+所有动画节点来自 film/timeline.js 的 forScene(23,24,0) 及 T.at/end/frac。源时间起点 {k['origin']:.9f}，片段时长 {k['duration']:.9f}。按 30fps 向上取整帧边界，替换帧 [{v['1080p']['window']['start_frame']}, {v['1080p']['window']['end_frame']})；这是采样量化，未写死旁白秒数。S06.mp4 由唯一指定 render.mjs 输出，CRF16、1920×1080、30fps；720p 补丁 CRF16。
+
+为严格保留窗口外像素，先对新场景以 CRF16 编码，再将边界 GOP 以 CRF0 封装，避免二次有损编码污染窗口外画面；边界 GOP 外视频包原样复制。最终成片并非全片重新 CRF16 压制。音轨从 v10 stream copy。720p 配音片段从粗剪 v11 截出，单独 CRF16 编码。
+
+视频检查见 video_check.json：两版窗口外抽检（含精确窗口前后相邻帧、边界 GOP 接点）MAE 均为零；GOP 外全部压缩视频包哈希一致，边界 GOP 内窗口外的每帧也逐一验证哈希一致（1080p 共 26 帧，720p 共 196 帧）；各关键帧底部字幕带 MAE 均为零；音轨压缩数据 SHA256 一致，全部音频包的 PTS、DTS 与时长也完全一致（audio_timing.json）；两版总帧数均为 {v['1080p']['frame_count']}。
+
+## 场景 parity
+
+| 场景 | 帧数 | MAE |
+|---|---:|---|
+{rows}
+
+S11 三张句 43 帧的微小差异与 f03 记录完全一致，未新增差异。S14 按 f03 的五张正式内容关键帧校验；旧虹膜过渡在本次窗口外，视频包及像素检查覆盖保留机制。
+
+## Determinism 与文件锁
+
+{det}
+
+并行截图曾超时；最终使用单 worker 完整成功输出，详见 video_retry.log。最终代码的 determinism 已通过。
+
+开工及收工均校验七个锁定文件，sha256_开工.txt 与 sha256_结束.txt 完全相同，且开工对 f03 基线验证全部通过。gross_appendix.js 与指定提交导出的 SHA256 一致；没有修改其接口或实现。未修改 v4_mix、assembly/endcard、两个开发目录及 .mimo.env；没有 git commit。
+
+## 仍不足之处
+
+- 大体按要求采用暂定 gross r4，其圆柱光泽和系膜色块仍较规整；待大体库迭代后可原文件替换。
+- 血管是教学展开示意，保留定位关系但不代表精确组织切面；管壁和红细胞的轮廓、渐变仍比细化样张规整，水彩细节有进一步提升空间。
+- 红细胞增多通过原位渐显表达，没有模拟血流轨迹或给出定量关系。
+- 场景窗口与前后既有粗剪以切换衔接，窗口外严格保留；未额外扩大过渡窗口。
+
+复现：node qa/v6/h01_s06/render_all.mjs；node qa/v6/h01_s06/parity.mjs；python3 qa/v6/h01_s06/check_stills.py；python3 qa/v6/h01_s06/build_v11.py；python3 qa/v6/h01_s06/check_video.py。
+'''
+(P/'自检.md').write_text(report)
