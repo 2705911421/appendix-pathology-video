@@ -1,7 +1,7 @@
 import fs from 'node:fs';import {execFileSync as run} from 'node:child_process';
 const scene=process.argv[2],ranges={S09:[35,36],S12:[47,48],S15:[58,59],S04:[14,19]},[first,last]=ranges[scene],P=`qa/v6/ct/${scene}`;
 const rows=JSON.parse(fs.readFileSync('/workspace/病理科普视频/配音/全稿_v3/timeline.json')).lines.filter(s=>s.n>=first&&s.n<=last),origin=rows[0].start,duration=rows.at(-1).end-origin;
-fs.mkdirSync(P,{recursive:true});const picks=rows.flatMap(s=>(scene==='S04'&&s.n!==17?[.72]:[.3,.82]).map(f=>({name:`s${s.n}_${Math.round(f*100)}`,t:s.start-origin+(s.end-s.start)*f})));
+fs.mkdirSync(P,{recursive:true});const picks=rows.flatMap(s=>(scene==='S04'?(s.n===14?[.12,.8]:[16,17].includes(s.n)?[.3,.82]:[.72]):[.3,.82]).map(f=>({name:`s${s.n}_${Math.round(f*100)}`,t:s.start-origin+(s.end-s.start)*f})));
 fs.writeFileSync(`${P}/keyframes.json`,JSON.stringify({origin,duration,picks},null,2));
 const tool='/workspace/garden-skills/skills/motion-showreel/scripts/render.mjs';
 function render(args){run('node',[tool,'film','--q',`scene=${scene.toLowerCase()}`,...args],{stdio:'inherit'});}
