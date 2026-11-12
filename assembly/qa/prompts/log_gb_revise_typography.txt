@@ -1,0 +1,24 @@
+START 2026-11-10T23:43:33+08:00
+I'll revise the existing subtitle typography in place: one config for the new sizes, then re-render the dry-run frames and video. First I'll read the current module, pipeline, and QA scripts so nothing else gets rewritten.The live sizes are still 68/42 with the band at y=810. I'll measure MixSans at 52/30 so the new baselines and fade sit on the real glyph edges.Measured MixSans: at 52 px the Chinese halo starts about 58 px above the baseline. I'll check the tallest cue characters, then lock `safeTop` so that fringe stays at or below it.MixSans at 52/30 puts the Chinese halo at y=952 and the English descent 24 px above the frame, so the safe area can sit at 950. I'll move every typography number into one config and point the drawer at it.The short fade was ending in a hard line across the frame. I’ll peak it just above the Chinese halo and ease it back out so the footer stays open.The live subtitle size is now 52/30, and the picture safe-area top is **y=950**. Mini can place scene art at y < 950.
+
+Chinese is 52 px, weight 500, baseline `cnY` 1010. English is 30 px, weight 400, floor 24 px, baseline `enY` 1050, max width 1840. The scrim starts at y=950, peaks at 0.16 opacity at `fadeEnd` 961 (just above the dense Chinese halo), and eases to clear at y=1080. Every number is in `subtitle/config.js`. `PRESETS.old` keeps 68/42 only for the comparison still.
+
+Measured on MixSans: Chinese ink y=965–1015, halo from y=952, English cap at y=1028 (13 px under the Chinese descent), English descent ending at y=1056 (24 px above y=1080). Ink and halo stay at y ≥ 950. Of 136 English cards, 0 shrink below 30 px and 0 overflow at 24 px. The widest card is 652.3 px at 30 px.
+
+Dry run passed, including the blind-review metadata check. `【待填】` is still in `endcard.json`. This pass did not write under `endcard/`.
+
+Files: `subtitle/config.js`, `subtitle/subtitle.js`, `subtitle/index.html`, `subtitle/README.md`, `pipeline/assemble.mjs`, `pipeline/README.md`, `qa/dryrun_report.md`.
+
+Stills and video:
+- `qa/frames/帧_01_句01中点.png`
+- `qa/frames/帧_02_最长英文_s03.png`
+- `qa/frames/帧_03_片尾A_t3.png`
+- `qa/frames/对比_字幕字号.png` (1920×2320)
+- `qa/frames/预览_手机竖屏.png` (390×219)
+- `qa/frames/预览_手机竖屏_条.png` (390×26)
+- `qa/dryrun_测试.mp4`, `qa/dryrun_测试_720p.mp4`, `qa/dryrun_测试_盲审.mp4`
+
+No blockers.
+
+EXIT 0
+END 2026-11-11T00:06:04+08:00 exit=0

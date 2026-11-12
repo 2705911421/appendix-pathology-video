@@ -15,7 +15,7 @@ function cardA(ctx) {
  text(ctx,D.titleLines[0],960,L.titleY,L.titleSize,700,1,'center');text(ctx,D.titleLines[1],960,L.subtitleY,L.subtitleSize,500,.75,'center');
  ctx.save();ctx.strokeStyle=C.ink;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(360,L.subtitleY+28);ctx.lineTo(1560,L.subtitleY+28);ctx.stroke();ctx.restore();
  heading(ctx,D.creationHeading,L.aHeadingY);text(ctx,D.intro,L.x,L.introY,L.bodySize);
- D.cells.forEach((lines,i)=>lines.forEach((s,j)=>text(ctx,s,L.x+(i%2)*L.cellCol+(j?20:0),L.cellY+Math.floor(i/2)*L.cellRow+j*L.bodyLeading,L.bodySize)));
+ let cellY=L.cellY;D.cells.forEach(lines=>{lines.forEach((s,j)=>text(ctx,s,L.x+(j?20:0),cellY+j*L.bodyLeading,L.bodySize));cellY+=L.cellRow+(lines.length-1)*L.bodyLeading;});
  D.notes.forEach((s,j)=>text(ctx,s,L.x,L.notesY+j*L.bodyLeading,25,400,.8));
 }
 function cardB(ctx) {

@@ -1,0 +1,13 @@
+{
+  "name": "pathology-v5-assembly",
+  "private": true,
+  "type": "module",
+  "description": "Standalone bilingual subtitles and final assembly for the v5 pathology film.",
+  "scripts": {
+    "stills": "node subtitle/render.mjs",
+    "assemble": "node pipeline/assemble.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.65.0"
+  }
+}

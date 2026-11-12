@@ -1,0 +1,381 @@
+{
+  "source": "定稿+estimate",
+  "formula": "duration_i = hanzi_i * 0.22 + 0.4; start_0 = 0; end_i = start_i + duration_i; start_{i+1} = end_i",
+  "finalAudioTiming": false,
+  "note": "NOT final audio timing. hanzi is the 定稿 字数 column (Chinese characters, excluding ASCII, punctuation, and [n]). Each duration is rounded to the nearest millisecond.",
+  "cueCount": 77,
+  "first": "这根形似小香肠的盲管，就是阑尾。",
+  "last": "持续右下腹痛、发热，请及时就诊。",
+  "mismatches": [
+    {
+      "kind": "hanzi",
+      "i": 45,
+      "id": "46",
+      "column": 15,
+      "computed": 17
+    }
+  ],
+  "contentDuration": 18,
+  "lastCueEnd": 17.4,
+  "endcardDuration": 12,
+  "totalDurationExpected": 30,
+  "duration1080": 30,
+  "duration720": 30,
+  "video": {
+    "width": 1920,
+    "height": 1080,
+    "pix_fmt": "yuv420p",
+    "codec": "h264"
+  },
+  "audio": {
+    "codec": "aac",
+    "sampleRate": "48000",
+    "channels": 2
+  },
+  "files": {
+    "master": {
+      "file": "/workspace/病理科普视频/v5/assembly/qa/dryrun_测试.mp4",
+      "bytes": 3531823,
+      "size": "3.37 MB"
+    },
+    "p720": {
+      "file": "/workspace/病理科普视频/v5/assembly/qa/dryrun_测试_720p.mp4",
+      "bytes": 877450,
+      "size": "856.9 KB"
+    },
+    "blind": {
+      "file": "/workspace/病理科普视频/v5/assembly/qa/dryrun_测试_盲审.mp4",
+      "bytes": 3471078,
+      "size": "3.31 MB"
+    }
+  },
+  "audioReport": {
+    "voice": null,
+    "music": null,
+    "voiceSilent": true,
+    "musicSilent": true,
+    "loudnorm": "skipped",
+    "reason": "Both voice and music are missing or digital silence. loudnorm is skipped because it misbehaves on digital silence.",
+    "integratedLufs": null,
+    "truePeak": null
+  },
+  "typography": {
+    "CN_SIZE": 52,
+    "EN_SIZE": 30,
+    "EN_FLOOR": 24,
+    "EN_MAX_W": 1840,
+    "MAX": 18,
+    "weightCn": 500,
+    "weightEn": 400,
+    "halo": {
+      "stroke": 6,
+      "blur": 10,
+      "shadowAlpha": 0.9,
+      "strokeAlpha": 0.82
+    },
+    "fade": {
+      "extend": "ease",
+      "stops": [
+        {
+          "t": 0,
+          "a": 0
+        },
+        {
+          "t": 0.0846,
+          "a": 0.16
+        },
+        {
+          "t": 0.8154,
+          "a": 0.05
+        },
+        {
+          "t": 1,
+          "a": 0
+        }
+      ]
+    }
+  },
+  "BAND": {
+    "fadeTop": 950,
+    "fadeEnd": 961,
+    "cnY": 1010,
+    "enY": 1050,
+    "safeTop": 950
+  },
+  "pictureSafeTop": 950,
+  "xfade": false,
+  "scene": "placeholder #F4EFE6",
+  "english": {
+    "cards": 136,
+    "shrinks": [],
+    "overflows": [],
+    "widest": {
+      "id": "52",
+      "i": 51,
+      "card": 0,
+      "text": "Necrosis and hemoglobin breakdown products",
+      "chars": 42,
+      "size": 30,
+      "width": 652.3,
+      "overflow": false
+    }
+  },
+  "stills": {
+    "t1": 1.74,
+    "t3": 8.48,
+    "endcardT": 3,
+    "fileTime": 21,
+    "state1": {
+      "id": "01",
+      "cn": "这根形似小香肠的盲管，就是阑尾",
+      "en": "This small sausage-shaped tube is the",
+      "cnA": 1,
+      "enA": 1
+    },
+    "state3": {
+      "id": "03",
+      "cn": "每一次颜色流转，都记录着组织的伤痕",
+      "en": "These colors reveal how tissue is injured.",
+      "cnA": 1,
+      "enA": 1
+    },
+    "inkReports": [
+      {
+        "file": "/workspace/病理科普视频/v5/assembly/qa/frames/帧_01_句01中点.png",
+        "w": 1920,
+        "h": 1080,
+        "t": 1.74,
+        "above": 0,
+        "minAbove": null,
+        "ink": 18463,
+        "minInk": 965,
+        "pass": true
+      },
+      {
+        "file": "/workspace/病理科普视频/v5/assembly/qa/frames/帧_02_最长英文_s03.png",
+        "w": 1920,
+        "h": 1080,
+        "t": 8.48,
+        "above": 0,
+        "minAbove": null,
+        "ink": 19693,
+        "minInk": 965,
+        "pass": true
+      }
+    ],
+    "endSize": {
+      "w": 1920,
+      "h": 1080
+    },
+    "overlayCheck": {
+      "above": 0,
+      "minAbove": null,
+      "opaque": 11353
+    },
+    "qaPaths": {
+      "compare": "/workspace/病理科普视频/v5/assembly/qa/frames/对比_字幕字号.png",
+      "phone": "/workspace/病理科普视频/v5/assembly/qa/frames/预览_手机竖屏.png",
+      "strip": "/workspace/病理科普视频/v5/assembly/qa/frames/预览_手机竖屏_条.png"
+    },
+    "qaMeta": {
+      "phone": {
+        "w": 390,
+        "h": 219
+      },
+      "strip": {
+        "w": 390,
+        "h": 26
+      },
+      "compare": {
+        "w": 1920,
+        "h": 2320
+      },
+      "labels": {
+        "old": "「原 68 / 42，安全区 810」",
+        "current": "「新 52 / 30，安全区 950」"
+      },
+      "safeTop": 950
+    },
+    "qaSize": {
+      "compare": {
+        "w": 1920,
+        "h": 2320
+      },
+      "phone": {
+        "w": 390,
+        "h": 219
+      },
+      "strip": {
+        "w": 390,
+        "h": 26
+      }
+    }
+  },
+  "window": [
+    {
+      "id": "01",
+      "ch": "01 开场",
+      "start": 0,
+      "end": 3.48,
+      "hanzi": 14,
+      "text": "这根形似小香肠的盲管，就是阑尾。",
+      "en": "This small sausage-shaped tube is the | appendix.",
+      "englishCards": [
+        "This small sausage-shaped tube is the",
+        "appendix."
+      ],
+      "lines": [
+        {
+          "text": "这根形似小香肠的盲管，就是阑尾",
+          "start": 0,
+          "end": 3.48
+        }
+      ],
+      "cards": [
+        {
+          "text": "This small sausage-shaped tube is the",
+          "start": 0,
+          "end": 2.799
+        },
+        {
+          "text": "appendix.",
+          "start": 2.799,
+          "end": 3.48
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "ch": "01 开场",
+      "start": 3.48,
+      "end": 6.52,
+      "hanzi": 12,
+      "text": "发起炎来，它可能染上红、黄、黑。",
+      "en": "When inflamed, it may turn red, yellow, | then black.",
+      "englishCards": [
+        "When inflamed, it may turn red, yellow,",
+        "then black."
+      ],
+      "lines": [
+        {
+          "text": "发起炎来，它可能染上红、黄、黑",
+          "start": 3.48,
+          "end": 6.52
+        }
+      ],
+      "cards": [
+        {
+          "text": "When inflamed, it may turn red, yellow,",
+          "start": 3.48,
+          "end": 5.851
+        },
+        {
+          "text": "then black.",
+          "start": 5.851,
+          "end": 6.52
+        }
+      ]
+    },
+    {
+      "id": "03",
+      "ch": "01 开场",
+      "start": 6.52,
+      "end": 10.44,
+      "hanzi": 16,
+      "text": "每一次颜色流转，都记录着组织的伤痕。",
+      "en": "These colors reveal how tissue is injured.",
+      "englishCards": [
+        "These colors reveal how tissue is injured."
+      ],
+      "lines": [
+        {
+          "text": "每一次颜色流转，都记录着组织的伤痕",
+          "start": 6.52,
+          "end": 10.44
+        }
+      ],
+      "cards": [
+        {
+          "text": "These colors reveal how tissue is injured.",
+          "start": 6.52,
+          "end": 10.44
+        }
+      ]
+    },
+    {
+      "id": "04",
+      "ch": "01 开场",
+      "start": 10.44,
+      "end": 14.14,
+      "hanzi": 15,
+      "text": "循着这抹色彩，我们走进炎症的现场。",
+      "en": "Follow the colors to understand | inflammation.",
+      "englishCards": [
+        "Follow the colors to understand",
+        "inflammation."
+      ],
+      "lines": [
+        {
+          "text": "循着这抹色彩，我们走进炎症的现场",
+          "start": 10.44,
+          "end": 14.14
+        }
+      ],
+      "cards": [
+        {
+          "text": "Follow the colors to understand",
+          "start": 10.44,
+          "end": 13.047
+        },
+        {
+          "text": "inflammation.",
+          "start": 13.047,
+          "end": 14.14
+        }
+      ]
+    },
+    {
+      "id": "05",
+      "ch": "01 开场",
+      "start": 14.14,
+      "end": 17.4,
+      "hanzi": 13,
+      "text": "病理学里的“变质”，不是食物变坏。",
+      "en": "In pathology, alteration has a specific | meaning.",
+      "englishCards": [
+        "In pathology, alteration has a specific",
+        "meaning."
+      ],
+      "lines": [
+        {
+          "text": "病理学里的“变质”，不是食物变坏",
+          "start": 14.14,
+          "end": 17.4
+        }
+      ],
+      "cards": [
+        {
+          "text": "In pathology, alteration has a specific",
+          "start": 14.14,
+          "end": 16.845
+        },
+        {
+          "text": "meaning.",
+          "start": 16.845,
+          "end": 17.4
+        }
+      ]
+    }
+  ],
+  "endcardUntouched": true,
+  "pendingStill": true,
+  "blind": {
+    "skipped": false,
+    "exitCode": 0,
+    "probe": "/workspace/病理科普视频/v5/assembly/qa/blind_ffprobe.txt",
+    "strings": "/workspace/病理科普视频/v5/assembly/qa/blind_strings.txt",
+    "pass": true,
+    "stderr": "Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '/workspace/病理科普视频/v5/assembly/qa/dryrun_测试_盲审.mp4':\n  Metadata:\n    major_brand     : isom\n    minor_version   : 512\n    compatible_brands: isomiso2avc1mp41\n  Duration: 00:00:30.02, start: 0.000000, bitrate: 925 kb/s\n  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 917 kb/s, 30 fps, 30 tbr, 15360 tbn (default)\n      Metadata:\n        handler_name    : VideoHandler\n        vendor_id       : [0][0][0][0]\n  Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 2 kb/s (default)\n      Metadata:\n        handler_name    : SoundHandler\n        vendor_id       : [0][0][0][0]\n"
+  },
+  "blockers": []
+}

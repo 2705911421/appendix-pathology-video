@@ -1,0 +1,364 @@
+{
+  "source": "narration.json",
+  "formula": null,
+  "finalAudioTiming": true,
+  "note": null,
+  "cueCount": 77,
+  "first": "这根形似小香肠的盲管，就是阑尾。",
+  "last": "持续右下腹痛、发热，请及时就诊。",
+  "mismatches": [],
+  "contentDuration": 21.7,
+  "lastCueEnd": 20.9,
+  "endcardDuration": 12,
+  "totalDurationExpected": 33.7,
+  "duration1080": 33.7,
+  "duration720": 33.7,
+  "video": {
+    "width": 1920,
+    "height": 1080,
+    "pix_fmt": "yuv420p",
+    "codec": "h264"
+  },
+  "audio": {
+    "codec": "aac",
+    "sampleRate": "48000",
+    "channels": 2
+  },
+  "files": {
+    "master": {
+      "file": "/workspace/病理科普视频/v5/assembly/qa/v3check/第01章_真配音试装.mp4",
+      "bytes": 4150445,
+      "size": "3.96 MB"
+    },
+    "p720": {
+      "file": "/workspace/病理科普视频/v5/assembly/qa/v3check/第01章_真配音试装_720p.mp4",
+      "bytes": 1470845,
+      "size": "1.40 MB"
+    },
+    "blind": null
+  },
+  "audioReport": {
+    "voice": "/workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav",
+    "music": null,
+    "voiceSilent": false,
+    "musicSilent": true,
+    "loudnorm": "two-pass",
+    "integratedLufs": -14,
+    "truePeak": -2.27,
+    "target": {
+      "integratedLufs": -14,
+      "truePeakMax": -1
+    }
+  },
+  "typography": {
+    "CN_SIZE": 52,
+    "EN_SIZE": 30,
+    "EN_FLOOR": 24,
+    "EN_MAX_W": 1840,
+    "MAX": 18,
+    "weightCn": 500,
+    "weightEn": 400,
+    "halo": {
+      "stroke": 6,
+      "blur": 10,
+      "shadowAlpha": 0.9,
+      "strokeAlpha": 0.82
+    },
+    "fade": {
+      "extend": "ease",
+      "stops": [
+        {
+          "t": 0,
+          "a": 0
+        },
+        {
+          "t": 0.0846,
+          "a": 0.16
+        },
+        {
+          "t": 0.8154,
+          "a": 0.05
+        },
+        {
+          "t": 1,
+          "a": 0
+        }
+      ]
+    }
+  },
+  "BAND": {
+    "fadeTop": 950,
+    "fadeEnd": 961,
+    "cnY": 1010,
+    "enY": 1050,
+    "safeTop": 950
+  },
+  "pictureSafeTop": 950,
+  "xfade": false,
+  "scene": "placeholder #F4EFE6",
+  "english": {
+    "cards": 136,
+    "shrinks": [],
+    "overflows": [],
+    "widest": {
+      "id": "52",
+      "i": 51,
+      "card": 0,
+      "text": "Necrosis and hemoglobin breakdown products",
+      "chars": 42,
+      "size": 30,
+      "width": 652.3,
+      "overflow": false
+    }
+  },
+  "stills": {
+    "t1": 2.05,
+    "t3": 10.350000000000001,
+    "endcardT": 3,
+    "fileTime": 24.7,
+    "state1": {
+      "id": "01",
+      "cn": "这根形似小香肠的盲管，就是阑尾",
+      "en": "This small sausage-shaped tube is the",
+      "cnA": 1,
+      "enA": 1
+    },
+    "state3": {
+      "id": "03",
+      "cn": "每一次颜色流转，都记录着组织的伤痕",
+      "en": "These colors reveal how tissue is injured.",
+      "cnA": 1,
+      "enA": 1
+    },
+    "inkReports": [
+      {
+        "file": "/workspace/病理科普视频/v5/assembly/qa/v3check/frames/帧_01_句01中点.png",
+        "w": 1920,
+        "h": 1080,
+        "t": 2.05,
+        "above": 0,
+        "minAbove": null,
+        "ink": 18463,
+        "minInk": 965,
+        "pass": true
+      },
+      {
+        "file": "/workspace/病理科普视频/v5/assembly/qa/v3check/frames/帧_02_最长英文_s03.png",
+        "w": 1920,
+        "h": 1080,
+        "t": 10.350000000000001,
+        "above": 0,
+        "minAbove": null,
+        "ink": 19693,
+        "minInk": 965,
+        "pass": true
+      }
+    ],
+    "endSize": {
+      "w": 1920,
+      "h": 1080
+    },
+    "overlayCheck": {
+      "above": 0,
+      "minAbove": null,
+      "opaque": 11353
+    },
+    "qaPaths": {
+      "compare": "/workspace/病理科普视频/v5/assembly/qa/v3check/frames/对比_字幕字号.png",
+      "phone": "/workspace/病理科普视频/v5/assembly/qa/v3check/frames/预览_手机竖屏.png",
+      "strip": "/workspace/病理科普视频/v5/assembly/qa/v3check/frames/预览_手机竖屏_条.png"
+    },
+    "qaMeta": {
+      "phone": {
+        "w": 390,
+        "h": 219
+      },
+      "strip": {
+        "w": 390,
+        "h": 26
+      },
+      "compare": {
+        "w": 1920,
+        "h": 2320
+      },
+      "labels": {
+        "old": "「原 68 / 42，安全区 810」",
+        "current": "「新 52 / 30，安全区 950」"
+      },
+      "safeTop": 950
+    },
+    "qaSize": {
+      "compare": {
+        "w": 1920,
+        "h": 2320
+      },
+      "phone": {
+        "w": 390,
+        "h": 219
+      },
+      "strip": {
+        "w": 390,
+        "h": 26
+      }
+    }
+  },
+  "window": [
+    {
+      "id": "01",
+      "ch": "01 开场",
+      "start": 0,
+      "end": 4.1,
+      "text": "这根形似小香肠的盲管，就是阑尾。",
+      "en": "This small sausage-shaped tube is the | appendix.",
+      "englishCards": [
+        "This small sausage-shaped tube is the",
+        "appendix."
+      ],
+      "lines": [
+        {
+          "text": "这根形似小香肠的盲管，就是阑尾",
+          "start": 0,
+          "end": 4.1
+        }
+      ],
+      "cards": [
+        {
+          "text": "This small sausage-shaped tube is the",
+          "start": 0,
+          "end": 3.298
+        },
+        {
+          "text": "appendix.",
+          "start": 3.298,
+          "end": 4.1
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "ch": "01 开场",
+      "start": 4.6,
+      "end": 8,
+      "text": "发起炎来，它可能染上红、黄、黑。",
+      "en": "When inflamed, it may turn red, yellow, | then black.",
+      "englishCards": [
+        "When inflamed, it may turn red, yellow,",
+        "then black."
+      ],
+      "lines": [
+        {
+          "text": "发起炎来，它可能染上红、黄、黑",
+          "start": 4.6,
+          "end": 8
+        }
+      ],
+      "cards": [
+        {
+          "text": "When inflamed, it may turn red, yellow,",
+          "start": 4.6,
+          "end": 7.252
+        },
+        {
+          "text": "then black.",
+          "start": 7.252,
+          "end": 8
+        }
+      ]
+    },
+    {
+      "id": "03",
+      "ch": "01 开场",
+      "start": 8.4,
+      "end": 12.3,
+      "text": "每一次颜色流转，都记录着组织的伤痕。",
+      "en": "These colors reveal how tissue is injured.",
+      "englishCards": [
+        "These colors reveal how tissue is injured."
+      ],
+      "lines": [
+        {
+          "text": "每一次颜色流转，都记录着组织的伤痕",
+          "start": 8.4,
+          "end": 12.3
+        }
+      ],
+      "cards": [
+        {
+          "text": "These colors reveal how tissue is injured.",
+          "start": 8.4,
+          "end": 12.3
+        }
+      ]
+    },
+    {
+      "id": "04",
+      "ch": "01 开场",
+      "start": 12.8,
+      "end": 16.5,
+      "text": "循着这抹色彩，我们走进炎症的现场。",
+      "en": "Follow the colors to understand | inflammation.",
+      "englishCards": [
+        "Follow the colors to understand",
+        "inflammation."
+      ],
+      "lines": [
+        {
+          "text": "循着这抹色彩，我们走进炎症的现场",
+          "start": 12.8,
+          "end": 16.5
+        }
+      ],
+      "cards": [
+        {
+          "text": "Follow the colors to understand",
+          "start": 12.8,
+          "end": 15.407
+        },
+        {
+          "text": "inflammation.",
+          "start": 15.407,
+          "end": 16.5
+        }
+      ]
+    },
+    {
+      "id": "05",
+      "ch": "01 开场",
+      "start": 16.9,
+      "end": 20.9,
+      "text": "病理学里的“变质”，不是食物变坏。",
+      "en": "In pathology, alteration has a specific | meaning.",
+      "englishCards": [
+        "In pathology, alteration has a specific",
+        "meaning."
+      ],
+      "lines": [
+        {
+          "text": "病理学里的“变质”，不是食物变坏",
+          "start": 16.9,
+          "end": 20.9
+        }
+      ],
+      "cards": [
+        {
+          "text": "In pathology, alteration has a specific",
+          "start": 16.9,
+          "end": 20.219
+        },
+        {
+          "text": "meaning.",
+          "start": 20.219,
+          "end": 20.9
+        }
+      ]
+    }
+  ],
+  "endcardUntouched": true,
+  "pendingStill": true,
+  "blind": {
+    "skipped": true
+  },
+  "blockers": [
+    "duration 33.7s is outside 29–31"
+  ]
+}

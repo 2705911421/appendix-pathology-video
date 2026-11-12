@@ -1,0 +1,25 @@
+START 2026-11-10T23:11:42+08:00
+I'll build the v5 subtitle module and assembly pipeline from the approved film_subtitle sources, then run the dry-run. First I'm reading the typography, endcard render pattern, and narration sources.The approved subtitle recipe and the 77-sentence script are clear. I'll add a standalone module that keeps that layout, splits English on ` | `, and wire a dry-run assembler around it.Bitexact alone still leaves `Lavc libx264` in the video sample entry. The blind copy will drop that tag and SEI user-data. Next I’ll add the subtitle module and the assembler.Subtitle and endcard stills look right: English cards fit at 42 px, and ink stays below y=810. Next is the full 30-second dry run.The v5 subtitle module and assembly pipeline are in place, and the 30-second dry run finished cleanly. Timings are the estimate, because `narration.json`, `sentences.tsv`, and `旁白_v3.wav` are not on disk yet.
+
+**Typography.** Chinese 68 px / weight 500, English 42 px / weight 400, floor 28 px, max width 1840 px, wrap budget 18. `BAND`: fadeTop 810, fadeEnd 910, cnY 986, enY 1038. Ink and paper halo, vermilion only on the approved Chinese accent list. English `" | "` cards play one at a time and do not follow Chinese line breaks.
+
+**Cues.** Source `定稿+estimate`, formula `duration = hanzi × 0.22 + 0.4` (nearest millisecond). **77** sentences, from 「这根形似小香肠的盲管，就是阑尾。」 through 「持续右下腹痛、发热，请及时就诊。」 All 136 English cards fit at 42 px (widest 913 px). One logged mismatch: sentence 46, 字数 column 15 vs 17 counted characters; the estimate uses the column.
+
+**Dry run.** Sentences 01–05 end at 17.40 s, paper hold to 18.00 s, then the 12 s endcard. Total **30.000 s**, 1920×1080, yuv420p, silent stereo AAC 48 kHz. Loudnorm skipped because both voice and music are missing.
+
+- `qa/dryrun_测试.mp4` (3.6 MB)
+- `qa/dryrun_测试_720p.mp4` (911 KB)
+- `qa/dryrun_测试_盲审.mp4`
+- `qa/frames/帧_01_句01中点.png` — first English card
+- `qa/frames/帧_02_最长英文_s03.png` — “These colors reveal how tissue is injured.”
+- `qa/frames/帧_03_片尾A_t3.png` — endcard A at local t=3
+- `qa/cues_estimate.json`, `qa/dryrun_report.md`
+
+Ink starts at about y=927. Overlay pixels above y=810 are fully transparent. `endcard.json` is unchanged and still contains 【待填】.
+
+**Blind review: PASS.** No encoder, Lavc, or Lavf tags in the probe. String scan of the endcard and cue files: 0 hits.
+
+Nothing is blocked for this dry run. Final audio timing will replace the estimate when ka moji’s narration files exist.
+
+EXIT 0
+END 2026-11-10T23:43:24+08:00 exit=0

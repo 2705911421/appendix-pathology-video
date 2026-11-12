@@ -36,8 +36,10 @@ def base():
  return im
 A=base();text(A,D['titleLines'][0],960,L['titleY'],48,700,center=True);text(A,D['titleLines'][1],960,L['subtitleY'],32,alpha=.75,center=True)
 heading(A,D['creationHeading'],L['aHeadingY']);text(A,D['intro'],L['x'],L['introY'],27)
-for i,lines in enumerate(D['cells']):
- for j,s in enumerate(lines):text(A,s,L['x']+(i%2)*L['cellCol']+(20 if j else 0),L['cellY']+(i//2)*L['cellRow']+j*L['bodyLeading'],27)
+cell_y=L['cellY']
+for lines in D['cells']:
+ for j,s in enumerate(lines):text(A,s,L['x']+(20 if j else 0),cell_y+j*L['bodyLeading'],L['bodySize'])
+ cell_y+=L['cellRow']+(len(lines)-1)*L['bodyLeading']
 for i,s in enumerate(D['notes']):text(A,s,L['x'],L['notesY']+i*L['bodyLeading'],25,alpha=.8)
 B=base();heading(B,D['musicHeading'],L['musicHeadingY'])
 for i,s in enumerate(D['music']):text(B,s,L['x'],L['musicY']+i*L['musicLeading'],26,alpha=.75 if i==1 else 1)

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>v5 bilingual subtitles</title>
+<style>
+@font-face{font-family:MixSans;src:url('./fonts/MixSans-Regular.woff2') format('woff2');font-weight:400 500;font-display:block}
+@font-face{font-family:MixSans;src:url('./fonts/MixSans-Bold.woff2') format('woff2');font-weight:700;font-display:block}
+html,body{margin:0;background:#F4EFE6}
+canvas{display:block;width:1920px;height:1080px}
+</style>
+<canvas width="1920" height="1080"></canvas>
+<script type="module">
+import {
+  drawSubtitles, safeFade, measureEnglish, consumeOverflow,
+  PRESETS, ACTIVE, BAND, FONT, PAPER, INK,
+} from './subtitle.js';
+
+window.READY = false;
+window.CUES = [];
+window.DARK = 0;
+window.XFADE = false;
+
+const faceList = [];
+const seenFace = new Set();
+for (const p of [PRESETS.current, PRESETS.old]) {
+  for (const spec of [
+    `${p.weightCn} ${p.cnSize}px MixSans`,
+    `${p.weightEn} ${p.enSize}px MixSans`,
+    `${p.weightEn} ${p.enFloor}px MixSans`,
+  ]) {
+    if (seenFace.has(spec)) continue;
+    seenFace.add(spec);
+    faceList.push(document.fonts.load(spec));
+  }
+}
+await Promise.all(faceList);
+await document.fonts.ready;
+if (!document.fonts.check(`${ACTIVE.weightCn} ${ACTIVE.cnSize}px MixSans`) || !document.fonts.check(`${ACTIVE.weightEn} ${ACTIVE.enSize}px MixSans`)) {
+  throw new Error('MixSans failed to load');
+}
+
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d', { alpha: true });
+
+function opts(preset) {
+  return { dark: window.DARK || 0, xfade: !!window.XFADE, paper: PAPER, preset };
+}
+
+function reset() {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1;
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+window.render = (t) => {
+  reset();
+  ctx.clearRect(0, 0, 1920, 1080);
+  ctx.fillStyle = PAPER;
+  ctx.fillRect(0, 0, 1920, 1080);
+  safeFade(ctx, PAPER, window.DARK || 0);
+  drawSubtitles(ctx, Number(t), window.CUES || [], opts());
+};
+
+window.renderOverlay = (t) => {
+  reset();
+  ctx.clearRect(0, 0, 1920, 1080);
+  drawSubtitles(ctx, Number(t), window.CUES || [], opts());
+};
+
+window.renderPreset = (t, presetId) => {
+  reset();
+  ctx.clearRect(0, 0, 1920, 1080);
+  ctx.fillStyle = PAPER;
+  ctx.fillRect(0, 0, 1920, 1080);
+  drawSubtitles(ctx, Number(t), window.CUES || [], opts(PRESETS[presetId] || ACTIVE));
+};
+
+window.measureCards = (cues) => {
+  const rows = [];
+  for (const cue of cues) {
+    const cards = cue.englishCards && cue.englishCards.length
+      ? cue.englishCards
+      : (cue.en ? String(cue.en).split(' | ').map((s) => s.trim()).filter(Boolean) : []);
+    cards.forEach((text, k) => {
+      const rec = measureEnglish(ctx, { en: text, i: `${cue.i}:${k}`, id: cue.id });
+      rows.push({ id: cue.id, i: cue.i, card: k, text, chars: [...text].length, size: rec.size, width: Math.round(rec.width * 10) / 10, overflow: rec.overflow });
+    });
+  }
+  return { rows, overflow: consumeOverflow() };
+};
+
+// QA stills: old band vs new band on paper, plus a 390 px-wide phone scale of the new frame.
+window.buildQaStills = (t) => {
+  const barH = 80;
+  const W = 1920;
+  const H = 1080;
+  const phoneW = 390;
+  const phoneH = Math.round(H * phoneW / W);
+  const bandH = H - BAND.safeTop;
+  const stripH = Math.max(1, Math.round(bandH * phoneW / W));
+  const oldLabel = `原 ${PRESETS.old.cnSize} / ${PRESETS.old.enSize}，安全区 ${PRESETS.old.band.safeTop}`;
+  const newLabel = `新 ${ACTIVE.cnSize} / ${ACTIVE.enSize}，安全区 ${BAND.safeTop}`;
+
+  function paint(preset) {
+    reset();
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = PAPER;
+    ctx.fillRect(0, 0, W, H);
+    drawSubtitles(ctx, Number(t), window.CUES || [], opts(preset));
+  }
+
+  const out = document.createElement('canvas');
+  out.width = W;
+  out.height = barH + H + barH + H;
+  const octx = out.getContext('2d');
+  octx.fillStyle = PAPER;
+  octx.fillRect(0, 0, out.width, out.height);
+
+  function bar(y, text) {
+    octx.fillStyle = PAPER;
+    octx.fillRect(0, y, W, barH);
+    octx.fillStyle = INK;
+    octx.font = `500 40px ${FONT}`;
+    octx.textAlign = 'center';
+    octx.textBaseline = 'middle';
+    octx.fillText('「' + text + '」', W / 2, y + barH / 2);
+    octx.fillStyle = '#C8C0B4';
+    octx.fillRect(0, y + barH - 3, W, 3);
+  }
+
+  bar(0, oldLabel);
+  paint(PRESETS.old);
+  octx.drawImage(canvas, 0, barH);
+  bar(barH + H, newLabel);
+  paint(ACTIVE);
+  octx.drawImage(canvas, 0, barH + H + barH);
+
+  const phone = document.createElement('canvas');
+  phone.width = phoneW;
+  phone.height = phoneH;
+  const pctx = phone.getContext('2d');
+  pctx.imageSmoothingEnabled = true;
+  pctx.imageSmoothingQuality = 'high';
+  pctx.drawImage(canvas, 0, 0, phoneW, phoneH);
+
+  const strip = document.createElement('canvas');
+  strip.width = phoneW;
+  strip.height = stripH;
+  const sctx = strip.getContext('2d');
+  sctx.imageSmoothingEnabled = true;
+  sctx.imageSmoothingQuality = 'high';
+  sctx.drawImage(canvas, 0, BAND.safeTop, W, bandH, 0, 0, phoneW, stripH);
+
+  return {
+    compare: out.toDataURL('image/png'),
+    phone: phone.toDataURL('image/png'),
+    strip: strip.toDataURL('image/png'),
+    meta: {
+      phone: { w: phoneW, h: phoneH },
+      strip: { w: phoneW, h: stripH },
+      compare: { w: out.width, h: out.height },
+      labels: { old: '「' + oldLabel + '」', current: '「' + newLabel + '」' },
+      safeTop: BAND.safeTop,
+    },
+  };
+};
+
+window.render(0);
+window.READY = true;
+</script>
+</html>

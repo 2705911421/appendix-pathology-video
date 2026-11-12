@@ -1,0 +1,82 @@
+{
+  "source": "定稿+estimate",
+  "formula": "duration_i = hanzi_i * 0.22 + 0.4; start_0 = 0; end_i = start_i + duration_i; start_{i+1} = end_i",
+  "contentDuration": 18,
+  "lastCueEnd": 17.4,
+  "cues": [
+    {
+      "i": 0,
+      "id": "01",
+      "ch": "01 开场",
+      "seg": "01",
+      "start": 0,
+      "end": 3.48,
+      "text": "这根形似小香肠的盲管，就是阑尾。",
+      "en": "This small sausage-shaped tube is the | appendix.",
+      "englishCards": [
+        "This small sausage-shaped tube is the",
+        "appendix."
+      ],
+      "hanzi": 14
+    },
+    {
+      "i": 1,
+      "id": "02",
+      "ch": "01 开场",
+      "seg": "01",
+      "start": 3.48,
+      "end": 6.52,
+      "text": "发起炎来，它可能染上红、黄、黑。",
+      "en": "When inflamed, it may turn red, yellow, | then black.",
+      "englishCards": [
+        "When inflamed, it may turn red, yellow,",
+        "then black."
+      ],
+      "hanzi": 12
+    },
+    {
+      "i": 2,
+      "id": "03",
+      "ch": "01 开场",
+      "seg": "01",
+      "start": 6.52,
+      "end": 10.44,
+      "text": "每一次颜色流转，都记录着组织的伤痕。",
+      "en": "These colors reveal how tissue is injured.",
+      "englishCards": [
+        "These colors reveal how tissue is injured."
+      ],
+      "hanzi": 16
+    },
+    {
+      "i": 3,
+      "id": "04",
+      "ch": "01 开场",
+      "seg": "01",
+      "start": 10.44,
+      "end": 14.14,
+      "text": "循着这抹色彩，我们走进炎症的现场。",
+      "en": "Follow the colors to understand | inflammation.",
+      "englishCards": [
+        "Follow the colors to understand",
+        "inflammation."
+      ],
+      "hanzi": 15
+    },
+    {
+      "i": 4,
+      "id": "05",
+      "ch": "01 开场",
+      "seg": "01",
+      "start": 14.14,
+      "end": 17.4,
+      "text": "病理学里的“变质”，不是食物变坏。",
+      "en": "In pathology, alteration has a specific | meaning.",
+      "englishCards": [
+        "In pathology, alteration has a specific",
+        "meaning."
+      ],
+      "hanzi": 13
+    }
+  ]
+}
