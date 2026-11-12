@@ -1,0 +1,8 @@
+Final 22x determinism: PASS (six frames, renderer standard threshold)
+S08 seven frames / S10 eight frames MAE=0: PASS
+S11 eight historical MAEs unchanged: PASS
+Small nucleus axes ±15%, density ±25%, spindle long axis ±15%: PASS
+Seven locked SHA256 files unchanged against opening and e02: PASS
+S19.mp4 full decode: PASS (ffmpeg emitted no errors)
+S19_带配音_720p.mp4 full decode: PASS (ffmpeg emitted no errors)
+git diff --check: PASS
