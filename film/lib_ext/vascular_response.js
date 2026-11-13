@@ -12,7 +12,7 @@ export function prepareVascular(){
 // (refined H&E sample). Replaces the old white teardrop with three long ovals,
 // which read as a face at 200%.
 export function drawNeutrophil(c,x,y,{sx=1,sy=1,rot=0,alpha=1}={}){
- c.save();c.globalAlpha*=alpha;c.translate(x,y);c.rotate(rot);c.scale(sx,sy);
+ c.save();c.globalAlpha*=alpha;c.translate(x,y);c.rotate(rot);c.scale(sx*1.5,sy*1.5);
  c.beginPath();for(let j=0;j<=64;j++){const a=j/64*TAU,k=1+.05*Math.sin(a*5)+.028*Math.cos(a*3);const xx=Math.cos(a)*27*k,yy=Math.sin(a)*24.5*k;j?c.lineTo(xx,yy):c.moveTo(xx,yy);}c.closePath();
  const g=c.createRadialGradient(-4,-6,3,0,0,30);g.addColorStop(0,'#F4E7F1');g.addColorStop(.55,'#E3CEE5');g.addColorStop(.86,'#D0B7D8');g.addColorStop(1,'#B99FC8');c.fillStyle=g;c.fill();c.strokeStyle='rgba(126,92,148,.60)';c.lineWidth=1.05;c.stroke();
  c.fillStyle='rgba(150,110,164,.30)';for(let i=0;i<22;i++){c.beginPath();c.arc(Math.sin(i*4.7)*17,Math.cos(i*2.3)*16,.9,0,TAU);c.fill();}
