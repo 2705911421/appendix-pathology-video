@@ -1,0 +1,73 @@
+{
+  "lane": "final_assemble",
+  "build_time": "2026-11-13T08:00:00Z",
+  "scenes_total": 20,
+  "fallback_scenes": ["S08", "S13", "S18"],
+  "export_ok": true,
+  "locked_files": "PASS 16/16 (开工=收工)",
+  "coverage": {
+    "S01": {"source": "gross_swap/S01", "fallback": false},
+    "S02": {"source": "clin/S02", "fallback": false},
+    "S03": {"source": "clin/S03", "fallback": false},
+    "S04": {"source": "ct_real_adv01/S04", "fallback": false},
+    "S05": {"source": "gross_swap/S05", "fallback": false},
+    "S06": {"source": "gross_swap/S06", "fallback": false},
+    "S07": {"source": "h06_adv/s07", "fallback": false},
+    "S08": {"source": "animatic/S08 (s08_rescale FAILED→回退)", "fallback": true},
+    "S09": {"source": "ct_real_adv01/S09", "fallback": false},
+    "S10_S11": {"source": "s10s11_b09/S10_S11 (DONE pass)", "fallback": false,
+                "s46_override": "gross_swap/S11_s46"},
+    "S12": {"source": "ct_real_adv01/S12", "fallback": false},
+    "S13": {"source": "mech/s13_adv01 (mech_fix02 渲染中→回退，s13s14_rescale S13r已否)", "fallback": true},
+    "S14": {"source": "s13s14_rescale/S14r (DONE pass)", "fallback": false},
+    "S15": {"source": "ct_real_adv01/S15", "fallback": false},
+    "S16": {"source": "clin/S16", "fallback": false},
+    "S17": {"source": "card/S17", "fallback": false},
+    "S18": {"source": "chron_s18 (s18_b09 无DONE→回退)", "fallback": true,
+            "s66_override": "gross_swap/S18_s66"},
+    "S19": {"source": "s19_b09_fix01/S19 (DONE pass)", "fallback": false},
+    "S20": {"source": "card/S20", "fallback": false},
+    "S21": {"source": "open/s21", "fallback": false}
+  },
+  "video": {
+    "阑尾_final_1080p.mp4": {
+      "duration_s": 339.333333,
+      "nb_frames": 10180,
+      "res": "1920x1080",
+      "fps": 30,
+      "codec": "h264",
+      "pix_fmt": "yuv420p",
+      "audio": "aac 48000Hz stereo 192k",
+      "faststart": true
+    },
+    "阑尾_final_720p.mp4": {
+      "duration_s": 339.349,
+      "res": "1280x720"
+    },
+    "阑尾_blind_1080p.mp4": {
+      "duration_s": 339.333333,
+      "nb_frames": 10180,
+      "res": "1920x1080",
+      "decoded_frame_md5_match": true,
+      "decoded_audio_md5_match": true,
+      "metadata_scan_empty": true
+    }
+  },
+  "audio": {
+    "loudness_I": -16.38,
+    "loudness_TP": -1.84,
+    "loudness_LRA": 1.7,
+    "I_target": -16.0,
+    "I_tolerance": 0.5,
+    "I_pass": true,
+    "TP_target": -1.5,
+    "TP_pass": true
+  },
+  "credits": {
+    "duration_s": 14.0,
+    "replaced_last_s": 12,
+    "named_rendered": true,
+    "blind_rendered_via_export": true
+  },
+  "export_verify_all_checks_pass": true
+}

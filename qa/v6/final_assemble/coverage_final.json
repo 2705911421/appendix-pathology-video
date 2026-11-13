@@ -1,0 +1,285 @@
+{
+  "scenes": [
+    {
+      "scene": "S01",
+      "sentences": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "start": 0.0,
+      "end": 21.66695833333333,
+      "video": "/workspace/病理科普视频/v5_gross_dev/qa/v6/gross_swap/S01/S01.mp4",
+      "fallback": false,
+      "source": "gross_swap/S01"
+    },
+    {
+      "scene": "S02",
+      "sentences": [
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "start": 21.66695833333333,
+      "end": 43.06395833333333,
+      "video": "/workspace/病理科普视频/v5_clin_dev/qa/v6/clin/S02/S02.mp4",
+      "fallback": false,
+      "source": "clin/S02"
+    },
+    {
+      "scene": "S03",
+      "sentences": [
+        11,
+        12,
+        13
+      ],
+      "start": 43.06395833333333,
+      "end": 53.900833333333345,
+      "video": "/workspace/病理科普视频/v5_clin_dev/qa/v6/clin/S03/S03.mp4",
+      "fallback": false,
+      "source": "clin/S03"
+    },
+    {
+      "scene": "S04",
+      "sentences": [
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "start": 53.900833333333345,
+      "end": 77.9246666666667,
+      "video": "/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real_adv01/S04/S04.mp4",
+      "fallback": false,
+      "source": "ct_real_adv01/S04"
+    },
+    {
+      "scene": "S05",
+      "sentences": [
+        20,
+        21,
+        22
+      ],
+      "start": 77.9246666666667,
+      "end": 90.63675000000003,
+      "video": "/workspace/病理科普视频/v5_gross_dev/qa/v6/gross_swap/S05/S05.mp4",
+      "fallback": false,
+      "source": "gross_swap/S05"
+    },
+    {
+      "scene": "S06",
+      "sentences": [
+        23,
+        24
+      ],
+      "start": 90.63675000000003,
+      "end": 101.22237500000004,
+      "video": "/workspace/病理科普视频/v5_gross_dev/qa/v6/gross_swap/S06/S06.mp4",
+      "fallback": false,
+      "source": "gross_swap/S06"
+    },
+    {
+      "scene": "S07",
+      "sentences": [
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "start": 101.22237500000004,
+      "end": 126.00695833333339,
+      "video": "/workspace/病理科普视频/v5/qa/v6/h06_adv/s07/S07.mp4",
+      "fallback": false,
+      "source": "h06_adv/s07"
+    },
+    {
+      "scene": "S08",
+      "sentences": [
+        31,
+        32,
+        33,
+        34
+      ],
+      "start": 126.00695833333339,
+      "end": 142.26645833333333,
+      "video": "/workspace/病理科普视频/v5/qa/v6/animatic/S08.mp4",
+      "fallback": true,
+      "source": "animatic/S08"
+    },
+    {
+      "scene": "S09",
+      "sentences": [
+        35,
+        36
+      ],
+      "start": 142.26645833333333,
+      "end": 150.34279166666664,
+      "video": "/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real_adv01/S09/S09.mp4",
+      "fallback": false,
+      "source": "ct_real_adv01/S09"
+    },
+    {
+      "scene": "S10_S11",
+      "sentences": [
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46
+      ],
+      "start": 150.34279166666664,
+      "end": 198.8695833333332,
+      "video": "/workspace/病理科普视频/v5_clin_dev/qa/v6/s10s11_b09/S10_S11.mp4",
+      "fallback": false,
+      "source": "s10s11_b09/S10_S11",
+      "s46_override": "/workspace/病理科普视频/v5_gross_dev/qa/v6/gross_swap/S11_s46/S11_s46.mp4"
+    },
+    {
+      "scene": "S12",
+      "sentences": [
+        47,
+        48
+      ],
+      "start": 198.8695833333332,
+      "end": 207.1135833333332,
+      "video": "/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real_adv01/S12/S12.mp4",
+      "fallback": false,
+      "source": "ct_real_adv01/S12"
+    },
+    {
+      "scene": "S13",
+      "sentences": [
+        49,
+        50,
+        51,
+        52,
+        53
+      ],
+      "start": 207.1135833333332,
+      "end": 228.56074999999979,
+      "video": "/workspace/病理科普视频/v5_mech_dev/qa/v6/mech/s13_adv01/S13.mp4",
+      "fallback": true,
+      "source": "mech/s13_adv01 (fallback, s13s14_rescale S13r 已否)"
+    },
+    {
+      "scene": "S14",
+      "sentences": [
+        54,
+        55,
+        56,
+        57
+      ],
+      "start": 228.56074999999979,
+      "end": 246.19470833333307,
+      "video": "/workspace/病理科普视频/v5_mech_dev/qa/v6/s13s14_rescale/S14r.mp4",
+      "fallback": false,
+      "source": "s13s14_rescale/S14r"
+    },
+    {
+      "scene": "S15",
+      "sentences": [
+        58,
+        59
+      ],
+      "start": 246.19470833333307,
+      "end": 256.22733333333304,
+      "video": "/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real_adv01/S15/S15.mp4",
+      "fallback": false,
+      "source": "ct_real_adv01/S15"
+    },
+    {
+      "scene": "S16",
+      "sentences": [
+        60,
+        61,
+        62
+      ],
+      "start": 256.22733333333304,
+      "end": 269.14966666666635,
+      "video": "/workspace/病理科普视频/v5_clin_dev/qa/v6/clin/S16/S16.mp4",
+      "fallback": false,
+      "source": "clin/S16"
+    },
+    {
+      "scene": "S17",
+      "sentences": [
+        63,
+        64,
+        65
+      ],
+      "start": 269.14966666666635,
+      "end": 281.0779999999997,
+      "video": "/workspace/病理科普视频/v5_card_dev/qa/v6/card/S17/S17.mp4",
+      "fallback": false,
+      "source": "card/S17"
+    },
+    {
+      "scene": "S18",
+      "sentences": [
+        66,
+        67,
+        68
+      ],
+      "start": 281.0779999999997,
+      "end": 289.93558333333294,
+      "video": "/workspace/病理科普视频/v5_chron_dev/qa/v6/chron_s18/S18.mp4",
+      "fallback": true,
+      "source": "chron_s18 (fallback)",
+      "s66_override": "/workspace/病理科普视频/v5_gross_dev/qa/v6/gross_swap/S18_s66/S18_s66.mp4"
+    },
+    {
+      "scene": "S19",
+      "sentences": [
+        69,
+        70
+      ],
+      "start": 289.93558333333294,
+      "end": 298.55979166666623,
+      "video": "/workspace/病理科普视频/v5_s19_dev/qa/v6/s19_b09_fix01/S19.mp4",
+      "fallback": false,
+      "source": "s19_b09_fix01/S19"
+    },
+    {
+      "scene": "S20",
+      "sentences": [
+        71,
+        72,
+        73,
+        74
+      ],
+      "start": 298.55979166666623,
+      "end": 315.77245833333285,
+      "video": "/workspace/病理科普视频/v5_card_dev/qa/v6/card/S20/S20.mp4",
+      "fallback": false,
+      "source": "card/S20"
+    },
+    {
+      "scene": "S21",
+      "sentences": [
+        75,
+        76,
+        77
+      ],
+      "start": 315.77245833333285,
+      "end": 327.8315,
+      "video": "/workspace/病理科普视频/v5_open_dev/qa/v6/open/s21/S21.mp4",
+      "fallback": false,
+      "source": "open/s21"
+    }
+  ],
+  "total_dur": 327.8315,
+  "generated": "2026-11-13T07:51:09.098677+00:00"
+}

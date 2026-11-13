@@ -1,0 +1,62 @@
+{
+  "阑尾_final_1080p.mp4": {
+    "path": "final/阑尾_final_1080p.mp4",
+    "size_bytes": 63516352,
+    "sha256": "18225ccfb2dad67f7ab1e09b0d5be1a93e2e3ab7216080ee4cca8081ce0328fd",
+    "duration": 339.333333,
+    "streams": [
+      {
+        "codec_name": "h264",
+        "width": 1920,
+        "height": 1080,
+        "codec_type": "video"
+      },
+      {
+        "codec_name": "aac",
+        "width": null,
+        "height": null,
+        "codec_type": "audio"
+      }
+    ]
+  },
+  "阑尾_final_720p.mp4": {
+    "path": "final/阑尾_final_720p.mp4",
+    "size_bytes": 23152461,
+    "sha256": "88f6ce90056ca27ed74c7dc005c8c6f1a848669aab095ceda87acc4401782818",
+    "duration": 339.349,
+    "streams": [
+      {
+        "codec_name": "h264",
+        "width": 1280,
+        "height": 720,
+        "codec_type": "video"
+      },
+      {
+        "codec_name": "aac",
+        "width": null,
+        "height": null,
+        "codec_type": "audio"
+      }
+    ]
+  },
+  "阑尾_blind_1080p.mp4": {
+    "path": "final/阑尾_blind_1080p.mp4",
+    "size_bytes": 63515626,
+    "sha256": "9b4899894593fbc8ec4fbba5884530e0d0bfb03f471a57d28f0fa5db05c0a1c7",
+    "duration": 339.333333,
+    "streams": [
+      {
+        "codec_name": "h264",
+        "width": 1920,
+        "height": 1080,
+        "codec_type": "video"
+      },
+      {
+        "codec_name": "aac",
+        "width": null,
+        "height": null,
+        "codec_type": "audio"
+      }
+    ]
+  }
+}
