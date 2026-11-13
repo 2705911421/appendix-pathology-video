@@ -1,0 +1,30 @@
+{
+  "S12.mp4": {
+    "duration": 7.433333,
+    "streams": [
+      {
+        "codec_type": "video",
+        "codec_name": "h264",
+        "width": 1920,
+        "height": 1080
+      }
+    ]
+  },
+  "S12_带配音_720p.mp4": {
+    "duration": 7.433333,
+    "streams": [
+      {
+        "codec_type": "video",
+        "codec_name": "h264",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "codec_type": "audio",
+        "codec_name": "aac",
+        "width": null,
+        "height": null
+      }
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+[ct-dev 6ce19b2] ct_real_adv01 (Codex): S09 病灶缓推与轻度脂肪模糊区域标注
+ 28 files changed, 312 insertions(+), 1 deletion(-)
+ create mode 100644 film/lib_ext/ct_real_adv01_compare.js
+ create mode 100644 qa/v6/ct_real_adv01/S04_commit.log
+ create mode 100644 qa/v6/ct_real_adv01/S09/S09.mp4
+ create mode 100644 qa/v6/ct_real_adv01/S09/S09_带配音_720p.mp4
+ create mode 100644 qa/v6/ct_real_adv01/S09/keyframes.json
+ create mode 100644 qa/v6/ct_real_adv01/S09/media_check.json
+ create mode 100644 qa/v6/ct_real_adv01/S09/review_sheet.png
+ create mode 100644 qa/v6/ct_real_adv01/S09/review_video720.png
+ create mode 100644 qa/v6/ct_real_adv01/S09/s35_30.png
+ create mode 100644 qa/v6/ct_real_adv01/S09/s35_30_200.png
+ create mode 100644 qa/v6/ct_real_adv01/S09/s35_30_video720.png
+ create mode 100644 qa/v6/ct_real_adv01/S09/s35_82.png
+ create mode 100644 qa/v6/ct_real_adv01/S09/s35_82_200.png
+ create mode 100644 qa/v6/ct_real_adv01/S09/s35_82_video720.png
+ create mode 100644 qa/v6/ct_real_adv01/S09/s36_30.png
+ create mode 100644 qa/v6/ct_real_adv01/S09/s36_30_200.png
+ create mode 100644 qa/v6/ct_real_adv01/S09/s36_30_video720.png
+ create mode 100644 qa/v6/ct_real_adv01/S09/s36_82.png
+ create mode 100644 qa/v6/ct_real_adv01/S09/s36_82_200.png
+ create mode 100644 qa/v6/ct_real_adv01/S09/s36_82_video720.png
+ create mode 100644 qa/v6/ct_real_adv01/S09/stills/t_000.82.png
+ create mode 100644 qa/v6/ct_real_adv01/S09/stills/t_002.25.png
+ create mode 100644 qa/v6/ct_real_adv01/S09/stills/t_004.42.png
+ create mode 100644 qa/v6/ct_real_adv01/S09/stills/t_006.54.png
+ create mode 100644 qa/v6/ct_real_adv01/S09/validation.json
+ create mode 100644 qa/v6/ct_real_adv01/S09/自检.md
+ create mode 100644 qa/v6/ct_real_adv01/S09_render.log
