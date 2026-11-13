@@ -1,0 +1,220 @@
+{
+  "ok": true,
+  "inputs": {
+    "video": "/workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v16.mp4",
+    "music": "/workspace/病理科普视频/v5_qa_dev/qa/v6/export/fixtures/sine_10s.wav",
+    "credits": "/workspace/病理科普视频/v5_qa_dev/qa/v6/export/fixtures/credits_12s.mp4",
+    "credits_replaced_last_seconds": 12
+  },
+  "targets": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "profile": "High",
+    "pix_fmt": "yuv420p",
+    "crf": 18,
+    "audio": "aac 48000 Hz 192k stereo",
+    "loudness_I": -16.0,
+    "loudness_TP": -1.5,
+    "loudness_LRA": 11.0
+  },
+  "loudnorm": {
+    "pass1": {
+      "input_i": -14.0,
+      "input_tp": -1.42,
+      "input_lra": 2.2,
+      "input_thresh": -24.4,
+      "output_i": -16.02,
+      "output_tp": -2.96,
+      "output_lra": 2.2,
+      "output_thresh": -26.41,
+      "target_offset": 0.02,
+      "normalization_type": "dynamic"
+    },
+    "pcm": {
+      "I": -16.0,
+      "TP": -3.42,
+      "LRA": 2.2
+    },
+    "linear": true
+  },
+  "aac_preflight": {
+    "I": -16.01,
+    "TP": -3.39,
+    "LRA": 2.2,
+    "gain_db": 0.0
+  },
+  "container_scrub": {
+    "udta_strings_cleared": []
+  },
+  "master": {
+    "path": "成片_1080p.mp4",
+    "duration_s": 339.833333,
+    "video_duration_s": 339.833333,
+    "nb_frames": 10195,
+    "width": 1920,
+    "height": 1080,
+    "fps": 30.0,
+    "pix_fmt": "yuv420p",
+    "profile": "High",
+    "video_codec": "h264",
+    "audio_codec": "aac",
+    "sample_rate": 48000,
+    "channels": 2,
+    "channel_layout": "stereo",
+    "audio_bitrate": 166421,
+    "faststart": true,
+    "loudness": {
+      "I": -16.01,
+      "TP": -3.39,
+      "LRA": 2.2,
+      "thresh": -26.4
+    },
+    "decoded_frame_md5": "3ffadb00a28ef0dada6c6d88639becbd",
+    "decoded_audio_md5": "c92e57630009d5eb5473f9de1dbbd0f8"
+  },
+  "blind": {
+    "path": "成片_盲审版.mp4",
+    "duration_s": 339.833333,
+    "video_duration_s": 339.833333,
+    "nb_frames": 10195,
+    "width": 1920,
+    "height": 1080,
+    "fps": 30.0,
+    "pix_fmt": "yuv420p",
+    "profile": "High",
+    "video_codec": "h264",
+    "audio_codec": "aac",
+    "sample_rate": 48000,
+    "channels": 2,
+    "channel_layout": "stereo",
+    "audio_bitrate": 166421,
+    "faststart": true,
+    "loudness": {
+      "I": -16.01,
+      "TP": -3.39,
+      "LRA": 2.2,
+      "thresh": -26.4
+    },
+    "decoded_frame_md5": "3ffadb00a28ef0dada6c6d88639becbd",
+    "decoded_audio_md5": "c92e57630009d5eb5473f9de1dbbd0f8"
+  },
+  "decoded_frame_md5_match": true,
+  "decoded_audio_md5_match": true,
+  "metadata_scan": {
+    "ffprobe_tag_keys": [
+      "format.major_brand",
+      "format.minor_version",
+      "format.compatible_brands",
+      "stream0:video.language",
+      "stream0:video.vendor_id",
+      "stream1:audio.language",
+      "stream1:audio.vendor_id"
+    ],
+    "forbidden_tags": [],
+    "personal_in_tags": [],
+    "chapters": 0,
+    "byte_hits": [],
+    "strings_hits": [],
+    "exiftool": {
+      "available": false,
+      "forbidden": [],
+      "personal": []
+    },
+    "empty": true
+  },
+  "checks": [
+    {
+      "name": "master_resolution",
+      "ok": true,
+      "detail": "1920x1080"
+    },
+    {
+      "name": "master_fps",
+      "ok": true,
+      "detail": "30.0"
+    },
+    {
+      "name": "master_pix_fmt",
+      "ok": true,
+      "detail": "yuv420p"
+    },
+    {
+      "name": "master_profile",
+      "ok": true,
+      "detail": "High"
+    },
+    {
+      "name": "master_codec",
+      "ok": true,
+      "detail": "h264"
+    },
+    {
+      "name": "master_audio",
+      "ok": true,
+      "detail": "aac 48000 2ch"
+    },
+    {
+      "name": "master_audio_bitrate",
+      "ok": true,
+      "detail": "166421"
+    },
+    {
+      "name": "master_faststart",
+      "ok": true,
+      "detail": "moov before mdat"
+    },
+    {
+      "name": "master_loudness_I",
+      "ok": true,
+      "detail": "-16.01"
+    },
+    {
+      "name": "master_loudness_TP",
+      "ok": true,
+      "detail": "-3.39"
+    },
+    {
+      "name": "blind_duration",
+      "ok": true,
+      "detail": "339.833333 vs 339.833333"
+    },
+    {
+      "name": "blind_frames",
+      "ok": true,
+      "detail": "10195 vs 10195"
+    },
+    {
+      "name": "blind_resolution",
+      "ok": true,
+      "detail": "1920x1080"
+    },
+    {
+      "name": "decoded_frame_md5_match",
+      "ok": true,
+      "detail": "3ffadb00a28ef0dada6c6d88639becbd vs 3ffadb00a28ef0dada6c6d88639becbd"
+    },
+    {
+      "name": "decoded_audio_md5_match",
+      "ok": true,
+      "detail": "c92e57630009d5eb5473f9de1dbbd0f8 vs c92e57630009d5eb5473f9de1dbbd0f8"
+    },
+    {
+      "name": "filenames_clean",
+      "ok": true,
+      "detail": "clean"
+    },
+    {
+      "name": "blind_metadata_empty",
+      "ok": true,
+      "detail": "see metadata_scan"
+    },
+    {
+      "name": "blind_faststart",
+      "ok": true,
+      "detail": "moov before mdat"
+    }
+  ],
+  "encode_attempt": 1,
+  "x264_params": "threads=2"
+}

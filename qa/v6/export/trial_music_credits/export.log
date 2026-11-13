@@ -1,0 +1,408 @@
+
+$ ffmpeg -hide_banner -nostdin -threads 2 -i /workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v16.mp4 -i /workspace/病理科普视频/v5_qa_dev/qa/v6/export/fixtures/sine_10s.wav -filter_complex [0:a]aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,apad=whole_dur=339.833333,atrim=end_sample=16312000,asetpts=PTS-STARTPTS[voice];[1:a]aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,apad=whole_dur=339.833333,atrim=end_sample=16312000,asetpts=PTS-STARTPTS[bed];[voice][bed]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[mix];[mix]loudnorm=I=-16.0:TP=-1.5:LRA=11.0:print_format=json[aout] -map [aout] -f null -
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '/workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v16.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    encoder         : Lavf61.7.103
+  Duration: 00:05:39.83, start: 0.000000, bitrate: 2445 kb/s
+  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 2301 kb/s, 30 fps, 30 tbr, 15360 tbn (default)
+      Metadata:
+        handler_name    : VideoHandler
+        vendor_id       : [0][0][0][0]
+        encoder         : Lavc61.19.101 libx264
+  Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 137 kb/s (default)
+      Metadata:
+        handler_name    : SoundHandler
+        vendor_id       : [0][0][0][0]
+[aist#1:0/pcm_s16le @ 0x555e1d38b080] Guessed Channel Layout: stereo
+Input #1, wav, from '/workspace/病理科普视频/v5_qa_dev/qa/v6/export/fixtures/sine_10s.wav':
+  Metadata:
+    encoder         : Lavf61.7.103
+  Duration: 00:00:10.00, bitrate: 1536 kb/s
+  Stream #1:0: Audio: pcm_s16le ([1][0][0][0] / 0x0001), 48000 Hz, stereo, s16, 1536 kb/s
+Stream mapping:
+  Stream #0:1 (aac) -> aresample:default
+  Stream #1:0 (pcm_s16le) -> aresample:default
+  loudnorm:default -> Stream #0:0 (pcm_s16le)
+Output #0, null, to 'pipe:':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    encoder         : Lavf61.7.103
+  Stream #0:0: Audio: pcm_s16le, 192000 Hz, stereo, s16, 6144 kb/s
+      Metadata:
+        encoder         : Lavc61.19.101 pcm_s16le
+size=N/A time=00:00:24.00 bitrate=N/A speed=  48x    size=N/A time=00:00:52.70 bitrate=N/A speed=52.7x    size=N/A time=00:01:21.30 bitrate=N/A speed=54.2x    size=N/A time=00:01:45.40 bitrate=N/A speed=52.7x    size=N/A time=00:02:12.50 bitrate=N/A speed=52.9x    size=N/A time=00:02:36.90 bitrate=N/A speed=52.2x    size=N/A time=00:03:01.60 bitrate=N/A speed=51.8x    size=N/A time=00:03:28.50 bitrate=N/A speed=52.1x    size=N/A time=00:03:50.40 bitrate=N/A speed=51.1x    size=N/A time=00:04:18.20 bitrate=N/A speed=51.5x    size=N/A time=00:04:46.00 bitrate=N/A speed=51.9x    size=N/A time=00:05:12.60 bitrate=N/A speed=  52x    size=N/A time=00:05:36.30 bitrate=N/A speed=51.7x    [Parsed_loudnorm_11 @ 0x7f0c00032400] 
+{
+	"input_i" : "-14.00",
+	"input_tp" : "-1.42",
+	"input_lra" : "2.20",
+	"input_thresh" : "-24.40",
+	"output_i" : "-16.02",
+	"output_tp" : "-2.96",
+	"output_lra" : "2.20",
+	"output_thresh" : "-26.41",
+	"normalization_type" : "dynamic",
+	"target_offset" : "0.02"
+}
+[out#0/null @ 0x555e1d38c7c0] video:0KiB audio:254875KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
+size=N/A time=00:05:39.90 bitrate=N/A speed=51.9x    
+
+$ ffmpeg -y -hide_banner -nostdin -threads 2 -i /workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v16.mp4 -i /workspace/病理科普视频/v5_qa_dev/qa/v6/export/fixtures/sine_10s.wav -filter_complex [0:a]aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,apad=whole_dur=339.833333,atrim=end_sample=16312000,asetpts=PTS-STARTPTS[voice];[1:a]aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,apad=whole_dur=339.833333,atrim=end_sample=16312000,asetpts=PTS-STARTPTS[bed];[voice][bed]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[mix];[mix]loudnorm=I=-16.0:TP=-1.5:LRA=11.0:measured_I=-14.0:measured_TP=-1.42:measured_LRA=2.2:measured_thresh=-24.4:offset=0.02:linear=true[aout] -map [aout] -c:a pcm_s24le -ar 48000 -ac 2 /tmp/export_final_m111y7ci/norm.wav
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '/workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v16.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    encoder         : Lavf61.7.103
+  Duration: 00:05:39.83, start: 0.000000, bitrate: 2445 kb/s
+  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 2301 kb/s, 30 fps, 30 tbr, 15360 tbn (default)
+      Metadata:
+        handler_name    : VideoHandler
+        vendor_id       : [0][0][0][0]
+        encoder         : Lavc61.19.101 libx264
+  Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 137 kb/s (default)
+      Metadata:
+        handler_name    : SoundHandler
+        vendor_id       : [0][0][0][0]
+[aist#1:0/pcm_s16le @ 0x55d47f6d4f00] Guessed Channel Layout: stereo
+Input #1, wav, from '/workspace/病理科普视频/v5_qa_dev/qa/v6/export/fixtures/sine_10s.wav':
+  Metadata:
+    encoder         : Lavf61.7.103
+  Duration: 00:00:10.00, bitrate: 1536 kb/s
+  Stream #1:0: Audio: pcm_s16le ([1][0][0][0] / 0x0001), 48000 Hz, stereo, s16, 1536 kb/s
+Stream mapping:
+  Stream #0:1 (aac) -> aresample:default
+  Stream #1:0 (pcm_s16le) -> aresample:default
+  loudnorm:default -> Stream #0:0 (pcm_s24le)
+Output #0, wav, to '/tmp/export_final_m111y7ci/norm.wav':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    ISFT            : Lavf61.7.103
+  Stream #0:0: Audio: pcm_s24le ([1][0][0][0] / 0x0001), 48000 Hz, stereo, s32 (24 bit), 2304 kb/s
+      Metadata:
+        encoder         : Lavc61.19.101 pcm_s24le
+size=   50944KiB time=00:03:01.69 bitrate=2296.9kbits/s speed= 363x    size=   92160KiB time=00:05:27.97 bitrate=2301.9kbits/s speed= 328x    [out#0/wav @ 0x55d47f6d4a00] video:0KiB audio:95578KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: 0.000104%
+size=   95578KiB time=00:05:39.83 bitrate=2304.0kbits/s speed= 316x    
+
+$ ffmpeg -hide_banner -nostdin -threads 2 -i /tmp/export_final_m111y7ci/norm.wav -map 0:a:0 -af loudnorm=I=-16.0:TP=-1.5:LRA=11.0:print_format=json -f null -
+Input #0, wav, from '/tmp/export_final_m111y7ci/norm.wav':
+  Metadata:
+    encoder         : Lavf61.7.103
+  Duration: 00:05:39.83, bitrate: 2304 kb/s
+  Stream #0:0: Audio: pcm_s24le ([1][0][0][0] / 0x0001), 48000 Hz, stereo, s32 (24 bit), 2304 kb/s
+Stream mapping:
+  Stream #0:0 -> #0:0 (pcm_s24le (native) -> pcm_s16le (native))
+Output #0, null, to 'pipe:':
+  Metadata:
+    encoder         : Lavf61.7.103
+  Stream #0:0: Audio: pcm_s16le, 192000 Hz, stereo, s16, 6144 kb/s
+      Metadata:
+        encoder         : Lavc61.19.101 pcm_s16le
+size=N/A time=00:00:24.20 bitrate=N/A speed=48.4x    size=N/A time=00:00:53.10 bitrate=N/A speed=  53x    size=N/A time=00:01:21.90 bitrate=N/A speed=54.6x    size=N/A time=00:01:50.40 bitrate=N/A speed=55.2x    size=N/A time=00:02:18.80 bitrate=N/A speed=55.5x    size=N/A time=00:02:47.50 bitrate=N/A speed=55.8x    size=N/A time=00:03:15.80 bitrate=N/A speed=55.9x    size=N/A time=00:03:44.50 bitrate=N/A speed=56.1x    size=N/A time=00:04:13.30 bitrate=N/A speed=56.2x    size=N/A time=00:04:42.20 bitrate=N/A speed=56.4x    size=N/A time=00:05:10.80 bitrate=N/A speed=56.5x    size=N/A time=00:05:36.00 bitrate=N/A speed=  56x    [Parsed_loudnorm_0 @ 0x7fb008003080] 
+{
+	"input_i" : "-16.00",
+	"input_tp" : "-3.42",
+	"input_lra" : "2.20",
+	"input_thresh" : "-26.40",
+	"output_i" : "-16.02",
+	"output_tp" : "-2.96",
+	"output_lra" : "2.20",
+	"output_thresh" : "-26.41",
+	"normalization_type" : "dynamic",
+	"target_offset" : "0.02"
+}
+[out#0/null @ 0x55fbff39b200] video:0KiB audio:254875KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
+size=N/A time=00:05:39.90 bitrate=N/A speed=56.1x    
+
+$ ffmpeg -y -hide_banner -nostdin -threads 2 -i /workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v16.mp4 -i /workspace/病理科普视频/v5_qa_dev/qa/v6/export/fixtures/credits_12s.mp4 -filter_complex [0:v]setsar=1,format=yuv420p,setpts=PTS-STARTPTS,trim=end_frame=9835,setpts=PTS-STARTPTS[vmain];[1:v]scale=1920:1080:force_original_aspect_ratio=decrease:flags=lanczos,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1,fps=30,format=yuv420p,setpts=PTS-STARTPTS,trim=end_frame=360,setpts=PTS-STARTPTS[vcred];[vmain][vcred]concat=n=2:v=1:a=0,format=yuv420p,setsar=1[v] -map [v] -an -c:v libx264 -profile:v high -pix_fmt yuv420p -crf 18 -preset medium -r 30 -fps_mode cfr -x264-params threads=2 -map_metadata -1 -map_chapters -1 -movflags +faststart /tmp/export_final_m111y7ci/video.mp4
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '/workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v16.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    encoder         : Lavf61.7.103
+  Duration: 00:05:39.83, start: 0.000000, bitrate: 2445 kb/s
+  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 2301 kb/s, 30 fps, 30 tbr, 15360 tbn (default)
+      Metadata:
+        handler_name    : VideoHandler
+        vendor_id       : [0][0][0][0]
+        encoder         : Lavc61.19.101 libx264
+  Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 137 kb/s (default)
+      Metadata:
+        handler_name    : SoundHandler
+        vendor_id       : [0][0][0][0]
+Input #1, mov,mp4,m4a,3gp,3g2,mj2, from '/workspace/病理科普视频/v5_qa_dev/qa/v6/export/fixtures/credits_12s.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    encoder         : Lavf61.7.103
+  Duration: 00:00:12.00, start: 0.000000, bitrate: 21 kb/s
+  Stream #1:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 17 kb/s, 30 fps, 30 tbr, 15360 tbn (default)
+      Metadata:
+        handler_name    : VideoHandler
+        vendor_id       : [0][0][0][0]
+        encoder         : Lavc61.19.101 libx264
+Stream mapping:
+  Stream #0:0 (h264) -> setsar:default
+  Stream #1:0 (h264) -> scale:default
+  setsar:default -> Stream #0:0 (libx264)
+[libx264 @ 0x55ef41f16b40] using SAR=1/1
+[libx264 @ 0x55ef41f16b40] using cpu capabilities: MMX2 SSE2Fast SSSE3 SSE4.2 AVX FMA3 BMI2 AVX2 AVX512
+[libx264 @ 0x55ef41f16b40] profile High, level 4.0, 4:2:0, 8-bit
+[libx264 @ 0x55ef41f16b40] 264 - core 164 r3108 31e19f9 - H.264/MPEG-4 AVC codec - Copyleft 2003-2023 - http://www.videolan.org/x264.html - options: cabac=1 ref=3 deblock=1:0:0 analyse=0x3:0x113 me=hex subme=7 psy=1 psy_rd=1.00:0.00 mixed_ref=1 me_range=16 chroma_me=1 trellis=1 8x8dct=1 cqm=0 deadzone=21,11 fast_pskip=1 chroma_qp_offset=-2 threads=2 lookahead_threads=1 sliced_threads=0 nr=0 decimate=1 interlaced=0 bluray_compat=0 constrained_intra=0 bframes=3 b_pyramid=2 b_adapt=1 b_bias=0 direct=1 weightb=1 open_gop=0 weightp=2 keyint=250 keyint_min=25 scenecut=40 intra_refresh=0 rc_lookahead=40 rc=crf mbtree=1 crf=18.0 qcomp=0.60 qpmin=0 qpmax=69 qpstep=4 ip_ratio=1.40 aq=1:1.00
+Output #0, mp4, to '/tmp/export_final_m111y7ci/video.mp4':
+  Metadata:
+    encoder         : Lavf61.7.103
+  Stream #0:0: Video: h264 (avc1 / 0x31637661), yuv420p(tv, progressive), 1920x1080 [SAR 1:1 DAR 16:9], q=2-31, 30 fps, 15360 tbn
+      Metadata:
+        encoder         : Lavc61.19.101 libx264
+      Side data:
+        cpb: bitrate max/min/avg: 0/0/0 buffer size: 0 vbv_delay: N/A
+frame=    3 fps=0.0 q=24.0 size=       0KiB time=00:00:00.03 bitrate=  11.5kbits/s speed=0.0665x    frame=  105 fps=105 q=24.0 size=       0KiB time=00:00:03.43 bitrate=   0.1kbits/s speed=3.43x    frame=  195 fps=130 q=24.0 size=       0KiB time=00:00:06.43 bitrate=   0.1kbits/s speed=4.29x    frame=  289 fps=144 q=24.0 size=       0KiB time=00:00:09.56 bitrate=   0.0kbits/s speed=4.78x    frame=  392 fps=157 q=24.0 size=     256KiB time=00:00:13.00 bitrate= 161.3kbits/s speed= 5.2x    frame=  491 fps=164 q=24.0 size=     256KiB time=00:00:16.30 bitrate= 128.7kbits/s speed=5.43x    frame=  600 fps=171 q=24.0 size=     256KiB time=00:00:19.93 bitrate= 105.2kbits/s speed=5.69x    frame=  672 fps=168 q=24.0 size=     512KiB time=00:00:22.33 bitrate= 187.8kbits/s speed=5.58x    frame=  730 fps=162 q=24.0 size=     512KiB time=00:00:24.26 bitrate= 172.9kbits/s speed=5.39x    frame=  781 fps=156 q=24.0 size=     768KiB time=00:00:25.96 bitrate= 242.3kbits/s speed=5.19x    frame=  847 fps=154 q=24.0 size=     768KiB time=00:00:28.16 bitrate= 223.4kbits/s speed=5.12x    frame=  912 fps=152 q=24.0 size=    1024KiB time=00:00:30.33 bitrate= 276.6kbits/s speed=5.05x    frame=  972 fps=149 q=24.0 size=    1280KiB time=00:00:32.33 bitrate= 324.3kbits/s speed=4.97x    frame= 1041 fps=149 q=24.0 size=    1536KiB time=00:00:34.63 bitrate= 363.3kbits/s speed=4.95x    frame= 1089 fps=145 q=24.0 size=    1536KiB time=00:00:36.23 bitrate= 347.3kbits/s speed=4.83x    frame= 1169 fps=146 q=24.0 size=    1792KiB time=00:00:38.90 bitrate= 377.4kbits/s speed=4.86x    frame= 1243 fps=146 q=24.0 size=    2048KiB time=00:00:41.36 bitrate= 405.6kbits/s speed=4.86x    frame= 1305 fps=145 q=24.0 size=    2048KiB time=00:00:43.43 bitrate= 386.3kbits/s speed=4.82x    frame= 1364 fps=143 q=24.0 size=    2304KiB time=00:00:45.40 bitrate= 415.7kbits/s speed=4.78x    frame= 1444 fps=144 q=24.0 size=    2560KiB time=00:00:48.06 bitrate= 436.3kbits/s speed= 4.8x    frame= 1527 fps=145 q=24.0 size=    2816KiB time=00:00:50.83 bitrate= 453.8kbits/s speed=4.84x    frame= 1616 fps=147 q=24.0 size=    2816KiB time=00:00:53.80 bitrate= 428.8kbits/s speed=4.89x    frame= 1685 fps=146 q=24.0 size=    2816KiB time=00:00:56.10 bitrate= 411.2kbits/s speed=4.87x    frame= 1772 fps=148 q=24.0 size=    3072KiB time=00:00:59.00 bitrate= 426.5kbits/s speed=4.91x    frame= 1805 fps=144 q=24.0 size=    3328KiB time=00:01:00.10 bitrate= 453.6kbits/s speed= 4.8x    frame= 1863 fps=143 q=24.0 size=    3584KiB time=00:01:02.03 bitrate= 473.3kbits/s speed=4.77x    frame= 1909 fps=141 q=24.0 size=    3584KiB time=00:01:03.56 bitrate= 461.9kbits/s speed= 4.7x    frame= 1974 fps=141 q=24.0 size=    3840KiB time=00:01:05.76 bitrate= 478.3kbits/s speed=4.69x    frame= 2038 fps=140 q=24.0 size=    3840KiB time=00:01:07.86 bitrate= 463.5kbits/s speed=4.68x    frame= 2098 fps=140 q=24.0 size=    3840KiB time=00:01:09.86 bitrate= 450.3kbits/s speed=4.65x    frame= 2164 fps=139 q=24.0 size=    4096KiB time=00:01:12.06 bitrate= 465.6kbits/s speed=4.65x    frame= 2208 fps=138 q=24.0 size=    4352KiB time=00:01:13.53 bitrate= 484.8kbits/s speed=4.59x    frame= 2276 fps=138 q=24.0 size=    4352KiB time=00:01:15.80 bitrate= 470.3kbits/s speed=4.59x    frame= 2361 fps=139 q=24.0 size=    4608KiB time=00:01:18.63 bitrate= 480.1kbits/s speed=4.62x    frame= 2466 fps=141 q=24.0 size=    4608KiB time=00:01:22.13 bitrate= 459.6kbits/s speed=4.69x    frame= 2567 fps=142 q=24.0 size=    4608KiB time=00:01:25.50 bitrate= 441.5kbits/s speed=4.75x    frame= 2664 fps=144 q=24.0 size=    4864KiB time=00:01:28.73 bitrate= 449.1kbits/s speed=4.79x    frame= 2747 fps=144 q=24.0 size=    4864KiB time=00:01:31.50 bitrate= 435.5kbits/s speed=4.81x    frame= 2789 fps=143 q=24.0 size=    5120KiB time=00:01:32.90 bitrate= 451.5kbits/s speed=4.76x    frame= 2825 fps=141 q=24.0 size=    5376KiB time=00:01:34.10 bitrate= 468.0kbits/s speed= 4.7x    frame= 2881 fps=140 q=24.0 size=    5632KiB time=00:01:35.96 bitrate= 480.8kbits/s speed=4.68x    frame= 2921 fps=139 q=24.0 size=    5888KiB time=00:01:37.30 bitrate= 495.7kbits/s speed=4.63x    frame= 2960 fps=138 q=24.0 size=    6144KiB time=00:01:38.60 bitrate= 510.5kbits/s speed=4.58x    frame= 2994 fps=136 q=24.0 size=    6656KiB time=00:01:39.73 bitrate= 546.7kbits/s speed=4.53x    frame= 3041 fps=135 q=24.0 size=    6656KiB time=00:01:41.30 bitrate= 538.3kbits/s speed= 4.5x    frame= 3065 fps=133 q=24.0 size=    7168KiB time=00:01:42.10 bitrate= 575.1kbits/s speed=4.44x    frame= 3107 fps=132 q=24.0 size=    7424KiB time=00:01:43.53 bitrate= 587.4kbits/s speed= 4.4x    frame= 3160 fps=132 q=24.0 size=    7424KiB time=00:01:45.26 bitrate= 577.7kbits/s speed=4.38x    frame= 3208 fps=131 q=24.0 size=    7680KiB time=00:01:46.86 bitrate= 588.7kbits/s speed=4.36x    frame= 3263 fps=130 q=24.0 size=    7936KiB time=00:01:48.70 bitrate= 598.1kbits/s speed=4.34x    frame= 3311 fps=130 q=24.0 size=    8192KiB time=00:01:50.30 bitrate= 608.4kbits/s speed=4.32x    frame= 3379 fps=130 q=24.0 size=    8192KiB time=00:01:52.56 bitrate= 596.2kbits/s speed=4.33x    frame= 3446 fps=130 q=24.0 size=    8448KiB time=00:01:54.80 bitrate= 602.8kbits/s speed=4.33x    frame= 3510 fps=130 q=24.0 size=    8704KiB time=00:01:56.93 bitrate= 609.8kbits/s speed=4.33x    frame= 3592 fps=131 q=24.0 size=    8704KiB time=00:01:59.66 bitrate= 595.9kbits/s speed=4.35x    frame= 3667 fps=131 q=24.0 size=    8960KiB time=00:02:02.16 bitrate= 600.8kbits/s speed=4.36x    frame= 3718 fps=130 q=24.0 size=    9216KiB time=00:02:03.86 bitrate= 609.5kbits/s speed=4.34x    frame= 3785 fps=130 q=24.0 size=    9472KiB time=00:02:06.10 bitrate= 615.3kbits/s speed=4.34x    frame= 3812 fps=129 q=24.0 size=    9728KiB time=00:02:07.00 bitrate= 627.5kbits/s speed= 4.3x    frame= 3865 fps=129 q=24.0 size=    9984KiB time=00:02:08.76 bitrate= 635.2kbits/s speed=4.29x    frame= 3921 fps=128 q=24.0 size=   10240KiB time=00:02:10.63 bitrate= 642.2kbits/s speed=4.28x    frame= 3948 fps=127 q=24.0 size=   10496KiB time=00:02:11.53 bitrate= 653.7kbits/s speed=4.24x    frame= 3982 fps=126 q=24.0 size=   10752KiB time=00:02:12.66 bitrate= 663.9kbits/s speed=4.21x    frame= 4030 fps=126 q=24.0 size=   10752KiB time=00:02:14.26 bitrate= 656.0kbits/s speed=4.19x    frame= 4078 fps=125 q=24.0 size=   11264KiB time=00:02:15.86 bitrate= 679.2kbits/s speed=4.18x    frame= 4119 fps=125 q=24.0 size=   11520KiB time=00:02:17.23 bitrate= 687.7kbits/s speed=4.15x    frame= 4171 fps=124 q=24.0 size=   11776KiB time=00:02:18.96 bitrate= 694.2kbits/s speed=4.14x    frame= 4203 fps=124 q=24.0 size=   12032KiB time=00:02:20.03 bitrate= 703.9kbits/s speed=4.11x    frame= 4255 fps=123 q=24.0 size=   12288KiB time=00:02:21.76 bitrate= 710.1kbits/s speed=4.11x    frame= 4283 fps=122 q=24.0 size=   12544KiB time=00:02:22.70 bitrate= 720.1kbits/s speed=4.07x    frame= 4311 fps=121 q=24.0 size=   12800KiB time=00:02:23.63 bitrate= 730.0kbits/s speed=4.04x    frame= 4365 fps=121 q=24.0 size=   13056KiB time=00:02:25.43 bitrate= 735.4kbits/s speed=4.04x    frame= 4385 fps=120 q=24.0 size=   13312KiB time=00:02:26.10 bitrate= 746.4kbits/s speed=   4x    frame= 4448 fps=120 q=24.0 size=   13568KiB time=00:02:28.20 bitrate= 750.0kbits/s speed=   4x    frame= 4506 fps=120 q=24.0 size=   13568KiB time=00:02:30.13 bitrate= 740.3kbits/s speed=   4x    frame= 4560 fps=120 q=24.0 size=   14080KiB time=00:02:31.93 bitrate= 759.2kbits/s speed=3.99x    frame= 4615 fps=120 q=24.0 size=   14080KiB time=00:02:33.76 bitrate= 750.1kbits/s speed=3.99x    frame= 4636 fps=119 q=24.0 size=   15104KiB time=00:02:34.46 bitrate= 801.0kbits/s speed=3.96x    frame= 4659 fps=118 q=24.0 size=   15872KiB time=00:02:35.23 bitrate= 837.6kbits/s speed=3.93x    frame= 4679 fps=117 q=24.0 size=   16640KiB time=00:02:35.90 bitrate= 874.4kbits/s speed=3.89x    frame= 4712 fps=116 q=24.0 size=   17152KiB time=00:02:37.00 bitrate= 895.0kbits/s speed=3.87x    frame= 4767 fps=116 q=24.0 size=   17408KiB time=00:02:38.83 bitrate= 897.8kbits/s speed=3.87x    frame= 4805 fps=116 q=24.0 size=   17920KiB time=00:02:40.10 bitrate= 916.9kbits/s speed=3.85x    frame= 4824 fps=115 q=24.0 size=   18432KiB time=00:02:40.73 bitrate= 939.4kbits/s speed=3.82x    frame= 4860 fps=114 q=24.0 size=   18688KiB time=00:02:41.93 bitrate= 945.4kbits/s speed=3.81x    frame= 4910 fps=114 q=24.0 size=   18688KiB time=00:02:43.60 bitrate= 935.8kbits/s speed= 3.8x    frame= 4936 fps=113 q=24.0 size=   19200KiB time=00:02:44.46 bitrate= 956.3kbits/s speed=3.78x    frame= 4965 fps=113 q=24.0 size=   19712KiB time=00:02:45.43 bitrate= 976.1kbits/s speed=3.76x    frame= 5009 fps=112 q=24.0 size=   19968KiB time=00:02:46.90 bitrate= 980.1kbits/s speed=3.75x    frame= 5049 fps=112 q=24.0 size=   20224KiB time=00:02:48.23 bitrate= 984.8kbits/s speed=3.74x    frame= 5072 fps=111 q=24.0 size=   20736KiB time=00:02:49.00 bitrate=1005.1kbits/s speed=3.71x    frame= 5100 fps=111 q=24.0 size=   21248KiB time=00:02:49.93 bitrate=1024.3kbits/s speed=3.69x    frame= 5159 fps=111 q=24.0 size=   21248KiB time=00:02:51.90 bitrate=1012.6kbits/s speed=3.69x    frame= 5198 fps=110 q=24.0 size=   21504KiB time=00:02:53.20 bitrate=1017.1kbits/s speed=3.68x    frame= 5224 fps=110 q=24.0 size=   22016KiB time=00:02:54.06 bitrate=1036.1kbits/s speed=3.66x    frame= 5282 fps=110 q=24.0 size=   22272KiB time=00:02:56.00 bitrate=1036.7kbits/s speed=3.66x    frame= 5344 fps=110 q=24.0 size=   22272KiB time=00:02:58.06 bitrate=1024.6kbits/s speed=3.67x    frame= 5390 fps=110 q=24.0 size=   22528KiB time=00:02:59.60 bitrate=1027.6kbits/s speed=3.66x    frame= 5454 fps=110 q=24.0 size=   22784KiB time=00:03:01.73 bitrate=1027.0kbits/s speed=3.67x    frame= 5510 fps=110 q=24.0 size=   23040KiB time=00:03:03.60 bitrate=1028.0kbits/s speed=3.67x    frame= 5565 fps=110 q=24.0 size=   23296KiB time=00:03:05.43 bitrate=1029.2kbits/s speed=3.67x    frame= 5638 fps=110 q=24.0 size=   23296KiB time=00:03:07.86 bitrate=1015.8kbits/s speed=3.68x    frame= 5707 fps=111 q=24.0 size=   23552KiB time=00:03:10.16 bitrate=1014.6kbits/s speed=3.69x    frame= 5773 fps=111 q=24.0 size=   23808KiB time=00:03:12.36 bitrate=1013.9kbits/s speed= 3.7x    frame= 5809 fps=111 q=24.0 size=   24064KiB time=00:03:13.56 bitrate=1018.4kbits/s speed=3.68x    frame= 5838 fps=110 q=24.0 size=   24576KiB time=00:03:14.53 bitrate=1034.9kbits/s speed=3.67x    frame= 5866 fps=110 q=24.0 size=   24832KiB time=00:03:15.46 bitrate=1040.7kbits/s speed=3.65x    frame= 5896 fps=109 q=24.0 size=   25344KiB time=00:03:16.46 bitrate=1056.8kbits/s speed=3.63x    frame= 5942 fps=109 q=24.0 size=   25856KiB time=00:03:18.00 bitrate=1069.8kbits/s speed=3.63x    frame= 5980 fps=109 q=24.0 size=   25856KiB time=00:03:19.26 bitrate=1063.0kbits/s speed=3.62x    frame= 6001 fps=108 q=24.0 size=   26368KiB time=00:03:19.96 bitrate=1080.2kbits/s speed= 3.6x    frame= 6030 fps=108 q=24.0 size=   26624KiB time=00:03:20.93 bitrate=1085.5kbits/s speed=3.58x    frame= 6079 fps=107 q=24.0 size=   26624KiB time=00:03:22.56 bitrate=1076.7kbits/s speed=3.58x    frame= 6112 fps=107 q=24.0 size=   26880KiB time=00:03:23.66 bitrate=1081.2kbits/s speed=3.57x    frame= 6153 fps=107 q=24.0 size=   27136KiB time=00:03:25.03 bitrate=1084.2kbits/s speed=3.56x    frame= 6226 fps=107 q=24.0 size=   27136KiB time=00:03:27.46 bitrate=1071.5kbits/s speed=3.57x    frame= 6277 fps=107 q=24.0 size=   27392KiB time=00:03:29.16 bitrate=1072.8kbits/s speed=3.57x    frame= 6325 fps=107 q=24.0 size=   27648KiB time=00:03:30.76 bitrate=1074.6kbits/s speed=3.57x    frame= 6380 fps=107 q=24.0 size=   27904KiB time=00:03:32.60 bitrate=1075.2kbits/s speed=3.57x    frame= 6430 fps=107 q=24.0 size=   28160KiB time=00:03:34.26 bitrate=1076.6kbits/s speed=3.57x    frame= 6493 fps=107 q=24.0 size=   28416KiB time=00:03:36.36 bitrate=1075.9kbits/s speed=3.57x    frame= 6544 fps=107 q=24.0 size=   28672KiB time=00:03:38.06 bitrate=1077.1kbits/s speed=3.57x    frame= 6592 fps=107 q=24.0 size=   28928KiB time=00:03:39.66 bitrate=1078.8kbits/s speed=3.57x    frame= 6656 fps=107 q=24.0 size=   29184KiB time=00:03:41.80 bitrate=1077.9kbits/s speed=3.57x    frame= 6714 fps=107 q=21.0 size=   29184KiB time=00:03:43.73 bitrate=1068.6kbits/s speed=3.58x    frame= 6769 fps=107 q=24.0 size=   29696KiB time=00:03:45.56 bitrate=1078.5kbits/s speed=3.58x    frame= 6814 fps=107 q=24.0 size=   29952KiB time=00:03:47.06 bitrate=1080.6kbits/s speed=3.57x    frame= 6862 fps=107 q=24.0 size=   30208KiB time=00:03:48.66 bitrate=1082.2kbits/s speed=3.57x    frame= 6888 fps=107 q=24.0 size=   30720KiB time=00:03:49.53 bitrate=1096.4kbits/s speed=3.56x    frame= 6913 fps=106 q=24.0 size=   31488KiB time=00:03:50.36 bitrate=1119.7kbits/s speed=3.54x    frame= 6936 fps=106 q=24.0 size=   32000KiB time=00:03:51.13 bitrate=1134.2kbits/s speed=3.53x    frame= 6956 fps=105 q=24.0 size=   32512KiB time=00:03:51.80 bitrate=1149.0kbits/s speed=3.51x    frame= 7003 fps=105 q=24.0 size=   32768KiB time=00:03:53.36 bitrate=1150.3kbits/s speed=3.51x    frame= 7025 fps=105 q=24.0 size=   33280KiB time=00:03:54.10 bitrate=1164.6kbits/s speed=3.49x    frame= 7049 fps=104 q=24.0 size=   33792KiB time=00:03:54.90 bitrate=1178.5kbits/s speed=3.48x    frame= 7074 fps=104 q=24.0 size=   34304KiB time=00:03:55.73 bitrate=1192.1kbits/s speed=3.46x    frame= 7097 fps=104 q=24.0 size=   34560KiB time=00:03:56.50 bitrate=1197.1kbits/s speed=3.45x    frame= 7120 fps=103 q=24.0 size=   35072KiB time=00:03:57.26 bitrate=1210.9kbits/s speed=3.44x    frame= 7147 fps=103 q=24.0 size=   35584KiB time=00:03:58.20 bitrate=1223.8kbits/s speed=3.42x    frame= 7167 fps=102 q=24.0 size=   36352KiB time=00:03:58.83 bitrate=1246.9kbits/s speed=3.41x    frame= 7213 fps=102 q=24.0 size=   36864KiB time=00:04:00.36 bitrate=1256.4kbits/s speed=3.41x    frame= 7240 fps=102 q=24.0 size=   37376KiB time=00:04:01.26 bitrate=1269.1kbits/s speed=3.39x    frame= 7259 fps=101 q=24.0 size=   37632KiB time=00:04:01.90 bitrate=1274.4kbits/s speed=3.38x    frame= 7289 fps=101 q=24.0 size=   38400KiB time=00:04:02.90 bitrate=1295.1kbits/s speed=3.37x    frame= 7337 fps=101 q=24.0 size=   38656KiB time=00:04:04.50 bitrate=1295.2kbits/s speed=3.37x    frame= 7377 fps=101 q=24.0 size=   38912KiB time=00:04:05.83 bitrate=1296.7kbits/s speed=3.36x    frame= 7398 fps=101 q=24.0 size=   39168KiB time=00:04:06.53 bitrate=1301.5kbits/s speed=3.35x    frame= 7421 fps=100 q=24.0 size=   39424KiB time=00:04:07.30 bitrate=1306.0kbits/s speed=3.34x    frame= 7447 fps=100 q=24.0 size=   39680KiB time=00:04:08.16 bitrate=1309.8kbits/s speed=3.33x    frame= 7489 fps=100 q=24.0 size=   39936KiB time=00:04:09.56 bitrate=1310.9kbits/s speed=3.32x    frame= 7538 fps=100 q=24.0 size=   40192KiB time=00:04:11.20 bitrate=1310.7kbits/s speed=3.32x    frame= 7602 fps=100 q=24.0 size=   40192KiB time=00:04:13.33 bitrate=1299.7kbits/s speed=3.33x    frame= 7656 fps=100 q=24.0 size=   40448KiB time=00:04:15.13 bitrate=1298.7kbits/s speed=3.33x    frame= 7718 fps=100 q=24.0 size=   40448KiB time=00:04:17.20 bitrate=1288.3kbits/s speed=3.34x    frame= 7787 fps=100 q=24.0 size=   40704KiB time=00:04:19.50 bitrate=1285.0kbits/s speed=3.34x    frame= 7862 fps=101 q=24.0 size=   40704KiB time=00:04:22.00 bitrate=1272.7kbits/s speed=3.36x    frame= 7935 fps=101 q=24.0 size=   40704KiB time=00:04:24.43 bitrate=1261.0kbits/s speed=3.37x    frame= 8020 fps=101 q=24.0 size=   40960KiB time=00:04:27.26 bitrate=1255.5kbits/s speed=3.38x    frame= 8108 fps=102 q=24.0 size=   40960KiB time=00:04:30.20 bitrate=1241.8kbits/s speed= 3.4x    frame= 8208 fps=102 q=24.0 size=   40960KiB time=00:04:33.53 bitrate=1226.7kbits/s speed=3.42x    frame= 8310 fps=103 q=24.0 size=   41216KiB time=00:04:36.93 bitrate=1219.2kbits/s speed=3.44x    frame= 8406 fps=104 q=24.0 size=   41216KiB time=00:04:40.13 bitrate=1205.3kbits/s speed=3.45x    frame= 8507 fps=104 q=24.0 size=   41216KiB time=00:04:43.50 bitrate=1191.0kbits/s speed=3.47x    frame= 8607 fps=105 q=24.0 size=   41472KiB time=00:04:46.83 bitrate=1184.4kbits/s speed=3.49x    frame= 8686 fps=105 q=24.0 size=   41472KiB time=00:04:49.46 bitrate=1173.7kbits/s speed=3.51x    frame= 8729 fps=105 q=24.0 size=   41984KiB time=00:04:50.90 bitrate=1182.3kbits/s speed= 3.5x    frame= 8750 fps=105 q=24.0 size=   43008KiB time=00:04:51.60 bitrate=1208.2kbits/s speed=3.49x    frame= 8768 fps=104 q=24.0 size=   44288KiB time=00:04:52.20 bitrate=1241.6kbits/s speed=3.48x    frame= 8790 fps=104 q=24.0 size=   45056KiB time=00:04:52.93 bitrate=1260.0kbits/s speed=3.46x    frame= 8835 fps=104 q=24.0 size=   45312KiB time=00:04:54.43 bitrate=1260.7kbits/s speed=3.46x    frame= 8853 fps=103 q=24.0 size=   46336KiB time=00:04:55.03 bitrate=1286.6kbits/s speed=3.45x    frame= 8869 fps=103 q=24.0 size=   47104KiB time=00:04:55.56 bitrate=1305.5kbits/s speed=3.43x    frame= 8903 fps=103 q=24.0 size=   47616KiB time=00:04:56.70 bitrate=1314.7kbits/s speed=3.43x    frame= 8931 fps=103 q=24.0 size=   47872KiB time=00:04:57.63 bitrate=1317.6kbits/s speed=3.42x    frame= 8979 fps=103 q=24.0 size=   48128KiB time=00:04:59.23 bitrate=1317.6kbits/s speed=3.42x    frame= 9058 fps=103 q=24.0 size=   48128KiB time=00:05:01.86 bitrate=1306.1kbits/s speed=3.43x    frame= 9143 fps=103 q=24.0 size=   48384KiB time=00:05:04.70 bitrate=1300.8kbits/s speed=3.44x    frame= 9243 fps=104 q=24.0 size=   48384KiB time=00:05:08.03 bitrate=1286.8kbits/s speed=3.46x    frame= 9333 fps=104 q=24.0 size=   48384KiB time=00:05:11.03 bitrate=1274.3kbits/s speed=3.47x    frame= 9429 fps=105 q=24.0 size=   48640KiB time=00:05:14.23 bitrate=1268.0kbits/s speed=3.49x    frame= 9506 fps=105 q=24.0 size=   48640KiB time=00:05:16.80 bitrate=1257.8kbits/s speed= 3.5x    frame= 9592 fps=105 q=24.0 size=   48640KiB time=00:05:19.66 bitrate=1246.5kbits/s speed=3.51x    frame= 9686 fps=106 q=24.0 size=   48640KiB time=00:05:22.83 bitrate=1234.3kbits/s speed=3.52x    frame= 9767 fps=106 q=24.0 size=   48896KiB time=00:05:25.50 bitrate=1230.6kbits/s speed=3.53x    frame= 9870 fps=107 q=24.0 size=   48896KiB time=00:05:29.00 bitrate=1217.5kbits/s speed=3.55x    frame= 9984 fps=107 q=24.0 size=   48896KiB time=00:05:32.73 bitrate=1203.8kbits/s speed=3.57x    frame=10085 fps=108 q=21.0 size=   48896KiB time=00:05:36.10 bitrate=1191.8kbits/s speed=3.59x    [mp4 @ 0x55ef41f40740] Starting second pass: moving the moov atom to the beginning of the file
+[out#0/mp4 @ 0x55ef41f14280] video:49031KiB audio:0KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: 0.239096%
+frame=10195 fps=108 q=-1.0 Lsize=   49148KiB time=00:05:39.76 bitrate=1185.0kbits/s speed=3.61x    
+[libx264 @ 0x55ef41f16b40] frame I:50    Avg QP: 5.12  size: 86980
+[libx264 @ 0x55ef41f16b40] frame P:3081  Avg QP:13.81  size: 11820
+[libx264 @ 0x55ef41f16b40] frame B:7064  Avg QP:13.49  size:  1336
+[libx264 @ 0x55ef41f16b40] consecutive B-frames:  5.3%  5.2%  5.5% 84.0%
+[libx264 @ 0x55ef41f16b40] mb I  I16..4: 74.0% 11.9% 14.1%
+[libx264 @ 0x55ef41f16b40] mb P  I16..4:  1.2%  1.5%  0.5%  P16..4:  4.5%  1.7%  1.5%  0.0%  0.0%    skip:89.1%
+[libx264 @ 0x55ef41f16b40] mb B  I16..4:  0.1%  0.1%  0.0%  B16..8:  3.3%  0.5%  0.2%  direct: 0.3%  skip:95.5%  L0:47.8% L1:41.0% BI:11.2%
+[libx264 @ 0x55ef41f16b40] 8x8 transform intra:36.9% inter:42.1%
+[libx264 @ 0x55ef41f16b40] coded y,uvDC,uvAC intra: 26.0% 21.6% 13.8% inter: 1.6% 1.7% 0.3%
+[libx264 @ 0x55ef41f16b40] i16 v,h,dc,p: 70% 24%  4%  1%
+[libx264 @ 0x55ef41f16b40] i8 v,h,dc,ddl,ddr,vr,hd,vl,hu: 25% 24% 40%  1%  2%  2%  3%  1%  2%
+[libx264 @ 0x55ef41f16b40] i4 v,h,dc,ddl,ddr,vr,hd,vl,hu: 26% 28% 15%  4%  6%  5%  7%  4%  5%
+[libx264 @ 0x55ef41f16b40] i8c dc,h,v,p: 76% 16%  7%  1%
+[libx264 @ 0x55ef41f16b40] Weighted P-Frames: Y:4.8% UV:3.1%
+[libx264 @ 0x55ef41f16b40] ref P L0: 76.6% 11.9%  9.1%  2.3%  0.1%
+[libx264 @ 0x55ef41f16b40] ref B L0: 88.9% 10.1%  1.0%
+[libx264 @ 0x55ef41f16b40] ref B L1: 96.8%  3.2%
+[libx264 @ 0x55ef41f16b40] kb/s:1181.92
+
+$ ffmpeg -y -hide_banner -nostdin -threads 2 -i /tmp/export_final_m111y7ci/norm.wav -c:a aac -b:a 192k -ar 48000 -ac 2 -map_metadata -1 /tmp/export_final_m111y7ci/audio.m4a
+Input #0, wav, from '/tmp/export_final_m111y7ci/norm.wav':
+  Metadata:
+    encoder         : Lavf61.7.103
+  Duration: 00:05:39.83, bitrate: 2304 kb/s
+  Stream #0:0: Audio: pcm_s24le ([1][0][0][0] / 0x0001), 48000 Hz, stereo, s32 (24 bit), 2304 kb/s
+Stream mapping:
+  Stream #0:0 -> #0:0 (pcm_s24le (native) -> aac (native))
+Output #0, ipod, to '/tmp/export_final_m111y7ci/audio.m4a':
+  Metadata:
+    encoder         : Lavf61.7.103
+  Stream #0:0: Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 192 kb/s
+      Metadata:
+        encoder         : Lavc61.19.101 aac
+size=     512KiB time=00:00:25.92 bitrate= 161.8kbits/s speed=51.8x    size=    1024KiB time=00:00:51.96 bitrate= 161.4kbits/s speed=  52x    size=    1536KiB time=00:01:16.99 bitrate= 163.4kbits/s speed=51.3x    size=    2048KiB time=00:01:41.41 bitrate= 165.4kbits/s speed=50.6x    size=    2560KiB time=00:02:06.29 bitrate= 166.1kbits/s speed=50.4x    size=    3072KiB time=00:02:32.78 bitrate= 164.7kbits/s speed=50.9x    size=    3584KiB time=00:02:57.89 bitrate= 165.0kbits/s speed=50.8x    size=    4352KiB time=00:03:27.63 bitrate= 171.7kbits/s speed=51.8x    size=    4864KiB time=00:03:54.21 bitrate= 170.1kbits/s speed=  52x    size=    5376KiB time=00:04:21.78 bitrate= 168.2kbits/s speed=52.3x    size=    5888KiB time=00:04:50.11 bitrate= 166.3kbits/s speed=52.7x    size=    6656KiB time=00:05:17.65 bitrate= 171.7kbits/s speed=52.9x    [out#0/ipod @ 0x55a64368e240] video:0KiB audio:6904KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: 0.914104%
+size=    6967KiB time=00:05:39.83 bitrate= 168.0kbits/s speed=54.4x    
+[aac @ 0x55a643551e00] Qavg: 21599.727
+
+$ ffmpeg -hide_banner -nostdin -threads 2 -i /tmp/export_final_m111y7ci/audio.m4a -map 0:a:0 -af loudnorm=I=-16.0:TP=-1.5:LRA=11.0:print_format=json -f null -
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '/tmp/export_final_m111y7ci/audio.m4a':
+  Metadata:
+    major_brand     : M4A 
+    minor_version   : 512
+    compatible_brands: M4A isomiso2
+    encoder         : Lavf61.7.103
+  Duration: 00:05:39.83, start: 0.000000, bitrate: 167 kb/s
+  Stream #0:0[0x1](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 166 kb/s (default)
+      Metadata:
+        handler_name    : SoundHandler
+        vendor_id       : [0][0][0][0]
+Stream mapping:
+  Stream #0:0 -> #0:0 (aac (native) -> pcm_s16le (native))
+Output #0, null, to 'pipe:':
+  Metadata:
+    major_brand     : M4A 
+    minor_version   : 512
+    compatible_brands: M4A isomiso2
+    encoder         : Lavf61.7.103
+  Stream #0:0(und): Audio: pcm_s16le, 192000 Hz, stereo, s16, 6144 kb/s (default)
+      Metadata:
+        handler_name    : SoundHandler
+        vendor_id       : [0][0][0][0]
+        encoder         : Lavc61.19.101 pcm_s16le
+size=N/A time=00:00:21.90 bitrate=N/A speed=43.8x    size=N/A time=00:00:46.90 bitrate=N/A speed=46.9x    size=N/A time=00:01:12.80 bitrate=N/A speed=48.5x    size=N/A time=00:01:37.00 bitrate=N/A speed=48.5x    size=N/A time=00:02:01.50 bitrate=N/A speed=48.6x    size=N/A time=00:02:26.60 bitrate=N/A speed=48.9x    size=N/A time=00:02:51.60 bitrate=N/A speed=  49x    size=N/A time=00:03:16.50 bitrate=N/A speed=49.1x    size=N/A time=00:03:41.50 bitrate=N/A speed=49.2x    size=N/A time=00:04:06.60 bitrate=N/A speed=49.3x    size=N/A time=00:04:30.80 bitrate=N/A speed=49.2x    size=N/A time=00:04:56.20 bitrate=N/A speed=49.4x    size=N/A time=00:05:21.60 bitrate=N/A speed=49.5x    [Parsed_loudnorm_0 @ 0x7f3d00003080] 
+{
+	"input_i" : "-16.01",
+	"input_tp" : "-3.39",
+	"input_lra" : "2.20",
+	"input_thresh" : "-26.40",
+	"output_i" : "-16.02",
+	"output_tp" : "-2.91",
+	"output_lra" : "2.20",
+	"output_thresh" : "-26.42",
+	"normalization_type" : "dynamic",
+	"target_offset" : "0.02"
+}
+[out#0/null @ 0x5562b95a00c0] video:0KiB audio:254880KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
+size=N/A time=00:05:39.90 bitrate=N/A speed=49.2x    
+
+$ ffmpeg -y -hide_banner -nostdin -threads 2 -i /tmp/export_final_m111y7ci/video.mp4 -i /tmp/export_final_m111y7ci/audio.m4a -map 0:v:0 -map 1:a:0 -c copy -map_metadata -1 -map_chapters -1 -movflags +faststart /workspace/病理科普视频/v5_qa_dev/qa/v6/export/trial_music_credits/成片_1080p.mp4
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '/tmp/export_final_m111y7ci/video.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    encoder         : Lavf61.7.103
+  Duration: 00:05:39.83, start: 0.000000, bitrate: 1184 kb/s
+  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 1181 kb/s, 30 fps, 30 tbr, 15360 tbn (default)
+      Metadata:
+        handler_name    : VideoHandler
+        vendor_id       : [0][0][0][0]
+        encoder         : Lavc61.19.101 libx264
+Input #1, mov,mp4,m4a,3gp,3g2,mj2, from '/tmp/export_final_m111y7ci/audio.m4a':
+  Metadata:
+    major_brand     : M4A 
+    minor_version   : 512
+    compatible_brands: M4A isomiso2
+    encoder         : Lavf61.7.103
+  Duration: 00:05:39.83, start: 0.000000, bitrate: 167 kb/s
+  Stream #1:0[0x1](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 166 kb/s (default)
+      Metadata:
+        handler_name    : SoundHandler
+        vendor_id       : [0][0][0][0]
+Stream mapping:
+  Stream #0:0 -> #0:0 (copy)
+  Stream #1:0 -> #0:1 (copy)
+Output #0, mp4, to '/workspace/病理科普视频/v5_qa_dev/qa/v6/export/trial_music_credits/成片_1080p.mp4':
+  Metadata:
+    encoder         : Lavf61.7.103
+  Stream #0:0: Video: h264 (High) (avc1 / 0x31637661), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], q=2-31, 1181 kb/s, 30 fps, 30 tbr, 15360 tbn (default)
+  Stream #0:1: Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 166 kb/s (default)
+[mp4 @ 0x55c4dceb1540] Starting second pass: moving the moov atom to the beginning of the file
+[out#0/mp4 @ 0x55c4dceb0e00] video:49031KiB audio:6904KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: 0.649707%
+frame=10195 fps=0.0 q=-1.0 Lsize=   56299KiB time=00:05:39.76 bitrate=1357.4kbits/s speed=2.79e+03x    
+
+$ ffmpeg -y -hide_banner -nostdin -threads 2 -i /workspace/病理科普视频/v5_qa_dev/qa/v6/export/trial_music_credits/成片_1080p.mp4 -map 0:v:0 -map 0:a:0 -c copy -map_metadata -1 -map_chapters -1 -fflags +bitexact -flags:v +bitexact -flags:a +bitexact -bsf:v filter_units=remove_types=6 -movflags +faststart /workspace/病理科普视频/v5_qa_dev/qa/v6/export/trial_music_credits/成片_盲审版.mp4
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '/workspace/病理科普视频/v5_qa_dev/qa/v6/export/trial_music_credits/成片_1080p.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    encoder         : Lavf61.7.103
+  Duration: 00:05:39.83, start: 0.000000, bitrate: 1357 kb/s
+  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 1181 kb/s, 30 fps, 30 tbr, 15360 tbn (default)
+      Metadata:
+        handler_name    : VideoHandler
+        vendor_id       : [0][0][0][0]
+  Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 166 kb/s (default)
+      Metadata:
+        handler_name    : SoundHandler
+        vendor_id       : [0][0][0][0]
+[filter_units @ 0x565432082400] 4 bytes left at end of AVCC header.
+Stream mapping:
+  Stream #0:0 -> #0:0 (copy)
+  Stream #0:1 -> #0:1 (copy)
+Output #0, mp4, to '/workspace/病理科普视频/v5_qa_dev/qa/v6/export/trial_music_credits/成片_盲审版.mp4':
+  Stream #0:0: Video: h264 (High) (avc1 / 0x31637661), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], q=2-31, 1181 kb/s, 30 fps, 30 tbr, 15360 tbn (default)
+  Stream #0:1: Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 166 kb/s (default)
+[mp4 @ 0x56543201f040] Starting second pass: moving the moov atom to the beginning of the file
+[out#0/mp4 @ 0x565431fb0ec0] video:49030KiB audio:6904KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: 0.649652%
+frame=10195 fps=0.0 q=-1.0 Lsize=   56298KiB time=00:05:39.76 bitrate=1357.4kbits/s speed=1.72e+03x    
+
+$ ffmpeg -hide_banner -nostdin -threads 2 -i /workspace/病理科普视频/v5_qa_dev/qa/v6/export/trial_music_credits/成片_1080p.mp4 -map 0:a:0 -af loudnorm=I=-16.0:TP=-1.5:LRA=11.0:print_format=json -f null -
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '/workspace/病理科普视频/v5_qa_dev/qa/v6/export/trial_music_credits/成片_1080p.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    encoder         : Lavf61.7.103
+  Duration: 00:05:39.83, start: 0.000000, bitrate: 1357 kb/s
+  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 1181 kb/s, 30 fps, 30 tbr, 15360 tbn (default)
+      Metadata:
+        handler_name    : VideoHandler
+        vendor_id       : [0][0][0][0]
+  Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 166 kb/s (default)
+      Metadata:
+        handler_name    : SoundHandler
+        vendor_id       : [0][0][0][0]
+Stream mapping:
+  Stream #0:1 -> #0:0 (aac (native) -> pcm_s16le (native))
+Output #0, null, to 'pipe:':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    encoder         : Lavf61.7.103
+  Stream #0:0(und): Audio: pcm_s16le, 192000 Hz, stereo, s16, 6144 kb/s (default)
+      Metadata:
+        handler_name    : SoundHandler
+        vendor_id       : [0][0][0][0]
+        encoder         : Lavc61.19.101 pcm_s16le
+size=N/A time=00:00:25.00 bitrate=N/A speed=  50x    size=N/A time=00:00:52.30 bitrate=N/A speed=52.3x    size=N/A time=00:01:17.50 bitrate=N/A speed=51.7x    size=N/A time=00:01:42.80 bitrate=N/A speed=51.4x    size=N/A time=00:02:09.10 bitrate=N/A speed=51.6x    size=N/A time=00:02:33.80 bitrate=N/A speed=51.3x    size=N/A time=00:02:59.50 bitrate=N/A speed=51.3x    size=N/A time=00:03:22.40 bitrate=N/A speed=50.6x    size=N/A time=00:03:48.50 bitrate=N/A speed=50.8x    size=N/A time=00:04:11.60 bitrate=N/A speed=50.3x    size=N/A time=00:04:36.50 bitrate=N/A speed=50.3x    size=N/A time=00:05:01.60 bitrate=N/A speed=50.3x    size=N/A time=00:05:26.90 bitrate=N/A speed=50.3x    [Parsed_loudnorm_0 @ 0x7f4650003080] 
+{
+	"input_i" : "-16.01",
+	"input_tp" : "-3.39",
+	"input_lra" : "2.20",
+	"input_thresh" : "-26.40",
+	"output_i" : "-16.02",
+	"output_tp" : "-2.91",
+	"output_lra" : "2.20",
+	"output_thresh" : "-26.42",
+	"normalization_type" : "dynamic",
+	"target_offset" : "0.02"
+}
+[out#0/null @ 0x5627f5513d80] video:0KiB audio:254880KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
+size=N/A time=00:05:39.90 bitrate=N/A speed=49.8x    
+
+$ ffmpeg -hide_banner -nostdin -threads 2 -i /workspace/病理科普视频/v5_qa_dev/qa/v6/export/trial_music_credits/成片_盲审版.mp4 -map 0:a:0 -af loudnorm=I=-16.0:TP=-1.5:LRA=11.0:print_format=json -f null -
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '/workspace/病理科普视频/v5_qa_dev/qa/v6/export/trial_music_credits/成片_盲审版.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+  Duration: 00:05:39.83, start: 0.000000, bitrate: 1357 kb/s
+  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 1181 kb/s, 30 fps, 30 tbr, 15360 tbn (default)
+      Metadata:
+        vendor_id       : [0][0][0][0]
+  Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 166 kb/s (default)
+      Metadata:
+        vendor_id       : [0][0][0][0]
+Stream mapping:
+  Stream #0:1 -> #0:0 (aac (native) -> pcm_s16le (native))
+Output #0, null, to 'pipe:':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    encoder         : Lavf61.7.103
+  Stream #0:0(und): Audio: pcm_s16le, 192000 Hz, stereo, s16, 6144 kb/s (default)
+      Metadata:
+        vendor_id       : [0][0][0][0]
+        encoder         : Lavc61.19.101 pcm_s16le
+size=N/A time=00:00:22.20 bitrate=N/A speed=44.3x    size=N/A time=00:00:48.70 bitrate=N/A speed=48.7x    size=N/A time=00:01:16.40 bitrate=N/A speed=50.9x    size=N/A time=00:01:41.00 bitrate=N/A speed=50.5x    size=N/A time=00:02:07.60 bitrate=N/A speed=  51x    size=N/A time=00:02:36.00 bitrate=N/A speed=  52x    size=N/A time=00:03:04.20 bitrate=N/A speed=52.6x    size=N/A time=00:03:32.20 bitrate=N/A speed=  53x    size=N/A time=00:04:00.00 bitrate=N/A speed=53.3x    size=N/A time=00:04:28.20 bitrate=N/A speed=53.6x    size=N/A time=00:04:55.90 bitrate=N/A speed=53.8x    size=N/A time=00:05:24.70 bitrate=N/A speed=54.1x    [Parsed_loudnorm_0 @ 0x7f1bd0003080] 
+{
+	"input_i" : "-16.01",
+	"input_tp" : "-3.39",
+	"input_lra" : "2.20",
+	"input_thresh" : "-26.40",
+	"output_i" : "-16.02",
+	"output_tp" : "-2.91",
+	"output_lra" : "2.20",
+	"output_thresh" : "-26.42",
+	"normalization_type" : "dynamic",
+	"target_offset" : "0.02"
+}
+[out#0/null @ 0x55fe61ae8dc0] video:0KiB audio:254880KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
+size=N/A time=00:05:39.90 bitrate=N/A speed=53.8x    
+
+$ ffmpeg -hide_banner -loglevel error -nostdin -threads 2 -i /workspace/病理科普视频/v5_qa_dev/qa/v6/export/trial_music_credits/成片_1080p.mp4 -map 0:v:0 -f hash -hash md5 -
+MD5=3ffadb00a28ef0dada6c6d88639becbd
+
+$ ffmpeg -hide_banner -loglevel error -nostdin -threads 2 -i /workspace/病理科普视频/v5_qa_dev/qa/v6/export/trial_music_credits/成片_盲审版.mp4 -map 0:v:0 -f hash -hash md5 -
+MD5=3ffadb00a28ef0dada6c6d88639becbd
+
+$ ffmpeg -hide_banner -loglevel error -nostdin -threads 2 -i /workspace/病理科普视频/v5_qa_dev/qa/v6/export/trial_music_credits/成片_1080p.mp4 -map 0:a:0 -c:a pcm_s16le -f hash -hash md5 -
+MD5=c92e57630009d5eb5473f9de1dbbd0f8
+
+$ ffmpeg -hide_banner -loglevel error -nostdin -threads 2 -i /workspace/病理科普视频/v5_qa_dev/qa/v6/export/trial_music_credits/成片_盲审版.mp4 -map 0:a:0 -c:a pcm_s16le -f hash -hash md5 -
+MD5=c92e57630009d5eb5473f9de1dbbd0f8
