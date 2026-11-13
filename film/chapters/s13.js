@@ -64,12 +64,13 @@ export default {
     const l53 = smooth((t - T.frac(53, .10)) / .45);
     c.save();
     c.fillStyle = '#2A2A35';
-    c.font = '400 36px MixSans';
+    c.font = '500 36px MixSans';
     c.globalAlpha = l49; c.fillText('腔内压力升高', 85, 372);
     c.globalAlpha = l50; c.fillText('受压／血栓 → 缺血', 85, 438);
     c.globalAlpha = l51; c.fillText('组织坏死、出血', 85, 504);
-    c.globalAlpha = l52; c.fillText('血红蛋白分解产物', 85, 570);
-    c.globalAlpha = l53; c.fillText('局部暗红、发黑', 85, 636);
+    c.globalAlpha = l52; c.fillText('坏死与血红蛋白', 85, 570);
+    c.fillText('分解产物', 85, 616);
+    c.globalAlpha = l53; c.fillText('局部暗红、发黑', 85, 682);
     c.restore();
 
     // ── 49: cross-section, intraluminal pressure rising ─────────────────────────────
@@ -183,7 +184,7 @@ export default {
       // 51–52: wall tissue dying, bleeding, then pigment
       if (tissueA > .01) {
         const n = smooth((t - T.frac(51, .16)) / (T.end(51) - T.frac(51, .16)));
-        const b = smooth((t - T.frac(51, .34)) / (T.end(51) - T.frac(51, .34)));
+        const b = smooth((t - T.frac(51, .63)) / (T.end(51) - T.frac(51, .63)));
         const g = smooth((t - T.frac(52, .12)) / (T.end(52) - T.frac(52, .12)));
         drawTissueField(c, { x: wx, y: wy, r, n, b, g, flow: (t % 9) / 9, alpha: tissueA * contentA });
       }
@@ -198,8 +199,8 @@ export default {
       tag(c, '受压', 1180, 176, wx - 30, wy - 128 - 42, labA * smooth((t - T.frac(50, .34)) / .4) * (1 - tissueA));
       tag(c, '血栓', 1594, 676, wx + 150, wy + 132, labA * smooth((t - T.frac(50, .5)) / .4) * (1 - tissueA));
       tag(c, '缺血', 1610, 228, wx + 120, wy - 150, labA * smooth((t - T.frac(50, .74)) / .3) * (1 - tissueA));
-      tag(c, '坏死', 1810, 470, wx + 90, wy + 20, labA * smooth((t - T.frac(51, .38)) / .4) * tissueA);
-      tag(c, '出血', 1688, 760, wx + tissueAnchors.bleed[0], wy + tissueAnchors.bleed[1], labA * smooth((t - T.frac(51, .62)) / .35) * tissueA);
+      tag(c, '坏死', 1810, 470, wx + tissueAnchors.necro[0], wy + tissueAnchors.necro[1], labA * smooth((t - T.frac(51, .38)) / .4) * tissueA);
+      tag(c, '出血', 1688, 760, wx + tissueAnchors.bleed[0], wy + tissueAnchors.bleed[1], labA * smooth((t - T.frac(51, .74)) / .35) * tissueA);
       tag(c, ['血红蛋白', '分解产物'], 1560, 150, wx + tissueAnchors.pigment[0], wy + tissueAnchors.pigment[1], labA * smooth((t - T.frac(52, .3)) / .45) * (1 - grossA));
     }
 
@@ -207,12 +208,12 @@ export default {
     if (grossA > .01) {
       const grow = smooth((t - T.frac(53, .08)) / (T.end(53) - T.frac(53, .08)));
       const stage = mix(2.52, 3, grow);
-      const sc = mix(1.96, 2.08, grow);
+      const sc = mix(1.12, 1.17, grow);
       const rot = .95;
       // Pin the black plaque in the right panel so the dark-red shaft and the tip both stay on screen.
       const f = frameAt(.8), w = tubeRadius(.8, swellAt(3)), lx = f.p[0] + f.nx * w * -.08, ly = f.p[1] + f.ny * w * -.08;
       const co = Math.cos(rot), si = Math.sin(rot);
-      const tx = 1340, ty = 500;
+      const tx = 1430, ty = 700;
       const pose = { x: tx - (lx * co - ly * si) * sc, y: ty - (lx * si + ly * co) * sc, sc, rot };
       c.save();
       c.globalAlpha = grossA;
@@ -223,8 +224,8 @@ export default {
       const pDark = toScreen(pose, [fBlack.p[0] + fBlack.nx * tubeRadius(.80, swell) * -.12, fBlack.p[1] + fBlack.ny * tubeRadius(.80, swell) * -.12]);
       tag(c, '发黑', 1628, 360, pDark[0], pDark[1], grossA * smooth((t - T.frac(53, .28)) / .35));
       // Distal red serosa, past the black plaques (those sit around s .75–.85) and off the mesoappendix.
-      const fRed = frameAt(.895);
-      const pRed = toScreen(pose, [fRed.p[0] + fRed.nx * tubeRadius(.895, swell) * -.2, fRed.p[1] + fRed.ny * tubeRadius(.895, swell) * -.2]);
+      const fRed = frameAt(.744);
+      const pRed = toScreen(pose, [fRed.p[0] + fRed.nx * tubeRadius(.744, swell) * .32, fRed.p[1] + fRed.ny * tubeRadius(.744, swell) * .32]);
       tag(c, '暗红', 1188, 800, pRed[0], pRed[1], grossA * smooth((t - T.frac(53, .42)) / .35));
     }
   },

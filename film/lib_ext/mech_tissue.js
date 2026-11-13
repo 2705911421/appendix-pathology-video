@@ -1,5 +1,5 @@
 // Lane mech: appendiceal-wall field for ischemia → necrosis with hemorrhage (S13, 51–52).
-// Not an H&E plate and not a sheet of epithelial polygons. Smooth-muscle ribbons lose
+// H&E teaching field with a viable-to-necrotic muscle transition. Smooth-muscle ribbons lose
 // their spindle nuclei next to an occluded mural vessel; red cells leak between the
 // ghost fibers; brown-black mottles are haemoglobin breakdown, with no concentration
 // and no clock. Anchors are local offsets from the field centre for the labels.
@@ -11,6 +11,7 @@ const TAU = Math.PI * 2;
 const bands = [];
 const bleeds = [];
 const pigments = [];
+const musclePlates = [];
 
 export const tissueAnchors = { necro: [80, 70], bleed: [150, 130], pigment: [36, -10] };
 
@@ -47,7 +48,7 @@ export function prepareTissue() {
     const near = i < 9;
     const x = near ? -70 + R() * 200 : 40 + R() * 240;
     const y = near ? -40 + R() * 250 : -180 + R() * 400;
-    if (Math.hypot(x, y) > 300) continue;
+    if (Math.hypot(x, y) > 300 || y < -100) continue;
     const n = 4 + Math.floor(R() * 4), list = [];
     for (let k = 0; k < n; k++) list.push({
       dx: (R() - .5) * 54,
@@ -81,8 +82,21 @@ export function prepareTissue() {
   pigments.push({ x: 28, y: 128, r: 30, seed: 5.4, a: .85 });
   tissueAnchors.pigment[0] = 78;
   tissueAnchors.pigment[1] = -36;
-  tissueAnchors.necro[0] = 36;
-  tissueAnchors.necro[1] = 78;
+  tissueAnchors.necro[0] = 50;
+  tissueAnchors.necro[1] = -210;
+  musclePlates.length = 0;
+  for (const n of [0,1]) {
+    const plate=document.createElement('canvas');plate.width=plate.height=2048;
+    const ctx=plate.getContext('2d');ctx.translate(1024,1024);ctx.scale(2048/700,2048/700);
+    paintMuscle(ctx,n);
+    if(n===1) {
+      const softened=document.createElement('canvas');softened.width=softened.height=2048;
+      const sc=softened.getContext('2d');sc.filter='blur(4px)';sc.drawImage(plate,0,0);
+      ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.beginPath();ctx.rect(0,0,1450,2048);ctx.clip();ctx.clearRect(0,0,2048,2048);ctx.drawImage(softened,0,0);ctx.restore();
+    }
+    musclePlates.push(plate);
+  }
+
 }
 
 function bandY(f, x) {
@@ -109,80 +123,15 @@ export function drawTissueField(c, { x, y, r = 350, n = 0, b = 0, g = 0, alpha =
     c.restore();
   }
 
-  // smooth-muscle ribbons. Nuclei drop out beside the blocked vessel first.
-  for (const f of bands) {
-    c.beginPath();
-    const top = [], bot = [];
-    for (let i = 0; i <= 26; i++) {
-      const px = -340 + i * (680 / 26);
-      const py = bandY(f, px);
-      top.push([px, py - f.half]);
-      bot.push([px, py + f.half]);
-    }
-    c.moveTo(top[0][0], top[0][1]);
-    for (const p of top) c.lineTo(p[0], p[1]);
-    for (let i = bot.length - 1; i >= 0; i--) c.lineTo(bot[i][0], bot[i][1]);
-    c.closePath();
-    // a ribbon is a mix: the left (near the vessel) dies, the right may still have nuclei
-    const ribbon = c.createLinearGradient(-40, 0, 220, 0);
-    const dead = Math.min(1, n * 1.2);
-    ribbon.addColorStop(0, `rgba(${(210 + (142 - 210) * dead) | 0},${(176 + (132 - 176) * dead) | 0},${(182 + (134 - 182) * dead) | 0},${.55})`);
-    ribbon.addColorStop(.45, `rgba(${(220 + (168 - 220) * dead) | 0},${(188 + (156 - 188) * dead) | 0},${(196 + (158 - 196) * dead) | 0},${.46})`);
-    ribbon.addColorStop(1, 'rgba(228,198,206,.42)');
-    c.fillStyle = ribbon;
-    c.fill();
-
-    for (const q of f.nuclei) {
-      const py = bandY(f, q.x) + q.dy;
-      // 1 beside the occluded vessel, 0 toward the far wall. Steep so the near zone is anuclear by mid-sentence.
-      const local = Math.max(0, Math.min(1, 1 - (q.x + 40) / 240));
-      const w = Math.min(1, n * 1.85 * (0.15 + 0.85 * local));
-      if (w < .62) {
-        c.save();
-        c.translate(q.x, py);
-        c.rotate(q.rot);
-        c.fillStyle = `rgba(214, 176, 190, ${(1 - w) * .45})`;
-        c.beginPath();
-        c.ellipse(0, 0, q.len, 5.2, 0, 0, TAU);
-        c.fill();
-        c.fillStyle = `rgba(107, 74, 140, ${.78 * (1 - w / .62)})`;
-        c.beginPath();
-        c.ellipse(0, 0, q.len * .62, 2.5, 0, 0, TAU);
-        c.fill();
-        c.restore();
-      } else {
-        c.fillStyle = `rgba(90, 64, 96, ${.28 * w})`;
-        for (let k = 0; k < 5; k++) {
-          c.beginPath();
-          c.arc(q.x + Math.sin(q.len + k * 1.7) * 8, py + Math.cos(k * 2.1) * 4, 1.15, 0, TAU);
-          c.fill();
-        }
-      }
-    }
-  }
-
-  if (n > .02) {
-    const gr = c.createRadialGradient(10, 30, 12, 20, 40, 300);
-    gr.addColorStop(0, `rgba(132, 118, 122, ${.5 * n})`);
-    gr.addColorStop(.5, `rgba(158, 142, 144, ${.22 * n})`);
-    gr.addColorStop(1, 'rgba(168, 150, 152, 0)');
-    c.fillStyle = gr;
-    c.beginPath();
-    c.arc(0, 0, r, 0, TAU);
-    c.fill();
-    // ghost outline of the ribbons once nuclei are gone, so the field is not a blank wash
-    c.strokeStyle = `rgba(120, 96, 104, ${.28 * n})`;
-    c.lineWidth = 1.15;
-    for (const f of bands) {
-      c.beginPath();
-      for (let i = 0; i <= 16; i++) {
-        const px = -300 + i * (220 / 16);
-        const py = bandY(f, px);
-        i ? c.lineTo(px, py) : c.moveTo(px, py);
-      }
-      c.stroke();
-    }
-  }
+  // Two prepared tissue plates: stable HE texture, sentence-driven nuclear fading.
+  const death = Math.min(1, n * 4);
+  c.save();
+  c.globalAlpha *= 1-death;
+  c.drawImage(musclePlates[0], -350, -350, 700, 700);
+  c.restore();
+  c.save();c.globalAlpha *= death;
+  c.drawImage(musclePlates[1], -350, -350, 700, 700);
+  c.restore();
 
   // occluded mural vessel running through the field. No flow glyphs here:
   // the backed-up discs and the plug are the block. Chevrons belong to sentence 50.
@@ -243,4 +192,40 @@ export function drawTissueField(c, { x, y, r = 350, n = 0, b = 0, g = 0, alpha =
   }
 
   c.restore();
+}
+
+function paintMuscle(c,n) {
+  // H&E smooth muscle: fine overlapping eosinophilic fibers, stable pigment grain.
+  // Left vessel-adjacent territory loses nuclei; the right edge stays viable.
+  const rand = rng(77099);
+  for (let i=0;i<280;i++) {
+    const yy=-360+rand()*720, xx=-360+rand()*720;
+    const len=35+rand()*110, half=2+rand()*5, phase=rand()*6;
+    const local=Math.max(0,Math.min(1,(210-xx)/170));
+    const dead=Math.min(1,n*2.8*local);
+    c.save();
+    c.translate(xx,yy); c.rotate(.08+Math.sin(yy/130)*.12);
+    // Pale overlapping pigment strokes soften the dead fibers without per-cell filters.
+    for(let layer=0;layer<3;layer++) {
+      c.fillStyle=dead>.45 ? `rgba(227,169,184,${.07+layer*.018})` : `rgba(217,139,168,${.10+layer*.025})`;
+      c.beginPath();c.moveTo(-len,0);
+      c.bezierCurveTo(-len*.4,-half*2, len*.5,-half, len,Math.sin(phase)*3);
+      c.bezierCurveTo(len*.5,half, -len*.5,half*2,-len,0);c.fill();
+    }
+    c.filter='none';
+    if(dead<.98) {
+      c.fillStyle=`rgba(107,76,154,${.8*(1-dead)**2})`;
+      c.beginPath();c.ellipse(0,0,5+rand()*4,1.6+rand()*.8,.04,0,TAU);c.fill();
+      c.fillStyle=`rgba(63,42,102,${.65*(1-dead)**2})`;
+      for(let j=0;j<3;j++){c.beginPath();c.ellipse(-3+j*3,0,.8,.65,0,0,TAU);c.fill();}
+    }
+    c.restore();
+  }
+  // Watercolour pigment granulation, kept still throughout the microscopic insert.
+  for(let i=0;i<4200;i++) {
+    const px=-350+rand()*700,py=-350+rand()*700;
+    c.fillStyle=i%3 ? 'rgba(217,139,168,.13)' : 'rgba(255,243,240,.32)';
+    c.beginPath();c.ellipse(px,py,.35+rand()*1.6,.25+rand()*.8,0,0,TAU);c.fill();
+  }
+
 }

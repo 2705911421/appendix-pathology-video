@@ -17,7 +17,7 @@ export function prepareCross() {
   }, { seed: 551, scale: 1, hd: true, soft: true, grain: .24, edge: .42, bleed: .6 }); } catch {}
 }
 
-const wob = (a, k, p) => 1 + .016 * Math.sin(a * 5 + 1.2 + p) + .009 * Math.sin(a * 9 + .4);
+const wob = (a, k, p) => 1 + .045 * Math.sin(a * 5 + 1.2 + p) + .022 * Math.sin(a * 9 + .4);
 
 function ring(c, cx, cy, ro, ri, wobA, wobB, p) {
   c.beginPath();
@@ -25,9 +25,11 @@ function ring(c, cx, cy, ro, ri, wobA, wobB, p) {
     const a = i / 96 * TAU, r = ro * wob(a, 0, p) * wobA;
     c.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
   }
+  c.closePath();
   for (let i = 96; i >= 0; i--) {
     const a = i / 96 * TAU, r = ri * wob(a, 1, p) * wobB;
-    c.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+    if (i === 96) c.moveTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+    else c.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
   }
   c.closePath();
 }
@@ -45,6 +47,8 @@ export function drawCrossSection(c, { x, y, R, press = 0, alpha = 1 }) {
   c.save();
   c.globalAlpha *= alpha;
   c.translate(x, y);
+  c.rotate(-.12);
+  c.scale(1.14, .88);
 
   // soft cast shadow on paper
   const sh = c.createRadialGradient(4, 8, R * .4, 4, 8, R * 1.06);
@@ -83,10 +87,12 @@ export function drawCrossSection(c, { x, y, R, press = 0, alpha = 1 }) {
     const r = rMuc * (1 + .045 * Math.sin(a * 11 + .7 + p * 2) + .02 * Math.sin(a * 19));
     c.lineTo(Math.cos(a) * r, Math.sin(a) * r);
   }
+  c.closePath();
   for (let i = 120; i >= 0; i--) {
     const a = i / 120 * TAU;
     const r = rLum * (1 + .035 * Math.sin(a * 9 + 1.5));
-    c.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+    if (i === 120) c.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+    else c.lineTo(Math.cos(a) * r, Math.sin(a) * r);
   }
   c.closePath();
   c.fillStyle = '#C98390'; c.fill();
@@ -112,6 +118,22 @@ export function drawCrossSection(c, { x, y, R, press = 0, alpha = 1 }) {
   c.restore();
   c.strokeStyle = 'rgba(130,102,66,.45)'; c.lineWidth = 1.4; c.stroke();
 
+  // Fixed pigment pools and fine granulation across every layer, clipped to wall.
+  c.save();
+  ring(c, 0, 0, rSer, rLum, 1, 1, p); c.clip();
+  const grain = rng(55209);
+  for (let i = 0; i < 2200; i++) {
+    const a = grain() * TAU, d = Math.sqrt(grain()) * R;
+    c.fillStyle = i % 3 ? 'rgba(107,76,120,.10)' : 'rgba(255,239,230,.25)';
+    c.beginPath(); c.ellipse(Math.cos(a)*d, Math.sin(a)*d, .5+grain()*2.7, .4+grain()*1.1, a, 0, TAU); c.fill();
+  }
+  for(let i=0;i<90;i++) {
+    const a=grain()*TAU,d=R*(.42+grain()*.55);
+    c.fillStyle=i%2?'rgba(217,139,168,.12)':'rgba(142,58,62,.09)';
+    c.beginPath();c.ellipse(Math.cos(a)*d,Math.sin(a)*d,8+grain()*22,4+grain()*13,a,0,TAU);c.fill();
+  }
+  c.restore();
+
   // intramural vessels: five small sections in the muscularis, flattened where pressure squeezes
   const vs = [[-.55, .84, 13], [-.05, .87, 15], [.55, .8, 12], [1.55, .86, 14], [2.5, .85, 12], [3.6, .87, 13], [4.7, .86, 12]];
   vs.forEach(([a, k, rr], i) => {
@@ -136,8 +158,8 @@ export function drawCrossSection(c, { x, y, R, press = 0, alpha = 1 }) {
       const a = -2.5 + i / (N - 1) * 4.6;
       const r0 = rLum * .18, r1 = rLum * (.62 + .2 * p), r2 = rLum * (.78 + .2 * p);
       const k = .5 + .5 * p;
-      c.strokeStyle = `rgba(66,42,52,${.26 + .46 * k})`;
-      c.lineWidth = 3.2;
+      c.strokeStyle = `rgba(255,248,223,${.65 + .30 * k})`;
+      c.lineWidth = 4.8;
       c.beginPath();
       c.moveTo(Math.cos(a) * r0, Math.sin(a) * r0);
       c.lineTo(Math.cos(a) * r1, Math.sin(a) * r1);
