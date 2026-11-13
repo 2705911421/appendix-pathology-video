@@ -21,7 +21,7 @@ drawSubtitles(ctx, t, cues, { dark: 0, xfade: false });
 node subtitle/render.mjs --cues qa/cues_estimate.json --t 1.74,8.48 --out-dir qa/frames
 ```
 
-Playwright uses system Chrome (`CHROME_PATH` or `/usr/bin/google-chrome`).
+Playwright uses system Chrome (`CHROME_PATH` or Playwright Chromium).
 
 ## API
 

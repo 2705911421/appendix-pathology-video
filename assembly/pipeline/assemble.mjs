@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+import { ffmpegPath, ffprobePath } from '../../tools/bin.mjs';
 // Final assembly: cues + scene video + bilingual subtitle overlay + 12 s endcard + audio.
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -14,7 +14,6 @@ import { renderEndcard } from './render_endcard.mjs';
 import { darkAt } from '../subtitle/sceneTheme.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const DEFAULT_VOICE = '/workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav';
 const ENDCARD_SECONDS = 12;
 
 function parseArgs(argv) {
@@ -55,17 +54,20 @@ function parseArgs(argv) {
     else if (a === '--keep-tmp') o.keepTmp = true;
     else throw new Error('Unknown argument ' + a);
   }
-  if (!o.voice && fs.existsSync(DEFAULT_VOICE)) o.voice = DEFAULT_VOICE;
+  o.voice ||= process.env.VOICE_WAV;
+  if (!o.voice || !exists(o.voice)) { console.log('未找到配音文件，将使用静音配音轨合成。'); o.voice = null; }
   return o;
 }
 
-function run(cmd, args) {
+async function run(cmd, args) {
+  cmd = cmd === 'ffmpeg' ? await ffmpegPath() : cmd === 'ffprobe' ? await ffprobePath() : cmd;
   return new Promise((resolve, reject) => {
     const p = spawn(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'] });
     let out = '';
     let err = '';
     p.stdout.on('data', (d) => { out += d; });
     p.stderr.on('data', (d) => { err += d; });
+    p.on('error', reject);
     p.on('close', (code) => {
       if (code === 0) resolve({ out, err });
       else reject(new Error(`${cmd} ${args.map((x) => (/\s/.test(x) ? JSON.stringify(x) : x)).join(' ')}\n${err.slice(-4000)}`));
@@ -97,12 +99,14 @@ async function linkOrCopy(src, dest) {
 }
 
 async function rawPixels(png, pixFmt) {
+  const binary = await ffmpegPath();
   return new Promise((resolve, reject) => {
-    const p = spawn('ffmpeg', ['-v', 'error', '-i', png, '-f', 'rawvideo', '-pix_fmt', pixFmt, 'pipe:1'], { stdio: ['ignore', 'pipe', 'pipe'] });
+    const p = spawn(binary, ['-v', 'error', '-i', png, '-f', 'rawvideo', '-pix_fmt', pixFmt, 'pipe:1'], { stdio: ['ignore', 'pipe', 'pipe'] });
     const chunks = [];
     let err = '';
     p.stdout.on('data', (d) => chunks.push(d));
     p.stderr.on('data', (d) => { err += d; });
+    p.on('error', reject);
     p.on('close', (code) => (code === 0 ? resolve(Buffer.concat(chunks)) : reject(new Error(err || 'raw decode failed'))));
   });
 }
@@ -559,8 +563,8 @@ async function main() {
     const probeTxt = path.join(opt.outDir, 'blind_ffprobe.txt');
     const stringsTxt = path.join(opt.outDir, 'blind_strings.txt');
     const scan = [endcardJson, snapPath, clipPath, measurePath];
-    const script = path.join(root, 'pipeline/blind_review.sh');
-    const proc = await runCapture(script, [out1080, outBlind, probeTxt, stringsTxt, ...scan]);
+    const script = path.join(root, 'pipeline/blind_review.mjs');
+    const proc = await runCapture(process.execPath, [script, out1080, outBlind, probeTxt, stringsTxt, ...scan]);
     blind = {
       skipped: false,
       exitCode: proc.code,
@@ -638,12 +642,13 @@ async function main() {
 }
 
 function runCapture(cmd, args) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const p = spawn(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'] });
     let out = '';
     let err = '';
     p.stdout.on('data', (d) => { out += d; });
     p.stderr.on('data', (d) => { err += d; });
+    p.on('error', reject);
     p.on('close', (code) => resolve({ code, out, err }));
   });
 }

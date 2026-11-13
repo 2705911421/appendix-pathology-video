@@ -2,12 +2,14 @@
 // Browser code should fetch a snapshot instead of importing this file.
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const narrationDir = process.env.NARRATION_DIR || path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../data/narration');
 
 export const DEFAULT_PATHS = {
-  narration: '/workspace/病理科普视频/配音/全稿_v3/narration.json',
-  sentences: '/workspace/病理科普视频/配音/全稿_v3/sentences.tsv',
-  lines: '/workspace/病理科普视频/配音/全稿_v3/lines.json',
-  script: '/workspace/病理科普视频/解说词_v2/解说词_定稿.md',
+  narration: path.join(narrationDir, 'narration.json'),
+  sentences: path.join(narrationDir, 'sentences.tsv'),
+  lines: path.join(narrationDir, 'lines.json'),
+  script: path.join(narrationDir, '解说词_定稿.md'),
 };
 
 /** duration_i = hanzi_i * 0.22 + 0.4 seconds. Evaluated in whole milliseconds. */

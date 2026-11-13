@@ -1,4 +1,4 @@
-// Timing snapshot generated from /workspace/病理科普视频/配音/全稿_v3/timeline.json
+// Timing snapshot generated from data/narration/timeline.json
 // (lines n=29–34, real start/end seconds; no estimated durations).
 // Preserve the approved scene through its legacy clock.
 import scene from './chapters/s08.js';

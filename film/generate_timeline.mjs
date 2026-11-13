@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 // Regenerate after a full narration replacement; never read credential files.
-const source=process.argv[2]||'/workspace/病理科普视频/配音/全稿_v3/timeline.json';
+const source=process.argv[2]||new URL('../data/narration/timeline.json', import.meta.url);
 const raw=JSON.parse(fs.readFileSync(source,'utf8'));
 if(!Array.isArray(raw.lines)||!raw.lines.length)throw Error('Missing sentence lines');
 const ids=new Set();
