@@ -1,0 +1,213 @@
+{
+  "lane": "final_credits_qa",
+  "status": "pass",
+  "commit": "827a565179013757c88fb11e2e2d261fbe238b50",
+  "metrics": {
+    "lane": "final_credits_qa",
+    "status": "pass",
+    "sentence_77": {
+      "n": 77,
+      "start_s": 323.88229166666616,
+      "end_s": 327.8314999999995,
+      "text": "持续右下腹痛、发热，请及时就诊。",
+      "note": "片尾卡片接在该句 end 之后，时长由 --duration 给出，默认 14.0 s"
+    },
+    "credits": {
+      "paper_rgb": [
+        244,
+        239,
+        230
+      ],
+      "paper_hex": "#F4EFE6",
+      "body_hex": "#4C4555",
+      "title_hex": "#2A2A35",
+      "contrast_body_on_paper": 8.00788810966586,
+      "contrast_threshold": 4.5,
+      "min_gap_px": 14,
+      "min_leading": 1.5,
+      "leading_threshold": 1.5,
+      "font_sizes": [
+        36,
+        52
+      ],
+      "title_px": 52,
+      "body_px": 36,
+      "title_baseline_y": 120,
+      "safe": [
+        90,
+        60,
+        1830,
+        950
+      ],
+      "page1_last_y1": 746.0,
+      "page2_last_y1": 702.0,
+      "ink_boxes": {
+        "p1": [
+          464,
+          75,
+          1453,
+          745
+        ],
+        "p2": [
+          173,
+          75,
+          1747,
+          701
+        ],
+        "blind": [
+          464,
+          75,
+          1453,
+          745
+        ]
+      },
+      "ct_items": 4,
+      "ct_diff": 0,
+      "music_lines": 6,
+      "music_match": true,
+      "music_source": "/workspace/病理科普视频/music/来源与授权.md",
+      "blind_forbidden_hits": [],
+      "p1_md5": "081722e7e3ec6def2ccea6b0f2b46a79",
+      "p1_again_md5": "081722e7e3ec6def2ccea6b0f2b46a79",
+      "blind_md5": "081722e7e3ec6def2ccea6b0f2b46a79",
+      "md5_match": true,
+      "blind_matches_open": true,
+      "p2_md5": "7957cf0393986df1864c81807dadfc6c",
+      "duration_s": 14.0,
+      "fade_in_s": 0.8,
+      "fade_out_s": 1.2,
+      "pages": 2,
+      "page_duration_s": 7.0,
+      "video": {
+        "path": "qa/v6/final_credits_qa/credits_test_14s.mp4",
+        "codec": "h264",
+        "width": 1920,
+        "height": 1080,
+        "fps": 30,
+        "nb_frames": 420,
+        "duration_s": 14.0,
+        "audio_streams": 0,
+        "blackdetect_hits": 0,
+        "frame0_min": 228,
+        "frame419_min": 225,
+        "frame0_dark_px": 0,
+        "frame419_dark_px": 0,
+        "page_cut_frames": [
+          209,
+          210
+        ],
+        "page_cut_maxabs": 183
+      },
+      "layout_problems": [],
+      "pass": true
+    },
+    "qa_v16": {
+      "video": "/workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v16.mp4",
+      "srt": "配音/字幕_定稿.srt",
+      "duration_s": 339.833,
+      "size": [
+        1920,
+        1080
+      ],
+      "fps": 30,
+      "exit_code": 1,
+      "lane_fail": false,
+      "note": "定稿字幕是旧稿 32 条，与全稿_v3 的 77 句不是同一稿。脚本如实报失败，不记为本 lane 失败。",
+      "sync": {
+        "pass": false,
+        "tolerance_s": 0.05,
+        "cue_count": 32,
+        "line_count": 77,
+        "text_mismatch": 32,
+        "fail_count": 77,
+        "max_abs_start_delta": 99.7555833333333,
+        "max_abs_end_delta": 104.36391666666663
+      },
+      "onset": {
+        "method": "energy",
+        "pass": true,
+        "tolerance_s": 0.1,
+        "max_abs_delta": 0.006250000000051159,
+        "fail_count": 0,
+        "energy_max_abs_delta": 0.006250000000051159,
+        "energy_fail_count": 0,
+        "silencedetect_max_abs_delta": 0.006000333333311403,
+        "silencedetect_fail_count": 0
+      },
+      "black": {
+        "pass": true,
+        "segments": 0,
+        "d": 0.1,
+        "pic_th": 0.98
+      },
+      "audio": {
+        "integrated_lufs": -14.0,
+        "lra": 2.2,
+        "true_peak_dbtp": -2.0,
+        "astats_peak_db": -2.036914,
+        "clipped_samples": 0,
+        "silence_segments": 241
+      },
+      "contact_sheet": {
+        "interval_s": 10,
+        "frames": 34,
+        "columns": 8
+      },
+      "scene_boundaries": 18,
+      "handoff_frame_mean_rgb": {
+        "t_327.83": [
+          242.3,
+          235.8,
+          226.9
+        ],
+        "t_339.70": [
+          236.4,
+          229.9,
+          221.6
+        ]
+      }
+    },
+    "synthetic": {
+      "aligned_exit": 0,
+      "aligned_sync_pass": true,
+      "aligned_max_abs_start_delta": 0.0,
+      "aligned_max_abs_end_delta": 0.0,
+      "aligned_onset_method": "energy",
+      "aligned_onset_max_abs_delta": 0.0,
+      "aligned_silencedetect_max_abs_delta": 4.199999999998649e-05,
+      "shifted_0_5s_exit": 1,
+      "shifted_sync_pass": false,
+      "shifted_max_abs_start_delta": 0.5,
+      "shifted_max_abs_end_delta": 0.5,
+      "shifted_text_mismatch": 0,
+      "shifted_fail_count": 1,
+      "files": [
+        "sync_report.json",
+        "audio_report.json",
+        "black_frames.json",
+        "contact_sheet.png",
+        "scene_boundaries.png",
+        "report.md"
+      ]
+    },
+    "srt_v3_not_the_official_demo": {
+      "pass": true,
+      "cue_count": 77,
+      "line_count": 77,
+      "text_mismatch": 0,
+      "fail_count": 0,
+      "max_abs_start_delta": 0.0004999999996471161,
+      "max_abs_end_delta": 0.0004999999996471161
+    },
+    "help_exit": {
+      "final_qa.py": 0,
+      "build_credits_text.py": 0,
+      "check_credits.py": 0,
+      "dump_credits_layout.mjs": 0
+    },
+    "sha256_locked": {
+      "start_equals_end": true,
+      "files_ok": 16
+    }
+  }
+}
