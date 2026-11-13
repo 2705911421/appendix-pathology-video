@@ -1,0 +1,35 @@
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5/qa/v6/h04_s06/s08_parity/t_000.68.png
+/workspace/病理科普视频/v5/qa/v6/h04_s06/s08_parity/t_002.60.png
+/workspace/病理科普视频/v5/qa/v6/h04_s06/s08_parity/t_006.75.png
+/workspace/病理科普视频/v5/qa/v6/h04_s06/s08_parity/t_011.44.png
+/workspace/病理科普视频/v5/qa/v6/h04_s06/s08_parity/t_016.13.png
+/workspace/病理科普视频/v5/qa/v6/h04_s06/s08_parity/t_020.23.png
+/workspace/病理科普视频/v5/qa/v6/h04_s06/s08_parity/t_023.67.png
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+window.READY never became true after 180s: page.waitForFunction: Timeout 180000ms exceeded.
+node:internal/errors:986
+  const err = new Error(message);
+              ^
+
+Error: Command failed: node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --q scene=s10 --still 0.350000,4.737516,2.302771,7.190562,11.418958,15.496854,20.151479,24.968271 --out qa/v6/h04_s06/s10_parity
+    at genericNodeError (node:internal/errors:986:15)
+    at wrappedFn (node:internal/errors:540:14)
+    at checkExecSyncError (node:child_process:943:11)
+    at execFileSync (node:child_process:979:15)
+    at file:///workspace/%E7%97%85%E7%90%86%E7%A7%91%E6%99%AE%E8%A7%86%E9%A2%91/v5/qa/v6/h04_s06/parity.mjs:6:2
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  status: 1,
+  signal: null,
+  output: [ null, null, null ],
+  pid: 185,
+  stdout: null,
+  stderr: null
+}
+
+Node.js v24.22.1

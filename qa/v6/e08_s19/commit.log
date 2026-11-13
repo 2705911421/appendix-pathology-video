@@ -1,0 +1,68 @@
+[s19-dev 720553f] s19_fix08: 连续间质层次、羽化接缝与慢性细胞特写修正 (Codex)
+ 59 files changed, 870 insertions(+), 22 deletions(-)
+ create mode 100644 qa/v6/e08_s19/S19.mp4
+ create mode 100644 qa/v6/e08_s19/S19_scene.mp4
+ create mode 100644 qa/v6/e08_s19/S19_带配音_720p.mp4
+ create mode 100644 qa/v6/e08_s19/audio_720p.py
+ create mode 100644 qa/v6/e08_s19/audio_alignment.json
+ create mode 100644 qa/v6/e08_s19/check_video.py
+ create mode 100644 qa/v6/e08_s19/commit.log
+ create mode 100644 qa/v6/e08_s19/decode_audio_check.log
+ create mode 100644 qa/v6/e08_s19/decode_check.log
+ create mode 100644 qa/v6/e08_s19/determinism.log
+ create mode 100644 qa/v6/e08_s19/ffprobe.json
+ create mode 100644 qa/v6/e08_s19/ffprobe_audio_720p.json
+ create mode 100644 qa/v6/e08_s19/finalize.log
+ create mode 100644 qa/v6/e08_s19/finalize.sh
+ create mode 100644 qa/v6/e08_s19/iris.log
+ create mode 100644 qa/v6/e08_s19/iris_enter.png
+ create mode 100644 qa/v6/e08_s19/iris_enter_200pct.png
+ create mode 100644 qa/v6/e08_s19/iris_exit.png
+ create mode 100644 qa/v6/e08_s19/iris_exit_200pct.png
+ create mode 100644 qa/v6/e08_s19/iris_video.py
+ create mode 100644 qa/v6/e08_s19/keyframes.json
+ create mode 100644 qa/v6/e08_s19/make_bundle.py
+ create mode 100644 qa/v6/e08_s19/measure_spindles.py
+ create mode 100644 qa/v6/e08_s19/metrics.log
+ create mode 100644 qa/v6/e08_s19/preview.log
+ create mode 100644 qa/v6/e08_s19/render.log
+ create mode 100644 qa/v6/e08_s19/render_s19.mjs
+ create mode 100644 qa/v6/e08_s19/render_video_retry.log
+ create mode 100644 qa/v6/e08_s19/review.py
+ create mode 100644 qa/v6/e08_s19/review_sheet.png
+ create mode 100644 qa/v6/e08_s19/s69_fibrosis.png
+ create mode 100644 qa/v6/e08_s19/s69_fibrosis_200pct.png
+ create mode 100644 qa/v6/e08_s19/s69_low.png
+ create mode 100644 qa/v6/e08_s19/s69_low_200pct.png
+ create mode 100644 qa/v6/e08_s19/s69_middle.png
+ create mode 100644 qa/v6/e08_s19/s69_middle_200pct.png
+ create mode 100644 qa/v6/e08_s19/s70_lymph.png
+ create mode 100644 qa/v6/e08_s19/s70_lymph_200pct.png
+ create mode 100644 qa/v6/e08_s19/s70_plasma.png
+ create mode 100644 qa/v6/e08_s19/s70_plasma_200pct.png
+ create mode 100644 qa/v6/e08_s19/sha256_开工.txt
+ create mode 100644 qa/v6/e08_s19/sha256_校验.log
+ create mode 100644 qa/v6/e08_s19/sha256_结束.txt
+ create mode 100644 qa/v6/e08_s19/spindle_measurements.json
+ create mode 100644 qa/v6/e08_s19/stills/t_000.44.png
+ create mode 100644 qa/v6/e08_s19/stills/t_002.84.png
+ create mode 100644 qa/v6/e08_s19/stills/t_003.67.png
+ create mode 100644 qa/v6/e08_s19/stills/t_006.16.png
+ create mode 100644 qa/v6/e08_s19/stills/t_007.84.png
+ create mode 100644 qa/v6/e08_s19/stroma_histogram.json
+ create mode 100644 qa/v6/e08_s19/validation.log
+ create mode 100644 qa/v6/e08_s19/video_check.json
+ create mode 100644 qa/v6/e08_s19/video_frame_parity.json
+ create mode 100644 qa/v6/e08_s19/审核意见.md
+ create mode 100644 qa/v6/e08_s19/对比_e07_e08_样张.png
+ create mode 100644 qa/v6/e08_s19/执行日志.md
+ create mode 100644 qa/v6/e08_s19/自检.md
+ create mode 100644 qa/v6/e08_s19/间质色阶直方图.png
+720553f2e0f21e1a0abe431aa68b58b9ae8f71f8
+The bundle contains this ref:
+720553f2e0f21e1a0abe431aa68b58b9ae8f71f8 refs/heads/s19-dev
+The bundle requires this ref:
+e8a43da92ae72714539f334d9ecff7950b5d3aa2 
+The bundle uses this hash algorithm: sha1
+/workspace/病理科普视频/v5_s19_dev/qa/v6/e08_s19/e08_s19-dev.bundle is okay
+

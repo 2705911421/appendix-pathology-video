@@ -1,0 +1,3213 @@
+2026-11-13T04:30:13.459398Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer realm=\"OAuth\", resource_metadata=\"https://mcp.notion.com/.well-known/oauth-protected-resource/mcp\", scope=\"default\"" })
+OpenAI Codex v0.163.0
+--------
+workdir: /workspace/病理科普视频/v5_ct_dev
+model: gpt-6.1-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, /workspace/病理科普视频, /workspace/garden-skills] (network access enabled)
+reasoning effort: none
+reasoning summaries: none
+session id: 01a1d32b-988a-78d0-8900-7ddd97649fc6
+--------
+user
+# 并行线通用规则（所有并行线必读）
+
+你在一个独立 git worktree 里工作（分支见下），与其他并行线同时进行。主线是 /workspace/病理科普视频/v5 的 v6-fresh 分支（另有线在 v5 和 v5_s19_dev 改 S06/S07/S19，不要碰这些目录）。
+
+**只在你自己的 worktree 里改文件。** 新场景写成 film/chapters/sNN.js；本线专用的绘图库写在 film/lib_ext/<本线名>_*.js。尽量不改共享文件（film/main.js、film/timeline.js、已有 lib_ext）；为了能单独渲染可以改 main.js，但改动要最小、集中，便于我之后合并。
+**锁定文件不许改**，开工和收工各做一次 sha256 校验并写入日志：engine/lib/{he,he_detail,wash,ann,scope,camera}.js、parity_r4/chapters/04.js。
+
+先读这些再动手：
+- 分镜：分镜/分镜_v1.md（本线场景的行、素材库 B–J 说明、"研究卡/文献提示"表）。
+- 配音与时间：配音/全稿_v3/（timeline.json，所有时间按句号对齐，不要写死秒数，后面会重新配音）。
+- 风格：/workspace/病理科普视频/v4_mix/qa/style/风格规范_v1.md；版式参考已做好的 S06（qa/v6/h02_s06/s23_red.png、s24_after.png）：浅米色底、左侧标题/要点文字栏、右侧主画面；手绘水彩质感，不要扁平饱和的矢量风。标签规范：细引线 + 浅紫字、无框；所有内容 y<950。
+- 渲染：/workspace/garden-skills/skills/motion-showreel/scripts/render.mjs（用法参考 qa/briefs/v6_d01_s11.md 和 qa/v6/ 下已有的 build/render 脚本）。
+- brief 格式与交付习惯参考 qa/briefs/v6_d01_s11.md、v6_e01_s19.md。
+
+内容红线：
+- 画面文字只能来自定稿解说词/分镜，**不得编造任何数字、研究或文献**；分镜"研究卡/文献提示"表里列出的数字和引注才能上屏，且原样照抄。
+- 原创自绘，不用网图/照片；不出现姓名、学校。
+- 医学上要准确；拿不准的地方在 自检.md 里列出，不要猜着画。
+
+每个场景交付（qa/v6/<本线名>/<场景>/）：每句 1–2 张关键帧 + 200% 局部、review_sheet.png（关键帧总览）、SNN.mp4 与 SNN_带配音_720p.mp4（配上对应句的真实配音）、自检.md（逐条对照分镜要求和风格规范）。一个场景完成并自检通过就在本分支 commit（`git -c user.name=mini -c user.email=mini@local commit`，信息以本线名开头），然后做下一个场景，全部做完再结束。不要 push，不要合并到 v6-fresh。
+
+
+**机器负载**：现在有 8 条线同时在这台 8 核/15GB 的机器上跑，渲染时只开 1 个渲染进程/1 个浏览器实例，不要并发多路渲染；预览可先用低分辨率，定稿再出全尺寸。
+**提交**：每完成一个场景就在本分支 commit；如果 git 元数据写不进去，把提交打成 qa/v6/<本线名>/<本线名>-dev.bundle 并在日志里说明。
+
+# ct_real_adv01（Codex 高级审核 + 修改，S04/S09/S12/S15 真实 CT 版，最后一轮）
+
+分支 ct-dev，HEAD 含 ct real01 四个提交（264ceef…b6744ec）。注意：qa/briefs/ct_adv01.md 是旧的代码绘制 CT 方案，已作废，**不要执行它，也不要再用代码画任何 CT 解剖**。CT 只能用 /workspace/病理科普视频/ct_real/ 里的真实公开授权病例图（来源见 ct_real/来源与授权.md），只允许平移/缩放、圈注、箭头、标签，不得改动或重绘原图像素。
+
+1. 先独立审核 qa/v6/ct_real/ 四场的 review_sheet、关键帧、200% 局部和带配音 720p，写 qa/v6/ct_real_adv01/审核意见.md。重点：
+   - 圈注/引线现在偏淡、偏细，在 720p 下几乎看不清；标签文字落在 CT 图下方很淡的浅紫小字，和图里的圈对应关系不清楚。要让观众一眼看到指的是哪里（可用适度缓推放大到病灶区、圈注加粗加亮或加柔和外发光，标签贴近圈注），但不得遮挡病灶本身。
+   - 核对每张图圈注的位置在医学上是否真的指向阑尾/脂肪模糊/壁强化缺损/腔外气体脓肿；拿不准就在审核意见里写明，并改为更保守的圈注范围或换 ct_real 里的备选图，不要猜。
+   - S09 与 S12 要一眼看出渗出轻重差别；S15 句 58 先点壁强化中断，句 59 再标气体/脓肿。
+   - 每个 CT 窗下的来源许可行（Radiopaedia rID、CC BY-NC-SA 3.0 等）保留清晰可读；qa/v6/ct_real/credits.md 的片尾署名逐条核对与 来源与授权.md 一致，不得编造作者或编号。
+   - 非 CT 部分（医生、卡片、文字栏）保持现状。
+2. 再按审核意见修改。
+3. 交付到 qa/v6/ct_real_adv01/<场景>/：关键帧 + 200% 局部、review_sheet.png、SNN.mp4、SNN_带配音_720p.mp4，以及总的 自检.md 和更新后的 credits.md。每场一个提交，信息 "ct_real_adv01 (Codex): SNN ..."；git 元数据写不进去就打 bundle 到 qa/v6/ct_real_adv01/ct-dev.bundle。单进程渲染，不 push、不合并。
+
+codex
+我会先核对锁定文件和现有四场交付，独立写出审核意见，再逐场修改、单进程渲染和提交。CT 只使用现有授权病例原图，非 CT 部分保持现状。
+
+exec
+/bin/bash -lc "pwd; git status --short; rg --files -g 'AGENTS.md' -g '*ct*' qa/briefs; ls qa/v6/ct_real; ls film/chapters" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+/workspace/病理科普视频/v5_ct_dev
+?? qa/briefs/ct_real_adv01.md
+?? qa/briefs/run_ct_real_adv01.log
+?? qa/v6/ct/bundle.sha256
+?? qa/v6/ct/bundle_verify.log
+?? qa/v6/ct/ct-dev.bundle
+?? qa/v6/ct/r3/bundle_verify.log
+?? qa/v6/ct/r3/commits.log
+?? qa/v6/ct/r3/output_check.log
+?? qa/v6/ct_real/bundle_verify.log
+?? qa/v6/ct_real/commits.log
+?? qa/v6/ct_real/ct-dev.bundle
+qa/briefs/run_ct_fix01.log
+qa/briefs/run_lane_ct_02_cb.log
+qa/briefs/ct_fix01.md
+qa/briefs/run_lane_ct_02_gkcont_gk.log
+qa/briefs/run_ct_real_adv01.log
+qa/briefs/ct_real_adv01.md
+qa/briefs/run_lane_ct_01.log
+qa/briefs/lane_ct_02_gkcont.md
+qa/briefs/ct_real01.md
+qa/briefs/run_ct_real01.log
+qa/briefs/ct_adv01.md
+qa/briefs/lane_ct_02.md
+qa/briefs/lane_ct_01.md
+S04
+S04_commit.log
+S04_render.log
+S09
+S09_commit.log
+S09_render.log
+S12
+S12_commit.log
+S12_render.log
+S15
+S15_commit.log
+S15_final_check.log
+S15_render.log
+bundle.sha256
+bundle_verify.log
+check.py
+commits.log
+credits.md
+ct-dev.bundle
+deliver.mjs
+git_setup.log
+locked_end.sha256
+locked_start.sha256
+locked_verify.log
+review.py
+selfcheck.py
+日志.md
+ct_library.js
+s04.js
+s06.js
+s08.js
+s09.js
+s10.js
+s11.js
+s12.js
+s14.js
+s15.js
+s19.js
+
+exec
+/bin/bash -lc 'find .. -name AGENTS.md -print; cat qa/briefs/ct_real01.md; cat qa/v6/ct_real/deliver.mjs; cat film/chapters/ct_library.js' in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 812ms:
+# 并行线通用规则（所有并行线必读）
+
+你在一个独立 git worktree 里工作（分支见下），与其他并行线同时进行。主线是 /workspace/病理科普视频/v5 的 v6-fresh 分支（另有线在 v5 和 v5_s19_dev 改 S06/S07/S19，不要碰这些目录）。
+
+**只在你自己的 worktree 里改文件。** 新场景写成 film/chapters/sNN.js；本线专用的绘图库写在 film/lib_ext/<本线名>_*.js。尽量不改共享文件（film/main.js、film/timeline.js、已有 lib_ext）；为了能单独渲染可以改 main.js，但改动要最小、集中，便于我之后合并。
+**锁定文件不许改**，开工和收工各做一次 sha256 校验并写入日志：engine/lib/{he,he_detail,wash,ann,scope,camera}.js、parity_r4/chapters/04.js。
+
+先读这些再动手：
+- 分镜：分镜/分镜_v1.md（本线场景的行、素材库 B–J 说明、"研究卡/文献提示"表）。
+- 配音与时间：配音/全稿_v3/（timeline.json，所有时间按句号对齐，不要写死秒数，后面会重新配音）。
+- 风格：/workspace/病理科普视频/v4_mix/qa/style/风格规范_v1.md；版式参考已做好的 S06（qa/v6/h02_s06/s23_red.png、s24_after.png）：浅米色底、左侧标题/要点文字栏、右侧主画面；手绘水彩质感，不要扁平饱和的矢量风。标签规范：细引线 + 浅紫字、无框；所有内容 y<950。
+- 渲染：/workspace/garden-skills/skills/motion-showreel/scripts/render.mjs（用法参考 qa/briefs/v6_d01_s11.md 和 qa/v6/ 下已有的 build/render 脚本）。
+- brief 格式与交付习惯参考 qa/briefs/v6_d01_s11.md、v6_e01_s19.md。
+
+内容红线：
+- 画面文字只能来自定稿解说词/分镜，**不得编造任何数字、研究或文献**；分镜"研究卡/文献提示"表里列出的数字和引注才能上屏，且原样照抄。
+- 原创自绘，不用网图/照片；不出现姓名、学校。
+- 医学上要准确；拿不准的地方在 自检.md 里列出，不要猜着画。
+
+每个场景交付（qa/v6/<本线名>/<场景>/）：每句 1–2 张关键帧 + 200% 局部、review_sheet.png（关键帧总览）、SNN.mp4 与 SNN_带配音_720p.mp4（配上对应句的真实配音）、自检.md（逐条对照分镜要求和风格规范）。一个场景完成并自检通过就在本分支 commit（`git -c user.name=mini -c user.email=mini@local commit`，信息以本线名开头），然后做下一个场景，全部做完再结束。不要 push，不要合并到 v6-fresh。
+
+
+**机器负载**：现在有 8 条线同时在这台 8 核/15GB 的机器上跑，渲染时只开 1 个渲染进程/1 个浏览器实例，不要并发多路渲染；预览可先用低分辨率，定稿再出全尺寸。
+**提交**：每完成一个场景就在本分支 commit；如果 git 元数据写不进去，把提交打成 qa/v6/<本线名>/<本线名>-dev.bundle 并在日志里说明。
+
+
+# ct_real01（Gisele 已批准：用公开授权真实 CT 替换四场代码绘制的 CT）
+
+分支 ct-dev，工作区 `/workspace/病理科普视频/v5_ct_dev`，本线名 ct。Gisele 已确认 CT 图不再由 AI/代码绘制，并批准了下列真实病例图。本 brief **覆盖**上方通用规则里的「原创自绘，不用网图/照片」——但仅限这四场的 CT 窗；其余画面仍须自绘、不得编造数字、不出现姓名学校。
+
+**不要做** `ct_adv01`。不要碰其他 worktree、不要 push、不要合并到 v6-fresh。不要读取、打印或改写 `/workspace/病理科普视频/配音/.mimo.env` 或任何密钥。
+
+## 已批准的图像（必须用这些，不要另选 Commons / 未批准病例）
+
+全部原图在 `/workspace/病理科普视频/ct_real/`。先把批准文件复制进本 worktree，例如 `film/assets/ct_real/`（保留原文件名与字节；复制后对一下 sha256）。出处与署名见 `/workspace/病理科普视频/ct_real/来源与授权.md`。
+
+| 场景 | 句号 | 批准文件 | 作用 |
+|---|---|---|---|
+| S04 | 14–19（CT 大窗出现于 16–18，句 19 证据图里的 CT 小窗也可复用） | `ct_real/S04/S04_primary_rID197373_axial_s130_appendix-thick-wall_img67748644.jpeg` | 主图：40 岁男性，增强门脉期，管径增粗、壁增厚 |
+| S04 | 同上，可选辅图 | `ct_real/S04/S04_primary_rID197373_axial_s135_appendicoliths_img67748649.jpeg` | 辅图：同病例腔内小结石（不要把“粪石/尺寸”写成新结论） |
+| S09 | 35–36 | `ct_real/S09/S09_primary_rID30389_coronal_s024_key-coronal-mild-stranding_img7922572.jpg` | 主图：官方冠状位，mild stranding |
+| S09 | 35–36 | `ct_real/S09/S09_primary_rID30389_axial_s058_appendix-near-cecum_img7922410.jpg` 或 `..._s060_...img7922413.jpg`（s059 也可） | 轴位对照，盲肠旁增粗阑尾 |
+| S12 | 47–48 | `ct_real/S12/S12_primary_rID197370_axial_s128_dilated-appendix-extensive-stranding_img67747991.jpeg` | 主图：扩张积液阑尾、广泛脂肪条索 |
+| S12 | 47–48 | `ct_real/S12/S12_primary_rID197370_coronal_s065_coronal-extensive-fat-stranding_img67748143.jpeg` | 冠状位，周围渗出更清楚 |
+| S15 | 58–59 | `ct_real/S15/S15_primary_rID242634_axial_s285_wall-enhancement-defect-and-gas-abscess_img75885695.jpg` | **同一张图**先点壁强化中断（58），再点腔外气体/脓肿（59） |
+
+不要使用 Commons 备选（有的带 17.1 mm 测量尺、英文标签或红圈），也不要用 rID 198519 / 198206，除非批准图缺失（它们没有缺失）。
+
+## 像素红线（必须遵守）
+
+- **禁止**重绘、涂改、AI 生成、滤波“美化”、伪彩色、或改动解剖像素。
+- **允许**：裁去 CT 床缘和大块黑边、等比缩放、平移/轻微 Ken Burns、灰阶显示（保持原灰阶关系）、以及叠加上层（箭头、圆圈、细引线、中文短标签、按句高亮）。叠加必须画在独立层，不得写回原图文件。
+- 病例描述里的 10 mm、12 mm、6×3 cm、17.1 mm 等 **一律不上屏**（分镜禁止测量值）。
+- 四场是四位不同患者。必须让观众明白这不是同一根阑尾的连续复查：每场 CT 窗附近用「典型病例」作屏上/字幕提示（这四字可以上屏；不要写“同一患者”或编造病程时间）。
+
+## 实现要求
+
+现有实现：`film/chapters/s04.js`；S09/S12/S15 经 `film/lib_ext/ct_r3_compare.js` 的 `compareScene(35–36,1) / (47–48,2) / (58–59,3)`，CT 来自 `drawCTStatic` / `drawCTChanges`（`ct_r3_schematic.js`）。渲染入口 `film/main.js`（`scene=` 查询，时间用 `forScene` 对齐 全稿_v3 `timeline.json`）。交付脚本参考 `qa/v6/ct/deliver.mjs`，但**本轮输出目录改为 `qa/v6/ct_real/`**，不要覆盖 `qa/v6/ct/` 里已有的自绘稿。
+
+1. 从这四场撤掉代码绘制的 CT 示意渲染；场景里不要再调用 `drawCTStatic` / `drawCTChanges` 来充当 CT 主图。
+2. 组织窗：不得再画一个灰阶、看起来像 CT 的水彩窗。若保留水彩 HE 组织对照，必须明确是组织/镜下对照，且不能挤占真实 CT；真实 CT 看不清时，按分镜改成单窗大特写（优先保证真实 CT 可读）。
+3. 非 CT 部分保持现有实现：S04 与 clin 统一的医生、超声/CT 选择、研究卡（2023、8项研究、1602人、敏感度95%、特异度94%、[1]，用词与时序对照分镜和配音 14–19；配音说「8项研究」不要写「8篇」）、句 19 临床–影像–病理证据关系；S09/S12/S15 左侧文字栏用分镜原句（管径增粗、壁增厚、周围脂肪轻度模糊；壁增厚强化、周围渗出明显；壁强化缺损：警惕坏死；腔外气体、脓肿：警惕穿孔 [3]）。标签规范不变：细引线 + 浅紫字、无框。内容 y<950。纸色/左栏/字幕沿用现稿，不要另起一套风格。
+4. 时间全部按句号对齐 `配音/全稿_v3/timeline.json`，不要写死秒数。句间过渡约 0.7s。
+5. 按句高亮（位置要落在真实解剖上，不要凭空指）：
+   - S04 句 18：在 s130 上标出病变阑尾（「发现病变」）；句 16–17 研究卡逐项揭示。
+   - S09 句 35：框选增粗管径/增厚管壁；句 36：扩到周围轻度模糊的脂肪。
+   - S12 句 47：先壁增厚强化，再周围渗出；句 48：保持连读并框选对应区域。轴位 s128 与冠状 s065 都要用上（可轴冠并列或按句切换，但两张批准图都要出现）。
+   - S15 **同一张** s285：句 58 只点亮局部壁强化中断；句 59 再标腔外气体、脓肿。每次一条对应引线。
+6. 每张在用的真实 CT 图，窗角加小号署名，例如：`Radiopaedia.org rID 197373 · CC BY-NC-SA 3.0`（S09 为 rID 30389，S12 为 rID 197370，S15 为 rID 242634）。不要挡解剖，不要把作者姓名写成病人信息。
+7. 把批准图对应的片尾署名（中英）写入 `qa/v6/ct_real/credits.md`，从 `ct_real/来源与授权.md` 原样抄录已用病例的现成署名句，供总装片尾使用，不要自撰作者或 rID。建议总块只列入实际用到的四个 rID：197373、30389、197370、242634。
+
+## 交付
+
+目录 `qa/v6/ct_real/`：
+
+- `credits.md`
+- 每场 `qa/v6/ct_real/SNN/`：每句 1–2 张关键帧 + 200% 局部、`review_sheet.png`、`SNN.mp4`、`SNN_带配音_720p.mp4`（配 全稿_v3 对应句真实配音）、`自检.md`（对照分镜、像素红线、署名、「典型病例」提示、句 58/59 高亮时序）。
+- 可复用/改写 `qa/v6/ct/deliver.mjs`、`review.py`、`check.py`，但输出必须落到 `qa/v6/ct_real/`。单渲染进程、单浏览器实例；`--workers 1`。机器内存有限，不要并行多路渲染。
+
+锁定文件开工/收工做 sha256，写入本轮日志：`engine/lib/{he,he_detail,wash,ann,scope,camera}.js`、`parity_r4/chapters/04.js`。
+
+每场自检通过后 `git -c user.name=mini -c user.email=mini@local commit`，信息以 `ct real01:` 开头。git 元数据写不进去则把提交打成 `qa/v6/ct_real/ct-dev.bundle` 并在日志说明。不要 push、不要合并。
+
+结束时用简短中文说明：四场各用了哪张图、组织窗如何处理、署名和「典型病例」加在何处。
+import fs from 'node:fs';import {execFileSync as run} from 'node:child_process';
+const scene=process.argv[2],ranges={S09:[35,36],S12:[47,48],S15:[58,59],S04:[14,19]},[first,last]=ranges[scene],P=`qa/v6/ct_real/${scene}`;
+const rows=JSON.parse(fs.readFileSync('/workspace/病理科普视频/配音/全稿_v3/timeline.json')).lines.filter(s=>s.n>=first&&s.n<=last),origin=rows[0].start,duration=rows.at(-1).end-origin;
+fs.mkdirSync(P,{recursive:true});const picks=rows.flatMap(s=>(scene==='S04'?(s.n===14?[.12,.8]:[16,17].includes(s.n)?[.3,.82]:[.72]):[.3,.82]).map(f=>({name:`s${s.n}_${Math.round(f*100)}`,t:s.start-origin+(s.end-s.start)*f})));
+fs.writeFileSync(`${P}/keyframes.json`,JSON.stringify({origin,duration,picks},null,2));
+const tool='/workspace/garden-skills/skills/motion-showreel/scripts/render.mjs';
+function render(args){run('node',[tool,'film','--q',`scene=${scene.toLowerCase()}`,...args],{stdio:'inherit'});}
+render(['--still',picks.map(p=>p.t.toFixed(6)).join(','),'--out',P+'/stills']);render(['--determinism']);
+run('python3',['qa/v6/ct_real/review.py',scene],{stdio:'inherit'});
+render(['--out',`${P}/${scene}.mp4`,'--fps','30','--workers','1','--crf','16']);
+run('ffmpeg',['-y','-i',`${P}/${scene}.mp4`,'-ss',String(origin),'-t',String(duration),'-i','/workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav','-map','0:v:0','-map','1:a:0','-vf','scale=1280:720','-c:v','libx264','-crf','16','-c:a','aac','-b:a','192k','-shortest',`${P}/${scene}_带配音_720p.mp4`],{stdio:'inherit'});
+run('python3',['qa/v6/ct_real/check.py',scene],{stdio:'inherit'});
+import {paper,text,drawCT} from '../lib_ext/ct_schematic.js';
+export default {prepare(){},draw(c){paper(c);text(c,'CT表现示意',70,75,46,'#6B4C9A',700);const names=['管径增粗、壁增厚','壁增厚强化、周围渗出明显','壁强化缺损、腔外气体、脓肿'];for(let i=0;i<3;i++){drawCT(c,50+i*635,155,600,610,{stage:i+1,around:true,complication:i===2});text(c,names[i],50+i*635,825,i===2?29:33);}}};
+
+exec
+/bin/bash -lc 'mkdir -p qa/v6/ct_real_adv01; sha256sum engine/lib/{he,he_detail,wash,ann,scope,camera}.js parity_r4/chapters/04.js > qa/v6/ct_real_adv01/locked_start.sha256; cat film/lib_ext/ct_real*; cat qa/v6/ct_real/{review.py,check.py}; cat /workspace/病理科普视频/ct_real/来源与授权.md' in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+import {paper,text,ramp} from './ct_r3_schematic.js';
+import {loadCT,realCT,mark} from './ct_real_images.js';
+const PUR='#6B4C9A';
+function sidebar(c,stage,alpha,second){
+  const t=(s,y,size,color,weight=500,a=1)=>text(c,s,70,y,size,color,weight,alpha*a);
+  if(stage===1){
+    t('CT与组织变化对应',200,42,PUR,700);
+    t('管径增粗',300,36,'#2A2A35');
+    t('壁增厚',372,36,'#2A2A35');
+    t('周围脂肪轻度模糊',448,36,'#2A2A35',500,second);
+  }else if(stage===2){
+    t('壁增厚强化',210,44,PUR,700);
+    t('周围渗出明显',294,39,'#2A2A35',500,second);
+  }else{
+    t('壁强化缺损：',190,42,PUR,700);
+    t('警惕坏死',260,38,'#2A2A35');
+    t('腔外气体、脓肿：',380,38,PUR,700,second);
+    t('警惕穿孔 [3]',450,38,'#2A2A35',500,second);
+  }
+}
+
+
+export function compareScene(first,last,stage){
+ let images;
+ return {async prepare(){images=await Promise.all((stage===1?[1,2]:stage===2?[3,4]:[5]).map(loadCT));},
+ draw(c,t,T){paper(c);
+ const next=ramp(t,T.at(last),.7),intro=ramp(t,T.at(first),.7);
+ const ex=stage===2?ramp(t,T.frac(first,.42),.7):next;
+ sidebar(c,stage,intro,stage===2?ex:next);
+ const index=stage===1?(t>=T.at(last)?2:1):stage===2?(t>=T.at(last)?4:3):5;
+ c.save();c.globalAlpha=intro;
+ const im=images[stage===3?0:index===(stage===1?1:3)?0:1];
+ const box={x:610,y:92,w:1260,h:770},rid=stage===1?'30389':stage===2?'197370':'242634';
+ if(stage!==3&&t>=T.at(last)&&next<1){c.globalAlpha=intro*(1-next);realCT(c,images[0],stage===1?1:3,box,rid);}
+ c.globalAlpha=intro*(stage!==3&&t>=T.at(last)?next:1);
+ const g=realCT(c,im,index,box,rid);c.globalAlpha=intro;
+ // Coordinates refer directly to the approved source pixels, before crop and scale.
+ if(stage===1){if(index===1)mark(c,g,[153,423],26,'壁增厚',intro);else mark(c,g,[137,252],29,'周围脂肪轻度模糊',next);}
+ if(stage===2){if(index===3){if(ex<.5)mark(c,g,[160,210],24,'壁增厚强化',1-ex);else mark(c,g,[165,214],48,'周围渗出明显',ex);}else mark(c,g,[172,295],49,'周围渗出明显',next);}
+ if(stage===3){if(t<T.at(last))mark(c,g,[128,233],10,'壁强化缺损',intro);else mark(c,g,[109,229],28,'腔外气体、脓肿',next);}
+ c.restore();}};
+}
+import {text,labelTo,drawFocus} from './ct_r3_schematic.js';
+export const files=["S04_primary_rID197373_axial_s130_appendix-thick-wall_img67748644.jpeg", "S09_primary_rID30389_coronal_s024_key-coronal-mild-stranding_img7922572.jpg", "S09_primary_rID30389_axial_s058_appendix-near-cecum_img7922410.jpg", "S12_primary_rID197370_axial_s128_dilated-appendix-extensive-stranding_img67747991.jpeg", "S12_primary_rID197370_coronal_s065_coronal-extensive-fat-stranding_img67748143.jpeg", "S15_primary_rID242634_axial_s285_wall-enhancement-defect-and-gas-abscess_img75885695.jpg"];
+export async function loadCT(i){const im=new Image();im.src=new URL('../assets/ct_real/'+files[i],import.meta.url);await im.decode();return im;}
+// Source rectangles only remove empty margins / table; anatomical pixels are untouched.
+export const crops=[[20,155,472,280],[0,0,512,695],[0,75,512,390],[20,90,472,310],[0,0,512,512],[0,70,512,350]];
+export function realCT(c,im,i,box,rid){
+ const [sx,sy,sw,sh]=crops[i],k=Math.min(box.w/sw,(box.h-78)/sh),w=sw*k,h=sh*k;
+ const x=box.x+(box.w-w)/2,y=box.y+38+(box.h-78-h)/2;
+ c.drawImage(im,sx,sy,sw,sh,x,y,w,h);
+ text(c,'典型病例',box.x+14,box.y+27,26,'#6B4C9A',500);
+ text(c,`Radiopaedia.org rID ${rid} · CC BY-NC-SA 3.0`,box.x+14,box.y+box.h-9,20,'#6B4C9A',500);
+ return {point:(px,py)=>({x:x+(px-sx)*k,y:y+(py-sy)*k}),k};
+}
+export function mark(c,g,p,r,label,alpha=1){const q=g.point(...p);drawFocus(c,q.x,q.y,r*g.k,alpha,[7,6],1.6,'#C9B7DA');labelTo(c,label,650,898,q.x,q.y,{color:'#C9B7DA',alpha,size:28});}
+import sys,json
+from pathlib import Path
+from PIL import Image,ImageDraw
+scene=sys.argv[1];p=Path('qa/v6/ct_real')/scene
+picks=json.load(open(p/'keyframes.json'))['picks']
+files=sorted((p/'stills').glob('*.png'))
+files=[f for f in files if 'sheet' not in f.name]
+sheet=Image.new('RGB',(960,310*((len(picks)+1)//2)),'#F4EFE6');d=ImageDraw.Draw(sheet)
+
+def crop2(im,box,name):
+    w=box[2]-box[0];h=box[3]-box[1]
+    im.crop(box).resize((w*2,h*2),Image.LANCZOS).save(p/name)
+
+for i,(f,pick) in enumerate(zip(files,picks)):
+    im=Image.open(f).convert('RGB');im.save(p/(pick['name']+'.png'))
+    n=int(pick['name'][1:3])
+    if scene=='S04':
+        if n==14:
+            crop2(im,(760,260,1340,940),pick['name']+'_200.png')
+        elif n==15:
+            crop2(im,(760,240,1760,940),pick['name']+'_200.png')
+        elif n<=18:
+            crop2(im,(850,250,1510,800),pick['name']+'_200.png')
+        else:
+            crop2(im,(560,220,1880,960),pick['name']+'_200.png')
+        crop2(im,(40,140,540,760),pick['name']+'_sidebar_200.png')
+    else:
+        crop2(im,(850,230,1530,810),pick['name']+'_200.png')
+
+    sheet.paste(im.resize((480,270),Image.LANCZOS),((i%2)*480,(i//2)*310))
+    d.text(((i%2)*480+12,(i//2)*310+276),pick['name'],fill='#2A2A35')
+sheet.save(p/'review_sheet.png')
+print('review_sheet',scene,len(picks))
+import json,subprocess,sys
+from pathlib import Path
+scene=sys.argv[1];p=Path('qa/v6/ct_real')/scene
+m=json.load(open(p/'keyframes.json'))
+results={}
+for file in [scene+'.mp4',scene+'_带配音_720p.mp4']:
+ data=json.loads(subprocess.check_output(['ffprobe','-v','quiet','-show_streams','-show_format','-of','json',str(p/file)]))
+ results[file]={'duration':float(data['format']['duration']),'streams':[{k:s.get(k) for k in ['codec_type','codec_name','width','height']} for s in data['streams']]}
+ assert abs(results[file]['duration']-m['duration'])<.15
+ assert any(s['codec_type']=='video' for s in data['streams'])
+ if '720p' in file: assert any(s['codec_type']=='audio' for s in data['streams'])
+(p/'media_check.json').write_text(json.dumps(results,indent=2,ensure_ascii=False))
+print(results)
+# 真实 CT 图像来源与授权
+
+检索与下载日期：2026-11-13（Asia/Shanghai）。  
+用途：三峡大学非商业病理科普竞赛视频《一根"香肠"的变质日记：阑尾的红→黄→黑》中 S04、S09、S12、S15 的 CT 窗，替换此前由代码绘制的 CT 示意。  
+原则：只使用公开授权的真实病例图；保留 CDN/站点提供的原始像素，不改解剖、不做 AI 生成或重绘。作者名、病例编号、许可证均按页面原文记录，未推拟。
+
+---
+
+## 1. 各场需要表现什么（据分镜与全稿_v3）
+
+| 场景 | 句号 | 分镜/解说要求的 CT 所见 | 上屏注意 |
+|---|---|---|---|
+| S04 | 14–19 | 作为“辅助确诊工具”出现的 CT 大窗；帮助发现病变，但不把 CT 写成三型分型手段。并非人人必须做 CT。 | 选一张典型、易读的阳性阑尾炎 CT 即可。不要测量数字。 |
+| S09 | 35–36 | **单纯性相关**：管径增粗、壁增厚，周围脂肪**轻度**模糊，对应早期炎症/壁水肿。 | 与 S12 要能一眼区分；不显示测量值；不盖章为病理分型。 |
+| S12 | 47–48 | **化脓相关**：壁增厚**强化**、周围**渗出明显**，与管壁内外炎症对应。 | 渗出范围应明显重于 S09。优先有对比剂强化的图像。 |
+| S15 | 58–59 | **坏疽/穿孔相关**：壁强化缺损（警惕坏死）；腔外气体、脓肿（警惕穿孔）。 | 58 先点壁强化中断，59 再标气体/脓肿。不用“CT 确诊三型”。 |
+
+说明：分镜原先希望“同一阑尾位置贯穿各场景”，那是自绘示意库的要求。真实病例无法用同一位患者走完红→黄→黑，三型必须用不同病例。上屏时不要暗示“同一根阑尾的连续 CT”。
+
+本目录**没有**单独的“正常细长阑尾”图。S04–S15 的分镜并未要求正常对照；若日后要做正常对照，需另找公开授权病例。
+
+---
+
+## 2. 许可条件（片尾必须处理）
+
+### 2.1 Radiopaedia（本片主推荐来源）
+
+各病例页均有 `<link rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">`。站点许可页 [radiopaedia.org/licence](https://radiopaedia.org/licence) 写明：病例图像默认 **Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported（CC BY-NC-SA 3.0）**。
+
+条款要点：
+
+- **署名（BY）**：须同时写出贡献者姓名、Radiopaedia.org、以及 rID；在线使用时应对 Radiopaedia 与该病例作可点击链接。站点示例格式：`Case courtesy of [Name], Radiopaedia.org, rID: ######`
+- **非商业（NC）**：本片为非商业竞赛科普视频，与站点“未经许可的在线非商业视频”一类用途相符。不得用于收费课程、付费墙或广告。
+- **相同方式共享（SA）**：若在作品中改编（裁切、加中文标签、嵌入视频等通常视为改编），**整部视频/该派生作品可能需要以兼容的 CC BY-NC-SA 3.0 方式声明**。建议在片尾同时给出许可声明，并在提交材料中写明。
+
+许可证全文：<https://creativecommons.org/licenses/by-nc-sa/3.0/>
+
+### 2.2 Wikimedia Commons（更宽松的备选，无 NC）
+
+下列 Commons 图为 **CC BY-SA 3.0 或 CC BY-SA 4.0**（只有署名 + 相同方式共享，**没有 NonCommercial**）。若希望降低 NC 限制，可考虑用它们替换对应镜头；但 ShareAlike 仍然存在，且其中几张原图已烙有测量尺、英文标注或红圈，不完全适合本片直接上屏（详见各条）。
+
+### 2.3 建议片尾署名总块
+
+中文：
+
+> 部分 CT 图像来自 Radiopaedia.org，采用 CC BY-NC-SA 3.0 许可。  
+> 病例 rID 197373，作者 Michael P. Hartung；rID 30389，作者 Jack Ren；rID 197370，作者 Michael P. Hartung；rID 198519，作者 Lam Van Le；rID 242634，作者 Diana Reyadh Kadhem；rID 198206，作者 Mina Sameh Rizk。  
+> 本片为非商业用途。按相同方式共享许可，详见 https://creativecommons.org/licenses/by-nc-sa/3.0/
+
+English（Radiopaedia 推荐句式）：
+
+> CT images: Case courtesy of Michael P. Hartung, Radiopaedia.org, rID: 197373; Case courtesy of Jack Ren, Radiopaedia.org, rID: 30389; Case courtesy of Michael P. Hartung, Radiopaedia.org, rID: 197370; Case courtesy of Lam Van Le, Radiopaedia.org, rID: 198519; Case courtesy of Diana Reyadh Kadhem, Radiopaedia.org, rID: 242634; Case courtesy of Mina Sameh Rizk, Radiopaedia.org, rID: 198206. Licensed under CC BY-NC-SA 3.0.
+
+实际采用哪几张，按下面“推荐上屏”勾选后再把未用病例从总块中删去。
+
+---
+
+## 3. 推荐上屏组合（先看这些）
+
+| 场景 | 推荐文件 | 理由 |
+|---|---|---|
+| S04 | `S04/S04_primary_rID197373_axial_s130_appendix-thick-wall_img67748644.jpeg`（可辅以 s135 粪石图） | 40 岁男性，增强门脉期，单纯性/非复杂性教学病例：管径增粗、壁增厚，发现病变一目了然，适合“CT 是辅助工具”。 |
+| S09 | `S09/S09_primary_rID30389_coronal_s024_key-coronal-mild-stranding_img7922572.jpg` ＋ 轴位 s058 或 s060 | 45 岁男性。病例文字明确写 **mild stranding**、无游离积液、无积气、无积液灶，最贴近“周围脂肪轻度模糊”。冠状位为该病例官方关键图。 |
+| S12 | `S12/S12_primary_rID197370_axial_s128_dilated-appendix-extensive-stranding_img67747991.jpeg` ＋ 冠状 s065 | 40 岁女性，增强门脉期。扩张积液阑尾、壁增厚强化、**广泛**阑尾周围脂肪条索，比 S09 明显更重，科普观众也能看出“渗出明显”。 |
+| S12（壁强化备选） | `S12/S12_candidate_rID198519_axial_s074_PVP-enhancing-wall-stranding_img68055874.jpeg` | 25 岁男性，手术证实。病例明确写“thickened walls **enhancing after contrast**”，并有周围脂肪模糊与邻近腹膜增厚。 |
+| S15 | `S15/S15_primary_rID242634_axial_s285_wall-enhancement-defect-and-gas-abscess_img75885695.jpg` | 50 岁男性，增强门脉期。**同一张图**同时有壁强化中断、腔外气体及阑尾周围脓肿（约 6×3 cm 含气积液），可先框强化缺损（句 58）、再框气体/脓肿（句 59）。 |
+
+---
+
+## 4. 逐张记录
+
+### 4.1 Radiopaedia rID 197373 — S04 主选（也可作 S09 备选）
+
+- **病例标题**：Acute appendicitis - uncomplicated  
+- **病例页**：<https://radiopaedia.org/cases/acute-appendicitis-uncomplicated-1>　永久链接 <https://radiopaedia.org/cases/197373>  
+- **DOI**：<https://doi.org/10.53347/rID-197373>  
+- **作者（页面 “Case contributed by” / meta author）**：Michael P. Hartung  
+- **官方引用（页面原文）**：Hartung M, Acute appendicitis - uncomplicated. Case study, Radiopaedia.org (Accessed on 13 Nov 2026) https://doi.org/10.53347/rID-197373  
+- **许可**：CC BY-NC-SA 3.0　<https://creativecommons.org/licenses/by-nc-sa/3.0/>  
+- **患者（页面所载）**：40 years, Male  
+- **诊断可信度（页面）**：Diagnosis almost certain  
+- **所见（病例 findings 原文大意）**：Dilated, fluid-filled appendix with thickened wall and periappendiceal stranding. Small appendicoliths which are not obstructing. 序列为 C+ portal venous phase，有轴位 / 冠状 / 矢状。
+
+| 文件 | 层面 | 像素 | sha256 |
+|---|---|---|---|
+| `S04/S04_primary_rID197373_axial_s130_appendix-thick-wall_img67748644.jpeg` | 轴位门脉期，标注“appendix”的切片（stack 第 130 帧，图像 id 67748644） | 512×512 | `cc3eb8523e3d201c7fae753649b0ba3d34bfc3b75a91dde7834f1918da70c41c` |
+| `S04/S04_primary_rID197373_axial_s135_appendicoliths_img67748649.jpeg` | 同序列，标注“appendicoliths”的切片（第 135 帧，id 67748649） | 512×512 | `9fc387915495f7e35ccac689ea50f0435e2a28cd0f6207cc9948f18079df8295` |
+| `S04/S04_overview_rID197373_axial_s103_page-default-axial_img67748617.jpeg` | 站点默认/页面缩略轴位（第 103 帧）。肾脏层面，阑尾不如 s130 清楚，**不推荐上屏**。 | 512×512 | `ece042a46e0502b954aa55ef4d3dc2a16cae166d9719677724ea2226b836a087` |
+| `S04/S04_overview_rID197373_coronal_s086_page-default-coronal_img67748806.jpeg` | 站点默认冠状位（偏后，阑尾显示弱），**不推荐上屏**。S09 目录中有相同副本。 | 512×512 | `036628558ced2e3c129a3a00d8372cc3d1510d5652f2192c7b78edf5bd63f204` |
+
+S09 目录中的 `S09_backup_rID197373_axial_s130_...jpeg` 与 S04 s130 为同一文件（sha256 相同）。该病例的周围脂肪条索不算“轻度”，作 S09 仅备选，避免与 S12 分不清。
+
+片尾单条：
+
+> 图像来源：Radiopaedia.org，病例 rID 197373，作者 Michael P. Hartung，CC BY-NC-SA 3.0  
+> Image: Case courtesy of Michael P. Hartung, Radiopaedia.org, rID: 197373 (CC BY-NC-SA 3.0)
+
+---
+
+### 4.2 Radiopaedia rID 30389 — S09 主选
+
+- **病例标题**：Appendicitis  
+- **病例页**：<https://radiopaedia.org/cases/appendicitis-22>　永久链接 <https://radiopaedia.org/cases/30389>  
+- **DOI**：<https://doi.org/10.53347/rID-30389>  
+- **作者**：Jack Ren  
+- **官方引用**：Ren J, Appendicitis. Case study, Radiopaedia.org (Accessed on 13 Nov 2026) https://doi.org/10.53347/rID-30389  
+- **许可**：CC BY-NC-SA 3.0　<https://creativecommons.org/licenses/by-nc-sa/3.0/>  
+- **患者**：45 years, Male  
+- **诊断可信度**：Diagnosis almost certain  
+- **所见（页面原文）**：The appendix is abnormally distended to 10 mm and demonstrates mural thickening with surrounding stranding… With the exception of the **mild stranding** around the appendix, there is no free intraperitoneal fluid. No pneumoperitoneum. No discrete collection. 序列标注为 renal cortical phase（有对比剂）。
+
+| 文件 | 层面 | 像素 | sha256 |
+|---|---|---|---|
+| `S09/S09_primary_rID30389_coronal_s024_key-coronal-mild-stranding_img7922572.jpg` | 冠状位，病例官方关键图（case_key_image_id 7922572，第 24 帧） | 512×695 | `2a55d6640f55f1c13b7feab3660882997507e4bc6975c2b21c2d9639ab7c732d` |
+| `S09/S09_primary_rID30389_axial_s058_appendix-near-cecum_img7922410.jpg` | 轴位，盲肠旁可见增粗阑尾及轻度周围模糊（自选；该病例无轴位标注） | 512×512 | `6907a2fb8095c495953c9b0a88a0d654ff0bf930f38271353816fe12daed3eda` |
+| `S09/S09_primary_rID30389_axial_s059_appendix-near-cecum_img7922412.jpg` | 同上，相邻层面 | 512×512 | `6a75a9fa376ee54c982f3e725b024c89b53835abf8b0bad16bb3775cc44aa600` |
+| `S09/S09_primary_rID30389_axial_s060_appendix-near-cecum_img7922413.jpg` | 同上，相邻层面 | 512×512 | `2c7357ae88f13d0b9741f5e888c703541858d3fb112cfad6a6bf37b2c9d8d807` |
+
+`S09/未选用_轴向候选/` 下的 s061、s062 为同一段相邻层面，阑尾轮廓稍弱，仅作浏览备份。
+
+注意：病例文本出现过 “10 mm”，那是病例描述，**不要把该数字做到画面上**（分镜禁止测量值）。
+
+片尾单条：
+
+> 图像来源：Radiopaedia.org，病例 rID 30389，作者 Jack Ren，CC BY-NC-SA 3.0  
+> Image: Case courtesy of Jack Ren, Radiopaedia.org, rID: 30389 (CC BY-NC-SA 3.0)
+
+---
+
+### 4.3 Radiopaedia rID 197370 — S12 主选
+
+- **病例标题**：Acute appendicitis - uncomplicated  
+- **病例页**：<https://radiopaedia.org/cases/acute-appendicitis-uncomplicated>　永久链接 <https://radiopaedia.org/cases/197370>  
+- **DOI**：<https://doi.org/10.53347/rID-197370>  
+- **作者**：Michael P. Hartung  
+- **官方引用**：Hartung M, Acute appendicitis - uncomplicated. Case study, Radiopaedia.org (Accessed on 13 Nov 2026) https://doi.org/10.53347/rID-197370  
+- **许可**：CC BY-NC-SA 3.0　<https://creativecommons.org/licenses/by-nc-sa/3.0/>  
+- **患者**：40 years, Female  
+- **诊断可信度**：Diagnosis almost certain  
+- **所见（页面原文）**：Dilated, fluid-filled appendix with appendicolith at the base and **extensive periappendiceal stranding**. 序列为 C+ portal venous phase。冠状位有标注 “periappendiceal fat stranding”。
+
+虽然标题是 “uncomplicated”（无穿孔/脓肿），但“广泛脂肪条索”在视觉上明显重于 rID 30389 的 mild stranding，适合承担 S12“周围渗出明显”。增强期可见管壁强化。
+
+| 文件 | 层面 | 像素 | sha256 |
+|---|---|---|---|
+| `S12/S12_primary_rID197370_axial_s128_dilated-appendix-extensive-stranding_img67747991.jpeg` | 轴位，标注“dilated appendix”；亦为病例关键图 id 67747991 | 512×512 | `94c2146e392dee8164f979095bbd8180705dbb938fe5f595cd88b72e5f50a14a` |
+| `S12/S12_primary_rID197370_axial_s137_appendicolith-base_img67748000.jpeg` | 轴位，基底部粪石（标注 appendicolith，第 137 帧） | 512×512 | `b3a5f0216ecfbeddee7f8d71838be5f66187ed1bbc15a7cbc9643a09ea510eea` |
+| `S12/S12_primary_rID197370_coronal_s065_coronal-extensive-fat-stranding_img67748143.jpeg` | 冠状位，标注“periappendiceal fat stranding”（第 65 帧） | 512×512 | `5151e424d2b69c4a1831920d180ec5c64dcff18b65372294c1f05bb3cdd2bd1d` |
+
+片尾单条：
+
+> 图像来源：Radiopaedia.org，病例 rID 197370，作者 Michael P. Hartung，CC BY-NC-SA 3.0  
+> Image: Case courtesy of Michael P. Hartung, Radiopaedia.org, rID: 197370 (CC BY-NC-SA 3.0)
+
+---
+
+### 4.4 Radiopaedia rID 198519 — S12 壁强化候选
+
+- **病例标题**：Acute appendicitis  
+- **病例页**：<https://radiopaedia.org/cases/acute-appendicitis-133>　永久链接 <https://radiopaedia.org/cases/198519>  
+- **DOI**：<https://doi.org/10.53347/rID-198519>  
+- **作者**：Lam Van Le  
+- **官方引用**：Le L, Acute appendicitis. Case study, Radiopaedia.org (Accessed on 13 Nov 2026) https://doi.org/10.53347/rID-198519  
+- **许可**：CC BY-NC-SA 3.0　<https://creativecommons.org/licenses/by-nc-sa/3.0/>  
+- **患者**：25 years, Male  
+- **诊断可信度**：Diagnosis certain（页面写随后腹腔镜手术证实）  
+- **所见（页面原文）**：远端阑尾约 10 mm，**thickened walls enhancing after contrast administration**，腔内粪石，surrounding fat stranding and thickening of the adjacent peritoneum. 有非增强、动脉期、门脉期轴位（无冠状位）。
+
+| 文件 | 层面 | 像素 | sha256 |
+|---|---|---|---|
+| `S12/S12_candidate_rID198519_axial_s074_PVP-enhancing-wall-stranding_img68055874.jpeg` | 门脉期轴位，与动脉期标注层面同一序号（第 74 帧）。更适合看壁强化。 | 512×512 | `f9c32604a39982c7bf5e31f975e6b28434088e86e569e29df2806a840cb79251` |
+| `S12/S12_candidate_rID198519_axial_s074_arterial-appendix-fat-stranding_img68054865.jpeg` | 动脉期轴位，页面标注 “distal appendix”“fat stranding” 的切片 | 512×512 | `7cd4b091bde3737ca3cad4bd9fa4d49b29a15ac7596fc9116a264c2922f3d89f` |
+
+图下方有 CT 床缘，合成时可裁去黑边和床缘，不要改腹部解剖。
+
+片尾单条：
+
+> 图像来源：Radiopaedia.org，病例 rID 198519，作者 Lam Van Le，CC BY-NC-SA 3.0  
+> Image: Case courtesy of Lam Van Le, Radiopaedia.org, rID: 198519 (CC BY-NC-SA 3.0)
+
+---
+
+### 4.5 Radiopaedia rID 242634 — S15 主选
+
+- **病例标题**：Complicated appendicitis  
+- **病例页**：<https://radiopaedia.org/cases/complicated-appendicitis-8>　永久链接 <https://radiopaedia.org/cases/242634>  
+- **DOI**：<https://doi.org/10.53347/rID-242634>  
+- **作者**：Diana Reyadh Kadhem  
+- **官方引用**：Kadhem D, Complicated appendicitis. Case study, Radiopaedia.org (Accessed on 13 Nov 2026) https://doi.org/10.53347/rID-242634  
+- **许可**：CC BY-NC-SA 3.0　<https://creativecommons.org/licenses/by-nc-sa/3.0/>  
+- **患者**：50 years, Male  
+- **诊断可信度**：Diagnosis almost certain  
+- **机构（页面）**：Baghdad Medical City  
+- **所见（页面原文）**：阑尾约 12 mm，壁增厚，右结肠旁沟明显炎性脂肪条索。**focal discontinuity of the enhancing appendiceal wall, communicating with an adjacent gas collection measuring approximately 6 x 3 cm, in keeping with perforation and periappendiceal abscess formation.** 增强门脉期轴位第 285 帧同时标注了壁强化中断与气体。
+
+| 文件 | 层面 | 像素 | sha256 |
+|---|---|---|---|
+| `S15/S15_primary_rID242634_axial_s285_wall-enhancement-defect-and-gas-abscess_img75885695.jpg` | 轴位门脉期，壁强化缺损 + 含气脓肿（图像 id 75885695） | 512×512 | `87254bec038dde8b74d5c1fbc100fc5a65f1e9a90db6a2e1f783f8241993b025` |
+
+注意：12 mm、6×3 cm 是病例描述，**不要写到画面上**。
+
+片尾单条：
+
+> 图像来源：Radiopaedia.org，病例 rID 242634，作者 Diana Reyadh Kadhem，CC BY-NC-SA 3.0  
+> Image: Case courtesy of Diana Reyadh Kadhem, Radiopaedia.org, rID: 242634 (CC BY-NC-SA 3.0)
+
+---
+
+### 4.6 Radiopaedia rID 198206 — S15 备选（非增强，手术证实穿孔）
+
+- **病例标题**：Perforated appendicitis  
+- **病例页**：<https://radiopaedia.org/cases/perforated-appendicitis-35>　永久链接 <https://radiopaedia.org/cases/198206>  
+- **DOI**：<https://doi.org/10.53347/rID-198206>  
+- **作者**：Mina Sameh Rizk  
+- **官方引用**：Rizk M, Perforated appendicitis. Case study, Radiopaedia.org (Accessed on 13 Nov 2026) https://doi.org/10.53347/rID-198206  
+- **许可**：CC BY-NC-SA 3.0　<https://creativecommons.org/licenses/by-nc-sa/3.0/>  
+- **患者**：60 years, Female  
+- **诊断可信度**：Diagnosis certain（手术证实）  
+- **所见**：增厚管壁、扩张管腔、腔内/壁内气体，以及 **focal wall defect**；少量腹腔积液与 **peritoneal gas foci**。序列为 **non-contrast**，因此不如 rID 242634 适合单独讲“壁强化缺损”，但对“壁缺损 / 腔外气体”仍有用。
+
+| 文件 | 层面 | 像素 | sha256 |
+|---|---|---|---|
+| `S15/S15_backup_rID198206_axial_s224_wall-defect_img67958925.jpg` | 轴位，标注 “wall defect”（第 224 帧） | 512×512 | `a89c635d798f736ce6df16cc8adc7eee4cc8dac348e4109edcea8fc1c215099c` |
+| `S15/S15_backup_rID198206_axial_s237_appendix_img67958938.jpg` | 轴位，标注 “appendix”（第 237 帧） | 512×512 | `3443aac43f6ef1d179987bbd9c78579c963bc3340fd82288d81908a91765f309` |
+| `S15/S15_backup_rID198206_axial_s068_peritoneal-gas-foci_img67958769.jpg` | 轴位较高层面，标注 “peritoneal gas foci”（肝周游离气体；本层不见阑尾） | 512×512 | `b1203954e6f1b720375b440c24d07d81e1e0c7ef9b570968677c34c6acf75036` |
+| `S15/S15_backup_rID198206_coronal_s091_key-coronal_img67959103.jpg` | 冠状位官方关键图（id 67959103） | 512×538 | `d1e80e15ec946676eee7cbac8211ea2f956945909732a7083ae22e32cbf35cfe` |
+
+该病例页另有一张术后大体照片，本次**未下载**（任务只要 CT）。
+
+片尾单条：
+
+> 图像来源：Radiopaedia.org，病例 rID 198206，作者 Mina Sameh Rizk，CC BY-NC-SA 3.0  
+> Image: Case courtesy of Mina Sameh Rizk, Radiopaedia.org, rID: 198206 (CC BY-NC-SA 3.0)
+
+---
+
+### 4.7 Wikimedia Commons 备选（无 NC，但多数不适合直接上屏）
+
+原文件另存于 `commons_备选/`（保留 Commons 原文件名）。场景目录中的副本内容相同。
+
+#### James Heilman, MD — 急性阑尾炎轴位（S04/S12 备选，有测量尺）
+
+- **文件页**：<https://commons.wikimedia.org/wiki/File:CAT_scan_demonstrating_acute_appendicitis.jpg>  
+- **作者（页面）**：James Heilman, MD  
+- **许可**：CC BY-SA 3.0　<https://creativecommons.org/licenses/by-sa/3.0>  
+- **本地**：`S04/S04_commons-alt_Heilman_CAT_scan_demonstrating_acute_appendicitis.jpg`（986×695，sha256 `6cf373f5a33b5107ec73af2b12c207fba9b8ea81713e44293a4e2a51b4e0cf8a`）  
+- **说明**：阑尾扩张清楚，但原图烙有测量框 “A: 17.1mm”。分镜禁止上屏测量值，**不宜直接使用**；若要用，合成时须遮盖测量框，且遮盖属于改编，需按 CC BY-SA 署名。17.1 mm 的管径也偏粗，更接近较重炎症而非 S09 的“轻度”。
+
+> 图像来源：Wikimedia Commons，File:CAT scan demonstrating acute appendicitis.jpg，作者 James Heilman, MD，CC BY-SA 3.0
+
+#### Cerevisae — 急性阑尾炎轴位（S09 备选，有英文标注）
+
+- **文件页**：<https://commons.wikimedia.org/wiki/File:CT_scan_of_the_abdomen_showing_acute_appendicitis.jpg>  
+- **作者**：Cerevisae  
+- **许可**：CC BY-SA 4.0　<https://creativecommons.org/licenses/by-sa/4.0>  
+- **本地**：`S09/S09_commons-alt_Cerevisae_CT_scan_of_the_abdomen_showing_acute_appendicitis.jpg`（512×512，sha256 `ee303acdbc1c409669d6e7235418a04d8c53003cfdd3d29b2ba6d713ced880b4`）  
+- **说明**：可见扩大阑尾与脂肪条索，但原图已有英文标签（Enlarged appendix, caecum, Fat stranding 等）。本片标签须按分镜中文来写，**不宜直接上屏**。
+
+> 图像来源：Wikimedia Commons，File:CT scan of the abdomen showing acute appendicitis.jpg，作者 Cerevisae，CC BY-SA 4.0
+
+#### Hellerhoff — 阑尾周围脓肿（S15 句 59 备选）
+
+- **轴位页**：<https://commons.wikimedia.org/wiki/File:Perityphlitischer_Abszess_in_der_CT_-_ax.jpg>  
+- **冠状位页**：<https://commons.wikimedia.org/wiki/File:Perityphlitischer_Abszess_in_der_CT_-_cor.jpg>  
+- **作者**：Hellerhoff  
+- **许可**：均为 CC BY-SA 3.0　<https://creativecommons.org/licenses/by-sa/3.0>  
+- **本地**：  
+  - `S15/S15_commons-alt_Hellerhoff_Perityphlitischer_Abszess_ax.jpg`（672×476，sha256 `294402344761f7e82b13df4a7bd8961a37129538e8d2f53ac4f999d304a0177e`）— 无额外标注，脓肿强化环清楚，但是分辨率偏低。  
+  - `S15/S15_commons-alt_Hellerhoff_Perityphlitischer_Abszess_cor.jpg`（460×540，sha256 `5b1de7548b100c4d501c84666c7fdb4b2438166073b6d934c41fd139ac143ed7`）— 原图带红圈。  
+- **页面说明（德文）**：Appendizitis mit perityphlitischem Abszess；脓肿有明显边缘强化。
+
+> 图像来源：Wikimedia Commons，File:Perityphlitischer Abszess in der CT - ax.jpg（及冠状位同组），作者 Hellerhoff，CC BY-SA 3.0
+
+#### James Heilman, MD — 穿孔阑尾炎（S15 备选，有红圈）
+
+- **文件页**：<https://commons.wikimedia.org/wiki/File:Perfedappendix.PNG>  
+- **作者**：James Heilman, MD  
+- **许可**：CC BY-SA 3.0　<https://creativecommons.org/licenses/by-sa/3.0>  
+- **本地**：`S15/S15_commons-alt_Heilman_Perfedappendix.PNG`（1037×968，sha256 `c1070f23f7d813a10d1555d401562c14cfce0355c25fc631ffd61eef56378119`）  
+- **说明**：右下腹含气炎性灶很清楚，分辨率高于多数 Radiopaedia JPEG，但原图带红色圆圈。若采用需在署名中注明未改解剖、圈为原图所有，或按许可做改编并声明。
+
+> 图像来源：Wikimedia Commons，File:Perfedappendix.PNG，作者 James Heilman, MD，CC BY-SA 3.0
+
+---
+
+## 5. 缺口与使用注意
+
+1. **没有“正常细长阑尾”对照图**。当前四场分镜不强制需要；若要做正常对照，需另寻公开授权病例（Radiopaedia / Commons / PMC CC BY）。  
+2. **没有在同一患者身上贯穿三型的真实 CT**（也不应伪造）。  
+3. **Radiopaedia 提供的 “original” 静帧多为 512×512 JPEG**（个别冠状位约 512×695）。这是站点托管的最高静帧，不是 DICOM。合成进约 610×620 的 CT 窗时会略微放大，科普用途可用。  
+4. 多张图底部含 **CT 床缘或大块黑边**，合成时可裁边，不要改腹部解剖。  
+5. Commons 备选虽然没有 NC 限制，但 Heilman 急性图有测量尺、Cerevisae 图有英文标签、部分脓肿/穿孔图有红圈，需处理后才能上屏。  
+6. 未采用 PMC 论文附图：Radiopaedia + Commons 已覆盖所需所见。若以后要更宽松的 CC BY（无 SA 或无 NC）图，可再查例如 PMC2766912（Indian J Radiol Imaging，CC BY 2.0，含穿孔伴脓肿图）。本次未下载，以免许可与出处未在本轮逐页核对。  
+7. 查看过但未采用的 Radiopaedia 病例：rID 62880（Yaïr Glick，蜂窝织炎性，但因肾衰竭未给静脉对比剂，不利于“壁强化”）；rID 147199（Husam Hussein Yaseen，坏疽穿孔，非增强且无切片标注，不如 rID 242634 清楚）。
+
+---
+
+## 6. 下载方法（供复核）
+
+Radiopaedia 病例页在带 `Accept: text/html` 或 Googlebot 的请求下可得到含许可证与 study id 的 HTML。完整层面列表来自公开的  
+`/studies/<id>/annotated_viewer_json.json`。  
+静帧地址为：
+
+`https://prod-images-static.radiopaedia.org/images/<image_id>/<original文件名>`
+
+其中 `<original文件名>` 取自该 JSON 的 `encodings.thumbnailed_files[].original`（新病例多为 `<hash>.jpeg`，本批全部 HTTP 200）。只下载了上述选定层面，没有整堆拉取。  
+Wikimedia 原图来自 `upload.wikimedia.org`，许可经 Commons API `extmetadata` 核对。
+
+未改动任何 git 仓库，也未读取或改写 `/workspace/病理科普视频/配音/.mimo.env`。
+
+总览图：`/workspace/病理科普视频/ct_real/contact_sheet.png`
+
+exec
+/bin/bash -lc "cat /workspace/病理科普视频/v4_mix/qa/style/风格规范_v1.md; cat qa/briefs/v6_d01_s11.md; cat qa/briefs/v6_e01_s19.md; cat film/chapters/s04.js; cat film/main.js; cat qa/v6/ct_real/credits.md; rg -n 'S04|S09|S12|S15|素材库|研究卡|文献提示' 分镜/分镜_v1.md; cat /workspace/病理科普视频/配音/全稿_v3/timeline.json | head -35" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+# 画面风格规范 v1
+
+照 `film_mini_detail` 第 04 章样帧执行（`he.js`、`he_detail.js`、`chapters/04.js`、`wash.js`、`ann.js`；该分支没有 `lib/detail.js`）。数量用代码里的同一套 `rng` 跑出。画布 1920×1080。镜下是局部坐标 ±420，装进目镜 `{x:640, y:480, r:340}`，缩放 `k = 340/420 × fs`（04 的 `fs` 从 1.06 到 1.48）。
+
+## 1. 线条
+
+结构层用 Rough.js（`ink.js`）：默认 `strokeWidth 2.6`、`roughness .9`、`bowing .8`、`seed 3`、圆头，墨色 `#2A2A35`。路径固定种子缓存一次，出现靠虚线揭开。抖动 `BOIL_FPS = 10`、3 变体；04 镜检 `boil: false`、`drift: false`。已有 `roughness`：.5 .55 .6 .7 .8 1；`bowing` 只在疼痛线为 .5。日常线宽 1.4–3；4.5–9 只留给已有的疼痛线、神经高亮、十字和阑尾。排线只给人物：头发角度 −30、间距 4、`fillWeight 2`；裤子 −60、间距 10、`fillWeight 1.1`。镜下不排线。
+
+镜下圆头细线（视野坐标）：上皮 7，血管轮廓 2.2，纤维素粗丝 `2.4×(1−0.85×detail)`（满细节 0.36），细网 0.55，肌/胶原/影细胞 0.65，裂隙纤维素 0.75 与 0.45，核桥 `0.48/缩放`，红细胞边 0.28，外壁 1.45、内壁 0.85。目镜圈 5、外圈 1.5；闪边宽 8，只在镜圈。标注锁在屏幕像素：引线 1.6，阶段轴 2，刻度 2.4，穿孔环 3。
+
+## 2. 配色
+
+病理色不随情绪变。`mood.js` 只动纸和网格：纸从 `#F4EFE6` 做轻微冷中性、压暗或提亮。玻片底固定 `#F6EEF0`。目镜外 `#111114`；深底上墨色由 `setDark` 混向 `#EFE8DC`。
+
+- 墨 `#2A2A35`。朱红 `#D6453A`（活组织、炎症、重点字、镜圈）。字幕里的朱红用 `#F07A63`。
+- H&E 紫 `#6B4C9A`（核、内皮核）。核深 `#3F2A66`，染色质点 `#38234F`，碎屑深 `#2E1F45`，叶填 `#51336F`。
+- 嗜伊红 `#D98BA8`，浅 `#EBC3D0`。胞质 `rgba(226,170,200,.75)`，颗粒 `rgba(167,105,159,.38)`，核桥 `#9273A5`。
+- 出血红褐：盘 `#A8404E`、边 `#7E2A38`、中央淡区 `#C9A8AE`、溶血 `#C9A4AC`。出血斑 `#8E3A3E` `#A8404E` `#9A3E48` `#7A3038`。Zahn 红层 `#8E3A3E`/`#A8404E`，粉层 `#F0D4DC`/`#F3D5DE`。充盈水彩 `#C9455A` 在坏疽期让开。
+- 镜下脓 `#B39459`（`C.pus`）。大体脓苔只用 02 的 `#CDB98A`。坏死晕 `#D7A3B3` `#E3B7C4` `#E7C9D2`。裂隙底 `#E9DDB0`。网格 `rgba(42,42,53,.07)`。
+
+## 3. 细胞与组织
+
+中性粒用 `detailedNeutrophil`。叶数：2 叶 15%、3 叶 45%、4 叶 30%、5 叶 10%。叶半轴 4.0×2.9，内侧收 0.14，叶间留胞质缝，二次曲线核桥相连，每叶 5 个染色质团。胞质椭圆（2→5 叶）7.20×5.65、8.05×7.55、9.25×8.70、10.625×10，内 22 颗颗粒。`chromatin()` 另是 25 个点，盖隐窝核和肌核。`detail=0` 时仍走简笔，03 不被改掉。
+
+全板 **1336** = 腔 186 + 浸润 1150。叶数 222 / 566 / 412 / 136。浸润：黏膜 378、黏膜下层 228、肌层 306、浆膜 84、纤维素带 154。
+
+圆视野（半径 `420/fs`）：
+
+- 早期 `neut=0.2`、`fs=1.06`：游出 166，腔内 71。
+- 全层、`fs=1.15`：**912**（黏膜 298、黏膜下层 204、肌层 262、浆膜 45、纤维素带 48、腔 55）。
+- 坏疽峰值 `fs=1.48`、场偏移 `[145.9, 60]`：圆内 471 个位置，按坏死权重抹掉 403，留 68。裂隙另有 45 个（2–5 叶），不参与这轮剔除。
+
+红细胞 `pushDisc`：`rx=5×(0.72–1.32)`（04 样帧原为 3.1，已按 look 改为 5），`ry=rx×(0.36–0.76)`，淡区 0.46×0.38；`rnd<.25` 为溶血。屏幕上的喷洒盘 **354**，溶血 92，聚在 5 块红褐斑和 6 条血管旁。每条血管有外壁、内壁、内皮核 4–6（本种子 4,4,4,5,5,4）、Zahn 带 3–5 层红粉交替（本种子 3,3,5,4,3,4），最内层填实。影细胞 52 个淡轮廓（`CG()<0.38` 开口）。核碎屑 90 簇 502 粒，核尘 1050。纤维素：60 条粗丝 + 140 条细网。隐窝 13×16 核，肌核 170。穿孔向浆膜加宽，浆膜端脓团 95、核 80。
+
+**比例（look 定）：**红细胞直径约 7.5 μm，中性粒细胞约 10–12 μm，后者约为前者的 1.5 倍。中性粒胞质直径 14–21 时，红细胞 `rx` 应约 5（直径约 10），不再用 3.1。
+
+### 3b. 正常阑尾组织学（01–03 必须有）
+
+- 黏膜下层有成片的淋巴滤泡：深紫色的淋巴细胞团，中间是淡色的生发中心。
+- 肌层分两层：内层是环行肌，横截面上的核是小圆点；外层是纵行肌，核呈梭形。
+- 隐窝画成管状腺，内衬柱状上皮，夹有杯状细胞。
+
+## 4. 水彩
+
+只烘一次。默认 1024；`hd:true` 输出 **2048**，颗粒在成图像素上重铺（3px 与 18px fbm，权重 .65/.35）。04 近景色素：`hd:true, soft:true, grain:.12, edge:.3, bleed:.5`。`edge` 是干边压暗，`bleed` 向外渗。四个坏死斑再 `blur(15px)`。`scaleBrushes` 会连乘（默认 2.4）；多烘之后用四次 `1/2.4` 把笔刷还回去。
+
+`drawWash` 的 `size` 再乘目镜或相机，才是屏幕像素。屏幕像素 / 烘焙边长 **> 1** 就是拉伸，要改 2048 重烘。审计把相对 1024 超过 1.1 标为需要 hd。共享层带 `he.bands` 仍是 1024，峰值约 1.20 倍，这是旧层；新的近景色素不要照它放大。
+
+## 5. 标注
+
+`ann.js`。字号是屏幕像素。字重用 100–900 的整百；片内实际是 **500**（默认、字幕）、**700**（标题）、**800**（诊断名、三型）。镜旁 22–30，站名 40，诊断 52 与 62；章标题 56 / 章号 22。字幕 44，基线 `y=1012`，只由 `subtitle.js` 画。
+
+描边文字：`label({halo:true})`，先描后填，默认线宽 5，纸色或 `rgb(17,17,20)`。字幕光晕线宽 6。斜引线 `leader`：锚点半径 4，线宽 1.6，先到肘点再走水平字托（03 的「黏膜破溃缺损」）。`elbow:true` 时斜段不超过水平距离。04 穿孔用半径 52、线宽 3 的圆环，字放在镜缘外。
+
+构图停在 `y < 900`（`SAFE.fadeTop`）。镜下注释用短标签，冒号前是看法、冒号后是所见，与「时间倒回：发病早期」同一结构，如「镜下：坏死组织结构消失、出血」。03 镜缘已有「HE 染色 · 阑尾壁」「核分 2–5 叶」。04 现片还没有「镜下：」四字；要加就用 `A.label`，可加 halo，放在阶段轨下、`y<900`，只用 `T.frac` / `T.end` 进出。
+
+## 6. 时序与工程
+
+节拍只用 `T.at(i, 偏移)`、`T.end(i, 偏移)`、`T.frac(i, 0–1)`，时间来自 `narration.json`（否则 `sentences.tsv`）。不规则形状在加载时按固定种子写入局部坐标。帧内随机用 `render(t)` 里的 `rng(种子)`。禁止 `Math.random()`、`Date.now()`、`performance.now()`。水彩只在 `bake()` 里生成。交接帧用 `T.end(末句) − 1e-3` 重画上一章末态（`drawExit04`）。每章导出 `EXIT_*`。画面上新的数字要能指回句子、教材或已有常量；04 没有新计数，也没有比例尺。
+
+## 6b. 动态规则
+
+「活的表面」（`lib/alive.js`）只用在大体标本、人体示意图和 05 章的血管示意图上；H&E 镜下视野一律不开，镜下的动态靠镜头推拉和对焦变化（look 定）。
+
+## 7. 自检清单
+
+1. 结构线是否仍是 2.6 / .9 / .8，或沿用已有覆盖；镜下有没有排线。
+2. 1080p 下能否数出 2–5 叶，叶间有胞质缝和核桥。
+3. 镜下细胞密度是否接近第 3 节量级（满层浸润的圆视野约 900 个中性粒，早期约 150–250）；坏死区是否只留无核影细胞和核碎屑，活的中性粒集中在坏死区边缘。（第 3 节的具体计数是 04 的实测值，其他章按同一密度量级做，不要照抄数字。）
+4. 红细胞是否双凹加淡区；中性粒细胞与红细胞大小比约 1.5:1（`rx`≈5）；血管是否有双层壁和 3–5 层红/粉血栓。
+5. 有纤维素渗出的地方，是否同时画了粗丝和细网（04 的比例约 60 : 140）。
+6. 色是否落在第 2 节；纸色是否只走 `mood.js`。
+7. 近景水彩是否 2048，屏幕像素有没有超过烘焙边长。
+8. 字是否都在 `y<900`，字重是否为 500 / 700 / 800，斜引线是否走 `leader`。
+9. 节拍是否全是句子索引；交接帧是否等于上一章末帧减 0.001 秒。
+10. `--determinism` 换序是否一致；新数字有没有出处。
+11. 正常组织（01–03）：黏膜下层有带生发中心的淋巴滤泡，肌层内环（圆点核）外纵（梭形核），隐窝是管状的、有柱状上皮和杯状细胞。
+# v6 d01（Codex）：S11 纤维素网与纤维脓性渗出（句 43–46）镜下段
+
+工作目录 /workspace/病理科普视频/v5，分支 v6-fresh，基于 HEAD（981bda2，tag v6-s10-final）。不许 git commit。
+
+硬约束、画风标准、镜头规则都和 qa/briefs/v6_c01_s10.md 一样，开工前先读一遍。另外：
+
+- S08 七帧 MAE 必须为 0。
+- S10 句 37–42 各关键帧和 qa/v6/c03_s10/ 的 MAE 必须为 0。
+- determinism、sha256 都要通过。
+
+## 衔接
+
+S10 和 S11 在口播上是连着的，所以句 37–46 要合成一整段深色镜下段：
+
+- 去掉 S10 末尾（句 42 后）的切出过渡和 S11 开头的切入过渡。
+- 只在句 46 结束后做一次切出。
+- 句 42 → 43 之间不回纸色，镜头连续运动：从脓细胞特写平移或拉到渗出物区域。
+- 字幕在 37–46 期间保持 dark 样式。
+
+## 逐句画面
+
+**43「渗出的纤维蛋白原凝成纤维素网。」**
+- 高倍，背景是淡染的渗出液。
+- 伊红色的细丝从散在的细小颗粒开始，逐渐连接、交织成网（纤维蛋白原→纤维素网）。这里用教学状态切换或生长动画，按句内进度推进。
+- 网是淡粉到伊红色、粗细不一、不规则的丝和小团，不能是规整的几何网格。可以参考或复用 he_detail.js 里的 fibrinMesh。
+- 左栏："纤维蛋白原 → 纤维素网"。写成"纤维蛋白原凝成纤维素网"也可以，不要用箭头符号。
+
+**44「网与脓细胞等交织，形成纤维脓性渗出物。」**
+- 纤维素网中嵌入大量脓细胞和中性粒细胞，以及组织碎屑，画法复用 S10 句 40 的脓液。
+- 左栏："纤维脓性渗出物"。
+
+**45「黄色并非只来自纤维素，更来自大量脓细胞。」**
+- 成分分别高亮：先轻提纤维素网，网变亮，其他成分减淡；再突出脓细胞，脓细胞保持饱和，网淡化。表达的意思是：脓细胞的贡献更大。
+- 只能用透明度和亮度的教学切换来做，绝不能把 HE 染成黄色。
+- 左栏两行："纤维素：部分""脓细胞：主要"。不加任何数字或百分比。
+
+**46「浆膜面可见纤维素性脓性渗出（含脓细胞）。」**
+- 镜头连续拉回中倍或低倍，移到阑尾壁的最外层：浆膜和外纵肌可辨，浆膜外表面覆盖一层不规则、厚薄不一的纤维脓性渗出物（纤维素丝 + 脓细胞），附着在浆膜上并向外蓬松。
+- 用短引线标"浆膜""纤维素性脓性渗出"。
+- 左栏原样写定稿的措辞："浆膜面：纤维素性脓性渗出（含脓细胞）"，可以分两行。
+- 说明：分镜原本想在这一句接一个大体标本的脓苔特写，但大体资产还没做，这一版先用镜下的浆膜面。大体特写以后再补，不在这一轮做。
+
+## 输出
+
+1. 渲染 S10+S11 合并段，重新合成粗剪 v6：qa/v6/animatic/粗剪_v6.mp4 和 720p 版本，CRF16。
+2. 交付到 qa/v6/d01_s11/：
+   - 句 43（起、中、末三帧，展示成网过程）、44、45（两个高亮状态各一帧）、46 的关键帧，以及句 42→43 衔接的中间帧，每张都附 200% 局部。
+   - review_sheet.png。
+   - 自检.md，内容包括：每句画面的病理对应、S08 和 S10 的 parity、determinism、sha256，以及你认为还不够好的地方。
+# v6 e01（Codex）：S19 慢性阑尾炎镜下段（句 69–70）
+
+工作目录 /workspace/病理科普视频/v5，分支 v6-fresh，基于当前 HEAD（含 d01 的 S10+S11 合并段）。不许 git commit。
+
+硬约束、画风标准、镜头规则都和 qa/briefs/v6_c01_s10.md 一样，开工前先读一遍：
+- 锁定文件 sha256 开工和收工各校验一次。
+- S08 七帧、S10 和 S11 已交付关键帧（qa/v6/c03_s10/、qa/v6/d01_s11/）的 MAE 必须为 0。
+- 必须通过 determinism 检查。
+- 深色镜下底 #111114，圆形视野（圆心 (1110,475)，r 425）。前后各一次 0.7 s 虹膜过渡，按句 id 卡点。字幕在本段用 dark 样式。
+- 低倍是斜切、被视野裁掉的椭圆。低→中→高连续推进，高倍时随句子平移。注释用完就退场，倍数标签只写低倍、中倍、高倍。所有内容放在 y<950。
+- 时间一律从 film/timeline.js 按句 id 取，不写死秒数。
+- 画面不出现任何数字，不标"全壁""大量"。
+
+## 病理内容（慢性阑尾炎）
+- 这是新的组织状态，不能复用急性的脓细胞和纤维素。阑尾壁结构仍可辨认，但黏膜下层和肌层内有成束的纤维组织增生，即纤维化：粉红色胶原束、梭形的纤维细胞核，局部可见肌层被纤维组织分隔。
+- 慢性炎细胞散在或成簇浸润：
+  - 淋巴细胞：小圆形，核深紫、圆、几乎占满细胞，胞质极少。
+  - 浆细胞：卵圆形，核偏在一侧，染色质呈车辐状或钟面状，核旁有淡染区（核周晕），胞质略嗜碱、偏紫粉。
+- 不要画成中性粒细胞（分叶核）或脓细胞。不要把正常淋巴滤泡当成慢性浸润，可以有少量滤泡，但浸润主要在壁内间质。
+
+## 逐句画面
+**69「阑尾壁纤维组织增生、纤维化」**（以全稿_v3 原文为准）
+- 低倍斜切定位到阑尾壁，推到中倍，在黏膜下层和肌层看到纤维化区。用短引线标"纤维组织增生"。
+- 左栏：先写"阑尾壁：纤维组织增生、纤维化"。
+
+**70「慢性炎细胞：淋巴细胞、浆细胞」**
+- 推到高倍，进入纤维化间质里的炎细胞浸润区。先平移到淋巴细胞为主的小区，标"淋巴细胞"；再平移到浆细胞，标"浆细胞"，可以局部再放大一档，让偏位核和核周晕看得清。保留母图定位，不要跳成孤立的细胞贴图。
+- 左栏：再加"慢性炎细胞：淋巴细胞、浆细胞"。
+- 句末切出，回到纸色。
+
+## 输出
+1. 新代码放在 film/chapters/s19.js 和 lib_ext/（如 he_chronic.js），接入多场景入口。把 S19 合成进粗剪，生成 qa/v6/animatic/粗剪_v7.mp4 和 720p 版本，CRF16。
+2. 交付到 qa/v6/e01_s19/：
+   - 句 69 低倍、中倍、纤维化标注三帧，句 70 淋巴细胞、浆细胞两帧，以及切入和切出的中间帧，每张都附 200% 局部。
+   - review_sheet.png。
+   - 自检.md，内容包括：每句的病理对应、parity、determinism、sha256，以及你认为还不够好的地方。
+import {loadCT,realCT,mark} from '../lib_ext/ct_real_images.js';
+import {paper,text,labelTo,ramp} from '../lib_ext/ct_r3_schematic.js';
+import {doctor,choice,evidenceBase} from '../lib_ext/ct_r3_clinical.js';
+
+const PUR='#6B4C9A', INK='#2A2A35';
+const CT={x:610,y:92,w:1260,h:838};
+const CT_SMALL={x:1040,y:170,w:470,h:540};
+
+export default {
+  async prepare(){
+    this.clinic=document.createElement('canvas');this.clinic.width=1920;this.clinic.height=1080;
+    doctor(this.clinic.getContext('2d'),1010,408,1.55);
+
+    this.ct=document.createElement('canvas');this.ct.width=1920;this.ct.height=1080;
+    this.image=await loadCT(0);this.g=realCT(this.ct.getContext('2d'),this.image,0,CT,'197373');
+
+    this.evidence=document.createElement('canvas');this.evidence.width=1920;this.evidence.height=1080;
+    const e=this.evidence.getContext('2d');
+    evidenceBase(e);
+    realCT(e,this.image,0,CT_SMALL,'197373');
+  },
+  draw(c,t,T){
+    paper(c);
+    const n=[14,15,16,17,18,19].filter(k=>t>=T.at(k)).at(-1)||14;
+    const fade=(id,f=0)=>ramp(t,T.frac(id,f),Math.max(.01,T.frac(id,Math.min(1,f+.15))-T.frac(id,f)));
+    const a15=fade(15);
+    const a16=fade(16);
+    const a18=fade(18);
+    const a19=fade(19);
+    const intro=fade(14);
+
+    if(n<=15){
+      c.save();c.globalAlpha=intro;c.drawImage(this.clinic,0,0);c.restore();
+      c.save();c.globalAlpha=intro;
+      text(c,'CT是辅助工具',70,245,44,PUR,700);
+      if(n>=15)text(c,'并非人人必须',70,325,42,INK,500,a15);
+      labelTo(c,'医生评估',640,792,868,704,{color:PUR,alpha:intro,size:40,weight:700});
+      c.restore();
+      choice(c,a15*intro);
+      return;
+    }
+
+    if(n<=17){
+      if(t<T.frac(16,.15)){
+        c.save();c.globalAlpha=1-a16;c.drawImage(this.clinic,0,0);c.restore();
+      }
+      c.save();c.globalAlpha=a16;c.drawImage(this.ct,0,0);c.restore();
+      c.save();c.globalAlpha=a16;
+      text(c,'增强螺旋CT',70,205,43,PUR,700);
+      text(c,'2023',70,300,40,INK,500);
+      text(c,'8项研究',70,380,40,INK,500,fade(16,.08));
+      text(c,'1602人',70,460,40,INK,500,fade(16,.42));
+      text(c,'敏感度95%',70,555,40,INK,500,fade(17));
+      text(c,'特异度94%',70,630,40,INK,500,fade(17,.40));
+      text(c,'[1]',70,710,30,PUR,500,fade(17,.55));
+      c.restore();
+      return;
+    }
+
+    if(n===18){
+      c.drawImage(this.ct,0,0);
+      c.save();c.globalAlpha=a18;
+      text(c,'发现病变',70,245,44,PUR,700);
+      c.restore();
+      mark(c,this.g,[168,240],20,'发现病变',a18);
+      return;
+    }
+
+    // 19: CT window gives way to the clinical/imaging/pathology evidence relation
+    if(t<T.frac(19,.15)){c.save();c.globalAlpha=1-a19;c.drawImage(this.ct,0,0);c.restore();}
+    c.save();c.globalAlpha=a19;c.drawImage(this.evidence,0,0);c.restore();
+    c.save();c.globalAlpha=a19;
+    text(c,'仍需结合临床',70,240,43,PUR,700);
+    text(c,'判断病情轻重',70,320,40,INK,500);
+    c.restore();
+  }
+};
+import {initBaker,bake} from './lib/wash.js';
+import {bakeHE} from './lib/he.js';
+import s08 from './chapters/s08.js';
+import {forScene} from './timeline.js';
+const name=new URLSearchParams(location.search).get('scene')||'s08';
+if(!['s06','s08','s10','s11','s19','s14','s09','s12','s15','s04','ct_library'].includes(name))throw Error('Unknown scene '+name);
+const scene=name==='s08'?s08:(await import(`./chapters/${name}.js`)).default;
+const ctRanges={s09:[35,36],s12:[47,48],s15:[58,59],s04:[14,19],ct_library:[35,36]};
+const clock=ctRanges[name]?forScene(...ctRanges[name],0):name==='s08'?{duration:T.end(34),T}:(name==='s06'?forScene(23,24,0):name==='s14'?forScene(54,57,0):name==='s19'?forScene(69,70,0):forScene(37,name==='s11'?46:42));
+import {T} from './timeline.js';
+const c=document.getElementById('c');c.width=1920;c.height=1080;const ctx=c.getContext('2d');
+await document.fonts.load('500 32px MixSans');if(!ctRanges[name]){await initBaker();bakeHE((k,r,o)=>bake(k,r,{...o,hd:true,soft:true,grain:.12,edge:.3,bleed:.5}));}
+await scene.prepare();window.DUR=clock.duration;window.render=t=>scene.draw(ctx,t,clock.T);window.READY=true;
+# 实际使用病例片尾署名
+
+图像来源：Radiopaedia.org，病例 rID 197373，作者 Michael P. Hartung，CC BY-NC-SA 3.0  
+
+Image: Case courtesy of Michael P. Hartung, Radiopaedia.org, rID: 197373 (CC BY-NC-SA 3.0)
+
+图像来源：Radiopaedia.org，病例 rID 30389，作者 Jack Ren，CC BY-NC-SA 3.0  
+
+Image: Case courtesy of Jack Ren, Radiopaedia.org, rID: 30389 (CC BY-NC-SA 3.0)
+
+图像来源：Radiopaedia.org，病例 rID 197370，作者 Michael P. Hartung，CC BY-NC-SA 3.0  
+
+Image: Case courtesy of Michael P. Hartung, Radiopaedia.org, rID: 197370 (CC BY-NC-SA 3.0)
+
+图像来源：Radiopaedia.org，病例 rID 242634，作者 Diana Reyadh Kadhem，CC BY-NC-SA 3.0  
+
+Image: Case courtesy of Diana Reyadh Kadhem, Radiopaedia.org, rID: 242634 (CC BY-NC-SA 3.0)
+
+https://creativecommons.org/licenses/by-nc-sa/3.0/
+38:| S04／14—19 | 左：先“CT是辅助工具／并非人人必须”，再研究卡“增强螺旋CT”；右：医生评估后才出现超声与 CT 选择图，随后自绘 CT 大窗，最后临床、影像与病理的证据关系图。 | 16—17 研究卡逐项揭示，数据用原值直接出现，不滚动计数；18 只突出检出线索；19 聚合临床证据。病理图作证据概念，不在此提前宣称完成术后分型。 | `ann.js: label, line, arrow`；`ink.js: ink`；`wash.js: drawWash`。旧库无 CT 成品能力。 | `ct_schematic.js` 自绘横断腹部与阑尾；`research_card.js`；`clinical.js` 检查选择图。 |
+43:| S09／35—36 | 左：“CT与组织变化对应”，分项“管径增粗、壁增厚、周围脂肪轻度模糊”；右：CT 表现示意与壁水肿两个大窗。 | 35 两窗同步框选阑尾壁；36 扩到周围脂肪。只有视觉对应，不显示测量数值，不将 CT 直接盖章为病理分型。 | `ann.js: ring, leader, label`；`he.js: drawLens`；`wash.js: drawWash`。 | `ct_schematic.js` 单纯性相关表现预设；`compare_view.js` 对照布局与同步定位。 |
+46:| S12／47—48 | 左：“壁增厚强化／周围渗出明显”；右：化脓相关 CT 表现示意与全层炎症双大窗。 | 47 依次描出壁和周围组织；48 保持画面连读并框选内外对应区域，不另起一套分型结论。 | `ann.js: leader, ring`；`he.js: drawLens`。 | `ct_schematic.js` 化脓相关表现预设；`compare_view.js`。 |
+49:| S15／58—59 | 左：“壁强化缺损：警惕坏死”“腔外气体、脓肿：警惕穿孔”；右：坏疽/穿孔相关 CT 表现示意与对应壁病变两大窗。 | 58 只点亮局部强化中断；59 再显示腔外气体、脓肿。每次一条对应引线；不使用“CT确诊三型”字样。 | `ann.js: leader, ring, label`；`he.js: drawLens`。 | `ct_schematic.js` 壁强化缺损、腔外气体及脓肿预设；`compare_view.js`。 |
+63:| S04 研究卡 | 2023、8篇、1602人、敏感度95%、特异度94% | 16 的画面建议及 17 正文。标题写“增强螺旋CT”，标引文 [1]；不改为 MDCT 专属结果，不作为三型分型准确度。 |
+64:| S16 文献提示 | 2023、2026 | 62 的画面建议；仅按定稿标 [3][4]，不凭年份补写未核对的论文作者、题名或单篇结果。 |
+67:研究卡下方在左栏分卡提示“并非三型分型准确度／仍需结合临床”；正文数据读完后再切边界提示，不将全部说明挤在同屏。63 相关卡保留定稿证据边界：[5] 为条件性推荐，具体时机结合临床评估；老师原话与指南口径不混作同一句指南引文。教材版次、年份及页码尚待核实，不补造。本分析不新增医学结论，故不另引外部数据改变定稿。
+159:- 内容类型：章节色卡、典型路径及分支、病理层次索引、定义卡、CT 所见要点、研究卡、治疗时机卡、来源卡。时间语义只使用稿件已有“缓解期／急性发作期”等文字，不加钟表/日历或时间数值。
+171:| B／三型相关 CT 自绘示意库 | 高：腹部断面、同一阑尾定位、壁强化及周围组织灰阶关系要清晰；容易被误解成真实临床影像或精准分型。 | S04、S09、S12、S15、S16 | **可先做**三类表现预设、CT表现示意标记、对应病理锚点及清晰大窗。不要加 HU、尺寸、测量刻度。 | 逐句高亮、与病理双窗同步、并发症复现顺序。 |
+176:| G／临床人物、症状对照、送检及手术图形 | 中：新增医生与患者互动；症状非典型不能靠编造新临床事实填充。 | S02—S04、S16—S17、S20—S21 | **可先做**人物姿态、典型/非典型无数值版、无数值化验单、送检和简洁切除图。 | 连读镜头衔接、疼痛迁移与就医动作时间。 |
+178:| I／路径分支、手术时机、研究与来源卡 | 中低：图形简单但措辞和证据边界要求严格。 | S04—S05、S17—S18、S20 | **可先做**按定稿静态卡、数字来源映射、条件说明与非固定路径布局。 | 多卡依次显现及停留长度。 |
+{
+ "duration": 327.8315,
+ "ffmpeg": {
+  "lufs": -16.3,
+  "true_peak_dbtp_summary": -1.6,
+  "true_peak_linear": 0.832,
+  "true_peak_dbtp": -1.5975334741855216
+ },
+ "pyloudnorm": -16.376012768376494,
+ "rail": 0,
+ "lines": [
+  {
+   "n": 1,
+   "seg": "01",
+   "chapter": "开场",
+   "start": 0.0,
+   "end": 4.120916666666667,
+   "dur": 4.120916666666667,
+   "text": "这根形似小香肠的盲管，就是阑尾。",
+   "en": "This small sausage-shaped tube is the | appendix."
+  },
+  {
+   "n": 2,
+   "seg": "01",
+   "chapter": "开场",
+   "start": 4.570916666666667,
+   "end": 7.951041666666667,
+   "dur": 3.380125,
+   "text": "发起炎来，它可能染上红、黄、黑。",
+   "en": "When inflamed, it may turn red, yellow, | then black."
+  },
+  {
+   "n": 3,
+   "seg": "01",
+   "chapter": "开场",
+
+exec
+/bin/bash -lc "sed -n '69,182p' 分镜/分镜_v1.md; cat qa/v6/ct_real/git_setup.log; ls /workspace/病理科普视频/ct_real/S15; rg -n 'function drawFocus|function labelTo' film/lib_ext/ct_r3_schematic.js; ls -lh qa/v6/ct_real/S*/S*720p.mp4; cat /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs | head -90" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+## v5 新项目结构与渲染方案
+
+建议直接以 `/workspace/病理科普视频/v5/` 为新项目根目录，后续实施时创建；本次未创建。结构建议：
+
+```text
+v5/
+  index.html
+  main.js                     # 新场景调度与纯时间渲染入口
+  data/
+    script.json               # 原句号、中文、英文卡、画面提示、引用标记
+    scene-manifest.json       # S01—S21 与句号范围
+    timeline.preview.json     # 预览估时，明确标识非成片时间轴
+    evidence.json             # 上屏数字与定稿位置的逐项映射
+  audio/
+    narration.json            # 新音轨句号时间边界；不得沿用旧数据
+    narration.*               # 新项目音轨
+  scenes/
+    index.js                  # 新 manifest 注册
+    s01_intro.js ... s21_closing.js
+  lib/
+    tokens.js, ink.js, wash.js, motion.js, ann.js
+    layout.js, sidebar.js, subtitle_bilingual.js, timeline.js
+    camera.js, he.js, he_detail.js, he_guide.js, figure.js, icons.js
+    alive.js                  # 可选，仅大体/人物/血管
+    gross_appendix.js, vascular_response.js, he_acute.js
+    ct_schematic.js, compare_view.js, pus_exudate.js, ischemia.js
+    perforation.js, clinical.js, symptom_compare.js, research_card.js
+    specimen_pathology.js, surgery_timing.js, path_branch.js
+    chronic_transition.js, he_chronic.js, chronic_cells.js
+    closing.js, reference_entry.js
+  assets/
+    wash/                     # 可复用配方生成的新烘焙资产
+    fonts/                    # 核对字形覆盖后的字体
+    references/               # 定稿所链接、已核对的原有文献资料
+  vendor/                     # Rough.js、p5 与 p5.brush 依赖
+  tools/                      # 截帧、确定性与安全区检查
+  qa/                         # 样帧、联系表、手机预览、核对记录
+```
+
+每场景独立文件，不与旧七章建立对应关系。建议文件及覆盖范围如下；可由场景表直接生成 manifest：
+
+| 新 scenes 文件 | 句号 | 新 scenes 文件 | 句号 | 新 scenes 文件 | 句号 |
+|---|---|---|---|---|---|
+| s01_intro.js | 01—05 | s08_red_histology.js | 31—34 | s15_black_ct.js | 58—59 |
+| s02_signals.js | 06—10 | s09_red_ct.js | 35—36 | s16_assessment.js | 60—62 |
+| s03_clinical.js | 11—13 | s10_yellow_wall.js | 37—42 | s17_acute_treatment.js | 63—65 |
+| s04_ct_evidence.js | 14—19 | s11_yellow_surface.js | 43—46 | s18_chronic_transition.js | 66—68 |
+| s05_pathway.js | 20—22 | s12_yellow_ct.js | 47—48 | s19_chronic_histology.js | 69—70 |
+| s06_red_gross.js | 23—24 | s13_black_ischemia.js | 49—53 | s20_chronic_timing.js | 71—74 |
+| s07_exudation.js | 25—30 | s14_black_necrosis.js | 54—57 | s21_closing.js | 75—77 |
+
+### 渲染器需要重新建立的约定
+
+1. 保留 `window.render(t)`、`window.READY`、`window.DUR` 这类可离线抽帧契约；入口重写场景调度，不复用旧 `chapterAt` 或章号推断。场景建议导出 `bake()`、`renderMain()`、`renderAnnotations()`、`sidebarState()`、`exitState()`；名称为拟定接口。
+2. 新时间轴以稳定句号 `01`—`77` 为键。旧 `T.at/end/frac` 数组是零基索引，不能直接传入本文句号；新适配层建议提供 `T.atId/endId/fracId`，内部统一映射。校验缺句、重句、倒序、负时长及文本不符；发现错误应显式报错，不能因句数相等而静默套用旧音轨。
+3. 新音轨未就绪时可用明确标为 preview 的估时开发单场景；不输出伪精确秒表。最终每个动作、续卡和转场绑定新句号时间。20—22、67—68、73—74 按连续口播处理，不在组内插章标题停顿。英语续卡先按语义绑定句内进度，再按实际音轨和阅读量核定。
+4. 绘制顺序：纸/网格→右区裁切后的主画面→屏幕坐标短标注→固定左栏→独立字幕。相机仅影响右区，字幕及左栏不继承漂移、缩放或震动。标注位置经主画面坐标转换后检查包围盒。
+5. 右区相机、暗底与 HE 视野参数独立于旧章号。镜下 `boil:false`、`drift:false`，旧 HE 内部微动也要审查关闭；动态由教学状态及推拉/对焦承担。大体可选 `alive`，不对 CT 使用表面起伏。
+6. 不规则形状加载时用固定种子生成；水彩只在 bake 生成，画面随机保持确定性。新场景交接用显式出口状态或在新时间轴末句边界重画上一场末态，不能跨 import 依赖旧 `EXIT_04` 等常量。
+7. 成片时长从新音轨及明确片尾策略推导，不继承旧入口固定片尾时长。READY 应等待字体、烘焙、数据与全部场景资源就绪。
+
+### 旧库迁移清单与必须修改处
+
+| 旧模块／能力 | 迁移建议与改动 |
+|---|---|
+| `tokens.js: C, FONT, W, H, SAFE` | 迁移色板、画布及字体约定；重设 contentBottom、字幕区上沿与中英基线，删除旧 fadeTop=900 的布局假设。字号和两栏尺寸集中定义。 |
+| `motion.js: rng, hash, noise2, fbm, tween, ease, seg` | 优先迁移纯函数；使用固定种子；不依赖上一帧。不把内部种子或细胞计数显示到画面。 |
+| `ink.js: shape, draw, ink, grid, setBoil` | 迁移 Rough.js 风格与缓存；按场景命名缓存键，保留圆头和标准线宽。镜下关闭 boil，网格裁在内容区。 |
+| `wash.js: initBaker, bake, drawWash, get` | 迁移烘焙和高分辨率选项及 vendor 依赖；新建配方/键。近景优先 hd，依据最终屏幕像素检查是否放大超出纹理分辨率；旧 he.bands 不直接拉大使用。检查 scaleBrushes 连乘及初始化隔离。 |
+| `ann.js: label, leader, ring, arrow, line, brace, setDark` | 迁移屏幕字号、光晕和折线能力；外层增加两栏测量/换行/安全区约束。`label` 本身不会自动排长卡；`counter`、`scalebar` 本片无必要，不为装饰加数字。暗色状态每场恢复，避免污染下一场。 |
+| `he.js: drawHE, drawLens, fieldToScreen, drawNeutrophil, bakeHE` | 保留视野与细胞 API 思路，拆出旧固定 CELLS、ULCER、VESSELS 等场景几何；三型和慢性各用新几何与分布。明确 detail 与 style:'ch04' 的调用路径，不能混用默认简笔结果冒充细节版。 |
+| `he_detail.js: detailedNeutrophil, chromatin, fibrinMesh, tissueTexture, prepareGangrene, gangrene, fadeSeams` | 作为目标 HE 画法基础；坏疽准备与绘制需按新视野解耦全局缓存/固定坐标。`pushDisc`、`drawBlood`、`drawZahn` 为文件内部函数，不能当现成导出调用；如要血管机制复用，应新封装公开接口。 |
+| `he_guide.js: detailedNeutrophil, drawVessels, tissueTexture` | 保留组织结构及血管画法参考；与 he_detail 统一一个细胞风格入口，避免同名函数被误选。正常背景保留淋巴滤泡、生发中心、双层肌与管状隐窝；正常淋巴滤泡不能直接当慢性浸润证据。 |
+| `figure.js: drawFigure, drawArmR, drawInsitu, painPt, specimenOutline` | 迁移人物和标本轮廓能力；将 FIG、INSITU、HAND_R 等旧绝对坐标改成局部几何/锚点参数。痛点轨迹重新适配新人体，不能整体平移后任其越过 y=810。新标本另建独立模块。 |
+| `icons.js: iconHospital, iconThermo` | 按新比例迁移必要图标；不使用 iconClock 构造病情时间表；不搬与新稿无关的图标和医学情节。 |
+| `camera.js: camAt, apply, toScreen, toWorld` | 改为以右侧 viewport 中心为相机基准；旧 apply 以全画布中心计算，不能原封不动套两栏。 |
+| `alive.js: aliveXform, drawAliveWash` | 可选迁移，限 gross/figure/vessel；扩大安全区检查到最大形变，禁止用于 HE 和 CT。 |
+| `detail.js: weighted, hatch, shadeSide` | 可选，只在新人物需要线条粗细/排线时迁移；镜下禁排线。该文件在当前 film 存在，不将其误说为风格参考分支的既有要求。 |
+| `timeline.js: loadTimeline` | 重写加载与验证；不得继续自动读取旧 audio/narration.json 或旧 TSV 作后备，不再由旧章号切场景。保留句内 frac 思路。 |
+| `subtitle.js: split, linesFor, draw, safeFade` | 仅参考字形/光晕方式；新写双语字幕。旧 18 字切行、删句末标点、单语 44px、单基线和旧安全区逻辑都不适用定稿。 |
+| `mood.js: moodAt`、`scope.js: scopeAt, drawSurround, drawPointer`、`chapter.js: titleBlock` | 不整模块搬用旧调度。纸色/暗底/标题样式可提炼；按新 scene 状态重写，去除旧句号、全屏镜位与章节节奏。 |
+
+迁移配套须包含 Rough.js、p5、p5.brush 及必要字体；新字幕增加英文和新中文，字体子集应重新核对字形。既有章节生成脚本若假定旧章号，也须新写，不能直接生成覆盖新 scenes。
+
+## 左侧说明栏：统一放入 lib
+
+建议 `lib/sidebar.js` 负责组合，`lib/layout.js` 负责测量、换行、边界检查；各场景只传语义状态，不重复写绝对坐标。
+
+- 宽度 460，内边距 24，正文可用宽度 412；栏顶起于 y=60、底部不超过 770。标题 48—56px、诊断名 44—52px、正文 36—40px、引文及边界文字 30—32px；研究百分比可用 56px。所有字号为屏幕像素，字重沿用 500/700/800。长词优先断行或续卡，不压缩至难读。
+- 顶部固定颜色/主题导航，中部只放当前一张主卡，底部按需放来源或证据边界。卡片高度由实测字形与行距计算；溢出时切换整张卡，不裁掉语义、不叠卡、不向字幕区延伸。
+- 内容类型：章节色卡、典型路径及分支、病理层次索引、定义卡、CT 所见要点、研究卡、治疗时机卡、来源卡。时间语义只使用稿件已有“缓解期／急性发作期”等文字，不加钟表/日历或时间数值。
+- 拟定接口：`drawSidebar(ctx, {theme, heading, card, source, progress}, layout)`；card 按 type 区分 definition/path/research/compare/timing/source。progress 只指当前叙事高亮，不画患者病程完成比例。研究数据须带 evidenceKey 才能渲染，且直接呈现最终值。
+- 所有卡片先测量再画；卡片出现只用淡入/短距离揭示，左栏位置固定。长病名如“化脓性（蜂窝织炎性）阑尾炎”分语义行，保持同义名关系。
+- 右侧若需解释多个标签，左栏设对应短词行，右区用引线和结构短标签；不能把右侧主画面变成第二个说明栏。
+
+## 新资产清单：按预计工作量由高到低
+
+工作量为相对制作复杂度判断，不作虚构工时报价。“可先做”指不依赖正式新时间轴即可制作与审图；最终动态节奏、字幕续卡和转场仍需新音轨。
+
+| 排序／资产 | 工作量与主要风险 | 覆盖场景 | 不依赖新时间轴可先做的部分 | 待新时间轴完成的部分 |
+|---|---|---|---|---|
+| A／新急性 HE 组织状态库 | 最高：正常组织基底、单纯性层次分布、全层化脓、坏疽出血及局灶穿孔须互相一致；旧细胞板不能直接代表三型。 | S08、S10、S14 及 CT 配对 | **可先做**四类静态样板与局部细胞放大，确定分布、细胞大小和坏死边缘形态。 | 场景内推拉、对焦、状态揭示和出口状态。 |
+| B／三型相关 CT 自绘示意库 | 高：腹部断面、同一阑尾定位、壁强化及周围组织灰阶关系要清晰；容易被误解成真实临床影像或精准分型。 | S04、S09、S12、S15、S16 | **可先做**三类表现预设、CT表现示意标记、对应病理锚点及清晰大窗。不要加 HU、尺寸、测量刻度。 | 逐句高亮、与病理双窗同步、并发症复现顺序。 |
+| C／慢性 HE 与慢性炎细胞库 | 高：新增纤维化组织、淋巴细胞与浆细胞形态，避免把正常滤泡或急性脓细胞误作慢性浸润。 | S18—S19 | **可先做**慢性全景、纤维束及两类细胞样板，母图到特写定位。 | 69—70 的揭示顺序与切换。 |
+| D／新大体阑尾及局部特写库 | 高：正常、轻肿充血、灰黄混合脓苔、局部暗红黑斑、可选穿孔需统一形体与水彩质感。 | S01、S05—S06、S11、S13—S14、S21 | **可先做**新轮廓、断面及高分辨率烘焙；红黄黑并列样帧。 | 定位放大、形态切换及镜头交接。 |
+| E／血管反应与缺血机制库 | 中高：液体/蛋白质/白细胞路径、腔压、受压/血栓与损伤关联需逐项讲清。 | S06—S07、S13 | **可先做**局部几何、成分符号、独立动作的标准化进度演示。 | 对应每句的动作起止与镜头保持。 |
+| F／纤维脓性渗出物库 | 中高：脓细胞退变、组织碎屑、液体、粗细纤维素网及浆膜覆盖为一套混合资产。 | S10—S11 | **可先做**成分样板、混合物与浆膜大特写。 | 成网→混合→黄色来源高亮节奏。 |
+| G／临床人物、症状对照、送检及手术图形 | 中：新增医生与患者互动；症状非典型不能靠编造新临床事实填充。 | S02—S04、S16—S17、S20—S21 | **可先做**人物姿态、典型/非典型无数值版、无数值化验单、送检和简洁切除图。 | 连读镜头衔接、疼痛迁移与就医动作时间。 |
+| H／两栏布局、双窗、左栏与双语字幕组件 | 中：全片共用，需尽早完成；主要风险是长病名和英文挤压图像及安全区。 | 全片 | **可先做**所有卡型、长文本压力样帧、字幕字体与区域模板。 | 正式字幕时码、英文续卡切换及连续原话跨句显示。 |
+| I／路径分支、手术时机、研究与来源卡 | 中低：图形简单但措辞和证据边界要求严格。 | S04—S05、S17—S18、S20 | **可先做**按定稿静态卡、数字来源映射、条件说明与非固定路径布局。 | 多卡依次显现及停留长度。 |
+| J／片名、三色罗盘、片尾入口 | 较低：维持颜色主线并落在及时就医，不引入时钟暗示。 | S01、S21 | **可先做**片名分行、无刻度罗盘和就医末态样帧；参考书目须先核对定稿链接原文件。 | 入片/收束节奏及片尾持续时间。 |
+
+优先实施顺序可先 H 的布局样板，再并行制作 A—G 的静态资产，最后接正式时间轴。上表按工作量排序，实施顺序按共用依赖调整；不要求先生成整条音轨才能开展资产工作。
+
+Cloning into bare repository '/tmp/ct-real01.git'...
+done.
+S15_backup_rID198206_axial_s068_peritoneal-gas-foci_img67958769.jpg
+S15_backup_rID198206_axial_s224_wall-defect_img67958925.jpg
+S15_backup_rID198206_axial_s237_appendix_img67958938.jpg
+S15_backup_rID198206_coronal_s091_key-coronal_img67959103.jpg
+S15_commons-alt_Heilman_Perfedappendix.PNG
+S15_commons-alt_Hellerhoff_Perityphlitischer_Abszess_ax.jpg
+S15_commons-alt_Hellerhoff_Perityphlitischer_Abszess_cor.jpg
+S15_primary_rID242634_axial_s285_wall-enhancement-defect-and-gas-abscess_img75885695.jpg
+407:export function drawFocus(c,x,y,r,alpha=1,dash=[8,7],lw=2,color=lav){
+548:export function labelTo(c,s,tx,ty,ax,ay,{size=26,color=lav,alpha=1,weight=500,right=false}={}){
+-rw-r--r-- 1 box box 1.2M Nov 13 12:20 qa/v6/ct_real/S04/S04_带配音_720p.mp4
+-rw-r--r-- 1 box box 530K Nov 13 12:21 qa/v6/ct_real/S09/S09_带配音_720p.mp4
+-rw-r--r-- 1 box box 614K Nov 13 12:21 qa/v6/ct_real/S12/S12_带配音_720p.mp4
+-rw-r--r-- 1 box box 562K Nov 13 12:22 qa/v6/ct_real/S15/S15_带配音_720p.mp4
+#!/usr/bin/env node
+// Frame-accurate renderer for pages that expose the render(t) contract:
+//   window.DUR = 15;              // seconds (optional if --duration is given)
+//   window.render = (t) => {...}; // draw the frame at t seconds; deterministic; may return a Promise
+//   window.READY = true;          // set once fonts / images / models are loaded
+// Optional: window.RENDER_CONTEXT = true lets render(t, { frameTime, fps }) keep
+// discrete copy/cuts on the output frame while motion uses sub-sample time t.
+//
+// Video
+//   node render.mjs <project> [--out out/video.mp4] [--size 1920x1080] [--fps 30] [--workers 3]
+//                   [--start 0] [--duration D] [--subframes 1] [--shutter 0.5] [--dpr 1]
+//                   [--audio audio/music.wav] [--grain 0] [--crf 16] [--png] [--q "k=v&k2=v2"]
+// Stills (review frames, PNG) and contact sheet
+//   node render.mjs <project> --still 0.5,2,7.25 [--out qa/stills] [--sheet]
+//   node render.mjs <project> --range 0:15:1 [--out qa/stills] [--sheet]
+// Poster frame (step 7)
+//   node render.mjs <project> --poster 14.5 [--out out/poster.png]
+// Style-frame directions (step 3): one key frame per ?dir=<name>, side by side with labels
+//   node render.mjs <project> --directions a,b,c --at 14.5,2,0 [--out qa/directions.png] [--dir-param dir]
+//   (--at: one time per direction, or one time for all; singles go next to the sheet in qa/directions/)
+// Determinism check (same t rendered in different orders must be pixel-identical)
+//   node render.mjs <project> --determinism
+// Text framing (review material, never pass/fail): text cut by the frame edge, two different strings on top of each
+// other, text in the platform safe zone, text too small for a phone. Canvas 2D and DOM/SVG text; issues that last ≥ 0.3 s.
+//   node render.mjs <project> --text-check [--every 0.2] [--safe auto|none|T,R,B,L] [--out qa/text]
+//   (--safe: fractions of the frame (0.12) or pixels; auto = 12 % top and bottom on vertical frames, none on landscape)
+//
+// --subframes N blends N samples per frame (motion blur; render time × N). --shutter 0.5 = 180°.
+// --dpr 2 supersamples (renders 2× and downsizes with lanczos): crisper hairlines / 3D edges, ~3× slower.
+// --grain N adds temporal film grain in ffmpeg (keeps page frames compressible). 0 = none.
+import fs from 'node:fs';
+import path from 'node:path';
+import { spawn, execFileSync } from 'node:child_process';
+import { loadChromium, launch, serve, resolveTarget, openPage, warnSoftwareGL, parseSize, args, die } from './lib/browser.mjs';
+import { textHook } from './lib/text-hook.mjs';
+
+// Anything that must be undone on failure or interruption (ffmpeg children, temp dirs, output lock).
+const cleanups = [];
+const runCleanups = () => { while (cleanups.length) { try { cleanups.pop()(); } catch {} } };
+const fail = msg => { console.error(msg); runCleanups(); process.exit(1); };
+process.on('exit', runCleanups);
+for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) process.on(sig, () => fail(`interrupted (${sig}); partial output removed`));
+process.on('unhandledRejection', e => fail(`render failed: ${String(e?.message || e).split('\n')[0]}`));
+
+const { pos, opt } = args(process.argv.slice(2));
+const target = resolveTarget(pos[0]);
+const { w: W, h: H } = parseSize(opt.size);
+const FPS = +(opt.fps || 30);
+const DPR = +(opt.dpr || 1);
+if (!(FPS > 0 && FPS <= 240)) die(`bad --fps ${opt.fps}`);
+if (!(DPR >= 1 && DPR <= 4)) die(`bad --dpr ${opt.dpr} (1–4)`);
+const QUERY = typeof opt.q === 'string' ? opt.q : '';
+const fmt = opt.png ? 'png' : 'jpeg';
+
+const chromium = await loadChromium(target.root);
+const { server, port } = await serve(target.root);
+const browser = await launch(chromium);
+const open = (query = QUERY, init = null) => openPage(browser, { port, rel: target.rel, w: W, h: H, dpr: DPR, query, init });
+const finish = async code => { await browser.close().catch(() => {}); server.close(); process.exit(code); };
+cleanups.push(() => server.close());
+
+async function shoot(page, t, type = fmt, frameTime = t) {
+  await page.evaluate(({ t, frameTime, fps }) => window.RENDER_CONTEXT === true
+    ? window.render(t, { frameTime, fps })
+    : window.render(t), { t, frameTime, fps: FPS });
+  return await page.screenshot({ type, ...(type === 'jpeg' ? { quality: 95 } : {}), clip: { x: 0, y: 0, width: W, height: H } });
+}
+
+if (opt.poster !== undefined) await poster();
+else if (opt.directions !== undefined) await directions();
+else if (opt.still || opt.range) await stills();
+else if (opt.determinism) await determinism();
+else if (opt['text-check']) await textCheck();
+else await video();
+await finish(0);
+
+// ───────────────────────────── text framing ─────────────────────────────
+function safeZone() {
+  const v = opt.safe === undefined || opt.safe === true ? 'auto' : String(opt.safe);
+  if (v === 'none') return null;
+  if (v === 'auto') return H > W ? { t: 0.12 * H, r: 0, b: 0.12 * H, l: 0 } : null;
+  const n = v.split(',').map(Number);
+  if (n.length !== 4 || n.some(x => !(x >= 0))) die(`bad --safe ${v}: auto | none | top,right,bottom,left (fractions like 0.12, or pixels)`);
+  const px = (x, d) => (x < 1 ? x * d : x);
+  return { t: px(n[0], H), r: px(n[1], W), b: px(n[2], H), l: px(n[3], W) };
+}
+async function textCheck() {
+  const every = +(opt.every || 0.2);
+  if (!(every > 0)) die(`bad --every ${opt.every}`);
+  const out = path.resolve(typeof opt.out === 'string' ? opt.out.replace(/\.json$/, '') : path.join(target.root, 'qa', 'text'));
+
+codex
+现稿的主要问题已确认：圈线和标签在缩小后很难辨认；S09、S12 的冠状位显示范围较大，病灶显得偏小。S15 的壁缺损小圈也过于精确，单张静帧不足以支持这种定位。我会保守标出局部壁段，并让句 59 的圈注明确覆盖相邻含气区域。
+
+exec
+/bin/bash -lc "rg --files /workspace/病理科普视频/ct_real | head -45; sed -n '548,566p' film/lib_ext/ct_r3_schematic.js; git log -4 --oneline; cat .git; ls /tmp/ct-real01.git | head; cat qa/v6/ct_real/S15/keyframes.json" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+/workspace/病理科普视频/ct_real/S04/S04_overview_rID197373_axial_s103_page-default-axial_img67748617.jpeg
+/workspace/病理科普视频/ct_real/S04/S04_overview_rID197373_coronal_s086_page-default-coronal_img67748806.jpeg
+/workspace/病理科普视频/ct_real/S04/S04_commons-alt_Heilman_CAT_scan_demonstrating_acute_appendicitis.jpg
+/workspace/病理科普视频/ct_real/S04/S04_primary_rID197373_axial_s135_appendicoliths_img67748649.jpeg
+/workspace/病理科普视频/ct_real/S04/S04_primary_rID197373_axial_s130_appendix-thick-wall_img67748644.jpeg
+/workspace/病理科普视频/ct_real/S15/S15_primary_rID242634_axial_s285_wall-enhancement-defect-and-gas-abscess_img75885695.jpg
+/workspace/病理科普视频/ct_real/S15/S15_backup_rID198206_axial_s068_peritoneal-gas-foci_img67958769.jpg
+/workspace/病理科普视频/ct_real/S15/S15_backup_rID198206_axial_s224_wall-defect_img67958925.jpg
+/workspace/病理科普视频/ct_real/S15/S15_backup_rID198206_coronal_s091_key-coronal_img67959103.jpg
+/workspace/病理科普视频/ct_real/S15/S15_commons-alt_Heilman_Perfedappendix.PNG
+/workspace/病理科普视频/ct_real/S15/S15_commons-alt_Hellerhoff_Perityphlitischer_Abszess_ax.jpg
+/workspace/病理科普视频/ct_real/S15/S15_commons-alt_Hellerhoff_Perityphlitischer_Abszess_cor.jpg
+/workspace/病理科普视频/ct_real/S15/S15_backup_rID198206_axial_s237_appendix_img67958938.jpg
+/workspace/病理科普视频/ct_real/contact_sheet.png
+/workspace/病理科普视频/ct_real/S09/S09_backup_rID197373_coronal_s086_coronal-default_img67748806.jpeg
+/workspace/病理科普视频/ct_real/S09/S09_commons-alt_Cerevisae_CT_scan_of_the_abdomen_showing_acute_appendicitis.jpg
+/workspace/病理科普视频/ct_real/S09/S09_primary_rID30389_axial_s058_appendix-near-cecum_img7922410.jpg
+/workspace/病理科普视频/ct_real/S09/S09_backup_rID197373_axial_s130_appendix-thick-wall_img67748644.jpeg
+/workspace/病理科普视频/ct_real/S09/S09_primary_rID30389_axial_s059_appendix-near-cecum_img7922412.jpg
+/workspace/病理科普视频/ct_real/S09/S09_primary_rID30389_coronal_s024_key-coronal-mild-stranding_img7922572.jpg
+/workspace/病理科普视频/ct_real/S09/S09_primary_rID30389_axial_s060_appendix-near-cecum_img7922413.jpg
+/workspace/病理科普视频/ct_real/来源与授权.md
+/workspace/病理科普视频/ct_real/S09/未选用_轴向候选/S09_axial-candidates_rID30389_axial_s062_axial-cand_img7922419.jpg
+/workspace/病理科普视频/ct_real/S09/未选用_轴向候选/S09_axial-candidates_rID30389_axial_s061_axial-cand_img7922417.jpg
+/workspace/病理科普视频/ct_real/sha256sums.txt
+/workspace/病理科普视频/ct_real/S12/S12_primary_rID197370_axial_s128_dilated-appendix-extensive-stranding_img67747991.jpeg
+/workspace/病理科普视频/ct_real/S12/S12_candidate_rID198519_axial_s074_PVP-enhancing-wall-stranding_img68055874.jpeg
+/workspace/病理科普视频/ct_real/S12/S12_primary_rID197370_coronal_s065_coronal-extensive-fat-stranding_img67748143.jpeg
+/workspace/病理科普视频/ct_real/S12/S12_primary_rID197370_axial_s137_appendicolith-base_img67748000.jpeg
+/workspace/病理科普视频/ct_real/S12/S12_candidate_rID198519_axial_s074_arterial-appendix-fat-stranding_img68054865.jpeg
+/workspace/病理科普视频/ct_real/commons_备选/Perityphlitischer_Abszess_in_der_CT_-_ax.jpg
+/workspace/病理科普视频/ct_real/commons_备选/Perityphlitischer_Abszess_in_der_CT_-_cor.jpg
+/workspace/病理科普视频/ct_real/commons_备选/CT_scan_of_the_abdomen_showing_acute_appendicitis.jpg
+/workspace/病理科普视频/ct_real/commons_备选/CAT_scan_demonstrating_acute_appendicitis.jpg
+/workspace/病理科普视频/ct_real/commons_备选/Perfedappendix.PNG
+export function labelTo(c,s,tx,ty,ax,ay,{size=26,color=lav,alpha=1,weight=500,right=false}={}){
+  if(alpha<=0)return;
+  c.save();c.globalAlpha=clamp(alpha);
+  c.font=`${weight} ${size}px MixSans`;const tw=c.measureText(s).width;
+  const sx=right?tx-tw:tx;
+  c.fillStyle=color;c.fillText(s,sx,ty);
+  c.strokeStyle=color;c.globalAlpha=clamp(alpha)*.85;c.lineWidth=1.3;c.lineCap='round';
+  const x0=right?sx-8:sx+tw+8, y0=ty-size*.32;
+  c.beginPath();c.moveTo(x0,y0);
+  const mx=sx+(right?-14:tw+18), my=(y0+ay)/2;
+  c.lineTo(mx,my);c.lineTo(ax,ay);c.stroke();
+  c.globalAlpha=clamp(alpha);c.fillStyle=color;c.beginPath();c.arc(ax,ay,2.4,0,TAU);c.fill();
+  c.restore();
+}
+
+export function drawConnector(c,x1,y1,x2,y2,alpha=.55){
+  if(alpha<=0)return;c.save();c.globalAlpha=clamp(alpha);c.strokeStyle=lav;c.lineWidth=1.2;c.setLineDash([6,6]);
+  c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();c.setLineDash([]);c.restore();
+}
+4a1ab4f ct: real01 brief/log
+b6744ec ct real01: S15 同张真实CT分句高亮与全线验收
+d8e891b ct real01: S12 真实轴冠CT与壁强化周围渗出时序
+e21a7dd ct real01: S09 真实轴冠CT与轻度脂肪模糊高亮
+gitdir: /workspace/病理科普视频/v5/.git/worktrees/v5_ct_dev
+COMMIT_EDITMSG
+HEAD
+branches
+config
+description
+hooks
+index
+info
+logs
+objects
+{
+  "origin": 246.19470833333307,
+  "duration": 9.232624999999985,
+  "picks": [
+    {
+      "name": "s58_30",
+      "t": 1.296199999999996
+    },
+    {
+      "name": "s58_82",
+      "t": 3.542946666666656
+    },
+    {
+      "name": "s59_30",
+      "t": 6.109254166666645
+    },
+    {
+      "name": "s59_82",
+      "t": 8.429472499999983
+    }
+  ]
+}
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+import json,subprocess
+from PIL import Image,ImageDraw
+p=Path('qa/v6/ct_real_adv01');sheet=Image.new('RGB',(1280,720*4),'#F4EFE6')
+for i,s in enumerate(['S04','S09','S12','S15']):
+ m=json.load(open(f'qa/v6/ct_real/{s}/keyframes.json')); t=m['picks'][-2]['t']
+ subprocess.run(['ffmpeg','-v','error','-y','-ss',str(t),'-i',f'qa/v6/ct_real/{s}/{s}_带配音_720p.mp4','-frames:v','1',str(p/f'{s}_before720.png')],check=True)
+ sheet.paste(Image.open(p/f'{s}_before720.png'),(0,720*i))
+sheet.resize((640,1440)).save(p/'before_video_review.png')
+PY" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 642ms:
+web search: 
+web search: https://radiopaedia.org/cases/242634
+exec
+/bin/bash -lc "ls /tmp | rg 'ct|radio'; ls qa/v6/h02_s06/s2*.png; git status --porcelain=v1" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+artifact_left.png
+artifact_right.png
+bitexact_test.mp4
+box-doctor.log
+codebuddy-artifacts
+com.google.Chrome.chrome_chrome_url_fetcher_.FUSRct
+com.google.Chrome.chrome_chrome_url_fetcher_.ctP6cE
+com.google.Chrome.rGKcts
+ct-dev-delivery.git
+ct-fix01-r3.git
+ct-real01.git
+ct_before_bodyspeckle.js
+ct_before_lensdbg.js
+ct_hashes.txt
+ct_html
+ct_json
+ct_orig
+ct_pre_strandtest.js
+ct_prev
+ct_schematic_backup.js
+ct_sources.png
+ct_thumbs
+implement_ct.py
+playwright-artifacts-01Va5n
+playwright-artifacts-06eLfY
+playwright-artifacts-09Vrd3
+playwright-artifacts-0Ar2OQ
+playwright-artifacts-0Dsg4O
+playwright-artifacts-0EgJxy
+playwright-artifacts-0FT9qV
+playwright-artifacts-0IrjRW
+playwright-artifacts-0a2IJg
+playwright-artifacts-0aeJ6B
+playwright-artifacts-0axbPC
+playwright-artifacts-0jHJok
+playwright-artifacts-0o8a2a
+playwright-artifacts-0xGB4Z
+playwright-artifacts-138B4P
+playwright-artifacts-14U7EP
+playwright-artifacts-152wtL
+playwright-artifacts-17jgJ1
+playwright-artifacts-1AImqw
+playwright-artifacts-1DAwjE
+playwright-artifacts-1FFkwH
+playwright-artifacts-1G5ZOc
+playwright-artifacts-1HZTAj
+playwright-artifacts-1Hkt96
+playwright-artifacts-1LtUZ5
+playwright-artifacts-1MhIOM
+playwright-artifacts-1N5P7L
+playwright-artifacts-1NAiiV
+playwright-artifacts-1QpJ0y
+playwright-artifacts-1SXyVT
+playwright-artifacts-1ZrZZ0
+playwright-artifacts-1aIdMK
+playwright-artifacts-1d5F9E
+playwright-artifacts-1eT6h9
+playwright-artifacts-1lUBVH
+playwright-artifacts-1rLvcz
+playwright-artifacts-1rU19B
+playwright-artifacts-1ywRud
+playwright-artifacts-1zCr7Z
+playwright-artifacts-1zjM8m
+playwright-artifacts-286lYw
+playwright-artifacts-2Kc9SH
+playwright-artifacts-2M4xRA
+playwright-artifacts-2Qk43W
+playwright-artifacts-2SsuXc
+playwright-artifacts-2TNfKe
+playwright-artifacts-2lLsoT
+playwright-artifacts-2mSzkJ
+playwright-artifacts-2p8eSQ
+playwright-artifacts-30AJII
+playwright-artifacts-30bsps
+playwright-artifacts-34aNRW
+playwright-artifacts-352gMV
+playwright-artifacts-382rPl
+playwright-artifacts-3BYtgh
+playwright-artifacts-3EeDnj
+playwright-artifacts-3EhLwE
+playwright-artifacts-3FCMiL
+playwright-artifacts-3JgYzW
+playwright-artifacts-3KcZaa
+playwright-artifacts-3LzFyk
+playwright-artifacts-3QBIoM
+playwright-artifacts-3QcQo8
+playwright-artifacts-3XfTGX
+playwright-artifacts-3c7w4F
+playwright-artifacts-3diNnT
+playwright-artifacts-3kr889
+playwright-artifacts-3l4bB3
+playwright-artifacts-3l5wTR
+playwright-artifacts-3lOPV0
+playwright-artifacts-3rFqLT
+playwright-artifacts-3rS4BY
+playwright-artifacts-3uC3QK
+playwright-artifacts-3v0iQm
+playwright-artifacts-3ww3A6
+playwright-artifacts-3wwL02
+playwright-artifacts-3wzhQW
+playwright-artifacts-3zaywL
+playwright-artifacts-41eM2l
+playwright-artifacts-42byfy
+playwright-artifacts-43VyTT
+playwright-artifacts-47Fdt1
+playwright-artifacts-4Bh9ID
+playwright-artifacts-4EXmzQ
+playwright-artifacts-4HNGcd
+playwright-artifacts-4K3Puo
+playwright-artifacts-4S5Hdt
+playwright-artifacts-4TBw8g
+playwright-artifacts-4VhqqW
+playwright-artifacts-4Xf4Bk
+playwright-artifacts-4ay41z
+playwright-artifacts-4epkqG
+playwright-artifacts-4iEkQp
+playwright-artifacts-4ii4gX
+playwright-artifacts-4mKvYO
+playwright-artifacts-4maPMv
+playwright-artifacts-4urLxa
+playwright-artifacts-4vaeVx
+playwright-artifacts-4yRkmX
+playwright-artifacts-4zgqNU
+playwright-artifacts-5110qq
+playwright-artifacts-54rnfK
+playwright-artifacts-55iC3d
+playwright-artifacts-56wCe2
+playwright-artifacts-58NHz4
+playwright-artifacts-59wHl8
+playwright-artifacts-5AVexz
+playwright-artifacts-5P6DDT
+playwright-artifacts-5UyjiJ
+playwright-artifacts-5WmIaV
+playwright-artifacts-5XLtfL
+playwright-artifacts-5brpie
+playwright-artifacts-5gt6ag
+playwright-artifacts-5iXx8T
+playwright-artifacts-5nQ8aW
+playwright-artifacts-5pFCYJ
+playwright-artifacts-5qUU5j
+playwright-artifacts-5sqp5s
+playwright-artifacts-5yU81w
+playwright-artifacts-62etpj
+playwright-artifacts-65QoEr
+playwright-artifacts-67GEUr
+playwright-artifacts-6A0HXx
+playwright-artifacts-6HBu2L
+playwright-artifacts-6McEF2
+playwright-artifacts-6PB8r1
+playwright-artifacts-6WnPXO
+playwright-artifacts-6XdkWW
+playwright-artifacts-6c0bwE
+playwright-artifacts-6irVFj
+playwright-artifacts-6j9JpW
+playwright-artifacts-6ji7ot
+playwright-artifacts-6k8sZy
+playwright-artifacts-6mrT7B
+playwright-artifacts-6oo6Rp
+playwright-artifacts-6yRfQb
+playwright-artifacts-6ydWf8
+playwright-artifacts-70fmwq
+playwright-artifacts-75UStN
+playwright-artifacts-75olgq
+playwright-artifacts-76tree
+playwright-artifacts-79cccK
+playwright-artifacts-7Do2cE
+playwright-artifacts-7Qm0ru
+playwright-artifacts-7TnmEQ
+playwright-artifacts-7YEmll
+playwright-artifacts-7ZrohG
+playwright-artifacts-7b4FM7
+playwright-artifacts-7bITEb
+playwright-artifacts-7c8vnj
+playwright-artifacts-7cz39k
+playwright-artifacts-7d7zKQ
+playwright-artifacts-7ivMdp
+playwright-artifacts-7kaGfi
+playwright-artifacts-7nERq4
+playwright-artifacts-7nWN9Y
+playwright-artifacts-7pDHPP
+playwright-artifacts-7yE8k5
+playwright-artifacts-7ymDsc
+playwright-artifacts-81sFBm
+playwright-artifacts-86kdDb
+playwright-artifacts-87MKGQ
+playwright-artifacts-8DFP4N
+playwright-artifacts-8FyIHv
+playwright-artifacts-8WXGnU
+playwright-artifacts-8dNcdX
+playwright-artifacts-8fAAic
+playwright-artifacts-8ietlZ
+playwright-artifacts-8mD9Yy
+playwright-artifacts-8n61y9
+playwright-artifacts-8n8pOr
+playwright-artifacts-8qYuVV
+playwright-artifacts-8qls6m
+playwright-artifacts-8tsnn6
+playwright-artifacts-8uvOVH
+playwright-artifacts-99rWyj
+playwright-artifacts-9Dh1MO
+playwright-artifacts-9Erz6X
+playwright-artifacts-9FRce7
+playwright-artifacts-9FoKRq
+playwright-artifacts-9T8PxQ
+playwright-artifacts-9U8kTx
+playwright-artifacts-9VFfjZ
+playwright-artifacts-9YMMNE
+playwright-artifacts-9ZBJ0Q
+playwright-artifacts-9duD7y
+playwright-artifacts-9mYmDH
+playwright-artifacts-9oPAS6
+playwright-artifacts-9oYfeD
+playwright-artifacts-9wjHqf
+playwright-artifacts-9ykPXU
+playwright-artifacts-A4Qkh1
+playwright-artifacts-A5ghmq
+playwright-artifacts-A5wh9o
+playwright-artifacts-A8nnsZ
+playwright-artifacts-AEZLWw
+playwright-artifacts-AJSUz6
+playwright-artifacts-AK9lCf
+playwright-artifacts-ALqLxC
+playwright-artifacts-AMClaD
+playwright-artifacts-AMOmAu
+playwright-artifacts-ANIr9A
+playwright-artifacts-AWp5CT
+playwright-artifacts-AXrsDd
+playwright-artifacts-AYgOjH
+playwright-artifacts-AZFMm6
+playwright-artifacts-AaAFcW
+playwright-artifacts-Agmtrb
+playwright-artifacts-AoJntk
+playwright-artifacts-AwgLsT
+playwright-artifacts-B4dqTX
+playwright-artifacts-BBMTBC
+playwright-artifacts-BEEA4P
+playwright-artifacts-BGrP2e
+playwright-artifacts-BHjjjH
+playwright-artifacts-BHnkQv
+playwright-artifacts-BIYXYc
+playwright-artifacts-BMbEpe
+playwright-artifacts-BOdBWS
+playwright-artifacts-BP1gzH
+playwright-artifacts-BRCACP
+playwright-artifacts-BU5kye
+playwright-artifacts-Bb1N8K
+playwright-artifacts-BcY5Ct
+playwright-artifacts-BjL452
+playwright-artifacts-BpqpbG
+playwright-artifacts-BtFaRJ
+playwright-artifacts-BvJavZ
+playwright-artifacts-BvQr0W
+playwright-artifacts-BytM4l
+playwright-artifacts-C1JxfD
+playwright-artifacts-C1iDRu
+playwright-artifacts-C9NyFo
+playwright-artifacts-CFhyYc
+playwright-artifacts-CM4NhR
+playwright-artifacts-CMoJFz
+playwright-artifacts-CUYkgD
+playwright-artifacts-CcoRGD
+playwright-artifacts-CslQAL
+playwright-artifacts-D2Z2XO
+playwright-artifacts-D4s8K6
+playwright-artifacts-D5kTyH
+playwright-artifacts-DC8gEy
+playwright-artifacts-DGLiPj
+playwright-artifacts-DJ18eE
+playwright-artifacts-DOJaQa
+playwright-artifacts-DQD5QV
+playwright-artifacts-Dawiyr
+playwright-artifacts-DbZUrR
+playwright-artifacts-Dh5NnT
+playwright-artifacts-DszJyy
+playwright-artifacts-E0G2AU
+playwright-artifacts-E2xJ6U
+playwright-artifacts-EDnOKX
+playwright-artifacts-EEVi7V
+playwright-artifacts-EEl7qI
+playwright-artifacts-EIw6zv
+playwright-artifacts-EKVn6g
+playwright-artifacts-ETFhI1
+playwright-artifacts-EWnpLb
+playwright-artifacts-Eet8Xz
+playwright-artifacts-EjJkt5
+playwright-artifacts-EkbZyB
+playwright-artifacts-En3NjS
+playwright-artifacts-EphSA1
+playwright-artifacts-Erm8Ub
+playwright-artifacts-EwEDJz
+playwright-artifacts-Ex9YhI
+playwright-artifacts-F21OCB
+playwright-artifacts-FA2KUR
+playwright-artifacts-FBTB4M
+playwright-artifacts-FEhI7m
+playwright-artifacts-FFGbAU
+playwright-artifacts-FFa8cA
+playwright-artifacts-FKM7wL
+playwright-artifacts-FLe3h9
+playwright-artifacts-FMN5b3
+playwright-artifacts-FPQqRg
+playwright-artifacts-FPxF4J
+playwright-artifacts-Fbm4B0
+playwright-artifacts-FdoifU
+playwright-artifacts-FeL2Yh
+playwright-artifacts-Fi4T8Y
+playwright-artifacts-FmRMSA
+playwright-artifacts-FopaaX
+playwright-artifacts-FuyyhI
+playwright-artifacts-G0ltQk
+playwright-artifacts-G7HC8I
+playwright-artifacts-G8SQha
+playwright-artifacts-G8dlkD
+playwright-artifacts-G9DVJP
+playwright-artifacts-GEGOki
+playwright-artifacts-GKg2aV
+playwright-artifacts-GKmVP6
+playwright-artifacts-GLoVWZ
+playwright-artifacts-GPMVb8
+playwright-artifacts-GSjzw4
+playwright-artifacts-GTK5As
+playwright-artifacts-Ge0Lkd
+playwright-artifacts-GgTy0n
+playwright-artifacts-GkVC77
+playwright-artifacts-GuHuSo
+playwright-artifacts-H5J9J5
+playwright-artifacts-HA7gpG
+playwright-artifacts-HCLGg6
+playwright-artifacts-HDhzk7
+playwright-artifacts-HDwGtM
+playwright-artifacts-HH5Skg
+playwright-artifacts-HImvO0
+playwright-artifacts-HJLIVt
+playwright-artifacts-HLpcXO
+playwright-artifacts-HOQ40e
+playwright-artifacts-HPAE6p
+playwright-artifacts-HQ6KRR
+playwright-artifacts-HVl7ey
+playwright-artifacts-Ha3T3m
+playwright-artifacts-Ha7gGs
+playwright-artifacts-HeiyN9
+playwright-artifacts-HjiNLI
+playwright-artifacts-HlBocZ
+playwright-artifacts-HpyYB0
+playwright-artifacts-HrnPhk
+playwright-artifacts-HsK08J
+playwright-artifacts-Htn59v
+playwright-artifacts-Hyl1Fh
+playwright-artifacts-HzJRKD
+playwright-artifacts-HzNrC8
+playwright-artifacts-I07zuA
+playwright-artifacts-I3bJWd
+playwright-artifacts-I4X4t6
+playwright-artifacts-IETPvZ
+playwright-artifacts-IHU8xk
+playwright-artifacts-IHthlh
+playwright-artifacts-IMS51a
+playwright-artifacts-INg8sR
+playwright-artifacts-IPIwKj
+playwright-artifacts-IRGA9y
+playwright-artifacts-IVQGkY
+playwright-artifacts-IbO3qm
+playwright-artifacts-IdsSQJ
+playwright-artifacts-IeXkI3
+playwright-artifacts-Ifyw9b
+playwright-artifacts-IkQVJQ
+playwright-artifacts-InX33M
+playwright-artifacts-IqGL6I
+playwright-artifacts-IyCFjB
+playwright-artifacts-J1bIsW
+playwright-artifacts-J9I5LX
+playwright-artifacts-JAsSMZ
+playwright-artifacts-JJf7MT
+playwright-artifacts-JQtH5m
+playwright-artifacts-Jez19r
+playwright-artifacts-JfkST9
+playwright-artifacts-JgP62w
+playwright-artifacts-JhzUIR
+playwright-artifacts-JifsQy
+playwright-artifacts-Jiuizx
+playwright-artifacts-JjNg2b
+playwright-artifacts-Jmo7ro
+playwright-artifacts-JoFVMp
+playwright-artifacts-JpCFz6
+playwright-artifacts-Jz54fa
+playwright-artifacts-K0GTWx
+playwright-artifacts-K1D4jg
+playwright-artifacts-K2xlNr
+playwright-artifacts-K67v09
+playwright-artifacts-K9wurD
+playwright-artifacts-KEUMJc
+playwright-artifacts-KEWXXf
+playwright-artifacts-KHA2z4
+playwright-artifacts-KJ77uL
+playwright-artifacts-KK7DnK
+playwright-artifacts-KLiW15
+playwright-artifacts-KLxXLJ
+playwright-artifacts-KOc6b9
+playwright-artifacts-KWnus7
+playwright-artifacts-KXYb9c
+playwright-artifacts-KjysUY
+playwright-artifacts-KnscMx
+playwright-artifacts-Kp0lsZ
+playwright-artifacts-Kp0uV0
+playwright-artifacts-Kucd9f
+playwright-artifacts-KxXmCL
+playwright-artifacts-KyZ0D6
+playwright-artifacts-KzxxH2
+playwright-artifacts-L1nUxw
+playwright-artifacts-LA4aJC
+playwright-artifacts-LBOl9S
+playwright-artifacts-LCZKdM
+playwright-artifacts-LFaSvn
+playwright-artifacts-LIqjva
+playwright-artifacts-LKPGTt
+playwright-artifacts-LLWf3c
+playwright-artifacts-LP61wI
+playwright-artifacts-LQ7Fl3
+playwright-artifacts-LU6Fg3
+playwright-artifacts-LaSbDl
+playwright-artifacts-Laf6tH
+playwright-artifacts-LatXm8
+playwright-artifacts-LbYA9y
+playwright-artifacts-LfSGw1
+playwright-artifacts-LgjSJk
+playwright-artifacts-LjcF6t
+playwright-artifacts-LltcKN
+playwright-artifacts-LtEYfS
+playwright-artifacts-LtpB7Z
+playwright-artifacts-Lw18Q2
+playwright-artifacts-M2WZcw
+playwright-artifacts-M3LBE4
+playwright-artifacts-M4WL6u
+playwright-artifacts-M7pskN
+playwright-artifacts-MDXjUp
+playwright-artifacts-ME3OAQ
+playwright-artifacts-MMz5ev
+playwright-artifacts-MPsnbR
+playwright-artifacts-MTirll
+playwright-artifacts-MWlrLS
+playwright-artifacts-MZuFfI
+playwright-artifacts-MamQ6o
+playwright-artifacts-Mar3Kp
+playwright-artifacts-MiL7fG
+playwright-artifacts-MlbGI9
+playwright-artifacts-MmCwF4
+playwright-artifacts-MpiHWf
+playwright-artifacts-MqRjLC
+playwright-artifacts-MrFfUU
+playwright-artifacts-MsMaIp
+playwright-artifacts-MtoFQM
+playwright-artifacts-MvKTki
+playwright-artifacts-MvcQFe
+playwright-artifacts-Mvs5fW
+playwright-artifacts-MxdoAw
+playwright-artifacts-N1zCFt
+playwright-artifacts-N2SMJH
+playwright-artifacts-N3fFtq
+playwright-artifacts-N9MJqa
+playwright-artifacts-NIkSTJ
+playwright-artifacts-NJyjd2
+playwright-artifacts-NL31Il
+playwright-artifacts-NMf1KM
+playwright-artifacts-NUAEBu
+playwright-artifacts-NUYS13
+playwright-artifacts-NdaWzQ
+playwright-artifacts-Ned6sz
+playwright-artifacts-Ngl9SA
+playwright-artifacts-NkFbTu
+playwright-artifacts-NkRMH0
+playwright-artifacts-Nmootr
+playwright-artifacts-NsRBMp
+playwright-artifacts-NsgXXZ
+playwright-artifacts-Nv0qdS
+playwright-artifacts-Nw7zjY
+playwright-artifacts-NwvpVg
+playwright-artifacts-NyefWw
+playwright-artifacts-O3oMN7
+playwright-artifacts-O8Jx8E
+playwright-artifacts-OFpX2i
+playwright-artifacts-OKYeOO
+playwright-artifacts-OKYulL
+playwright-artifacts-OPqhAR
+playwright-artifacts-OQ8fTo
+playwright-artifacts-OQuLo5
+playwright-artifacts-OSRN8p
+playwright-artifacts-OSvLbu
+playwright-artifacts-OTOKnC
+playwright-artifacts-OVmDwN
+playwright-artifacts-Oggv3N
+playwright-artifacts-OhRZGh
+playwright-artifacts-OmKz8q
+playwright-artifacts-Oo1iim
+playwright-artifacts-Opkata
+playwright-artifacts-Oqp16y
+playwright-artifacts-OtMCPq
+playwright-artifacts-OtQBrX
+playwright-artifacts-OvDdmV
+playwright-artifacts-P0AryN
+playwright-artifacts-P4WTxv
+playwright-artifacts-P7dL8N
+playwright-artifacts-P7ijRA
+playwright-artifacts-PF9ZdD
+playwright-artifacts-PGcdw0
+playwright-artifacts-PKmStd
+playwright-artifacts-PLlxWV
+playwright-artifacts-PN6bPz
+playwright-artifacts-PR6hKR
+playwright-artifacts-PRdYw5
+playwright-artifacts-PUuPpt
+playwright-artifacts-PYoagD
+playwright-artifacts-Pb2Qkp
+playwright-artifacts-PfIlfR
+playwright-artifacts-Pj1JCg
+playwright-artifacts-PndtFB
+playwright-artifacts-PtGKLs
+playwright-artifacts-PuD8oi
+playwright-artifacts-Q1C65P
+playwright-artifacts-Q1zPKV
+playwright-artifacts-Q8cR73
+playwright-artifacts-QAcck0
+playwright-artifacts-QCRn78
+playwright-artifacts-QHWkKJ
+playwright-artifacts-QL2TrV
+playwright-artifacts-QMZIZQ
+playwright-artifacts-QPFci3
+playwright-artifacts-QPT2qS
+playwright-artifacts-QSYSP0
+playwright-artifacts-QZ6rFB
+playwright-artifacts-QbtrvV
+playwright-artifacts-Qgxwu4
+playwright-artifacts-Qlll7O
+playwright-artifacts-QmHTkk
+playwright-artifacts-QnCr3v
+playwright-artifacts-QpdQQ8
+playwright-artifacts-QxCFg8
+playwright-artifacts-R849bD
+playwright-artifacts-RAet9F
+playwright-artifacts-RCWgPQ
+playwright-artifacts-REwIQU
+playwright-artifacts-RKCgZs
+playwright-artifacts-RKzhmY
+playwright-artifacts-RLUTeN
+playwright-artifacts-RNUSbg
+playwright-artifacts-ROPNQ9
+playwright-artifacts-RWtjXv
+playwright-artifacts-RYimtc
+playwright-artifacts-Rc29x3
+playwright-artifacts-RePXx1
+playwright-artifacts-Rf96tg
+playwright-artifacts-RfyXFD
+playwright-artifacts-RhEJfV
+playwright-artifacts-RkDzev
+playwright-artifacts-RkSY1s
+playwright-artifacts-RlGap1
+playwright-artifacts-RofV2d
+playwright-artifacts-RqBu2Q
+playwright-artifacts-Rv6uFP
+playwright-artifacts-RwAiae
+playwright-artifacts-RxNHtA
+playwright-artifacts-RyggsD
+playwright-artifacts-SKUiHn
+playwright-artifacts-SN0mEx
+playwright-artifacts-SToqTT
+playwright-artifacts-STuKQv
+playwright-artifacts-SYMVjK
+playwright-artifacts-SaZra9
+playwright-artifacts-SgXw6o
+playwright-artifacts-SlQdOC
+playwright-artifacts-SnWUuy
+playwright-artifacts-Snn6I1
+playwright-artifacts-T4In47
+playwright-artifacts-T7dXKL
+playwright-artifacts-TJOzP5
+playwright-artifacts-TK2rNj
+playwright-artifacts-TTdAMj
+playwright-artifacts-TcTVXh
+playwright-artifacts-Tf07ux
+playwright-artifacts-TfpEbK
+playwright-artifacts-Tfu0Aa
+playwright-artifacts-TinsAo
+playwright-artifacts-TjlHpw
+playwright-artifacts-Tmh7gL
+playwright-artifacts-TobBQN
+playwright-artifacts-Tt8Vw7
+playwright-artifacts-U1DXF2
+playwright-artifacts-U2YzDI
+playwright-artifacts-U5Kzix
+playwright-artifacts-U5h4YF
+playwright-artifacts-UBLLkY
+playwright-artifacts-UC9pDN
+playwright-artifacts-UDUK5M
+playwright-artifacts-UGYbN6
+playwright-artifacts-UKTlNH
+playwright-artifacts-UMp5pk
+playwright-artifacts-UQBbgs
+playwright-artifacts-URWUFF
+playwright-artifacts-UTTxG1
+playwright-artifacts-UVNFXI
+playwright-artifacts-UlMwvG
+playwright-artifacts-UmvGav
+playwright-artifacts-UofaDg
+playwright-artifacts-UplKn0
+playwright-artifacts-Uq0JCy
+playwright-artifacts-V0s0MK
+playwright-artifacts-V1DThi
+playwright-artifacts-V1kIuR
+playwright-artifacts-V2KGg4
+playwright-artifacts-V7rtkF
+playwright-artifacts-VIVAvw
+playwright-artifacts-VO6eOA
+playwright-artifacts-VOubmj
+playwright-artifacts-VQh5ir
+playwright-artifacts-VYYjU3
+playwright-artifacts-VZFgx7
+playwright-artifacts-Vd8lAK
+playwright-artifacts-VdjNb7
+playwright-artifacts-VfbCpa
+playwright-artifacts-VgHpRV
+playwright-artifacts-VhCDGt
+playwright-artifacts-Vs4IHQ
+playwright-artifacts-W1lRMb
+playwright-artifacts-W2pPw7
+playwright-artifacts-W4UpW8
+playwright-artifacts-W4brGm
+playwright-artifacts-W4duRf
+playwright-artifacts-W7VWNU
+playwright-artifacts-W9gqIL
+playwright-artifacts-WDJ3oo
+playwright-artifacts-WG80VF
+playwright-artifacts-WPCeY7
+playwright-artifacts-WQiV4V
+playwright-artifacts-WRRFnz
+playwright-artifacts-WTBrOg
+playwright-artifacts-WbFIJd
+playwright-artifacts-WbPqNB
+playwright-artifacts-WdZOih
+playwright-artifacts-WgD8eV
+playwright-artifacts-WiQ227
+playwright-artifacts-WjeUrS
+playwright-artifacts-WmcCUe
+playwright-artifacts-Wp9zRE
+playwright-artifacts-Wq0M56
+playwright-artifacts-WrPbcQ
+playwright-artifacts-WupT9D
+playwright-artifacts-X005hA
+playwright-artifacts-X0p5cE
+playwright-artifacts-X26fgx
+playwright-artifacts-X34CCh
+playwright-artifacts-X68Aid
+playwright-artifacts-X9b6yR
+playwright-artifacts-XBkU77
+playwright-artifacts-XD8z0B
+playwright-artifacts-XHqIJK
+playwright-artifacts-XLim4h
+playwright-artifacts-XRVRIh
+playwright-artifacts-XSTwRI
+playwright-artifacts-XbVPjh
+playwright-artifacts-XcOfwJ
+playwright-artifacts-Xf5h6Q
+playwright-artifacts-Xh2637
+playwright-artifacts-XqxEBn
+playwright-artifacts-Y1HLaM
+playwright-artifacts-Y5PpJl
+playwright-artifacts-Y5nWR1
+playwright-artifacts-Y5vDuM
+playwright-artifacts-Y8wjXD
+playwright-artifacts-Y9yOgk
+playwright-artifacts-YB4Xwk
+playwright-artifacts-YBwo1M
+playwright-artifacts-YCRtBa
+playwright-artifacts-YCt0hO
+playwright-artifacts-YG4GpW
+playwright-artifacts-YLcNc5
+playwright-artifacts-YMNgG5
+playwright-artifacts-YW7KCs
+playwright-artifacts-YWPcIT
+playwright-artifacts-YavYnV
+playwright-artifacts-YbnhM5
+playwright-artifacts-Ye6H70
+playwright-artifacts-YjWDJD
+playwright-artifacts-YjlRs0
+playwright-artifacts-YkzJXr
+playwright-artifacts-YoF3vQ
+playwright-artifacts-YrW6Ja
+playwright-artifacts-YtzDLu
+playwright-artifacts-Z25sgU
+playwright-artifacts-Z90hoC
+playwright-artifacts-ZBVIDd
+playwright-artifacts-ZCvAkF
+playwright-artifacts-ZFYnlf
+playwright-artifacts-ZJeJNF
+playwright-artifacts-ZOcGQS
+playwright-artifacts-ZP0O1u
+playwright-artifacts-ZUM7MM
+playwright-artifacts-ZVIPtC
+playwright-artifacts-ZYSv2r
+playwright-artifacts-ZZDRSd
+playwright-artifacts-Zaj5d3
+playwright-artifacts-Ze32p0
+playwright-artifacts-ZjPbxj
+playwright-artifacts-Zo7JoB
+playwright-artifacts-ZoUL9w
+playwright-artifacts-ZprgEi
+playwright-artifacts-ZsFqBr
+playwright-artifacts-ZtxgXR
+playwright-artifacts-ZwqS7X
+playwright-artifacts-a007aR
+playwright-artifacts-a2EaCD
+playwright-artifacts-a5jhjg
+playwright-artifacts-a6Inp4
+playwright-artifacts-a8Ugcp
+playwright-artifacts-aAPEVR
+playwright-artifacts-aEskgN
+playwright-artifacts-aJISEq
+playwright-artifacts-aLsXk2
+playwright-artifacts-aPv74M
+playwright-artifacts-aQ1JSU
+playwright-artifacts-aSu1JB
+playwright-artifacts-aVMuXC
+playwright-artifacts-aeu6Ez
+playwright-artifacts-ag2Spm
+playwright-artifacts-ai3Kfd
+playwright-artifacts-amP96s
+playwright-artifacts-ardagM
+playwright-artifacts-auA7vZ
+playwright-artifacts-aubbTR
+playwright-artifacts-azXT6i
+playwright-artifacts-b0NRNE
+playwright-artifacts-b2LlbL
+playwright-artifacts-bCrJyn
+playwright-artifacts-bFlcXz
+playwright-artifacts-bIG53t
+playwright-artifacts-bMHFs6
+playwright-artifacts-bX3UX6
+playwright-artifacts-bZBbHf
+playwright-artifacts-bgfcTT
+playwright-artifacts-bjMwNe
+playwright-artifacts-bjghSN
+playwright-artifacts-bmKUuO
+playwright-artifacts-bnN23g
+playwright-artifacts-bnoqCR
+playwright-artifacts-bqwOQn
+playwright-artifacts-broKqq
+playwright-artifacts-bvBA23
+playwright-artifacts-c1Bo22
+playwright-artifacts-c1aIHn
+playwright-artifacts-c4Zvpx
+playwright-artifacts-c6Ea8k
+playwright-artifacts-cO8Yfo
+playwright-artifacts-cObuyk
+playwright-artifacts-cQRnVq
+playwright-artifacts-cQaAWx
+playwright-artifacts-cXYbB9
+playwright-artifacts-cahEFB
+playwright-artifacts-cascx7
+playwright-artifacts-cmHsmP
+playwright-artifacts-cmnAok
+playwright-artifacts-cx0TNP
+playwright-artifacts-cx4pp5
+playwright-artifacts-czYIan
+playwright-artifacts-czfcLN
+playwright-artifacts-d11JnT
+playwright-artifacts-d3EZkQ
+playwright-artifacts-dASJBA
+playwright-artifacts-dCbLHy
+playwright-artifacts-dDQFUL
+playwright-artifacts-dOWPHG
+playwright-artifacts-dPZIv7
+playwright-artifacts-dRph0I
+playwright-artifacts-dUgWTn
+playwright-artifacts-dXcqpw
+playwright-artifacts-dZsYFa
+playwright-artifacts-daLnio
+playwright-artifacts-dbbkh9
+playwright-artifacts-dfsR7T
+playwright-artifacts-diKcYd
+playwright-artifacts-difdhP
+playwright-artifacts-dmEMxl
+playwright-artifacts-dsxeZf
+playwright-artifacts-dwvBBy
+playwright-artifacts-dyRGL9
+playwright-artifacts-e0uQG8
+playwright-artifacts-e6AxwJ
+playwright-artifacts-eIkyR7
+playwright-artifacts-eM8MXz
+playwright-artifacts-eP046j
+playwright-artifacts-eSBGiH
+playwright-artifacts-eXbNmX
+playwright-artifacts-ebisef
+playwright-artifacts-ebrYrK
+playwright-artifacts-ecUs3k
+playwright-artifacts-edOQGn
+playwright-artifacts-edOs8y
+playwright-artifacts-efeVWI
+playwright-artifacts-eg2hKh
+playwright-artifacts-emdpe9
+playwright-artifacts-emtb0G
+playwright-artifacts-etcdAt
+playwright-artifacts-euP7fF
+playwright-artifacts-eyoCga
+playwright-artifacts-ezqzCA
+playwright-artifacts-f2wv7O
+playwright-artifacts-f430V0
+playwright-artifacts-f5lFoO
+playwright-artifacts-f784sT
+playwright-artifacts-f8i9Hg
+playwright-artifacts-fF5if2
+playwright-artifacts-fLhrYx
+playwright-artifacts-fM4o2f
+playwright-artifacts-fOx7R3
+playwright-artifacts-fS4pzq
+playwright-artifacts-fX8un7
+playwright-artifacts-fYGFIr
+playwright-artifacts-fYm3sH
+playwright-artifacts-ffRu2N
+playwright-artifacts-ffrPeh
+playwright-artifacts-flr6FF
+playwright-artifacts-fnK5ac
+playwright-artifacts-fngKk1
+playwright-artifacts-g4n3wP
+playwright-artifacts-g5RDXJ
+playwright-artifacts-g9FPKl
+playwright-artifacts-gCaZcj
+playwright-artifacts-gCfqJ9
+playwright-artifacts-gCmKaz
+playwright-artifacts-gDOA6l
+playwright-artifacts-gFkAeo
+playwright-artifacts-gOENXX
+playwright-artifacts-gSNUhE
+playwright-artifacts-gUUClW
+playwright-artifacts-gVGsEX
+playwright-artifacts-gWd58H
+playwright-artifacts-gYgWem
+playwright-artifacts-gcw5km
+playwright-artifacts-ge6aMV
+playwright-artifacts-gfso6R
+playwright-artifacts-h649nq
+playwright-artifacts-h79M1G
+playwright-artifacts-h7KXec
+playwright-artifacts-h9mqVk
+playwright-artifacts-hCm3CC
+playwright-artifacts-hH6TJY
+playwright-artifacts-hJSGIo
+playwright-artifacts-hKF1pF
+playwright-artifacts-hMqVxQ
+playwright-artifacts-hRnLs8
+playwright-artifacts-hUAEPV
+playwright-artifacts-hV8LfC
+playwright-artifacts-hY48M5
+playwright-artifacts-hZjHlz
+playwright-artifacts-herOfy
+playwright-artifacts-hgtAFw
+playwright-artifacts-hilCwy
+playwright-artifacts-hke0pt
+playwright-artifacts-hm0rLs
+playwright-artifacts-hm6Pns
+playwright-artifacts-hvc72H
+playwright-artifacts-hwYreP
+playwright-artifacts-hx3Rz6
+playwright-artifacts-hx6tVi
+playwright-artifacts-hyIRDK
+playwright-artifacts-hzOfq9
+playwright-artifacts-i2CWDI
+playwright-artifacts-i3EXJO
+playwright-artifacts-iAgcg3
+playwright-artifacts-iEFZ96
+playwright-artifacts-iHE5gv
+playwright-artifacts-iHRv6W
+playwright-artifacts-iIeEbw
+playwright-artifacts-iJIBvN
+playwright-artifacts-iKnygQ
+playwright-artifacts-iSwtvX
+playwright-artifacts-iTXHUt
+playwright-artifacts-ibwIP2
+playwright-artifacts-icJ6Jb
+playwright-artifacts-ig76Nc
+playwright-artifacts-ijmbIU
+playwright-artifacts-imScwC
+playwright-artifacts-iodtrn
+playwright-artifacts-is7GhI
+playwright-artifacts-iv2vYk
+playwright-artifacts-iyMdi0
+playwright-artifacts-j0RLMr
+playwright-artifacts-j2YMfw
+playwright-artifacts-j4IJXb
+playwright-artifacts-j8qrNX
+playwright-artifacts-j99sbR
+playwright-artifacts-j9Cygu
+playwright-artifacts-jIp4p0
+playwright-artifacts-jJrkVZ
+playwright-artifacts-jKvMrm
+playwright-artifacts-jMs1m3
+playwright-artifacts-jOkEK8
+playwright-artifacts-jPjSEI
+playwright-artifacts-jQ3XFe
+playwright-artifacts-jQalAo
+playwright-artifacts-jUNidR
+playwright-artifacts-jVcQHq
+playwright-artifacts-jWieN6
+playwright-artifacts-jeHudB
+playwright-artifacts-jg3mx2
+playwright-artifacts-jhy78k
+playwright-artifacts-jiETn3
+playwright-artifacts-jkFrl1
+playwright-artifacts-jniYo7
+playwright-artifacts-jpbB7x
+playwright-artifacts-jrKFj4
+playwright-artifacts-jsSZ6I
+playwright-artifacts-juSVNo
+playwright-artifacts-jzVxv5
+playwright-artifacts-k1Kd1I
+playwright-artifacts-k1VzFn
+playwright-artifacts-k1xEDf
+playwright-artifacts-k38ykS
+playwright-artifacts-k42pwW
+playwright-artifacts-k4bOdC
+playwright-artifacts-k6p76g
+playwright-artifacts-k7YYdN
+playwright-artifacts-k8htKi
+playwright-artifacts-k9SWCq
+playwright-artifacts-kCNwjc
+playwright-artifacts-kDBuGw
+playwright-artifacts-kDYlHl
+playwright-artifacts-kOEOyN
+playwright-artifacts-kQ0pnl
+playwright-artifacts-kQ4J1g
+playwright-artifacts-kQupPA
+playwright-artifacts-kR4wcO
+playwright-artifacts-kaIjfB
+playwright-artifacts-ke32Ls
+playwright-artifacts-kgK1ma
+playwright-artifacts-klWWqN
+playwright-artifacts-knBcUA
+playwright-artifacts-kpwnOt
+playwright-artifacts-kvYomC
+playwright-artifacts-l0d4oa
+playwright-artifacts-l0mMCW
+playwright-artifacts-l1pKix
+playwright-artifacts-l5FvDk
+playwright-artifacts-l9m1dy
+playwright-artifacts-lHoJMp
+playwright-artifacts-lIckST
+playwright-artifacts-lJr7xd
+playwright-artifacts-lKfhX7
+playwright-artifacts-lSFa8f
+playwright-artifacts-lUeY4L
+playwright-artifacts-lW595G
+playwright-artifacts-ledAzc
+playwright-artifacts-lrWcn5
+playwright-artifacts-lve7B9
+playwright-artifacts-ly3169
+playwright-artifacts-m7cmT8
+playwright-artifacts-mHEthd
+playwright-artifacts-mS5of9
+playwright-artifacts-mYkS0J
+playwright-artifacts-md4CZA
+playwright-artifacts-mfiFoe
+playwright-artifacts-mh9C6B
+playwright-artifacts-miVjDQ
+playwright-artifacts-mjCELi
+playwright-artifacts-mjvIhT
+playwright-artifacts-ml3O8t
+playwright-artifacts-ml9tpS
+playwright-artifacts-mpQ2q0
+playwright-artifacts-mqYOhn
+playwright-artifacts-mtpZWY
+playwright-artifacts-mwwkx6
+playwright-artifacts-mxYgFr
+playwright-artifacts-myfESs
+playwright-artifacts-myoHMq
+playwright-artifacts-n3n6pC
+playwright-artifacts-n49DOA
+playwright-artifacts-n8pLwZ
+playwright-artifacts-nJpQWP
+playwright-artifacts-nNLMI0
+playwright-artifacts-nQ7diT
+playwright-artifacts-nSNc3X
+playwright-artifacts-nVFh6v
+playwright-artifacts-nWVW1Y
+playwright-artifacts-nXHr7h
+playwright-artifacts-nXpU9n
+playwright-artifacts-nYirlp
+playwright-artifacts-naBHbc
+playwright-artifacts-nfktAD
+playwright-artifacts-noBmEz
+playwright-artifacts-ns55in
+playwright-artifacts-nsdWyj
+playwright-artifacts-nwDwUk
+playwright-artifacts-o2PzPD
+playwright-artifacts-o2mfEz
+playwright-artifacts-o3Rv8G
+playwright-artifacts-o47MZG
+playwright-artifacts-oCdWek
+playwright-artifacts-oH7P0g
+playwright-artifacts-oHlbna
+playwright-artifacts-oKkUpD
+playwright-artifacts-oNPpLs
+playwright-artifacts-oYYJtt
+playwright-artifacts-oZGU0s
+playwright-artifacts-og40VH
+playwright-artifacts-onhHvU
+playwright-artifacts-opoBaB
+playwright-artifacts-osR7Nj
+playwright-artifacts-ot854m
+playwright-artifacts-otO6oQ
+playwright-artifacts-ouxVZL
+playwright-artifacts-owlaan
+playwright-artifacts-oxWVhl
+playwright-artifacts-oy16qp
+playwright-artifacts-p2eGaE
+playwright-artifacts-p5lkJz
+playwright-artifacts-p7bI2P
+playwright-artifacts-pA2hjp
+playwright-artifacts-pBewod
+playwright-artifacts-pC9RkR
+playwright-artifacts-pJAWW2
+playwright-artifacts-pJX0Kn
+playwright-artifacts-pM4NtL
+playwright-artifacts-pMml3d
+playwright-artifacts-pOujZj
+playwright-artifacts-pQ5mV6
+playwright-artifacts-pW1nxs
+playwright-artifacts-pbtXUI
+playwright-artifacts-pccqNH
+playwright-artifacts-pfC4w1
+playwright-artifacts-pgul1e
+playwright-artifacts-ppVPLS
+playwright-artifacts-pqa1FN
+playwright-artifacts-pqdLMt
+playwright-artifacts-pxLrWl
+playwright-artifacts-q3S3Md
+playwright-artifacts-q4c0K6
+playwright-artifacts-q5sHM9
+playwright-artifacts-q6AHCp
+playwright-artifacts-qBN8Ip
+playwright-artifacts-qCKB3u
+playwright-artifacts-qGmIYu
+playwright-artifacts-qGvbth
+playwright-artifacts-qMXttU
+playwright-artifacts-qNimZV
+playwright-artifacts-qO1mjY
+playwright-artifacts-qSSKdT
+playwright-artifacts-qVRyhG
+playwright-artifacts-qVZd8p
+playwright-artifacts-qZxMDd
+playwright-artifacts-qaiA8a
+playwright-artifacts-qmyDR5
+playwright-artifacts-qojmUc
+playwright-artifacts-qqBPah
+playwright-artifacts-qsTwvc
+playwright-artifacts-qtLyuh
+playwright-artifacts-quorKt
+playwright-artifacts-qwr8Rb
+playwright-artifacts-qxwUJX
+playwright-artifacts-r4I33j
+playwright-artifacts-r56utk
+playwright-artifacts-r6RbG6
+playwright-artifacts-r73Pwz
+playwright-artifacts-r8K4sF
+playwright-artifacts-rAZekG
+playwright-artifacts-rJ48uY
+playwright-artifacts-rMaksD
+playwright-artifacts-rNdS7g
+playwright-artifacts-rOWZlp
+playwright-artifacts-rPzzST
+playwright-artifacts-rQ30d8
+playwright-artifacts-rRSoHg
+playwright-artifacts-ran5dN
+playwright-artifacts-rgqbhD
+playwright-artifacts-rjUUex
+playwright-artifacts-rl4aA8
+playwright-artifacts-roNyH3
+playwright-artifacts-rtbQuK
+playwright-artifacts-rvMoqY
+playwright-artifacts-rxa05I
+playwright-artifacts-s05KWa
+playwright-artifacts-s2Nrmb
+playwright-artifacts-s52N0V
+playwright-artifacts-s6jVNo
+playwright-artifacts-s7gMCG
+playwright-artifacts-s8Ytu1
+playwright-artifacts-s96RNy
+playwright-artifacts-sCQmRT
+playwright-artifacts-sCqjUx
+playwright-artifacts-sEpACV
+playwright-artifacts-sFLYsY
+playwright-artifacts-sFaBKI
+playwright-artifacts-sGTRtL
+playwright-artifacts-sHJADx
+playwright-artifacts-sIZgEV
+playwright-artifacts-sRlG5m
+playwright-artifacts-sTJOZm
+playwright-artifacts-sU19HK
+playwright-artifacts-sWv57U
+playwright-artifacts-saBitO
+playwright-artifacts-sd1pIl
+playwright-artifacts-se90uz
+playwright-artifacts-sjjk4e
+playwright-artifacts-slN1L6
+playwright-artifacts-sroRgq
+playwright-artifacts-sufkwp
+playwright-artifacts-t39BPf
+playwright-artifacts-t4Dovu
+playwright-artifacts-tAAPub
+playwright-artifacts-tJUjEh
+playwright-artifacts-tJscEn
+playwright-artifacts-tNI0ON
+playwright-artifacts-tOXfLX
+playwright-artifacts-tQ6hrj
+playwright-artifacts-tTdzOU
+playwright-artifacts-tUSLuk
+playwright-artifacts-tXAbQo
+playwright-artifacts-tj4Bgm
+playwright-artifacts-tkiJ9H
+playwright-artifacts-tkzQJR
+playwright-artifacts-todVcg
+playwright-artifacts-trjkDj
+playwright-artifacts-tuxxqd
+playwright-artifacts-u0dJqr
+playwright-artifacts-u0wxWO
+playwright-artifacts-u1mM9W
+playwright-artifacts-u2PnDi
+playwright-artifacts-u7O5Wk
+playwright-artifacts-uATlsM
+playwright-artifacts-uBYtuo
+playwright-artifacts-uCghmb
+playwright-artifacts-uGTNgw
+playwright-artifacts-uHCZLS
+playwright-artifacts-uM4RP3
+playwright-artifacts-uSQLO2
+playwright-artifacts-ucYFcu
+playwright-artifacts-udE9U6
+playwright-artifacts-uiJOxw
+playwright-artifacts-ukofIk
+playwright-artifacts-ukrEMI
+playwright-artifacts-uoKCV2
+playwright-artifacts-uxl079
+playwright-artifacts-uzGzD0
+playwright-artifacts-uzWISH
+playwright-artifacts-v07zqb
+playwright-artifacts-v3HgEx
+playwright-artifacts-v9VAik
+playwright-artifacts-vG49v2
+playwright-artifacts-vGgF6x
+playwright-artifacts-vN2mHp
+playwright-artifacts-vNSJ0S
+playwright-artifacts-vOtMa9
+playwright-artifacts-vWIlxl
+playwright-artifacts-vbDdjF
+playwright-artifacts-vdGuT0
+playwright-artifacts-vgZN3Q
+playwright-artifacts-vgb0BY
+playwright-artifacts-vkX9E6
+playwright-artifacts-vkzRxm
+playwright-artifacts-vldNuH
+playwright-artifacts-voAVbf
+playwright-artifacts-vvaAtM
+playwright-artifacts-vx4Sfs
+playwright-artifacts-w8KmrJ
+playwright-artifacts-wAD6BJ
+playwright-artifacts-wBWMmw
+playwright-artifacts-wFYlS4
+playwright-artifacts-wIsPL2
+playwright-artifacts-wNf9Kj
+playwright-artifacts-wPMfDD
+playwright-artifacts-wPPz5V
+playwright-artifacts-wUeWUi
+playwright-artifacts-wVP235
+playwright-artifacts-wWSgv5
+playwright-artifacts-wdw8VD
+playwright-artifacts-wiQQSL
+playwright-artifacts-wk2JON
+playwright-artifacts-wkS2Ot
+playwright-artifacts-wyForu
+playwright-artifacts-xCGvyJ
+playwright-artifacts-xJFQhG
+playwright-artifacts-xKBuN4
+playwright-artifacts-xMPyfb
+playwright-artifacts-xN0P1h
+playwright-artifacts-xN5MkD
+playwright-artifacts-xNlE7w
+playwright-artifacts-xORw8J
+playwright-artifacts-xTM8Hy
+playwright-artifacts-xTiYbn
+playwright-artifacts-xTqQg2
+playwright-artifacts-xU9R7e
+playwright-artifacts-xXKuYZ
+playwright-artifacts-xY4umL
+playwright-artifacts-xbhJXW
+playwright-artifacts-xcgkOX
+playwright-artifacts-xdUGqg
+playwright-artifacts-xfWias
+playwright-artifacts-xl7U06
+playwright-artifacts-xlB1SW
+playwright-artifacts-xoIHME
+playwright-artifacts-xplbcG
+playwright-artifacts-xwQ0a0
+playwright-artifacts-xwl0jL
+playwright-artifacts-xxDfZR
+playwright-artifacts-xzfM0L
+playwright-artifacts-y1oaJD
+playwright-artifacts-y2flOz
+playwright-artifacts-y5D5Mi
+playwright-artifacts-y8aZKa
+playwright-artifacts-y9tnGT
+playwright-artifacts-y9zIMV
+playwright-artifacts-yBP7r5
+playwright-artifacts-yEy6Sx
+playwright-artifacts-yJfg3a
+playwright-artifacts-yLqpwH
+playwright-artifacts-yQqtPp
+playwright-artifacts-yRgqz6
+playwright-artifacts-ySQr6X
+playwright-artifacts-yWL0cr
+playwright-artifacts-yWx4YA
+playwright-artifacts-yf1V2E
+playwright-artifacts-ylQ5RB
+playwright-artifacts-ymTSL1
+playwright-artifacts-ypOk7F
+playwright-artifacts-yrzPjR
+playwright-artifacts-yvxaw2
+playwright-artifacts-yxPvcf
+playwright-artifacts-z2T20D
+playwright-artifacts-z4iyta
+playwright-artifacts-z6qi8v
+playwright-artifacts-zB7mFB
+playwright-artifacts-zCziVS
+playwright-artifacts-zF4baP
+playwright-artifacts-zGX715
+playwright-artifacts-zGrPjW
+playwright-artifacts-zIBcl2
+playwright-artifacts-zLWJgg
+playwright-artifacts-zOubL7
+playwright-artifacts-zV97Ew
+playwright-artifacts-zVdBqK
+playwright-artifacts-zWRrLv
+playwright-artifacts-zZS31o
+playwright-artifacts-zaMdoB
+playwright-artifacts-zdLivZ
+playwright-artifacts-zf76S8
+playwright-artifacts-zgcvbk
+playwright-artifacts-zlfQgt
+playwright-artifacts-zsIRZ9
+playwright-artifacts-ztMwDP
+playwright-artifacts-zukEA6
+playwright_chromiumdev_profile-1NctGq
+s04_19_ct.png
+s04_19_ct2.png
+s04_19_doctor.png
+s04_dbg2_ct.png
+s04_dbg3_ct.png
+s04_dbg4_ct.png
+s04_dbg_ct.png
+qa/v6/h02_s06/s23_red.png
+qa/v6/h02_s06/s23_red_200pct.png
+qa/v6/h02_s06/s23_red_final_video.png
+qa/v6/h02_s06/s23_start.png
+qa/v6/h02_s06/s23_start_200pct.png
+qa/v6/h02_s06/s23_start_final_video.png
+qa/v6/h02_s06/s23_transition.png
+qa/v6/h02_s06/s23_transition_200pct.png
+qa/v6/h02_s06/s23_transition_final_video.png
+qa/v6/h02_s06/s24_after.png
+qa/v6/h02_s06/s24_after_200pct.png
+qa/v6/h02_s06/s24_after_final_video.png
+qa/v6/h02_s06/s24_anchor.png
+qa/v6/h02_s06/s24_anchor_200pct.png
+qa/v6/h02_s06/s24_anchor_final_video.png
+qa/v6/h02_s06/s24_before.png
+qa/v6/h02_s06/s24_before_200pct.png
+qa/v6/h02_s06/s24_before_final_video.png
+?? qa/briefs/ct_real_adv01.md
+?? qa/briefs/run_ct_real_adv01.log
+?? qa/v6/ct/bundle.sha256
+?? qa/v6/ct/bundle_verify.log
+?? qa/v6/ct/ct-dev.bundle
+?? qa/v6/ct/r3/bundle_verify.log
+?? qa/v6/ct/r3/commits.log
+?? qa/v6/ct/r3/output_check.log
+?? qa/v6/ct_real/bundle_verify.log
+?? qa/v6/ct_real/commits.log
+?? qa/v6/ct_real/ct-dev.bundle
+?? qa/v6/ct_real_adv01/
+
+exec
+/bin/bash -lc "ls /tmp/ct_json /tmp/ct_html; rg -l '75885695' /tmp/ct_json; ls /tmp/ct_json | head" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+/tmp/ct_html:
+acute-appendicitis-133.html
+acute-appendicitis-uncomplicated-1.html
+acute-appendicitis-uncomplicated.html
+appendicitis-22.html
+bot_bing.html
+bot_facebook.html
+bot_googlebot.html
+complicated-appendicitis-8.html
+gangrenous-appendicitis-with-perforation.html
+perforated-appendicitis-35.html
+phlegmonous-appendicitis-with-reactive-ileal-wall-thickening.html
+test.html
+
+/tmp/ct_json:
+acute-appendicitis-133.json
+acute-appendicitis-uncomplicated-1.json
+acute-appendicitis-uncomplicated.json
+appendicitis-22.json
+commons_meta.json
+complicated-appendicitis-8.json
+gangrenous-appendicitis-with-perforation.json
+perforated-appendicitis-35_1.json
+perforated-appendicitis-35_ct.json
+perforated-appendicitis-35_photo.json
+urls_acute-appendicitis-133.txt
+urls_acute-appendicitis-uncomplicated-1.txt
+urls_acute-appendicitis-uncomplicated.txt
+urls_appendicitis-22.txt
+urls_bot_bing.txt
+urls_bot_facebook.txt
+urls_bot_googlebot.txt
+urls_complicated-appendicitis-8.txt
+urls_gangrenous-appendicitis-with-perforation.txt
+urls_perforated-appendicitis-35.txt
+/tmp/ct_json/complicated-appendicitis-8.json
+acute-appendicitis-133.json
+acute-appendicitis-uncomplicated-1.json
+acute-appendicitis-uncomplicated.json
+appendicitis-22.json
+commons_meta.json
+complicated-appendicitis-8.json
+gangrenous-appendicitis-with-perforation.json
+perforated-appendicitis-35_1.json
+perforated-appendicitis-35_ct.json
+perforated-appendicitis-35_photo.json
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+import json
+p=json.load(open('/tmp/ct_json/complicated-appendicitis-8.json'))
+print(str(p)[:1800])
+def walk(x):
+ if isinstance(x,dict):
+  if any(str(v)=='75885695' for v in x.values()): print(str(x)[:10000])
+  for k,v in x.items():
+   if 'annot' in k: print(k,str(v)[:10000])
+   elif isinstance(v,(dict,list)): walk(v)
+ elif isinstance(x,list):
+  for v in x:walk(v)
+walk(p)
+PY" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+{'study': {'id': 183445, 'case_slug': 'complicated-appendicitis-8', 'case_title': 'Complicated appendicitis', 'modality': 'CT', 'series': [{'stack_root_id': 75864869, 'series_id': 756751, 'content_type': 'image/jpeg', 'frames': [{'id': 75864615, 'width': 512, 'height': 512}, {'id': 75864616}, {'id': 75864617}, {'id': 75864618}, {'id': 75864619}, {'id': 75864620}, {'id': 75864621}, {'id': 75864622}, {'id': 75864623}, {'id': 75864624}, {'id': 75864625}, {'id': 75864626}, {'id': 75864627}, {'id': 75864628}, {'id': 75864629}, {'id': 75864630}, {'id': 75864631}, {'id': 75864632}, {'id': 75864633}, {'id': 75864634}, {'id': 75864635}, {'id': 75864636}, {'id': 75864637}, {'id': 75864638}, {'id': 75864639}, {'id': 75864640}, {'id': 75864641}, {'id': 75864642}, {'id': 75864643}, {'id': 75864644}, {'id': 75864645}, {'id': 75864646}, {'id': 75864647}, {'id': 75864648}, {'id': 75864649}, {'id': 75864650}, {'id': 75864651}, {'id': 75864652}, {'id': 75864653}, {'id': 75864654}, {'id': 75864655}, {'id': 75864656}, {'id': 75864657}, {'id': 75864658}, {'id': 75864659}, {'id': 75864660}, {'id': 75864661}, {'id': 75864662}, {'id': 75864663}, {'id': 75864664}, {'id': 75864665}, {'id': 75864666}, {'id': 75864667}, {'id': 75864668}, {'id': 75864669}, {'id': 75864670}, {'id': 75864671}, {'id': 75864672}, {'id': 75864673}, {'id': 75864674}, {'id': 75864675}, {'id': 75864676}, {'id': 75864677}, {'id': 75864678}, {'id': 75864679}, {'id': 75864680}, {'id': 75864681}, {'id': 75864682}, {'id': 75864683}, {'id': 75864684}, {'id': 75864685}, {'id': 75864686}, {'id': 75864687}, {'id': 75864688}, {'id': 75864689}, {'id': 75864690}, {'id': 75864691}, {'id': 75864692}, {'id': 75864693}, {'id': 75864694}, {'id': 75864695}, {'id': 75864696}, {'id': 75864697}, {'id': 75864698}, {'id': 75864699}, {'id': 75864
+annotations [{'series_id': 756751, 'id': 114128, 'key_arrow_idx': 0, 'label': 'appendix arises from the caecu', 'label_positions': [{'slice_idx': 312, 'x': 205, 'y': 341}], 'arrow_positions': [{'slice_idx': 312, 'rotation': -284, 'x': 134, 'y': 202}]}]
+{'id': 75885695}
+annotations [{'series_id': 757040, 'id': 115525, 'key_arrow_idx': 0, 'label': 'gallstone', 'label_positions': [{'slice_idx': 126, 'x': 97, 'y': 373}], 'arrow_positions': [{'slice_idx': 126, 'rotation': 0, 'x': 130, 'y': 199}]}, {'series_id': 757040, 'id': 114136, 'key_arrow_idx': 0, 'label': 'Several regional lymph nodes ', 'label_positions': [{'slice_idx': 280, 'x': 205, 'y': 341}], 'arrow_positions': [{'slice_idx': 280, 'rotation': -349, 'x': 152, 'y': 224}]}, {'series_id': 757040, 'id': 114276, 'key_arrow_idx': 0, 'label': 'focal discontinuity of the enh', 'label_positions': [{'slice_idx': 285, 'x': 205, 'y': 341}], 'arrow_positions': [{'slice_idx': 285, 'rotation': -329, 'x': 112, 'y': 236}]}, {'series_id': 757040, 'id': 115524, 'key_arrow_idx': 0, 'label': 'gas', 'label_positions': [{'slice_idx': 285, 'x': 62, 'y': 312}], 'arrow_positions': [{'slice_idx': 285, 'rotation': 0, 'x': 100, 'y': 219}]}]
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+import json
+for f in ['acute-appendicitis-uncomplicated-1','appendicitis-22','acute-appendicitis-uncomplicated','complicated-appendicitis-8']:
+ p=json.load(open('/tmp/ct_json/'+f+'.json')); print(f)
+ for s in p['study']['series']:
+  for a in s.get('annotations',[]):print(a)
+PY" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+acute-appendicitis-uncomplicated-1
+{'series_id': 652360, 'id': 30938, 'key_arrow_idx': 0, 'label': 'appendix', 'label_positions': [{'slice_idx': 130, 'x': 205, 'y': 341}], 'arrow_positions': [{'slice_idx': 130, 'rotation': -401, 'x': 175, 'y': 250}]}
+{'series_id': 652360, 'id': 30939, 'key_arrow_idx': 0, 'label': 'appendicoliths', 'label_positions': [{'slice_idx': 135, 'x': 108, 'y': 284}], 'arrow_positions': [{'slice_idx': 135, 'rotation': 0, 'x': 177, 'y': 246}]}
+appendicitis-22
+acute-appendicitis-uncomplicated
+{'series_id': 652358, 'id': 30932, 'key_arrow_idx': 0, 'label': 'dilated appendix', 'label_positions': [{'slice_idx': 128, 'x': 47, 'y': 264}], 'arrow_positions': [{'slice_idx': 128, 'rotation': -283, 'x': 148, 'y': 223}]}
+{'series_id': 652358, 'id': 30929, 'key_arrow_idx': 0, 'label': 'appendicolith', 'label_positions': [{'slice_idx': 137, 'x': 205, 'y': 341}], 'arrow_positions': [{'slice_idx': 137, 'rotation': 0, 'x': 256, 'y': 256}]}
+{'series_id': 652358, 'id': 30930, 'key_arrow_idx': 0, 'label': 'appendicolith', 'label_positions': [{'slice_idx': 137, 'x': 192, 'y': 205}], 'arrow_positions': [{'slice_idx': 137, 'rotation': -396, 'x': 164, 'y': 190}]}
+{'series_id': 652359, 'id': 30934, 'key_arrow_idx': 0, 'label': 'periappendiceal fat stranding', 'label_positions': [{'slice_idx': 65, 'x': 219, 'y': 260}], 'arrow_positions': [{'slice_idx': 65, 'rotation': -132, 'x': 193, 'y': 293}]}
+complicated-appendicitis-8
+{'series_id': 756751, 'id': 114128, 'key_arrow_idx': 0, 'label': 'appendix arises from the caecu', 'label_positions': [{'slice_idx': 312, 'x': 205, 'y': 341}], 'arrow_positions': [{'slice_idx': 312, 'rotation': -284, 'x': 134, 'y': 202}]}
+{'series_id': 757040, 'id': 115525, 'key_arrow_idx': 0, 'label': 'gallstone', 'label_positions': [{'slice_idx': 126, 'x': 97, 'y': 373}], 'arrow_positions': [{'slice_idx': 126, 'rotation': 0, 'x': 130, 'y': 199}]}
+{'series_id': 757040, 'id': 114136, 'key_arrow_idx': 0, 'label': 'Several regional lymph nodes ', 'label_positions': [{'slice_idx': 280, 'x': 205, 'y': 341}], 'arrow_positions': [{'slice_idx': 280, 'rotation': -349, 'x': 152, 'y': 224}]}
+{'series_id': 757040, 'id': 114276, 'key_arrow_idx': 0, 'label': 'focal discontinuity of the enh', 'label_positions': [{'slice_idx': 285, 'x': 205, 'y': 341}], 'arrow_positions': [{'slice_idx': 285, 'rotation': -329, 'x': 112, 'y': 236}]}
+{'series_id': 757040, 'id': 115524, 'key_arrow_idx': 0, 'label': 'gas', 'label_positions': [{'slice_idx': 285, 'x': 62, 'y': 312}], 'arrow_positions': [{'slice_idx': 285, 'rotation': 0, 'x': 100, 'y': 219}]}
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+import json,hashlib,subprocess
+p=Path('qa/v6/ct_real_adv01')
+e=[]
+for f in ['acute-appendicitis-uncomplicated-1','appendicitis-22','acute-appendicitis-uncomplicated','complicated-appendicitis-8']:
+ d=json.load(open('/tmp/ct_json/'+f+'.json'))
+ for s in d['study']['series']:
+  for a in s.get('annotations',[]): e.append({'case':f,**a})
+(p/'source_annotations.json').write_text(json.dumps(e,ensure_ascii=False,indent=2))
+src=Path('/workspace/病理科普视频/ct_real/来源与授权.md').read_text();credits=Path('qa/v6/ct_real/credits.md').read_text()
+for line in credits.splitlines():
+ if line.startswith(('图像来源：','Image:')):assert line.strip() in src
+(p/'credits.md').write_text(credits+'\\n已用病例逐条与《来源与授权.md》核对。仅保留上述四例；裁切、等比缩放与独立圈注层，未修改原始解剖像素。\\n')
+(p/'审核意见.md').write_text('''# ct_real_adv01 独立审核（修改前）
+
+审核对象：qa/v6/ct_real/ 四场 review_sheet、逐句关键帧及 200% 局部；四个带配音 720p 文件的视频抽帧与媒体轨道/时码。当前环境不具备人工听音条件，不将音轨存在等同于已完成听感审核。非 CT 部分不改。
+
+## 共性问题
+
+1. 旧圈为 1.6px 淡紫虚线，引线 1.3px，720p 压缩后断续且不显眼；标签固定在 y=898，离病灶过远、颜色过浅，存在长引线穿过图像和来源行的问题。改为独立叠加的亮浅紫实线圈、柔和暗色外缘、较短引线；标签靠近圈的外上侧，文字加暗色描边，圈内不填色、不置中心实点。
+2. 冠状位全腹范围令 S09/S12 病灶偏小。使用原图局部等比放大，保留周围解剖；S09 圈限于轻度改变附近，S12 外围圈扩大至明显条索区，避免仅靠文字表达轻重。
+3. 来源行旧字号 20px，在 720p 只有约 13px。主窗增至 26px；S04 证据小窗的来源分两行放在窗下，避免长行跨到病理卡。保留四例编号及 CC BY-NC-SA 3.0，不添加测量值。
+
+## 逐场医学核查与修改决定
+
+- S04：s130 增厚管壁结构可见。旧圆心 (168,240) 范围可覆盖病变；保留围绕阑尾的圈，不将圈解释为精确壁轮廓。病例官方 appendix 箭头坐标 (175,250) 也落在该邻近区域。句 18 加强可见性；医生、研究卡、句 19 证据关系保持。
+- S09：官方冠状位关键图能见右下腹增粗管状结构；旧圈 (153,423) 位于其附近。病例无逐点官方标注，轴位 s058 的阑尾与盲肠相邻，单帧难确认完整边界。因此保留较保守的区域圈，不沿管壁精描、不新增箭头诊断。冠状局部放大；句 36 圈包含附近轻度脂肪条索。该病例文字明确 mild stranding，不能放大圈幅伪装重度。
+- S12：s128 官方 dilated appendix 箭头 (148,223)，旧圈 (160,210) 偏右上但仍覆盖相关结构；校正中心并以区域圈表示壁增厚。冠状位官方 periappendiceal fat stranding 箭头 (193,293)，旧圈 (172,295) 偏左；校正并保留更广的周围条索范围。句 47 先壁后周围，48 切冠状位连读。病例标题 uncomplicated，图示仅支持广泛条索，不能称影像确诊化脓分型。
+- S15：旧句 58 的小圈中心 (128,233) 与官方 focal discontinuity 箭头 (112,236) 有偏差，不宜继续把小圈当精确裂口。改为围绕官方坐标的较宽局部壁段圈；单张 JPEG 不足以精确定义缺损边缘，审核保留此限制。官方 gas 箭头 (100,219)；句 59 切换为覆盖相邻气体与积液区的区域圈。两句使用同一张 s285，58 不提前显示气体标签，59 仅一条对应引线，不涂盖原病灶。
+
+## 证据与署名
+
+病例来源与许可按 /workspace/病理科普视频/ct_real/来源与授权.md 核对；原片尾四例中英署名逐条匹配，无虚构作者/编号，沿用并注明仅裁切缩放和上层标注。官方浏览器 JSON 已存在 /tmp/ct_json/，本轮提取相关 annotations 保存为 source_annotations.json；不凭肉眼推拟精细缺口。网页实时读取失败，未用网页失败结果补造任何医学结论。
+
+本轮不增画 CT 解剖、不滤波、不修改源 JPEG；不新增组织窗。不同患者提示“典型病例”继续保留。
+''')
+PY" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('film/lib_ext/ct_real_adv01_images.js')
+p.write_text('''import {text} from './ct_r3_schematic.js';
+export {loadCT,files} from './ct_real_images.js';
+const crops=[[20,155,472,280],[0,0,512,695],[0,75,512,390],[20,90,472,310],[0,0,512,512],[0,70,512,350]];
+const closeups=[crops[0],[50,280,350,315],[40,115,420,300],[35,105,420,280],[45,150,365,335],[35,115,365,275]];
+// Zoom and translation only. Source JPEGs and grayscale values remain unchanged.
+export function realCT(c,im,i,box,rid,progress=0){
+ const u=Math.max(0,Math.min(1,progress)),a=crops[i],b=closeups[i];
+ const [sx,sy,sw,sh]=a.map((v,j)=>v+(b[j]-v)*u);
+ const small=box.w<600,foot=small?100:78;
+ const k=Math.min(box.w/sw,(box.h-foot)/sh),w=sw*k,h=sh*k;
+ const x=box.x+(box.w-w)/2,y=box.y+38+(box.h-foot-h)/2;
+ c.drawImage(im,sx,sy,sw,sh,x,y,w,h);
+ text(c,'典型病例',box.x+14,box.y+27,26,'#6B4C9A',500);
+ if(small){
+  text(c,"'`Radiopaedia.org rID ${rid}`,box.x+14,box.y+box.h-40,26,'"'#6B4C9A',500);
+  text(c,'CC BY-NC-SA 3.0',box.x+14,box.y+box.h-9,26,'#6B4C9A',500);
+ }else text(c,"'`Radiopaedia.org rID ${rid} · CC BY-NC-SA 3.0`,box.x+14,box.y+box.h-9,26,'"'#6B4C9A',500);
+ return {point:(px,py)=>({x:x+(px-sx)*k,y:y+(py-sy)*k}),k,bounds:{x,y,w,h}};
+}
+export function mark(c,g,p,r,label,alpha=1){
+ if(alpha<=0)return;
+ const q=g.point(...p),R=r*g.k;
+ const tx=Math.min(1830-label.length*32,q.x+R+34),ty=Math.max(175,q.y-R-20);
+ const angle=Math.atan2(ty-q.y,tx-q.x),ax=q.x+Math.cos(angle)*R,ay=q.y+Math.sin(angle)*R;
+ c.save();c.globalAlpha*=alpha;c.lineCap='round';c.lineJoin='round';
+ const ring=()=>{c.beginPath();c.arc(q.x,q.y,R,0,Math.PI*2);};
+ // Contrast underlay is confined to annotation edges, with no fill or filter on CT.
+ ring();c.strokeStyle='rgba(34,24,46,.65)';c.lineWidth=6.4;c.stroke();
+ ring();c.strokeStyle='#DCC9EF';c.lineWidth=3.2;c.stroke();
+ const lead=()=>{c.beginPath();c.moveTo(ax,ay);c.lineTo(tx-10,ty+6);c.lineTo(tx+34,ty+6);};
+ lead();c.strokeStyle='rgba(34,24,46,.7)';c.lineWidth=4.4;c.stroke();
+ lead();c.strokeStyle='#DCC9EF';c.lineWidth=2.2;c.stroke();
+ c.font='500 32px MixSans';c.strokeStyle='#241B2E';c.lineWidth=5;
+ c.strokeText(label,tx,ty);c.fillStyle='#DCC9EF';c.fillText(label,tx,ty);
+ c.restore();
+}
+''')
+p=Path('film/chapters/s04.js');p.write_text(p.read_text().replace(\"../lib_ext/ct_real_images.js\",\"../lib_ext/ct_real_adv01_images.js\"))
+# New delivery scripts keep old submissions untouched.
+for name in ['deliver.mjs','review.py','check.py']:
+ s=Path('qa/v6/ct_real/'+name).read_text().replace('qa/v6/ct_real','qa/v6/ct_real_adv01')
+ if name=='deliver.mjs':s=s.replace(\"'--crf','16'\",\"'--crf','16'\")
+ if name=='review.py':s=s.replace(\"crop2(im,(850,230,1530,810)\",\"crop2(im,(610,125,1870,850)\")
+ Path('qa/v6/ct_real_adv01/'+name).write_text(s)
+PY
+node qa/v6/ct_real_adv01/deliver.mjs S04 > qa/v6/ct_real_adv01/S04_render.log 2>&1" in /workspace/病理科普视频/v5_ct_dev
+exec
+/bin/bash -lc 'git -c user.name=mini -c user.email=mini@local add film/chapters/s04.js film/lib_ext/ct_real_adv01_images.js qa/v6/ct_real_adv01/审核意见.md 2>&1; tail -8 qa/v6/ct_real_adv01/S04_render.log; cat film/timeline.js | head -65' in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+fatal: Unable to create '/workspace/病理科普视频/v5/.git/worktrees/v5_ct_dev/index.lock': Read-only file system
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real_adv01/S04/stills/t_000.31.png
+/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real_adv01/S04/stills/t_002.08.png
+/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real_adv01/S04/stills/t_004.77.png
+// Timing snapshot generated from /workspace/病理科普视频/配音/全稿_v3/timeline.json
+// (lines n=29–34, real start/end seconds; no estimated durations).
+// Preserve the approved scene through its legacy clock.
+import scene from './chapters/s08.js';
+import {timing as allTiming} from './timing_snapshot.js';
+const timing=allTiming.filter(s=>s.n>=29&&s.n<=34);
+export const origin = timing[0].start;
+export const sentences = timing.map(s => ({id:s.n,start:s.start-origin,end:s.end-origin}));
+export const duration = sentences.at(-1).end + 0.8;
+export const T = {
+  at: id => sentences[id-29].start,
+  end: id => id===34 ? duration : sentences[id-29].end,
+  frac: (id,f) => sentences[id-29].start + (sentences[id-29].end-sentences[id-29].start)*f,
+};
+const legacy = {at:id=>(id-29)*6,end:id=>(id-28)*6,frac:(id,f)=>(id-29+f)*6};
+export function sceneTime(t) {
+  const s = sentences.find(s=>t<s.end) || sentences.at(-1);
+  if(t>=sentences.at(-1).end) return 33; // retain the approved final state for the tail
+  return (s.id-29)*6 + Math.max(0,(t-s.start)/(s.end-s.start))*6;
+}
+const draw = scene.draw;
+scene.draw = (ctx,t) => draw.call(scene,ctx,sceneTime(t),legacy);
+
+export function forScene(first,last,tail=.8){
+ const rows=allTiming.filter(s=>s.n>=first&&s.n<=last),origin=rows[0].start;
+ const row=id=>{const s=rows.find(s=>s.n===Number(id));if(!s)throw Error('Unknown sentence '+id);return s;};
+ return {origin,duration:rows.at(-1).end-origin+tail,rows,
+ T:{has:id=>rows.some(s=>s.n===id),at:id=>row(id).start-origin,end:id=>row(id).end-origin,frac:(id,f)=>row(id).start-origin+(row(id).end-row(id).start)*f}};
+}
+
+exec
+/bin/bash -lc 'git clone --bare --no-hardlinks . /tmp/ct-real-adv01.git > qa/v6/ct_real_adv01/git_setup.log 2>&1; git --git-dir=/tmp/ct-real-adv01.git --work-tree="$PWD" read-tree HEAD; tail -4 qa/v6/ct_real_adv01/S04_render.log' in /workspace/病理科普视频/v5_ct_dev
+codex
+找到病例原有的官方标注坐标了：S15 的壁缺损和气体位置、S12 的阑尾和周围脂肪条索位置都可据此校正，无需猜测。审核意见已写入交付目录，S04 正在渲染。
+
+当前 worktree 的 git 元数据只读，无法直接提交；我会按你的备用要求生成包含四场独立提交的 bundle。
+
+exec
+/bin/bash -lc 'tail -7 qa/v6/ct_real_adv01/S04_render.log; cat qa/v6/ct_real_adv01/git_setup.log; du -sh /tmp/ct-real-adv01.git; cat qa/v6/ct_real/S04/自检.md' in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real_adv01/S04/stills/t_022.12.png
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+deterministic: 6 frames match across render orders (2.555, 8.593, 11.612, 16.953, 21.598, 23.191 s)
+review_sheet S04 9
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+rendering 697 frames × 1 sample(s) @ 1920x1080 30fps with 1 worker(s)…
+Cloning into bare repository '/tmp/ct-real-adv01.git'...
+2.5G	/tmp/ct-real-adv01.git
+# S04 自检
+
+14 医生评估，15 才显示超声/CT选择；16 按序揭示2023、8项研究、1602人，17 揭示敏感度95%、特异度94%、[1]；18 在 s130 病变处加独立圈和引线「发现病变」；19 复用同图连接临床—影像—病理证据。保留统一医生和病理概念玻片。
+
+## 像素与来源
+
+- `S04_primary_rID197373_axial_s130_appendix-thick-wall_img67748644.jpeg`：`cc3eb8523e3d201c7fae753649b0ba3d34bfc3b75a91dde7834f1918da70c41c`（与批准原图一致）。
+
+- 原始图像未滤波、未重绘、未伪彩、未写回；Canvas 仅裁除边缘空白/床缘并等比缩放。高亮圈与引线为独立矢量叠加层，源坐标记录在 ct_real_images.js / ct_real_compare.js。
+- 每个实际出现的 CT 窗上角均显示「典型病例」，下角显示对应 Radiopaedia.org rID 与 CC BY-NC-SA 3.0。S04 句19小窗同样保留。
+- 中英片尾署名按来源与授权.md逐条原样抄录到 ../credits.md，只包含实际用到的四个病例。
+- 不上屏测量值、病例年龄、姓名、学校；未使用 Commons 或未批准病例。
+
+## 版式与时间
+
+- 沿用纸色、左侧文字、细引线及浅紫色无框标签；所有新增内容 y<950。原有字幕区域未改动。
+- S04保留病理概念玻片，不把它画成灰阶CT。
+- 时间按全稿_v3句号取 at/frac；已核对 timing_snapshot 全部起止与 timeline.json 相同。比较场句间图像淡入淡出0.7s，配音取对应真实旁白时间段。
+- 每句关键帧及200%局部、review_sheet、1080p无声片和720p真实配音片齐备。media_check.json记录时长及音视频流；determinism结果见对应render.log。
+
+## 医学边界与局限
+
+- 典型病例用于呈现所见，四场为四位不同患者，不表现连续复查，不依据CT直接判定病理三型。
+- 标注由批准切片上的可见结构定位，未新增诊断。单张切片不能替代完整序列阅片；S15微小壁强化中断的精确边缘仍建议影像科终审，本版不据此补画缺口或新增坏死范围。
+- 单窗方案不提供同步HE组织层次配对，优先真实CT可读性；组织对应关系由原解说及前后病理场景承担。
+
+ succeeded in 18775ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+rendering 697 frames × 1 sample(s) @ 1920x1080 30fps with 1 worker(s)…
+  70/697 frames  7s
+
+exec
+/bin/bash -lc 'head -3 film/timing_snapshot.js; tail -5 qa/v6/ct_real_adv01/S04_render.log; git --git-dir=/tmp/ct-real-adv01.git branch --show-current; du -sh /tmp/ct-real-adv01.git' in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+// Generated by generate_timeline.mjs; regenerate after narration replacement.
+export const timing = [
+  {
+rendering 697 frames × 1 sample(s) @ 1920x1080 30fps with 1 worker(s)…
+  70/697 frames  7s
+  140/697 frames  12s
+  210/697 frames  16s
+  280/697 frames  19s
+ct-dev
+4.2G	/tmp/ct-real-adv01.git
+
+ succeeded in 69907ms:
+exec
+/bin/bash -lc "cat > qa/v6/ct_real_adv01/validate.py <<'PY'
+import json,sys,subprocess,hashlib
+from pathlib import Path
+import numpy as np
+from PIL import Image
+s=sys.argv[1];root=Path('qa/v6/ct_real_adv01');p=root/s;m=json.load(open(p/'keyframes.json'))
+timing=json.loads(Path('film/timing_snapshot.js').read_text().split('=',1)[1].strip().rstrip(';'))
+orig=json.load(open('/workspace/病理科普视频/配音/全稿_v3/timeline.json'))['lines']
+assert all(a['start']==b['start'] and a['end']==b['end'] for a,b in zip(timing,orig))
+assets=[]
+for f in Path('film/assets/ct_real').iterdir():
+ source=Path('/workspace/病理科普视频/ct_real')/f.name[:3]/f.name
+ if source.exists():
+  digest=hashlib.sha256(f.read_bytes()).hexdigest(); assert digest==hashlib.sha256(source.read_bytes()).hexdigest(); assets.append({'file':f.name,'sha256':digest})
+parity={}
+for k in m['picks']:
+ a=np.array(Image.open(p/(k['name']+'.png')));b=np.array(Image.open(Path('qa/v6/ct_real')/s/(k['name']+'.png')))
+ assert np.array_equal(a[:,:600],b[:,:600]);parity[k['name']+'_sidebar']='pixel identical'
+ if s=='S04' and int(k['name'][1:3])<=15:assert np.array_equal(a,b);parity[k['name']+'_doctor_choice']='pixel identical'
+def pcm(args):
+ return np.frombuffer(subprocess.check_output(['ffmpeg','-v','error',*args,'-vn','-ac','1','-ar','16000','-f','s16le','-']),dtype=np.int16).astype(float)
+a=pcm(['-i',str(p/(s+'_带配音_720p.mp4'))]);b=pcm(['-ss',str(m['origin']),'-t',str(m['duration']),'-i','/workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav'])
+n=min(len(a),len(b));corr=float(np.corrcoef(a[:n],b[:n])[0,1]);assert corr>.98,corr
+# Review the encoded 720p result, not just browser stills.
+frames=[]
+for k in m['picks']:
+ dest=p/(k['name']+'_video720.png');subprocess.run(['ffmpeg','-v','error','-y','-ss',str(k['t']),'-i',str(p/(s+'_带配音_720p.mp4')),'-frames:v','1',str(dest)],check=True)
+ frames.append(Image.open(dest).resize((640,360)))
+sheet=Image.new('RGB',(1280,360*((len(frames)+1)//2)),'#F4EFE6')
+for i,im in enumerate(frames):sheet.paste(im,((i%2)*640,(i//2)*360))
+sheet.save(p/'review_video720.png')
+(p/'validation.json').write_text(json.dumps({'timeline_matches':True,'assets':assets,'non_CT_parity':parity,'real_narration_PCM_correlation':corr},ensure_ascii=False,indent=2))
+print(s,'validation passed; narration correlation',corr)
+PY
+cat > qa/v6/ct_real_adv01/日志.md <<'EOF'
+# ct_real_adv01 日志
+
+- 开工：已读取指定分镜、素材库 B–J、研究表、真实配音 timeline、风格规范、交付参考。未执行旧 ct_adv01 brief。
+- 开工锁定文件校验：locked_start.sha256。未编辑锁定文件。
+- 先独立审核旧交付，再写审核意见.md，随后修改。官方标注坐标来自既存病例 viewer JSON，摘录 source_annotations.json。
+- 原 git add 失败：worktree 元数据 /workspace/病理科普视频/v5/.git/worktrees/v5_ct_dev/index.lock 为只读。按用户 fallback，在 /tmp/ct-real-adv01.git 建立本 worktree 的独立 bare 副本，仅以本 worktree 为工作树逐场提交，不写主线/其他 worktree；最后生成 ct-dev.bundle。
+- 旧交付 qa/v6/ct_real/ 保持原样；本轮所有交付在 qa/v6/ct_real_adv01/。
+- 渲染顺序 S04 → S09 → S12 → S15；每次只有一个 render.mjs / 一个浏览器，--workers 1。
+- 音轨以源 WAV 的句号范围裁取，校验输出解码 PCM 与源段相关性；未声称完成人工听音。
+EOF
+node --check film/lib_ext/ct_real_adv01_images.js
+python3 - <<'PY'
+from pathlib import Path
+p=Path('qa/v6/ct_real_adv01/S04/自检.md')
+p.write_text('''# S04 自检
+
+- 14–15 医生、检查选择与旧稿整帧像素一致；16–17 研究卡保持原数字、原时序；18 病变阑尾外圈改为 3.2px 亮浅紫实线加暗色外缘，短引线连至附近无框标签，未遮填管腔；19 原证据关系保留。
+- 真实图仍为 rID 197373 s130，源文件字节哈希与批准原图一致，未重绘/滤波。圈为区域定位，不作精细壁界。
+- 窗上“典型病例”保留。主窗来源26px，小窗分两行26px；无新增数字结论、姓名或学校。
+- 非 CT 文字栏逐帧像素比较为零差异；句19医生/卡片未修改。浅米纸底与原画风保持，新增内容 y<950。
+- 时间来自全稿_v3句号，timeline snapshot 与原 JSON 核对相同。真实配音剪取对应原 WAV；媒体时长/轨道见 media_check.json，音轨相关性与非CT parity 见 validation.json。
+- 每句1–2帧、200%局部、review_sheet、1080p视频与带配音720p齐备；编码后720p抽帧见 review_video720.png；determinism通过，见 S04_render.log。
+- 单帧只呈现病变线索，不将CT当作病理分型。没有新增组织窗；原病理证据概念卡保留。
+''')
+PY" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+exec
+/bin/bash -lc 'tail -7 qa/v6/ct_real_adv01/S04_render.log; df -h /tmp | tail -1' in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+[libx264 @ 0x561858675180] Weighted P-Frames: Y:8.6% UV:6.5%
+[libx264 @ 0x561858675180] ref P L0: 76.0% 15.7%  7.0%  1.3%  0.0%
+[libx264 @ 0x561858675180] ref B L0: 39.4% 60.2%  0.4%
+[libx264 @ 0x561858675180] ref B L1: 97.5%  2.5%
+[libx264 @ 0x561858675180] kb/s:244.16
+[aac @ 0x561858ec6600] Qavg: 52179.230
+{'S04.mp4': {'duration': 23.233333, 'streams': [{'codec_type': 'video', 'codec_name': 'h264', 'width': 1920, 'height': 1080}]}, 'S04_带配音_720p.mp4': {'duration': 23.224, 'streams': [{'codec_type': 'video', 'codec_name': 'h264', 'width': 1280, 'height': 720}, {'codec_type': 'audio', 'codec_name': 'aac', 'width': None, 'height': None}]}}
+/dev/vdb        128G  104G   25G  81% /tmp
+
+exec
+/bin/bash -lc 'python3 qa/v6/ct_real_adv01/validate.py S04; git --git-dir=/tmp/ct-real-adv01.git --work-tree="$PWD" add film/chapters/s04.js film/lib_ext/ct_real_adv01_images.js qa/v6/ct_real_adv01; git --git-dir=/tmp/ct-real-adv01.git --work-tree="$PWD" -c user.name=mini -c user.email=mini@local commit -m '"'ct_real_adv01 (Codex): S04 清晰圈注、短引线与来源许可可读性' > qa/v6/ct_real_adv01/S04_commit.log 2>&1" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 12492ms:
+S04 validation passed; narration correlation 0.999992852603528
+
+exec
+/bin/bash -lc 'head -3 qa/v6/ct_real_adv01/S04_commit.log; cat film/chapters/s09.js; cat film/chapters/s12.js; cat film/chapters/s15.js' in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+[ct-dev f699cef] ct_real_adv01 (Codex): S04 清晰圈注、短引线与来源许可可读性
+ 71 files changed, 661 insertions(+), 1 deletion(-)
+ create mode 100644 film/lib_ext/ct_real_adv01_images.js
+import {compareScene} from '../lib_ext/ct_real_compare.js';
+export default compareScene(35,36,1);
+import {compareScene} from '../lib_ext/ct_real_compare.js';
+export default compareScene(47,48,2);
+import {compareScene} from '../lib_ext/ct_real_compare.js';
+export default compareScene(58,59,3);
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+s=Path('film/lib_ext/ct_real_compare.js').read_text().replace(\"./ct_real_images.js\",\"./ct_real_adv01_images.js\")
+s=s.replace(\"const box={x:610\", \"const zoom=ramp(t,T.at(first),T.frac(first,.6)-T.at(first));\\n const box={x:610\")
+s=s.replace('box,rid);','box,rid,zoom);')
+s=s.replace(\"26,'壁增厚'\",\"26,'管径增粗、壁增厚'\")
+s=s.replace(\"[160,210],24\",\"[148,223],24\").replace(\"[165,214],48\",\"[162,218],48\").replace(\"[172,295],49\",\"[193,293],49\")
+s=s.replace(\"[128,233],10\",\"[112,236],16\").replace(\"[109,229],28\",\"[111,229],31\")
+Path('film/lib_ext/ct_real_adv01_compare.js').write_text(s)
+p=Path('film/chapters/s09.js');p.write_text(p.read_text().replace('ct_real_compare.js','ct_real_adv01_compare.js'))
+PY
+node qa/v6/ct_real_adv01/deliver.mjs S09 > qa/v6/ct_real_adv01/S09_render.log 2>&1" in /workspace/病理科普视频/v5_ct_dev
+codex
+S04 已完成渲染并保存独立提交。病变圈、近旁标签和两处来源行已检查；医生、选择图及左侧文字栏通过像素一致性核对。720p 音轨也与原配音对应段匹配。接下来处理 S09，重点放大阑尾区域，同时保留“轻度”脂肪改变的视觉程度。
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('qa/v6/ct_real_adv01/S09');p.mkdir(exist_ok=True)
+(p/'自检.md').write_text('''# S09 自检
+
+- 句35使用rID30389冠状s024官方关键图，先圈增粗/增厚结构；句36轴位s058圈及周围轻度模糊脂肪。两图原始字节保持。
+- 冠状由全腹缓推至右下腹所在范围，轴位保留盲肠旁背景；圈为区域定位，未沿单帧无法确认的阑尾边界精描。该病例无官方逐点箭头，此项保留医学不确定性，不新增精确诊断。
+- 实线圈3.2px、短引线2.2px，亮浅紫加暗外缘；32px标签紧靠圈上侧，无框、无填色，不以实点盖住病灶。与S12相比圈范围较小，条索较轻；不以放大冒充严重渗出。
+- 左栏、原纸色/画风保持像素一致，未增改组织窗。所有新增内容y<950。窗上“典型病例”，窗下来源许可26px，编号30389准确。
+- 按35–36句号取时，句间0.7s淡入；两图同句连续缓推，不写固定场景秒数。真实配音匹配、媒体流/时长、确定性与源图sha256见validation.json、media_check.json、S09_render.log。
+- 每句两帧及200%局部、review_sheet、编码720p抽帧总览、两种视频均交付。
+- 不写测量、姓名、学校，不宣称CT确诊病理三型；真实病例为独立患者。
+''')
+PY
+tail -6 qa/v6/ct_real_adv01/S09_render.log" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+  22/218 frames  2s
+  44/218 frames  3s
+  66/218 frames  4s
+  88/218 frames  5s
+  110/218 frames  7s
+  132/218 frames  8s
+
+ succeeded in 23652ms:
+exec
+/bin/bash -lc 'python3 qa/v6/ct_real_adv01/validate.py S09 && git --git-dir=/tmp/ct-real-adv01.git --work-tree="$PWD" add film/chapters/s09.js film/lib_ext/ct_real_adv01_compare.js qa/v6/ct_real_adv01 && git --git-dir=/tmp/ct-real-adv01.git --work-tree="$PWD" -c user.name=mini -c user.email=mini@local commit -m '"'ct_real_adv01 (Codex): S09 病灶缓推与轻度脂肪模糊区域标注' > qa/v6/ct_real_adv01/S09_commit.log 2>&1" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 1277ms:
+S09 validation passed; narration correlation 0.9999977748112158
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('film/chapters/s12.js');p.write_text(p.read_text().replace('ct_real_compare.js','ct_real_adv01_compare.js'))
+PY
+node qa/v6/ct_real_adv01/deliver.mjs S12 > qa/v6/ct_real_adv01/S12_render.log 2>&1" in /workspace/病理科普视频/v5_ct_dev
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('qa/v6/ct_real_adv01/S12');p.mkdir(exist_ok=True)
+(p/'自检.md').write_text('''# S12 自检
+
+- 句47使用rID197370轴位s128：先壁增厚强化，句内按frac切到更广周围条索；48接冠状s065，维持“周围渗出明显”。官方箭头源坐标阑尾(148,223)、冠状条索(193,293)，已修正旧圈偏移。
+- 同一批准病例两张图都出现。等比缓推至下腹病灶区域，没有修改灰阶或源JPEG；周围渗出圈半径48/49源像素，比S09的26/29源像素更广，并对应原图真实条索范围。
+- 标签靠圈外上侧，3.2px浅紫圈与2.2px引线有暗色外缘，圈内不填色，标签不压病灶。先壁后周围两种状态互替，每次一条引线。
+- 左栏文字与旧稿逐关键帧像素一致；沿用米色纸底和画风，无新增组织窗，新增内容y<950。来源许可26px、rID197370、“典型病例”清楚保留。
+- 病例标题为uncomplicated；不将“广泛条索”直接等同于病理化脓分型，不补画全层炎症组织。
+- 时间绑定47–48句号，切图淡入0.7s；原timeline与snapshot一致。真实配音裁段及媒体时长、轨道、确定性和源图哈希检查记录在validation.json、media_check.json、S12_render.log。
+- 每句两帧+200%局部、review_sheet、编码后720p总览、1080p无声及720p真实配音片齐备；S47早晚两帧分别覆盖壁/周围状态。
+''')
+PY
+tail -5 qa/v6/ct_real_adv01/S12_render.log; head -1 qa/v6/ct_real_adv01/S09_commit.log" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+rendering 223 frames × 1 sample(s) @ 1920x1080 30fps with 1 worker(s)…
+  22/223 frames  2s
+  44/223 frames  3s
+  66/223 frames  4s
+  88/223 frames  5s
+[ct-dev 6ce19b2] ct_real_adv01 (Codex): S09 病灶缓推与轻度脂肪模糊区域标注
+
+codex
+S09 已完成并保存独立提交。S12 正在渲染：已按官方坐标校正阑尾和冠状位脂肪条索的圈注，句 47 先标壁、再扩至周围，句 48 接冠状位。两场都只缩放和平移真实图像，靠原有条索范围及对应圈注呈现轻重差别。
+
+ succeeded in 23375ms:
+exec
+/bin/bash -lc 'python3 qa/v6/ct_real_adv01/validate.py S12 && git --git-dir=/tmp/ct-real-adv01.git --work-tree="$PWD" add film/chapters/s12.js qa/v6/ct_real_adv01 && git --git-dir=/tmp/ct-real-adv01.git --work-tree="$PWD" -c user.name=mini -c user.email=mini@local commit -m '"'ct_real_adv01 (Codex): S12 按官方坐标校正并突出广泛周围条索' > qa/v6/ct_real_adv01/S12_commit.log 2>&1" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 1375ms:
+S12 validation passed; narration correlation 0.9999961334953704
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('film/chapters/s15.js');p.write_text(p.read_text().replace('ct_real_compare.js','ct_real_adv01_compare.js'))
+PY
+node qa/v6/ct_real_adv01/deliver.mjs S15 > qa/v6/ct_real_adv01/S15_render.log 2>&1" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 25501ms:
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('qa/v6/ct_real_adv01/S15');p.mkdir(exist_ok=True)
+(p/'自检.md').write_text('''# S15 自检
+
+- 同一张批准图rID242634轴位s285贯穿58–59。58仅标“壁强化缺损”，圈中心由旧(128,233)校正到官方箭头(112,236)，半径16源像素，保守包括局部壁段，不描摹猜测缺口。
+- 59才切换为“腔外气体、脓肿”，区域圈(111,229)、半径31源像素，覆盖官方gas箭头(100,219)及相邻含气积液区域。前一引线撤去，任何时刻只保留一条；58不提前点气体。
+- 只以原图等比缓推、平移增强可见度；圈内不填色、不放锚点实点。圈3.2px、短引线2.2px、文字32px浅紫并有暗色外缘，不遮挡缺损或气泡。
+- 左栏、纸底、医生卡片等非CT内容保持原样。窗上典型病例，窗下rID242634与CC BY-NC-SA3.0，26px；新增内容y<950，无新增姓名/学校/测量数值。
+- 两句时序由T.at/frac读取真实timeline；确定性检查、媒体流/时长、原音PCM对应和源图sha256见相应JSON与S15_render.log。每句两帧+200%局部、review_sheet、编码720p总览与双视频齐备。
+- 单张JPEG无法独立确认精确壁缺损边缘或脓肿完整边界：依据官方病例定位、使用局部区域圈，保留此局限，不补画断壁、不宣称CT直接确诊坏疽型。
+''')
+Path('qa/v6/ct_real_adv01/自检.md').write_text('''# ct_real_adv01 总自检
+
+## 交付及独立审核
+
+先审旧稿并保存审核意见.md，后逐场修改。S04/S09/S12/S15目录均交付每句1–2张1920×1080关键帧、200%局部、review_sheet.png、SNN.mp4、SNN_带配音_720p.mp4、逐场自检。另有review_video720.png与逐帧_video720.png供核对编码后可读性；media_check.json记录时长和音视频轨道，validation.json记录真实音轨相关性、源图哈希及左栏像素一致性。
+
+## 逐条要求对照
+
+1. 圈注加强为3.2px浅紫实线，有6.4px低透明暗色外缘；引线2.2px，32px无框浅紫标签移近圈外上侧。无填充，无中心实点，未遮住病灶。保留原纸色与非CT画风。
+2. S04使用197373 s130；S09使用30389冠状s024与轴位s058；S12使用197370轴位s128与冠状s065；S15使用242634轴位s285。仅原图缩放、平移、上层圈注，不改变源文件像素，六张资产sha256与批准图一致。
+3. 医学核查优先官方标注坐标：S12壁/冠状条索已校正，S15壁缺损中心已校正。S09无官方逐点箭头，保守区域圈，不能将单帧边界当作完整阑尾轮廓。细节与来源坐标见审核意见.md、source_annotations.json。
+4. S09维持较小区域圈/轻度条索；S12明显广泛条索以更大区域圈呈现。图像原有差别保留，未滤波增强或人为制造渗出。两场缓推均按句内进度。
+5. S15句58仅壁强化缺损，句59再圈相邻气体/脓肿，每次一条短引线。同一张图不跳换病例，不涂补缺损。
+6. 各窗保留典型病例及准确rID、许可。主窗26px来源行；S04证据小窗分两行26px，未侵入病理卡。credits.md四例中英逐条原文核对一致，未添加作者/编号，未列未用病例。
+7. 所有非CT文字栏像素一致；S04句14/15整帧像素一致。未修改医生/卡片绘制库，未修改film/main.js、timeline.js或既有lib_ext，新增库以ct_real_adv01_命名。新内容y<950，字幕区未占用。
+8. 所有时序基于全稿_v3句号；snapshot已核对原timeline，句间切换沿用0.7s。配音为对应原WAV裁段，PCM相关性均>0.98；并非仅检查AAC轨道存在。
+9. 四场determinism均通过，逐场只一个渲染进程/浏览器、workers=1。锁定文件开工和收工sha256一致（locked_start/end.sha256、locked_verify.log）。未执行旧ct_adv01方案，未修改其他worktree，未push/合并。
+10. Git元数据只读，使用独立临时bare仓库对本worktree逐场保存四个提交；交付ct-dev.bundle，说明及导入前提见日志.md、bundle_verify.log和commits.log。
+
+## 保留限制
+
+S15微小缺损边缘、脓肿完整范围和S09阑尾连续走行无法凭这些单张JPEG独立确认。本版以官方病例标注/文字与保守区域圈呈现，不声称替代完整序列阅片。四例各是不同患者，CT仅呈现相关所见，不直接确诊病理三型。带配音文件已作视频抽帧及源音轨对应校验，当前环境未完成人工听感审核。
+''')
+PY
+sha256sum engine/lib/{he,he_detail,wash,ann,scope,camera}.js parity_r4/chapters/04.js > qa/v6/ct_real_adv01/locked_end.sha256
+sha256sum -c qa/v6/ct_real_adv01/locked_start.sha256 > qa/v6/ct_real_adv01/locked_verify.log
+tail -5 qa/v6/ct_real_adv01/S15_render.log" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+[libx264 @ 0x55fd69220180] ref B L0: 87.4% 11.6%  1.0%
+[libx264 @ 0x55fd69220180] ref B L1: 94.2%  5.8%
+[libx264 @ 0x55fd69220180] kb/s:545.05
+[aac @ 0x55fd69a69d00] Qavg: 49826.043
+{'S15.mp4': {'duration': 9.233333, 'streams': [{'codec_type': 'video', 'codec_name': 'h264', 'width': 1920, 'height': 1080}]}, 'S15_带配音_720p.mp4': {'duration': 9.232, 'streams': [{'codec_type': 'video', 'codec_name': 'h264', 'width': 1280, 'height': 720}, {'codec_type': 'audio', 'codec_name': 'aac', 'width': None, 'height': None}]}}
+
+exec
+/bin/bash -lc 'python3 qa/v6/ct_real_adv01/validate.py S15' in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 1045ms:
+S15 validation passed; narration correlation 0.9999975022119978
+
+codex
+四场视频已生成，S15 的两句高亮顺序和圈注位置已检查。确定性、媒体时长、真实配音段对应、源图字节一致性及非 CT 文字栏核对均通过，锁定文件哈希也未变化。
+
+我正在保存最后一场提交并验证 bundle。单张 JPEG 无法确认的精细边界，以及尚未完成人工听感审核这一限制，已写入自检。
+
+exec
+/bin/bash -lc "cat qa/v6/ct_real_adv01/locked_verify.log; rg 'deterministic:' qa/v6/ct_real_adv01/S*_render.log; git diff --stat" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+engine/lib/he.js: OK
+engine/lib/he_detail.js: OK
+engine/lib/wash.js: OK
+engine/lib/ann.js: OK
+engine/lib/scope.js: OK
+engine/lib/camera.js: OK
+parity_r4/chapters/04.js: OK
+qa/v6/ct_real_adv01/S15_render.log:deterministic: 6 frames match across render orders (1.016, 3.416, 4.616, 6.74, 8.586, 9.199 s)
+qa/v6/ct_real_adv01/S09_render.log:deterministic: 6 frames match across render orders (0.8, 2.692, 3.638, 5.312, 6.767, 7.243 s)
+qa/v6/ct_real_adv01/S04_render.log:deterministic: 6 frames match across render orders (2.555, 8.593, 11.612, 16.953, 21.598, 23.191 s)
+qa/v6/ct_real_adv01/S12_render.log:deterministic: 6 frames match across render orders (0.819, 2.754, 3.722, 5.434, 6.923, 7.411 s)
+ film/chapters/s04.js | 2 +-
+ film/chapters/s09.js | 2 +-
+ film/chapters/s12.js | 2 +-
+ film/chapters/s15.js | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+
+exec
+/bin/bash -lc "cat >> qa/v6/ct_real_adv01/日志.md <<'EOF'
+- 四场已逐场自检、通过determinism；输出配音解码PCM与对应源段相关系数均大于0.99999。全部旧片尾署名原文核对一致。
+- 收工：locked_end.sha256与locked_start.sha256一致，七个锁定文件全部OK（locked_verify.log）。
+- bundle为基于原HEAD 4a1ab4f 的增量包，包含四个ct_real_adv01 (Codex)场景提交；接收仓库需已有该基点。可用 git bundle verify 检查，以临时分支读取bundle内ct-dev；本轮不执行任何合并或push。
+EOF
+git --git-dir=/tmp/ct-real-adv01.git --work-tree=\""'$PWD" add film/chapters/s15.js qa/v6/ct_real_adv01
+git --git-dir=/tmp/ct-real-adv01.git --work-tree="$PWD" -c user.name=mini -c user.email=mini@local commit -m '"'ct_real_adv01 (Codex): S15 校正壁缺损定位、分句标气体脓肿并完成验收' > qa/v6/ct_real_adv01/S15_commit.log 2>&1
+git --git-dir=/tmp/ct-real-adv01.git log -4 --format='%h %s' > qa/v6/ct_real_adv01/commits.log
+git --git-dir=/tmp/ct-real-adv01.git bundle create \""'$PWD/qa/v6/ct_real_adv01/ct-dev.bundle" ct-dev ''^4a1ab4f' in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 1942ms:
+exec
+/bin/bash -lc 'git bundle verify qa/v6/ct_real_adv01/ct-dev.bundle > qa/v6/ct_real_adv01/bundle_verify.log 2>&1; sha256sum qa/v6/ct_real_adv01/ct-dev.bundle > qa/v6/ct_real_adv01/bundle.sha256; cat qa/v6/ct_real_adv01/commits.log; cat qa/v6/ct_real_adv01/bundle_verify.log; ls -lh qa/v6/ct_real_adv01/ct-dev.bundle' in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+e732b75 ct_real_adv01 (Codex): S15 校正壁缺损定位、分句标气体脓肿并完成验收
+7cb6858 ct_real_adv01 (Codex): S12 按官方坐标校正并突出广泛周围条索
+6ce19b2 ct_real_adv01 (Codex): S09 病灶缓推与轻度脂肪模糊区域标注
+f699cef ct_real_adv01 (Codex): S04 清晰圈注、短引线与来源许可可读性
+qa/v6/ct_real_adv01/ct-dev.bundle is okay
+The bundle contains this ref:
+e732b752e021aa51541cf717297bc0723c44877d refs/heads/ct-dev
+The bundle requires this ref:
+4a1ab4fd95fa34815857ab004f45fa45f598436d 
+The bundle uses this hash algorithm: sha1
+-rw-r--r-- 1 box box 45M Nov 13 12:37 qa/v6/ct_real_adv01/ct-dev.bundle
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+import json
+p=Path('qa/v6/ct_real_adv01')
+for s in ['S04','S09','S12','S15']:
+ d=p/s;m=json.load(open(d/'keyframes.json'))
+ for k in m['picks']:
+  for suf in ['.png','_200.png','_video720.png']:assert (d/(k['name']+suf)).is_file()
+ for f in ['review_sheet.png','review_video720.png','自检.md',s+'.mp4',s+'_带配音_720p.mp4','media_check.json','validation.json']:assert (d/f).stat().st_size>0
+ print(s,len(m['picks']),'keyframes and crops; all deliverables present')
+PY
+git --git-dir=/tmp/ct-real-adv01.git diff --name-only 4a1ab4f ct-dev -- film engine parity_r4
+sha256sum -c qa/v6/ct_real_adv01/locked_start.sha256" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+S04 9 keyframes and crops; all deliverables present
+S09 4 keyframes and crops; all deliverables present
+S12 4 keyframes and crops; all deliverables present
+S15 4 keyframes and crops; all deliverables present
+film/chapters/s04.js
+film/chapters/s09.js
+film/chapters/s12.js
+film/chapters/s15.js
+film/lib_ext/ct_real_adv01_compare.js
+film/lib_ext/ct_real_adv01_images.js
+engine/lib/he.js: OK
+engine/lib/he_detail.js: OK
+engine/lib/wash.js: OK
+engine/lib/ann.js: OK
+engine/lib/scope.js: OK
+engine/lib/camera.js: OK
+parity_r4/chapters/04.js: OK
+
+codex
+四场审核、修改和交付已完成：加强圈注、贴近标签、校正定位，保留来源许可；S15 按句 58/59 依次标壁缺损和气体/脓肿。CT 原图及非 CT 内容保持，锁定文件校验通过。
+
+- [审核意见](qa/v6/ct_real_adv01/审核意见.md)
+- [总自检](qa/v6/ct_real_adv01/自检.md)
+- [更新署名](qa/v6/ct_real_adv01/credits.md)
+
+四场关键帧、200% 局部和双版本视频均已齐备。git 元数据只读，四个独立提交已打入 [ct-dev.bundle](qa/v6/ct_real_adv01/ct-dev.bundle)，验证通过；未 push、未合并。精细医学边界及未完成人工听感审核的限制已记入自检。
+tokens used
+100,930
+四场审核、修改和交付已完成：加强圈注、贴近标签、校正定位，保留来源许可；S15 按句 58/59 依次标壁缺损和气体/脓肿。CT 原图及非 CT 内容保持，锁定文件校验通过。
+
+- [审核意见](qa/v6/ct_real_adv01/审核意见.md)
+- [总自检](qa/v6/ct_real_adv01/自检.md)
+- [更新署名](qa/v6/ct_real_adv01/credits.md)
+
+四场关键帧、200% 局部和双版本视频均已齐备。git 元数据只读，四个独立提交已打入 [ct-dev.bundle](qa/v6/ct_real_adv01/ct-dev.bundle)，验证通过；未 push、未合并。精细医学边界及未完成人工听感审核的限制已记入自检。

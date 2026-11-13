@@ -1,0 +1,38 @@
+{
+  "s69_fibrosis": {
+    "native_roi": [
+      960,
+      350,
+      1260,
+      650
+    ],
+    "video_time": 4.115865000000001,
+    "raw_MAE": 5.362440740740741,
+    "grayscale_correlation": 0.9974082215094813,
+    "note": "Lossy JPEG95 + CRF16 and iris re-encode; not lossless parity. Structural identity criterion correlation>0.95."
+  },
+  "s70_lymph": {
+    "native_roi": [
+      960,
+      350,
+      1260,
+      650
+    ],
+    "video_time": 6.608158333333313,
+    "raw_MAE": 4.8937740740740745,
+    "grayscale_correlation": 0.9976645252087011,
+    "note": "Lossy JPEG95 + CRF16 and iris re-encode; not lossless parity. Structural identity criterion correlation>0.95."
+  },
+  "s70_plasma": {
+    "native_roi": [
+      960,
+      350,
+      1260,
+      650
+    ],
+    "video_time": 8.288199999999966,
+    "raw_MAE": 3.56267037037037,
+    "grayscale_correlation": 0.9993134776630752,
+    "note": "Lossy JPEG95 + CRF16 and iris re-encode; not lossless parity. Structural identity criterion correlation>0.95."
+  }
+}

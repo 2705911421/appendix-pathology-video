@@ -1,0 +1,679 @@
+{
+  "lane": "s19_b09",
+  "status": "failed",
+  "commit": "7b00cca99293f6e3eb8e119783f0f65f64f9a1fd",
+  "metrics": {
+    "fidelity": {
+      "mae_255": 0.07053571586677315,
+      "threshold": 1.0,
+      "pass": true
+    },
+    "unchanged": {
+      "mae_255": 0.0,
+      "n_pixels": 386194,
+      "collagen_percent": 13.013859941457817,
+      "cells_percent": 5.7624915666320184,
+      "measurement_camera_z": 2.7
+    },
+    "sizes": {
+      "lymph": {
+        "new_n": 112,
+        "unique_source_cells": 112,
+        "reference_n": 128,
+        "new_median_px": 12.511543321050887,
+        "reference_median_px": 12.19777576420693,
+        "ratio": 1.0257233419362137,
+        "implied_um_at_fov475": 6.991744797057849,
+        "samples": [
+          13.310390350493705,
+          11.865669967289703,
+          12.633791217482694,
+          12.433011814969907,
+          13.108614954070728,
+          11.107369731383121,
+          13.797573557037033,
+          11.844171212618335,
+          13.468722866130824,
+          11.87847042769519,
+          11.538664530657769,
+          12.964096793197664,
+          12.731423094711953,
+          11.554773064570863,
+          12.574463957648613,
+          10.683221258464203,
+          11.8430579356062,
+          13.480038738442948,
+          10.665797446546517,
+          14.01475021750274,
+          10.814055221086582,
+          13.155416794159825,
+          12.664393887390315,
+          13.90879742660802,
+          12.00137939189037,
+          12.659608694496603,
+          11.960039970957876,
+          11.885805538291953,
+          12.573602333066091,
+          12.533070463443199,
+          11.296454988527714,
+          12.136645016126861,
+          13.758578217392033,
+          12.268715573049318,
+          13.865319680752897,
+          11.986781601978237,
+          13.188102583673263,
+          14.28697505060749,
+          13.476205758393219,
+          11.651996599159263,
+          11.536833650491984,
+          12.442147344251264,
+          11.673151091408297,
+          12.590990602337063,
+          13.695101306766084,
+          13.691997787708647,
+          12.527995420429301,
+          12.21184722294029,
+          11.537645015058205,
+          12.373325766938011,
+          13.098085360002264,
+          11.874463759795747,
+          11.551989285479634,
+          14.308330574930794,
+          14.246381134407581,
+          11.61478341050546,
+          12.414788619866222,
+          12.524266539060749,
+          12.663145199719384,
+          10.96861190576861,
+          11.583715845831167,
+          13.158209577011384,
+          12.84595237173524,
+          12.633916568739492,
+          12.295847387672026,
+          11.513387261447715,
+          10.69612665372518,
+          13.307227701219848,
+          12.801835113784199,
+          12.499842336691842,
+          12.687242216202,
+          13.35244346892289,
+          10.987807968176371,
+          13.312668469587036,
+          11.735154441935048,
+          11.559044777549035,
+          12.156628749802415,
+          11.201097853573994,
+          11.150844751097582,
+          12.278244483733152,
+          10.581312750220528,
+          11.04100039197516,
+          11.171005535411062,
+          12.179433826325367,
+          13.33286131634808,
+          13.748865463502376,
+          12.523244305409932,
+          14.541115967667903,
+          12.299934688425106,
+          12.72123023566937,
+          12.012741543523287,
+          14.0753672730036,
+          13.1732064744442,
+          12.750285808059651,
+          12.630181295627619,
+          12.874385236538822,
+          11.811535568752369,
+          13.612595133854217,
+          13.572092449610569,
+          12.799337265439195,
+          13.052133791460088,
+          12.528290609205035,
+          12.348651046770678,
+          11.501268924216303,
+          12.80226804059137,
+          11.631134505249427,
+          11.788503779254667,
+          12.69820221645992,
+          12.753107845902694,
+          11.788911604053819,
+          11.940200566147142,
+          11.993005352071025
+        ]
+      },
+      "plasma": {
+        "new_n": 42,
+        "unique_source_cells": 14,
+        "reference_n": 22,
+        "new_median_px": 10.78551040975994,
+        "reference_median_px": 10.432809538265142,
+        "ratio": 1.0338068925921797,
+        "implied_um_at_fov475": 6.027196993689378,
+        "samples": [
+          10.093312821198227,
+          11.0585623600986,
+          9.850820925722555,
+          11.123763395102609,
+          11.05475916933255,
+          11.13333567482391,
+          9.678309941332781,
+          11.79386523479626,
+          10.859462239333542,
+          10.821937895837028,
+          9.743788966468808,
+          11.571044422625809,
+          9.993210348592617,
+          10.016774924829148,
+          10.122294477222557,
+          11.226649260534064,
+          10.155262585646335,
+          11.311905470014379,
+          11.076649068972452,
+          11.313110163486908,
+          9.990030091474093,
+          11.987126142696034,
+          10.880541188281834,
+          10.981741524278323,
+          10.057597129178493,
+          11.7638163469978,
+          10.0220442115595,
+          10.16855132517532,
+          9.822467584812692,
+          10.960196996504541,
+          10.14353318104377,
+          11.431411115836438,
+          10.74908292368285,
+          11.022464640185868,
+          9.980954386145354,
+          12.109617998469794,
+          10.550562456306015,
+          10.716937497063475,
+          10.051334781987311,
+          11.891657761956028,
+          9.708003523616938,
+          9.925412127684192
+        ]
+      },
+      "oil_body": {
+        "n": 14,
+        "median_px": 47.795449609945045,
+        "focused_px": 44.25883810798647,
+        "implied_um": 10.683688736340656
+      }
+    },
+    "scale": {
+      "z_hi": 1.45,
+      "z_oil": 3.25,
+      "high_px_um": 1.7894736842105263,
+      "overview_px_um": 0.7404718693284936,
+      "oil_px_um": 4.473684210526316,
+      "empirical_high_px_um_from_lymph7p5": 1.6682057761401183,
+      "empirical_overview_px_um": 0.6902920452993593
+    },
+    "focus": {
+      "fib": {
+        "atlas_relative_xy": [
+          -128.80566297227938,
+          -484.97592631753975
+        ],
+        "atlas_pixel_xy": [
+          1471.1943370277206,
+          565.0240736824603
+        ],
+        "screen_when_centered": [
+          1110,
+          475
+        ]
+      },
+      "lymph": {
+        "atlas_relative_xy": [
+          -160.0436573663358,
+          -417.142966982511
+        ],
+        "atlas_pixel_xy": [
+          1439.9563426336642,
+          632.857033017489
+        ],
+        "screen_when_centered": [
+          1110,
+          475
+        ],
+        "screen_at_keyframe": [
+          1095.2880211263237,
+          506.9468994099623
+        ]
+      },
+      "plasma": {
+        "atlas_relative_xy": [
+          -115.06784436820217,
+          -420.17893279157516
+        ],
+        "atlas_pixel_xy": [
+          1484.9321556317977,
+          629.8210672084249
+        ],
+        "screen_when_centered": [
+          1110,
+          475
+        ]
+      }
+    },
+    "determinism": {
+      "s69_overview": {
+        "first": "f3bfacdb22560fd3fe891b0033071c6f",
+        "second": "f3bfacdb22560fd3fe891b0033071c6f",
+        "pass": true
+      },
+      "s69_fibrosis": {
+        "first": "452acc37ed34ed4865658ceac951b086",
+        "second": "452acc37ed34ed4865658ceac951b086",
+        "pass": true
+      },
+      "s70_lymph": {
+        "first": "4ad932f1b13dad65a796650dbca3c5ef",
+        "second": "4ad932f1b13dad65a796650dbca3c5ef",
+        "pass": true
+      },
+      "s70_plasma": {
+        "first": "49b8ceb3ec86b3c6e4cec644537fa851",
+        "second": "49b8ceb3ec86b3c6e4cec644537fa851",
+        "pass": true
+      }
+    },
+    "contrast": {
+      "s69_fibrosis": 11.69786589426171,
+      "s70_lymph": 11.701806238728892,
+      "s70_plasma": 11.706752278853314
+    },
+    "text": {
+      "minimum_px": 36,
+      "title_px": 44,
+      "max_content_y": 906,
+      "contrast_min": 11.69786589426171
+    },
+    "events": {
+      "max_error_s": 0,
+      "source": "配音/全稿_v3/timeline.json",
+      "origin": 289.93558333333294,
+      "duration": 8.174208333333297
+    },
+    "pixel_targeted": {
+      "n": 13,
+      "median_px": 14.755472278097805,
+      "samples": [
+        {
+          "source_xy": [
+            -183.32650903655414,
+            -212.95702171570497
+          ],
+          "screen_xy": [
+            1130.4385192980283,
+            504.42241292233285
+          ],
+          "diameter_px": 14.755472278097805,
+          "component_wh": [
+            17,
+            18
+          ]
+        },
+        {
+          "source_xy": [
+            -236.63040648594682,
+            -221.7372270829004
+          ],
+          "screen_xy": [
+            1056.0579172038902,
+            521.5621242220409
+          ],
+          "diameter_px": 16.545286401814263,
+          "component_wh": [
+            18,
+            20
+          ]
+        },
+        {
+          "source_xy": [
+            -197.66273361227837,
+            -220.0491986886615
+          ],
+          "screen_xy": [
+            1112.4474553073187,
+            515.4630711266487
+          ],
+          "diameter_px": 14.361922094451577,
+          "component_wh": [
+            19,
+            14
+          ]
+        },
+        {
+          "source_xy": [
+            -178.24972789231148,
+            -228.28257381157425
+          ],
+          "screen_xy": [
+            1145.1644931794408,
+            526.7882552256248
+          ],
+          "diameter_px": 6.180387232371033,
+          "component_wh": [
+            10,
+            10
+          ]
+        },
+        {
+          "source_xy": [
+            -207.05205083525874,
+            -236.42067088509665
+          ],
+          "screen_xy": [
+            1107.7034345249424,
+            540.0227518326313
+          ],
+          "diameter_px": 12.309163489997376,
+          "component_wh": [
+            13,
+            16
+          ]
+        },
+        {
+          "source_xy": [
+            -205.95933965755506,
+            -202.29395698395967
+          ],
+          "screen_xy": [
+            1090.219430899492,
+            490.02379286215756
+          ],
+          "diameter_px": 13.911592676604096,
+          "component_wh": [
+            17,
+            13
+          ]
+        },
+        {
+          "source_xy": [
+            -75.60885454107677,
+            -167.86263821920417
+          ],
+          "screen_xy": [
+            1291.5003295600109,
+            444.0286934992713
+          ],
+          "diameter_px": 18.609705966725112,
+          "component_wh": [
+            16,
+            26
+          ]
+        },
+        {
+          "source_xy": [
+            -82.59731221260598,
+            -190.81027821797696
+          ],
+          "screen_xy": [
+            1282.0416507672555,
+            476.74003876098976
+          ],
+          "diameter_px": 19.38054864282415,
+          "component_wh": [
+            20,
+            26
+          ]
+        },
+        {
+          "source_xy": [
+            -71.56600433476234,
+            -166.58715653484794
+          ],
+          "screen_xy": [
+            1298.2780042607287,
+            442.73263992234456
+          ],
+          "diameter_px": 17.297725082009,
+          "component_wh": [
+            24,
+            21
+          ]
+        },
+        {
+          "source_xy": [
+            -96.18466706266607,
+            -196.8402102911722
+          ],
+          "screen_xy": [
+            1261.0696951981568,
+            484.0426948042935
+          ],
+          "diameter_px": 15.430353037616328,
+          "component_wh": [
+            15,
+            18
+          ]
+        },
+        {
+          "source_xy": [
+            -110.38293023324154,
+            -162.73079351713278
+          ],
+          "screen_xy": [
+            1231.4038182758252,
+            432.55207893020923
+          ],
+          "diameter_px": 12.716187407449045,
+          "component_wh": [
+            14,
+            13
+          ]
+        },
+        {
+          "source_xy": [
+            -117.29300573024611,
+            -168.61080993124475
+          ],
+          "screen_xy": [
+            1220.9129067482422,
+            440.63583416086186
+          ],
+          "diameter_px": 10.998079684646791,
+          "component_wh": [
+            17,
+            10
+          ]
+        },
+        {
+          "source_xy": [
+            -121.69174175633269,
+            -173.63168546639866
+          ],
+          "screen_xy": [
+            1214.7114066973534,
+            447.70472657589755
+          ],
+          "diameter_px": 18.712051592547777,
+          "component_wh": [
+            23,
+            23
+          ]
+        }
+      ],
+      "median_um": 8.245705096584068
+    },
+    "medical": {
+      "added_neutrophils": 0,
+      "inherited_pus_source_centres_inside_crop": 38,
+      "inherited_pus_source_near_crop": 55,
+      "epithelium_original_ulcer_parameter": 0.16,
+      "clusters": 4,
+      "lymph_added": 112,
+      "plasma_added": 14,
+      "collagen_bands": 3,
+      "gap_or_ulcer_mode_used": false,
+      "neutrophils_zero_pass": false,
+      "s69_overview_inherited_pus_centres": 181,
+      "s69_fibrosis_inherited_pus_centres": 30,
+      "s70_lymph_inherited_pus_centres": 38,
+      "s70_plasma_inherited_pus_centres": 9
+    },
+    "pixel_tool": {
+      "file": "qa/v6/s19_b09/keyframes/s70_lymph.png",
+      "px_per_um_if_fov": 1.7894736842105263,
+      "fov_um": 475.0,
+      "n_lobes": 316,
+      "n_clusters": 126,
+      "lobe_px_median": 8.097548476163917,
+      "cluster_px_median": 11.986100377805714,
+      "cluster_um_median": 6.698114917009075,
+      "lobe_um_median": 4.525100619032777
+    },
+    "video": {
+      "S19.mp4": {
+        "duration_s": 8.166667,
+        "timeline_duration_s": 8.174208333333297,
+        "error_s": 0.0075413333332967625,
+        "black_segments": [],
+        "endpoints": {
+          "first": {
+            "mean_rgb": 71.91796087319959,
+            "nonblack_fraction": 0.2838507908950617
+          },
+          "last": {
+            "mean_rgb": 69.85153501157407,
+            "nonblack_fraction": 0.28931568287037035
+          }
+        },
+        "streams": [
+          {
+            "codec_type": "video",
+            "width": 1920,
+            "height": 1080,
+            "side_data_list": [
+              {}
+            ]
+          }
+        ]
+      },
+      "S19_带配音_720p.mp4": {
+        "duration_s": 8.174,
+        "timeline_duration_s": 8.174208333333297,
+        "error_s": 0.00020833333329761672,
+        "black_segments": [],
+        "endpoints": {
+          "first": {
+            "mean_rgb": 71.89369176793981,
+            "nonblack_fraction": 0.2854806857638889
+          },
+          "last": {
+            "mean_rgb": 69.83298936631944,
+            "nonblack_fraction": 0.2917599826388889
+          }
+        },
+        "streams": [
+          {
+            "codec_type": "video",
+            "width": 1280,
+            "height": 720,
+            "side_data_list": [
+              {}
+            ]
+          },
+          {
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    "audio": {
+      "source": "配音/全稿_v3/旁白_v3.wav",
+      "start_s": 289.93558333333294,
+      "end_s": 298.10979166666624,
+      "duration_s": 8.174208333333297,
+      "sentences": [
+        69,
+        70
+      ]
+    },
+    "production_overlay": {
+      "s69_overview": {
+        "collagen_percent": 3.0678866201186072,
+        "cells_percent": 2.440851323042706
+      },
+      "s69_fibrosis": {
+        "collagen_percent": 3.9500921694075477,
+        "cells_percent": 1.7743274997742247
+      },
+      "s70_lymph": {
+        "collagen_percent": 3.7825758206264686,
+        "cells_percent": 1.7792857003723965
+      },
+      "s70_plasma": {
+        "collagen_percent": 18.85497440328941,
+        "cells_percent": 8.781150337954495
+      }
+    },
+    "rounds": 3,
+    "lock_check": {
+      "start_ok": 16,
+      "end_ok": 16,
+      "files_unchanged": true
+    },
+    "deviations": [
+      "overview z=.60 instead of .50, to meet measured medium-power scale",
+      "oil pan settles at sentence70 fraction .87 and holds through the end",
+      "plasma sample42 consists of 14 source cells measured at 3 actual periodic atlas occurrences; source-cell limit remains14",
+      "targeted pixel segmentation has14 separated lymph nuclei due to overlapping clusters; supplied pixel tool has130 nuclear clusters"
+    ],
+    "failures": [
+      {
+        "requirement": "医学：中性粒细胞/脓细胞=0",
+        "measured": 38,
+        "threshold": 0,
+        "reason": "Locked drawHE renders kind=pus regardless of neut=0. Only the two explicitly permitted S08 neutrophil loops were skipped; clearing the inherited population is outside permitted operations."
+      },
+      {
+        "requirement": "医学：上皮完整",
+        "measured_ulcer_parameter": 0.16,
+        "measured_source_gap_units": 32,
+        "threshold_gap_units": 0,
+        "reason": "Verbatim S08 buildSource calls drawHE with ulcer:.16. drawHE creates a surface gap from x=-6 to26. Fixing it requires altering a base call or drawing outside the three permitted overlays."
+      }
+    ],
+    "status": "failed",
+    "pixel_tool_fibrosis": {
+      "file": "qa/v6/s19_b09/keyframes/s69_fibrosis.png",
+      "px_per_um_if_fov": 1.7894736842105263,
+      "fov_um": 475.0,
+      "n_lobes": 320,
+      "n_clusters": 136,
+      "lobe_px_median": 8.214724333230155,
+      "cluster_px_median": 12.302495519585362,
+      "cluster_um_median": 6.874923966827114,
+      "lobe_um_median": 4.59058124504038
+    },
+    "per_high_frame": {
+      "s69_fibrosis": {
+        "n": 56,
+        "median_px": 12.485071382340283,
+        "median_um": 6.976951654837217
+      },
+      "s70_lymph": {
+        "n": 56,
+        "median_px": 12.485071382340283,
+        "median_um": 6.976951654837217
+      }
+    }
+  },
+  "failed_requirements": [
+    {
+      "requirement": "医学：中性粒细胞/脓细胞=0",
+      "measured": 38,
+      "threshold": 0,
+      "reason": "Locked drawHE renders kind=pus regardless of neut=0. Only the two explicitly permitted S08 neutrophil loops were skipped; clearing the inherited population is outside permitted operations."
+    },
+    {
+      "requirement": "医学：上皮完整",
+      "measured_ulcer_parameter": 0.16,
+      "measured_source_gap_units": 32,
+      "threshold_gap_units": 0,
+      "reason": "Verbatim S08 buildSource calls drawHE with ulcer:.16. drawHE creates a surface gap from x=-6 to26. Fixing it requires altering a base call or drawing outside the three permitted overlays."
+    }
+  ]
+}

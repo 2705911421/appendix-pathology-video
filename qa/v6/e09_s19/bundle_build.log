@@ -1,0 +1,73 @@
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+[s19-dev 7b8dd5f] s19_fix09: 清理碎点、长胶原束与浆细胞染色质修正 (Codex)
+ 61 files changed, 804 insertions(+), 37 deletions(-)
+ create mode 100644 qa/v6/e09_s19/S19.mp4
+ create mode 100644 qa/v6/e09_s19/S19_scene.mp4
+ create mode 100644 qa/v6/e09_s19/S19_带配音_720p.mp4
+ create mode 100644 qa/v6/e09_s19/audio_720p.py
+ create mode 100644 qa/v6/e09_s19/audio_alignment.json
+ create mode 100644 qa/v6/e09_s19/bundle_build.log
+ create mode 100644 qa/v6/e09_s19/check_video.py
+ create mode 100644 qa/v6/e09_s19/commit.log
+ create mode 100644 qa/v6/e09_s19/decode_audio_check.log
+ create mode 100644 qa/v6/e09_s19/decode_check.log
+ create mode 100644 qa/v6/e09_s19/detail_review.py
+ create mode 100644 qa/v6/e09_s19/determinism.log
+ create mode 100644 qa/v6/e09_s19/ffprobe.json
+ create mode 100644 qa/v6/e09_s19/ffprobe_audio_720p.json
+ create mode 100644 qa/v6/e09_s19/finalize.log
+ create mode 100644 qa/v6/e09_s19/finalize.sh
+ create mode 100644 qa/v6/e09_s19/iris_enter.png
+ create mode 100644 qa/v6/e09_s19/iris_enter_200pct.png
+ create mode 100644 qa/v6/e09_s19/iris_exit.png
+ create mode 100644 qa/v6/e09_s19/iris_exit_200pct.png
+ create mode 100644 qa/v6/e09_s19/iris_video.py
+ create mode 100644 qa/v6/e09_s19/keyframes.json
+ create mode 100644 qa/v6/e09_s19/make_bundle.py
+ create mode 100644 qa/v6/e09_s19/metrics.log
+ create mode 100644 qa/v6/e09_s19/render.log
+ create mode 100644 qa/v6/e09_s19/render_s19.mjs
+ create mode 100644 qa/v6/e09_s19/review.py
+ create mode 100644 qa/v6/e09_s19/review_sheet.png
+ create mode 100644 qa/v6/e09_s19/s69_fibrosis.png
+ create mode 100644 qa/v6/e09_s19/s69_fibrosis_200pct.png
+ create mode 100644 qa/v6/e09_s19/s69_fibrosis_全画面200pct.png
+ create mode 100644 qa/v6/e09_s19/s69_low.png
+ create mode 100644 qa/v6/e09_s19/s69_low_200pct.png
+ create mode 100644 qa/v6/e09_s19/s69_low_全画面200pct.png
+ create mode 100644 qa/v6/e09_s19/s69_middle.png
+ create mode 100644 qa/v6/e09_s19/s69_middle_200pct.png
+ create mode 100644 qa/v6/e09_s19/s69_middle_全画面200pct.png
+ create mode 100644 qa/v6/e09_s19/s70_lymph.png
+ create mode 100644 qa/v6/e09_s19/s70_lymph_200pct.png
+ create mode 100644 qa/v6/e09_s19/s70_plasma.png
+ create mode 100644 qa/v6/e09_s19/s70_plasma_200pct.png
+ create mode 100644 qa/v6/e09_s19/sha256_开工.txt
+ create mode 100644 qa/v6/e09_s19/sha256_校验.log
+ create mode 100644 qa/v6/e09_s19/sha256_结束.txt
+ create mode 100644 qa/v6/e09_s19/stills/t_000.44.png
+ create mode 100644 qa/v6/e09_s19/stills/t_002.84.png
+ create mode 100644 qa/v6/e09_s19/stills/t_003.67.png
+ create mode 100644 qa/v6/e09_s19/stills/t_006.16.png
+ create mode 100644 qa/v6/e09_s19/stills/t_007.84.png
+ create mode 100644 qa/v6/e09_s19/stroma_histogram.json
+ create mode 100644 qa/v6/e09_s19/validation.log
+ create mode 100644 qa/v6/e09_s19/video_check.json
+ create mode 100644 qa/v6/e09_s19/video_frame_parity.json
+ create mode 100644 qa/v6/e09_s19/三处碎点_400pct_对比.png
+ create mode 100644 qa/v6/e09_s19/审核意见.md
+ create mode 100644 qa/v6/e09_s19/对比_e08_e09_样张.png
+ create mode 100644 qa/v6/e09_s19/执行日志.md
+ create mode 100644 qa/v6/e09_s19/细胞同尺度对比.png
+ create mode 100644 qa/v6/e09_s19/自检.md
+ create mode 100644 qa/v6/e09_s19/间质色阶直方图.png
+7b8dd5f00b5092c86b051960419040cd7fb14b43

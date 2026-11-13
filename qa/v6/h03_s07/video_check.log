@@ -1,0 +1,132 @@
+{
+  "1080p": {
+    "outside_window_MAE": {
+      "0": 0.0,
+      "600": 0.0,
+      "2400": 0.0,
+      "3024": 0.0004245434670781893,
+      "3036": 0.0027956211419753085,
+      "3767": 0.015558449074074074,
+      "3787": 0.0,
+      "3788": 0.0,
+      "4800": 0.0,
+      "6600": 0.0,
+      "8400": 0.0,
+      "9300": 0.0,
+      "10194": 0.0
+    },
+    "outside_gop_packets_identical": 9431,
+    "boundary_sampled_frames": 34,
+    "boundary_exact_frames": 1,
+    "boundary_max_channel_error": 11,
+    "boundary_worst_MAE": 0.11930748456790123,
+    "subtitle_band_MAE": {
+      "handoff_start": 0.02270699786324786,
+      "handoff_mid": 0.10154113247863247,
+      "s25_fluid": 0.048060897435897434,
+      "s26_protein": 0.04314369658119658,
+      "s27_adhesion": 0.16131410256410256,
+      "s27_crossing": 0.06451923076923077,
+      "s27_exited": 0.1482011217948718,
+      "s28_defense": 0.07093482905982906,
+      "s29_injury": 0.033095619658119656,
+      "s30_exudation": 0.040852029914529915
+    },
+    "subtitle_band_max_MAE": 0.16131410256410256,
+    "audio_hash": "SHA256=e741c403c580eb387a466cbeb8104655660e2c1ad1e39516789759386748e6f6",
+    "frame_count": 10195,
+    "window": {
+      "start_frame": 3037,
+      "end_frame": 3767,
+      "gop_start": 3024,
+      "gop_end": 3788,
+      "fps": 30
+    }
+  },
+  "_720p": {
+    "outside_window_MAE": {
+      "0": 0.0,
+      "600": 0.0,
+      "2400": 0.0,
+      "3020": 0.09720630787037036,
+      "3036": 0.001818214699074074,
+      "3767": 0.020179398148148148,
+      "3984": 0.0,
+      "3985": 0.0,
+      "4800": 0.0,
+      "6600": 0.0,
+      "8400": 0.0,
+      "9300": 0.0,
+      "10194": 0.0
+    },
+    "outside_gop_packets_identical": 9230,
+    "boundary_sampled_frames": 79,
+    "boundary_exact_frames": 1,
+    "boundary_max_channel_error": 12,
+    "boundary_worst_MAE": 0.14232132523148147,
+    "subtitle_band_MAE": {
+      "handoff_start": 0.011755087209302326,
+      "handoff_mid": 0.08930474806201551,
+      "s25_fluid": 0.10092054263565892,
+      "s26_protein": 0.025090843023255816,
+      "s27_adhesion": 0.07728621608527132,
+      "s27_crossing": 0.04204820736434108,
+      "s27_exited": 0.04186046511627907,
+      "s28_defense": 0.031910125968992245,
+      "s29_injury": 0.03777858527131783,
+      "s30_exudation": 0.1097171753875969
+    },
+    "subtitle_band_max_MAE": 0.1097171753875969,
+    "audio_hash": "SHA256=e741c403c580eb387a466cbeb8104655660e2c1ad1e39516789759386748e6f6",
+    "frame_count": 10195,
+    "window": {
+      "start_frame": 3037,
+      "end_frame": 3767,
+      "gop_start": 3020,
+      "gop_end": 3985,
+      "fps": 30
+    }
+  },
+  "insertion": {
+    "handoff_start": {
+      "frame": 3037,
+      "picture_MAE_against_still": 3.0705212191358027
+    },
+    "handoff_mid": {
+      "frame": 3046,
+      "picture_MAE_against_still": 6.4847723765432095
+    },
+    "s25_fluid": {
+      "frame": 3095,
+      "picture_MAE_against_still": 2.1076626157407405
+    },
+    "s26_protein": {
+      "frame": 3201,
+      "picture_MAE_against_still": 2.1298248456790123
+    },
+    "s27_adhesion": {
+      "frame": 3266,
+      "picture_MAE_against_still": 2.1046095679012344
+    },
+    "s27_crossing": {
+      "frame": 3308,
+      "picture_MAE_against_still": 2.0943479938271605
+    },
+    "s27_exited": {
+      "frame": 3352,
+      "picture_MAE_against_still": 2.0805223765432097
+    },
+    "s28_defense": {
+      "frame": 3472,
+      "picture_MAE_against_still": 2.090030864197531
+    },
+    "s29_injury": {
+      "frame": 3603,
+      "picture_MAE_against_still": 2.08070100308642
+    },
+    "s30_exudation": {
+      "frame": 3751,
+      "picture_MAE_against_still": 2.0913439429012346
+    }
+  }
+}

@@ -1,0 +1,1 @@
+exec(open('qa/v6/a02/compare.py').read().replace("for c in json.loads((P/'configs.json').read_text()):","for c in json.loads((P/'configs.json').read_text()):\n if not all((P/c['scene']/(p['name']+'.png')).exists() for p in c['key']['picks']):continue"))

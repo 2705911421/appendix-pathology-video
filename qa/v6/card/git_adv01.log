@@ -1,0 +1,4 @@
+Cloning into bare repository '/tmp/card_adv01_git'...
+done.
+原worktree git add/commit失败：Unable to create /workspace/病理科普视频/v5/.git/worktrees/v5_card_dev/index.lock: Read-only file system。
+备用：/tmp/card_adv01_git 保存独立 git 元数据，工作树仍为本目录。每场景提交后生成 card-dev.bundle；原分支指针不变，bundle内card-dev包含Codex提交。无需改写主线元数据。

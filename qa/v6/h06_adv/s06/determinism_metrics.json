@@ -1,0 +1,38 @@
+[
+  {
+    "name": "s23_start",
+    "byte_identical": true,
+    "mae": 0.0,
+    "pixels_difference_gt24_fraction": 0.0
+  },
+  {
+    "name": "s23_transition",
+    "byte_identical": true,
+    "mae": 0.0,
+    "pixels_difference_gt24_fraction": 0.0
+  },
+  {
+    "name": "s23_red",
+    "byte_identical": false,
+    "mae": 9.371784979423868e-05,
+    "pixels_difference_gt24_fraction": 0.0
+  },
+  {
+    "name": "s24_anchor",
+    "byte_identical": true,
+    "mae": 0.0,
+    "pixels_difference_gt24_fraction": 0.0
+  },
+  {
+    "name": "s24_before",
+    "byte_identical": true,
+    "mae": 0.0,
+    "pixels_difference_gt24_fraction": 0.0
+  },
+  {
+    "name": "s24_after",
+    "byte_identical": true,
+    "mae": 0.0,
+    "pixels_difference_gt24_fraction": 0.0
+  }
+]

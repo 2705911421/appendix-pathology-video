@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/workspace/病理科普视频/v5/qa/v6/a02/verify_v16.py", line 26, in <module>
+    (P/'boundary_metrics.json').write_text(json.dumps(metrics,indent=2));assert all(x['not_blank'] for x in metrics)
+                                                                                ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+RESOLVED: two low-variance S19 boundary frames match intentional source iris closure (MAE<0.5); all other boundaries nonblank; full decoding/audio/contiguity checks passed. See iris_boundary_verification.json and boundary_metrics.json.

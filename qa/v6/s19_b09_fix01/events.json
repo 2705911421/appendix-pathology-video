@@ -1,0 +1,223 @@
+{
+  "origin": 289.93558333333294,
+  "duration": 8.174208333333297,
+  "events": [
+    {
+      "n": 69,
+      "event": "overview_start",
+      "fraction": 0,
+      "local": 0,
+      "absolute": 289.935583,
+      "timeline_s": 289.935583,
+      "error_s": 0
+    },
+    {
+      "n": 69,
+      "event": "push_start",
+      "fraction": 0.18,
+      "local": 0.785543,
+      "absolute": 290.721126,
+      "timeline_s": 290.721126,
+      "error_s": 0
+    },
+    {
+      "n": 69,
+      "event": "push_end",
+      "fraction": 0.64,
+      "local": 2.79304,
+      "absolute": 292.728623,
+      "timeline_s": 292.728623,
+      "error_s": 0
+    },
+    {
+      "n": 69,
+      "event": "fib_label_start",
+      "fraction": 0.65,
+      "local": 2.836681,
+      "absolute": 292.772265,
+      "timeline_s": 292.772265,
+      "error_s": 0
+    },
+    {
+      "n": 69,
+      "event": "fib_label_full",
+      "fraction": 0.78,
+      "local": 3.404018,
+      "absolute": 293.339601,
+      "timeline_s": 293.339601,
+      "error_s": 0
+    },
+    {
+      "n": 69,
+      "event": "fib_label_fade",
+      "fraction": 0.92,
+      "local": 4.014995,
+      "absolute": 293.950578,
+      "timeline_s": 293.950578,
+      "error_s": 0
+    },
+    {
+      "n": 69,
+      "event": "fib_label_end",
+      "fraction": 1,
+      "local": 4.364125,
+      "absolute": 294.299708,
+      "timeline_s": 294.299708,
+      "error_s": 0
+    },
+    {
+      "n": 70,
+      "event": "sidebar_start",
+      "fraction": 0,
+      "local": 4.814125,
+      "absolute": 294.749708,
+      "timeline_s": 294.749708,
+      "error_s": 0
+    },
+    {
+      "n": 70,
+      "event": "sidebar_full",
+      "fraction": 0.16,
+      "local": 5.351738,
+      "absolute": 295.287322,
+      "timeline_s": 295.287322,
+      "error_s": 0
+    },
+    {
+      "n": 70,
+      "event": "lymph_pan_start",
+      "fraction": 0.27,
+      "local": 5.721347,
+      "absolute": 295.656931,
+      "timeline_s": 295.656931,
+      "error_s": 0
+    },
+    {
+      "n": 70,
+      "event": "lymph_pan_end",
+      "fraction": 0.48,
+      "local": 6.426965,
+      "absolute": 296.362548,
+      "timeline_s": 296.362548,
+      "error_s": 0
+    },
+    {
+      "n": 70,
+      "event": "lymph_label_start",
+      "fraction": 0.28,
+      "local": 5.754948,
+      "absolute": 295.690532,
+      "timeline_s": 295.690532,
+      "error_s": 0
+    },
+    {
+      "n": 70,
+      "event": "lymph_label_full",
+      "fraction": 0.34,
+      "local": 5.956553,
+      "absolute": 295.892137,
+      "timeline_s": 295.892137,
+      "error_s": 0
+    },
+    {
+      "n": 70,
+      "event": "lymph_label_fade",
+      "fraction": 0.45,
+      "local": 6.326162,
+      "absolute": 296.261746,
+      "timeline_s": 296.261746,
+      "error_s": 0
+    },
+    {
+      "n": 70,
+      "event": "lymph_label_end",
+      "fraction": 0.49,
+      "local": 6.460566,
+      "absolute": 296.396149,
+      "timeline_s": 296.396149,
+      "error_s": 0
+    },
+    {
+      "n": 70,
+      "event": "oil_pan_start",
+      "fraction": 0.75,
+      "local": 7.334187,
+      "absolute": 297.269771,
+      "timeline_s": 297.269771,
+      "error_s": 0
+    },
+    {
+      "n": 70,
+      "event": "plasma_label_start",
+      "fraction": 0.77,
+      "local": 7.401389,
+      "absolute": 297.336972,
+      "timeline_s": 297.336972,
+      "error_s": 0
+    },
+    {
+      "n": 70,
+      "event": "plasma_label_full",
+      "fraction": 0.84,
+      "local": 7.636595,
+      "absolute": 297.572178,
+      "timeline_s": 297.572178,
+      "error_s": 0
+    },
+    {
+      "n": 70,
+      "event": "oil_pan_end",
+      "fraction": 0.87,
+      "local": 7.737397,
+      "absolute": 297.672981,
+      "timeline_s": 297.672981,
+      "error_s": 0
+    }
+  ],
+  "keyframe_scale": [
+    {
+      "tag": "s69_overview",
+      "t": 0.43641250000000015,
+      "camera": [
+        0,
+        0,
+        0.6
+      ],
+      "px_per_um": 0.6902920452993592,
+      "band": "中倍"
+    },
+    {
+      "tag": "s69_fibrosis",
+      "t": 3.665865000000001,
+      "camera": [
+        -128.80566297227938,
+        -484.97592631753975,
+        1.45
+      ],
+      "px_per_um": 1.6682057761401183,
+      "band": "高倍"
+    },
+    {
+      "tag": "s70_lymph",
+      "t": 6.158158333333313,
+      "camera": [
+        -149.89746503966248,
+        -439.17531140317465,
+        1.45
+      ],
+      "px_per_um": 1.6682057761401183,
+      "band": "高倍"
+    },
+    {
+      "tag": "s70_plasma",
+      "t": 7.972603333333298,
+      "camera": [
+        -115.06784436820217,
+        -420.17893279157516,
+        3.25
+      ],
+      "px_per_um": 4.473684210526316,
+      "band": "油镜"
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "1080p": {
+    "outside_window_MAE": {
+      "0": 0.0,
+      "600": 0.0,
+      "2400": 0.0,
+      "2719": 0.0,
+      "3024": 0.0,
+      "3300": 0.0,
+      "4800": 0.0,
+      "6600": 0.0,
+      "8400": 0.0,
+      "9300": 0.0,
+      "10194": 0.0
+    },
+    "outside_gop_packets_identical": 9891,
+    "boundary_outside_window_frames_exact": 0,
+    "audio_hash": "SHA256=e741c403c580eb387a466cbeb8104655660e2c1ad1e39516789759386748e6f6",
+    "subtitle_band_MAE": {
+      "s23_start": 0.0,
+      "s23_transition": 0.0,
+      "s23_red": 0.0,
+      "s24_anchor": 0.0,
+      "s24_before": 0.0,
+      "s24_after": 0.0
+    },
+    "frame_count": 10195,
+    "window": {
+      "start_frame": 2720,
+      "end_frame": 3024,
+      "gop_start": 2720,
+      "gop_end": 3024,
+      "fps": 30
+    }
+  },
+  "_720p": {
+    "outside_window_MAE": {
+      "0": 0.0,
+      "600": 0.0,
+      "2400": 0.0,
+      "2719": 0.0,
+      "3024": 0.0,
+      "3049": 0.0,
+      "3050": 0.0,
+      "3300": 0.0,
+      "4800": 0.0,
+      "6600": 0.0,
+      "8400": 0.0,
+      "9300": 0.0,
+      "10194": 0.0
+    },
+    "outside_gop_packets_identical": 9865,
+    "boundary_outside_window_frames_exact": 26,
+    "audio_hash": "SHA256=e741c403c580eb387a466cbeb8104655660e2c1ad1e39516789759386748e6f6",
+    "subtitle_band_MAE": {
+      "s23_start": 0.0,
+      "s23_transition": 0.0,
+      "s23_red": 0.0,
+      "s24_anchor": 0.0,
+      "s24_before": 0.0,
+      "s24_after": 0.0
+    },
+    "frame_count": 10195,
+    "window": {
+      "start_frame": 2720,
+      "end_frame": 3024,
+      "gop_start": 2720,
+      "gop_end": 3050,
+      "fps": 30
+    }
+  },
+  "insertion": {
+    "s23_start": {
+      "frame": 2724,
+      "picture_MAE_against_still": 3.4129944058641977
+    },
+    "s23_transition": {
+      "frame": 2789,
+      "picture_MAE_against_still": 3.6905740740740742
+    },
+    "s23_red": {
+      "frame": 2865,
+      "picture_MAE_against_still": 4.092287808641975
+    },
+    "s24_anchor": {
+      "frame": 2930,
+      "picture_MAE_against_still": 3.4929261188271603
+    },
+    "s24_before": {
+      "frame": 2939,
+      "picture_MAE_against_still": 3.4920570987654322
+    },
+    "s24_after": {
+      "frame": 3008,
+      "picture_MAE_against_still": 3.8353645833333334
+    }
+  }
+}

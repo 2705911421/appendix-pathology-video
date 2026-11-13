@@ -1,0 +1,6 @@
+import fs from 'node:fs';import {loadChromium,launch,serve,resolveTarget} from '/workspace/garden-skills/skills/motion-showreel/scripts/lib/browser.mjs';
+const P='qa/v6/h04_s06',target=resolveTarget('film'),chromium=await loadChromium(target.root),{server,port}=await serve(target.root),browser=await launch(chromium);
+try{for(const [scene,source] of [['s10','c03_s10'],['s11','d01_s11']]){
+const times=scene==='s08'?JSON.parse(fs.readFileSync('qa/v6/c03_s10/s08_times.json')):JSON.parse(fs.readFileSync(`qa/v6/${source}/keyframes.json`)).picks.map(p=>p.t),dir=P+'/'+scene+'_parity';fs.mkdirSync(dir,{recursive:true});
+const page=await browser.newPage({viewport:{width:1920,height:1080},deviceScaleFactor:1});page.on('pageerror',e=>console.error(e));await page.goto(`http://127.0.0.1:${port}/index.html?scene=${scene}`);console.log('initializing '+scene);await page.waitForFunction(()=>window.READY===true,null,{timeout:600000});for(const raw of times){const t=+raw.toFixed(6);await page.evaluate(t=>window.render(t),t);await page.screenshot({path:`${dir}/t_${t.toFixed(2).padStart(6,'0')}.png`,clip:{x:0,y:0,width:1920,height:1080}});console.log(scene+' '+t);}await page.close();}
+}finally{await browser.close();server.close();}
