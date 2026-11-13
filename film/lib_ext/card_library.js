@@ -1,7 +1,7 @@
 // Lane card: paper cards, narrative navigation and non-probabilistic branches.
 import {ink} from '../lib/ink.js';
-// Figures come from the clinical lane's shared library (same drawing as S02/S03/S16).
-// Shared clinical appearance; only the opt-in painRLQ arm is added for this lane.
+// Same person() as the clinical lane (S02/S03/S16): dark-haired doctor, broad shoulders,
+// white coat, stethoscope, glasses. painRLQ is the only card-local arm. No second overlay.
 import {prepare as prepareClin,person as clinPerson} from './clin_draw.js';
 export const colors=['#D6453A','#A28A53','#41343F'];
 export const ease=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
@@ -20,27 +20,11 @@ export function path(c,branch=0,active=2){
 export const GROUND=780;
 const FIG_H=620; // clin_draw person local height (top 0 → sole 618)
 export function prepareFigures(){prepareClin();}
-function doctorDetails(c,x,top,s){
- c.save();c.translate(x,top);c.scale(s,s);
- // Short grey hair under a clipped head so the doctor never reads as the patient.
- const head=new Path2D('M -43 38 Q -39 3 0 6 Q 39 5 43 39 L 39 83 Q 32 118 0 128 Q -31 118 -39 85 Z');
- c.save();c.clip(head);
- c.fillStyle='#EDE7DC';c.beginPath();
- c.moveTo(-52,64);c.quadraticCurveTo(-58,12,-14,3);c.quadraticCurveTo(30,-8,48,28);
- c.lineTo(48,52);c.quadraticCurveTo(16,26,-8,28);c.quadraticCurveTo(-28,34,-34,64);c.closePath();c.fill();
- c.strokeStyle='#C9BFB0';c.lineWidth=1.4;
- for(let i=0;i<7;i++){c.beginPath();c.moveTo(-30+i*10,10+i*3);c.quadraticCurveTo(-24+i*10,26+i*3,-20+i*9,40);c.stroke();}
- c.restore();
- c.strokeStyle='#2A2A35';c.lineWidth=2.2;
- c.beginPath();c.arc(-18,68,11,0,Math.PI*2);c.stroke();
- c.beginPath();c.arc(19,68,11,0,Math.PI*2);c.stroke();
- c.beginPath();c.moveTo(-7,68);c.lineTo(8,68);c.stroke();
- c.restore();
-}
 // One figure with both soles on `ground`. Returns anchor points for labels/arrows.
-export function personAt(c,{x=1040,ground=GROUND,scale=.92,doctor=false,face='calm',arm='rest',alpha=1,doctorOverlay=false}={}){
+// scale and ground stay the card placement API; the drawing itself is clin person().
+export function personAt(c,{x=1040,ground=GROUND,scale=.92,doctor=false,face='calm',arm='rest',alpha=1}={}){
  const top=ground-FIG_H*scale;
- c.save();c.globalAlpha*=alpha;clinPerson(c,{x,y:top,scale,doctor,face,arm});if(doctor&&doctorOverlay)doctorDetails(c,x,top,scale);c.restore();
+ c.save();c.globalAlpha*=alpha;clinPerson(c,{x,y:top,scale,doctor,face,arm});c.restore();
  return {x,top,ground,scale,chest:[x,top+175*scale],handR:[x+100*scale,top+382*scale],handL:[x-100*scale,top+382*scale]};
 }
 export function people(c,{pain=0,alpha=1,x=1040,ground=GROUND,scale=.92}={}){
