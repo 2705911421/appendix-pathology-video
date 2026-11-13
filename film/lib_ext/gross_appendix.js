@@ -769,40 +769,56 @@ function fibrinStrands(ctx, c, ang, rx, ry, seed, alpha) {
   }
   ctx.restore();
 }
-function paintPus(ctx, swell, alpha) {
-  const tile = PIX.get('g.pusTile');
-  if (!PUS_SPRITE || alpha <= 0.002) return;
-  // Connected, translucent fibrin veil under the raised islands, exposing red beneath.
-  for(let i=0;i<22;i++) {
-    const s=.14+i*.028, v=-.22+.13*Math.sin(i*1.8);
-    const pts=surfaceBlob(s,v,27,18+4*Math.sin(i),9800+i,{swell,n:44,jitter:.3,amp:.23});
-    fillPoly(ctx,pts,[205,185,138],.19*alpha);
+// Unique surface-coordinate deposits, with zero-alpha edges; no repeated pus sprites.
+function paintPus(ctx, swell, alpha, necrosis = 0, marginOnly = false) {
+  if (alpha <= .002) return;
+  const R = rng(marginOnly ? 59032 : 59031);
+  const point = (s, v) => {
+    const f = frameAt(s), w = tubeRadius(s, swell);
+    return [f.p[0] + f.nx * w * v, f.p[1] + f.ny * w * v];
+  };
+  const density = (s, v) => {
+    const centre = -.26 + .15 * Math.sin(s * 21) + .07 * Math.sin(s * 57);
+    const width = .34 + .12 * Math.sin(s * 35 + 1);
+    return smooth((s - .10) / .08) * (1 - smooth((s - .72) / .16)) *
+      Math.exp(-(((v - centre) / width) ** 2)) *
+      (.56 + .25 * Math.sin(s * 49 + v * 7) + .17 * Math.sin(s * 97 - v * 13));
+  };
+  // Independently sized translucent blooms merge into irregular longitudinal sheets.
+  for (let i = 0; i < (marginOnly ? 520 : 4200); i++) {
+    const s = marginOnly ? .68 + R() * .19 : .105 + R() * .76;
+    const v = -.90 + R() * 1.55;
+    const d = density(s, v);
+    if (R() > d * (marginOnly ? Math.exp(-(((s - .75) / .075) ** 2)) : 1)) continue;
+    const dirty = necrosis * smooth((s - .63) / .17);
+    const tone = mix3(mix3([207, 201, 161], [237, 224, 184], R()), [153, 163, 125], dirty * .78);
+    const f = frameAt(s), p = point(s, v);
+    ctx.save(); ctx.translate(...p); ctx.rotate(Math.atan2(f.ty, f.tx));
+    ctx.scale(3 + R() * 15, 1.1 + R() * 4.5);
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+    const opacity = (.09 + R() * .15) * alpha * (marginOnly ? .5 : 1);
+    g.addColorStop(0, css(tone, opacity));
+    g.addColorStop(.42, css(tone, opacity * .78));
+    g.addColorStop(1, css(tone, 0));
+    ctx.fillStyle = g; ctx.fillRect(-1, -1, 2, 2); ctx.restore();
   }
-  PUS_PATCHES.forEach((p, i) => {
-    const [s, v, rx, ry, rot] = p;
-    const f = frameAt(clamp(s, 0, CAP_S)), w = tubeRadius(clamp(s, 0, CAP_S), swell);
-    const c = [f.p[0] + f.nx * w * v, f.p[1] + f.ny * w * v];
-    const ang = Math.atan2(f.ty, f.tx) + rot;
-    const R = rng(9000 + i * 31);
-    // Thin ochre halo stains the congested base so the rim is not a cut edge.
-    if (tile) drawSprite(ctx, tile, c[0] + (R() - .5) * 6, c[1] + (R() - .5) * 5, rx * 4.4, ry * 4.8, ang, .17 * alpha, 'multiply');
-    // Narrow underside shadow beneath the thick islands; thin veil remains transparent.
-    ctx.save();ctx.filter='blur(1.4px)';
-    drawSprite(ctx,PUS_SPRITE,c[0]+f.nx*2,c[1]+f.ny*2,rx*2.6,ry*2.8,ang,.18*alpha,'multiply');
-    ctx.restore();
-    // Uneven thickness: two irregular sheets, the centre denser than the shoulder.
-    drawSprite(ctx, PUS_SPRITE, c[0], c[1], rx * 3.4, ry * 3.6, ang, .77 * alpha);
-    drawSprite(ctx, PUS_SPRITE, c[0] + (R() - .5) * rx * .7, c[1] + (R() - .5) * ry * .7, rx * 2.3, ry * 2.5, ang + (R() - .5) * 1.4, .44 * alpha);
-    // Pigment mottle inside the same footprint (keepWatercolour grain over the flat body).
-    drawSprite(ctx, PUS_SPRITE, c[0], c[1], rx * 3.3, ry * 3.5, ang, .14 * alpha, 'multiply');
-    for(let j=0;j<24;j++) {
-      const u=(R()-.5)*rx*1.3,vv=(R()-.5)*ry*1.2;
-      const x=c[0]+Math.cos(ang)*u-Math.sin(ang)*vv,y=c[1]+Math.sin(ang)*u+Math.cos(ang)*vv;
-      ctx.fillStyle=j%3?'rgba(236,221,187,'+(.19*alpha)+')':'rgba(132,105,66,'+(.16*alpha)+')';
-      ctx.beginPath();ctx.ellipse(x,y,.4+R()*1.6,.25+R()*.7,ang,0,Math.PI*2);ctx.fill();
+  // Fine tapered threads follow the curved axis, without outlining the deposits.
+  for (let i = 0; i < (marginOnly ? 55 : 530); i++) {
+    const s = marginOnly ? .68 + R() * .17 : .12 + R() * .70;
+    const v = -.80 + R() * 1.25;
+    if (R() > density(s, v)) continue;
+    const len = .008 + R() * .044, drift = (R() - .5) * .13;
+    const tone = mix3([234, 225, 191], [159, 171, 133], necrosis * smooth((s - .64) / .15));
+    const pts = Array.from({ length: 13 }, (_, j) => {
+      const t = j / 12;
+      return point(Math.min(.89, s + len * t), v + drift * t + .018 * Math.sin(t * 5 + i));
+    });
+    for (let j = 0; j < 12; j++) {
+      ctx.lineWidth = (.25 + R() * .48) * Math.sin(Math.PI * (j + .5) / 12);
+      ctx.strokeStyle = css(tone, (.12 + R() * .23) * alpha * (marginOnly ? .5 : 1));
+      ctx.beginPath(); ctx.moveTo(...pts[j]); ctx.lineTo(...pts[j + 1]); ctx.stroke();
     }
-    fibrinStrands(ctx, c, ang, rx, ry, 9500 + i * 17, alpha * smooth(alpha / .6));
-  });
+  }
 }
 
 // Surface pigment has clustered grains and short strokes following the tissue axis.
@@ -1075,11 +1091,12 @@ export function drawAppendix(ctx, state, pose, { alpha = 1 } = {}) {
   ctx.filter = 'blur(1.2px)';
   paintBleeds(ctx, swell, bleedA);
   ctx.restore();
-  paintPus(ctx, swell, pusA);
+  paintPus(ctx, swell, pusA, necA);
   ctx.save();
   ctx.filter = 'blur(1.6px)';
   paintNecro(ctx, swell, necA);
   ctx.restore();
+  if (necA > .01) paintPus(ctx, swell, pusA * necA, necA, true);
   paintNecroDamage(ctx, swell, necA);
   paintPit(ctx, swell, necA);
   paintCut(ctx, swell, look);
