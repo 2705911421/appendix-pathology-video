@@ -6,10 +6,10 @@ import {timing as allTiming} from './timing_snapshot.js';
 const params=new URLSearchParams(location.search);
 const name=params.get('scene')||'s08';
 // Merged scene registry (mini, 2026-11-13): main line + ct-dev (S04/S09/S12/S15 real CT) + mech-dev (S13) + clin-dev (S02/S03/S16) + open-dev (S01/S21) + card-dev (S05/S17/S20).
-const ranges={s07:[25,30],s14:[54,57],s19:[69,70],s13:[49,53],s02:[6,10],s03:[11,13],s16:[60,62],s04:[14,19],s09:[35,36],s12:[47,48],s15:[58,59],ct_library:[35,36],s05:[20,22],s17:[63,65],s20:[71,74],card:[20,22]};
+const ranges={s13r:[49,53],s14r:[54,57],s07:[25,30],s14:[54,57],s19:[69,70],s13:[49,53],s02:[6,10],s03:[11,13],s16:[60,62],s04:[14,19],s09:[35,36],s12:[47,48],s15:[58,59],ct_library:[35,36],s05:[20,22],s17:[63,65],s20:[71,74],card:[20,22]};
 const cardSc=['s05','s17','s20','card'];
 const noWash=['s02','s03','s16','s04','s09','s12','s15','ct_library'];
-if(!['s06','s07','s08','s10','s11','s19','s14','s13','s02','s03','s16','s04','s09','s12','s15','ct_library','s01','s21','s05','s17','s20','card'].includes(name))throw Error('Unknown scene '+name);
+if(!['s13r','s14r','s06','s07','s08','s10','s11','s19','s14','s13','s02','s03','s16','s04','s09','s12','s15','ct_library','s01','s21','s05','s17','s20','card'].includes(name))throw Error('Unknown scene '+name);
 const scene=name==='s08'?s08:(await import(`./chapters/${name}.js`)).default;
 // S06 owns the silence between sentences 24 and 25, so the animatic has no
 // uncovered frames at the S06→S07 handoff (previously 13 placeholder frames).
