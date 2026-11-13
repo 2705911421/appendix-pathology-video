@@ -1,0 +1,5 @@
+import fs from 'node:fs';
+import {loadChromium,launch,serve,openPage} from '/workspace/garden-skills/skills/motion-showreel/scripts/lib/browser.mjs';
+const P='qa/v6/s19_b09_fix01',picks=JSON.parse(fs.readFileSync('qa/v6/s19_b09_fix01/keyframes.json')).picks,root=process.cwd(),{server,port}=await serve(root),browser=await launch(await loadChromium(root));
+try{for(const mode of ['bare','chronic','collagen','cells']){const page=await openPage(browser,{port,rel:'film/s19_b09_qa.html',w:1920,h:1080,dpr:1,query:'mode='+mode});await page.evaluate(()=>window.render(0));await page.screenshot({path:P+'/'+mode+'.png'});if(mode==='chronic')fs.writeFileSync(P+'/populations.json',JSON.stringify(await page.evaluate(()=>window.QA),null,2));fs.mkdirSync(P+'/audit',{recursive:true});await page.evaluate(mode=>history.replaceState(null,'','?mode='+mode+'&production=1'),mode);for(const p of picks){await page.evaluate(t=>window.render(t),p.t);await page.screenshot({path:P+'/audit/'+mode+'_'+p.name+'.png'});}await page.close();}}
+finally{await browser.close();server.close();}
