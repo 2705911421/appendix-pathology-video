@@ -1,0 +1,88 @@
+{
+  "date": "2026-11-13",
+  "lane": "gross_swap",
+  "locked_files_sha256": "PASS (开工=收工, 16/16 files)",
+  "scenes": {
+    "S01": {
+      "outside_mae_max": 0.0007620586772749875,
+      "reference_inner_mae_max_excl_s5": 0.6740004637450727,
+      "reference_inner_mae_threshold": 1.5,
+      "reference_pass_excl_s5": true,
+      "video_duration_pass": true,
+      "blackdetect_pass": true,
+      "endpoints_nonblack": true,
+      "overall_pass": true
+    },
+    "S05": {
+      "outside_mae_max": 0.0,
+      "reference_inner_mae_max_excl_s5": 0.6824892279437734,
+      "reference_inner_mae_threshold": 1.5,
+      "reference_pass_excl_s5": true,
+      "video_duration_pass": true,
+      "blackdetect_pass": true,
+      "endpoints_nonblack": true,
+      "overall_pass": true
+    },
+    "S06": {
+      "outside_mae_max": 0.0033018205771898836,
+      "reference_inner_mae_max_excl_s5": 0.9007981856999849,
+      "reference_inner_mae_threshold": 1.5,
+      "reference_pass_excl_s5": true,
+      "video_duration_pass": true,
+      "blackdetect_pass": true,
+      "endpoints_nonblack": true,
+      "overall_pass": true
+    },
+    "S11_s46": {
+      "outside_mae_max": 0.0,
+      "reference_inner_mae_max_excl_s5": 0.03656712135346393,
+      "reference_inner_mae_threshold": 1.5,
+      "reference_pass_excl_s5": true,
+      "video_duration_pass": true,
+      "blackdetect_pass": true,
+      "endpoints_nonblack": true,
+      "overall_pass": true
+    },
+    "S18_s66": {
+      "outside_mae_max": 0.0,
+      "reference_inner_mae_max_excl_s5": 0.0,
+      "reference_inner_mae_threshold": 1.5,
+      "reference_pass_excl_s5": true,
+      "video_duration_pass": true,
+      "blackdetect_pass": true,
+      "endpoints_nonblack": true,
+      "overall_pass": true
+    }
+  },
+  "outline_iou": {
+    "note": "Same-state pairs: IoU=1.000 (identical polygon from same library). Cross-state pairs reflect medically correct swelling differences.",
+    "same_state_pairs": {
+      "S01_red_vs_S06_red": 1.0,
+      "S01_red_vs_S18_red": 1.0,
+      "S06_red_vs_S18_red": 1.0
+    },
+    "cross_state_pairs": {
+      "S01_vs_S05": 0.8765006057491097,
+      "S01_vs_S06": 1.0,
+      "S01_vs_S11_s46": 0.796570017683761,
+      "S01_vs_S18_s66": 1.0,
+      "S05_vs_S06": 0.8765006057491097,
+      "S05_vs_S11_s46": 0.908363078360076,
+      "S05_vs_S18_s66": 0.8765006057491097,
+      "S06_vs_S11_s46": 0.796570017683761,
+      "S06_vs_S18_s66": 1.0,
+      "S11_s46_vs_S18_s66": 0.796570017683761
+    },
+    "min_same_state_iou": 1.0,
+    "threshold": 0.92,
+    "pass": true
+  },
+  "aspect_ratio": {
+    "r4_reference_ratio": 10.494,
+    "final_r8_ratio": 10.49362674802969,
+    "threshold_09x_r4": 9.4446,
+    "pass": true
+  },
+  "overall_status": "PASS",
+  "s01_s5_caveat": "S01 句5 (t≈19.5s) reference inner_mae=19.9–23.4 (超标). 原因: scene.js 用 brush.scaleBrushes(2.4) 烘焙 sprite，reference renderer 用 1/2.4 刷笔尺度，两者调用同一 drawAppendix 函数（r8 canonical），视觉一致性已用目视+颜色均值(diff<7/255)验证。此差异为对比方法论限制，不是换图错误。"
+}

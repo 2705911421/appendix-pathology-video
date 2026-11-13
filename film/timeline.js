@@ -25,5 +25,5 @@ export function forScene(first,last,tail=.8){
  const rows=allTiming.filter(s=>s.n>=first&&s.n<=last),origin=rows[0].start;
  const row=id=>{const s=rows.find(s=>s.n===Number(id));if(!s)throw Error('Unknown sentence '+id);return s;};
  return {origin,duration:rows.at(-1).end-origin+tail,rows,
- T:{at:id=>row(id).start-origin,end:id=>row(id).end-origin,frac:(id,f)=>row(id).start-origin+(row(id).end-row(id).start)*f}};
+ T:{has:id=>rows.some(s=>s.n===id),at:id=>row(id).start-origin,end:id=>row(id).end-origin,frac:(id,f)=>row(id).start-origin+(row(id).end-row(id).start)*f}};
 }

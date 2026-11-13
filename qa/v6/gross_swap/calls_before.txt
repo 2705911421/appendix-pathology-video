@@ -1,0 +1,7 @@
+film/chapters/s01.js:1:import {prepare, drawAppendix, frameAt, toScreen, sidePt, SWELL} from '../lib_ext/gross_appendix.js';
+film/chapters/s13.js:4:import { prepare as prepareGross, drawAppendix, frameAt, toScreen, tubeRadius, swellAt } from '../lib_ext/mech_gross_appendix.js';
+film/chapters/gross_test.js:9:} from '../lib_ext/gross_appendix.js';
+film/chapters/s06.js:1:import {prepare,drawAppendix,frameAt,toScreen} from '../lib_ext/gross_appendix.js';
+film/lib_ext/card_figure.js:75:export function specimenOutline(swell, N = 28) { const L = [], R = [];
+film/lib_ext/mech_gross_appendix.js:1:// Lane mech: verbatim copy of v5_gross_dev round-4 film/lib_ext/gross_appendix.js
+film/lib_ext/card_gross_cache.js:2:import {prepare,drawAppendix} from './card_gross_appendix.js';

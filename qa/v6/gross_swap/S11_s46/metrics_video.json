@@ -1,0 +1,30 @@
+{
+  "videos": [
+    {
+      "file": "S11_s46.mp4",
+      "duration": 5.333333,
+      "expected": 5.321875000000006,
+      "duration_error": 0.011457999999993973,
+      "black_intervals": [],
+      "endpoint_mean_luma": [
+        50.46033098636831,
+        51.21050829475308
+      ],
+      "endpoint_nonblack": true,
+      "duration_pass": true
+    },
+    {
+      "file": "S11_s46_\u5e26\u914d\u97f3_720p.mp4",
+      "duration": 5.333333,
+      "expected": 5.321875000000006,
+      "duration_error": 0.011457999999993973,
+      "black_intervals": [],
+      "endpoint_mean_luma": [
+        50.46787181712963,
+        51.218783637152775
+      ],
+      "endpoint_nonblack": true,
+      "duration_pass": true
+    }
+  ]
+}

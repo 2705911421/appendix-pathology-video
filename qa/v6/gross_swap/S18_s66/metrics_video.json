@@ -1,0 +1,30 @@
+{
+  "videos": [
+    {
+      "file": "S18_s66.mp4",
+      "duration": 3.1,
+      "expected": 3.113999999999976,
+      "duration_error": 0.01399999999997581,
+      "black_intervals": [],
+      "endpoint_mean_luma": [
+        234.33333333333334,
+        229.01880947788067
+      ],
+      "endpoint_nonblack": true,
+      "duration_pass": true
+    },
+    {
+      "file": "S18_s66_\u5e26\u914d\u97f3_720p.mp4",
+      "duration": 3.114,
+      "expected": 3.113999999999976,
+      "duration_error": 2.398081733190338e-14,
+      "black_intervals": [],
+      "endpoint_mean_luma": [
+        234.33333333333334,
+        229.03745478877315
+      ],
+      "endpoint_nonblack": true,
+      "duration_pass": true
+    }
+  ]
+}

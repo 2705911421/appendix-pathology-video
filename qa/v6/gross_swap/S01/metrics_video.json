@@ -1,0 +1,34 @@
+{
+  "videos": [
+    {
+      "file": "S01.mp4",
+      "duration": 21.766667,
+      "expected": 21.766958333333328,
+      "duration_error": 0.0002913333333260937,
+      "black_intervals": [],
+      "endpoint_mean_luma": [
+        234.33333333333334,
+        222.5331573109568
+      ],
+      "endpoint_nonblack": true,
+      "duration_pass": true
+    },
+    {
+      "file": "S01_\u5e26\u914d\u97f3_720p.mp4",
+      "duration": 21.767,
+      "expected": 21.766958333333328,
+      "duration_error": 4.166666667160257e-05,
+      "black_intervals": [],
+      "endpoint_mean_luma": [
+        234.33333333333334,
+        222.53111906828704
+      ],
+      "endpoint_nonblack": true,
+      "duration_pass": true
+    }
+  ],
+  "before_audio_duration": 21.767,
+  "after_audio_duration": 21.767,
+  "audio_duration_difference": 0.0,
+  "audio_same_duration_pass": true
+}
