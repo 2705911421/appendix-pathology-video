@@ -75,6 +75,25 @@ export function drawCrossSection(c, { x, y, R, press = 0, alpha = 1 }) {
   c.restore();
   c.strokeStyle = 'rgba(110,52,60,.55)'; c.lineWidth = 2; c.stroke();
 
+  // Inner circular / outer longitudinal muscle, a subtle interface on the same silhouette.
+  const rMid = rSub + (rMus-rSub)*.63;
+  c.save();
+  ring(c,0,0,rMus,rSub,1,1,p); c.clip();
+  c.strokeStyle='rgba(232,179,183,.48)'; c.lineWidth=1.3;
+  c.beginPath();
+  for(let i=0;i<=120;i++){const a=i/120*TAU,rr=rMid*wob(a,0,p);c.lineTo(Math.cos(a)*rr,Math.sin(a)*rr);}
+  c.stroke();
+  const muscleRng=rng(55231);
+  for(let i=0;i<180;i++){
+    const a=muscleRng()*TAU, outer=i%3===0;
+    const rr=(outer?rMid+(rMus-rMid)*(.15+.7*muscleRng()):rSub+(rMid-rSub)*(.15+.7*muscleRng()))*wob(a,0,p);
+    c.save();c.translate(Math.cos(a)*rr,Math.sin(a)*rr);c.rotate(a+Math.PI/2);
+    c.fillStyle='rgba(63,42,102,.38)';c.beginPath();
+    // Longitudinal muscle is cut across; circular muscle runs in the section plane.
+    c.ellipse(0,0,outer?1.7:4.8,outer?1.5:1.05,0,0,TAU);c.fill();c.restore();
+  }
+  c.restore();
+
   // submucosa
   ring(c, 0, 0, rSub, rMuc, 1, 1, p);
   c.fillStyle = '#E7D2CC'; c.fill();
@@ -97,6 +116,17 @@ export function drawCrossSection(c, { x, y, R, press = 0, alpha = 1 }) {
   c.closePath();
   c.fillStyle = '#C98390'; c.fill();
   c.strokeStyle = 'rgba(120,58,74,.45)'; c.lineWidth = 1.5; c.stroke();
+
+  // Short tubular crypt profiles confined to mucosa; no new label or extra layer.
+  c.save();
+  ring(c,0,0,rMuc,rLum,1,1,p);c.clip();
+  for(let i=0;i<38;i++){
+    const a=i/38*TAU,rr=(rLum+rMuc)*.5;
+    c.save();c.translate(Math.cos(a)*rr,Math.sin(a)*rr);c.rotate(a);
+    c.strokeStyle='rgba(107,76,154,.42)';c.lineWidth=1.4;
+    c.fillStyle='rgba(244,223,225,.55)';c.beginPath();c.ellipse(0,0,(rMuc-rLum)*.32,2.5,0,0,TAU);c.fill();c.stroke();c.restore();
+  }
+  c.restore();
 
   // lumen: murky residual content (yellowish, not a bright stain)
   c.beginPath();

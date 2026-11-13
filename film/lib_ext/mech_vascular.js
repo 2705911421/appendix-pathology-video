@@ -274,6 +274,17 @@ export function drawVessel(c, {
     c.stroke();
     c.clip();
     c.globalAlpha = ga;
+    // Irregular pale fibrin/platelet laminae alternating with the red-cell-rich base.
+    // Clipped to the attached clot: no free-floating plug or geometric concentric target.
+    for(let j=0;j<4;j++) {
+      c.strokeStyle=j%2?'rgba(240,212,220,.78)':'rgba(243,213,222,.65)';
+      c.lineWidth=3.2; c.beginPath();
+      for(let x=x0-8;x<=x1+12;x+=7){
+        const yy=ys(x)+inner(x)*(-.65+j*.42)+2.4*Math.sin(x/31+j*1.6);
+        x===x0-8?c.moveTo(x,yy):c.lineTo(x,yy);
+      }
+      c.stroke();
+    }
     for (let i = 0; i < 18; i++) {
       const x = x0 + rr() * (x1 - x0), y = (rr() * 2 - 1) * inner(x) * .75;
       c.strokeStyle = i % 3 ? 'rgba(214,178,182,.75)' : 'rgba(96,52,76,.55)';

@@ -221,6 +221,20 @@ function paintMuscle(c,n) {
     }
     c.restore();
   }
+  // Sparse karyorrhectic clusters at the viable/dead interface, baked and stationary.
+  // Leave the anuclear core and its annotation target clear.
+  if(n>0) {
+    const debris=rng(77131);
+    for(let i=0;i<48;i++) {
+      const xx=-50+debris()*220, yy=-170+debris()*440;
+      for(let k=0;k<3+Math.floor(debris()*4);k++) {
+        const dx=(debris()-.5)*12,dy=(debris()-.5)*8,sz=.7+debris()*1.4;
+        c.fillStyle='rgba(63,42,102,.58)';c.beginPath();
+        c.moveTo(xx+dx-sz,yy+dy);c.lineTo(xx+dx,yy+dy-sz*.8);
+        c.lineTo(xx+dx+sz*.8,yy+dy+sz*.6);c.closePath();c.fill();
+      }
+    }
+  }
   // Watercolour pigment granulation, kept still throughout the microscopic insert.
   for(let i=0;i<4200;i++) {
     const px=-350+rand()*700,py=-350+rand()*700;
