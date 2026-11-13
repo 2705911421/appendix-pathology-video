@@ -1,4 +1,4 @@
-import {loadCT,realCT,mark} from '../lib_ext/ct_real_images.js';
+import {loadCT,realCT,mark} from '../lib_ext/ct_real_adv01_images.js';
 import {paper,text,labelTo,ramp} from '../lib_ext/ct_r3_schematic.js';
 import {doctor,choice,evidenceBase} from '../lib_ext/ct_r3_clinical.js';
 
