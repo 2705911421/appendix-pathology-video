@@ -4,6 +4,7 @@ import {bake,drawWash} from '../lib/wash.js';
 const TAU=Math.PI*2;
 export function point(a,r){const u=Math.cos(a)*r*1.5,v=Math.sin(a)*r;return [u*Math.cos(.3)-v*Math.sin(.3),u*Math.sin(.3)+v*Math.cos(.3)];}
 export const focus={fib:point(-1.58,688),lymph:point(-1.72,650),plasma:point(-1.08,665)};
+export const plasmaLeader=(()=>{const R=rng(8719+7919);R();const r=(7.1+R()*1.5)*.158;return [focus.plasma[0]-1.05+r*Math.cos(-.55),focus.plasma[1]-.65+r*Math.sin(-.55)];})();
 // S19-only morphology. Independent seeds make every cell repeatable at all powers.
 function outline(c,rx,ry,phase,x=0,y=0,amp=.045,seg=72){
  c.beginPath();for(let j=0;j<=seg;j++){const a=j/seg*TAU,f=1+amp*Math.sin(3*a+phase)+amp*.45*Math.sin(5*a-phase)+amp*.22*Math.sin(9*a+phase*1.7);const px=x+Math.cos(a)*rx*f,py=y+Math.sin(a)*ry*f;j?c.lineTo(px,py):c.moveTo(px,py);}c.closePath();
@@ -18,9 +19,9 @@ function chronicCell(c,x,y,type,s=1,rot=0,key=0){
  // Plasma cells stay 1.5–1.8 x a lymphocyte on the same mother plate; both vary in size and aspect.
  const rx=pl?7.1+R()*1.5:3.8+R()*1.1,ry=pl?rx*(.58+R()*.18):rx*(.80+R()*.16);
  c.save();c.translate(x,y);c.rotate(rot);c.scale(s*.158,s*.158);
- outline(c,rx,ry,ph,0,0,pl?.05:.11);
+ outline(c,rx,ry,ph,0,0,pl?.05:.018);
  const g=c.createLinearGradient(-rx,-ry*.4,rx,ry*.5);
- if(pl){g.addColorStop(0,'#985B8C');g.addColorStop(.5,'#AA6C9B');g.addColorStop(1,'#BC87AA');}
+ if(pl){g.addColorStop(0,'#8C467E');g.addColorStop(.5,'#9C568E');g.addColorStop(1,'#AD709B');}
  else{g.addColorStop(0,'rgba(219,181,204,.46)');g.addColorStop(1,'rgba(232,201,216,.22)');}
  c.fillStyle=g;c.fill();
  c.save();c.clip();
@@ -34,7 +35,7 @@ function chronicCell(c,x,y,type,s=1,rot=0,key=0){
   // Hof drawn last so it reads as a distinct pale crescent beside the nucleus.
   for(let k=0;k<3;k++){const o=.6+k*.3;c.fillStyle=['rgba(228,197,213,.42)','rgba(230,201,216,.24)','rgba(233,206,219,.13)'][k];crescent(c,nx,ny,1.6,0,nrx+o,nry+o,nrx-.2,nry-.16);}
   // Slightly deeper basophilia at the periphery, inside a fine dark membrane.
-  outline(c,rx*.9,ry*.9,ph,0,0,pl?.05:.11);c.strokeStyle='rgba(118,66,124,.22)';c.lineWidth=1.3;c.stroke();
+  outline(c,rx*.9,ry*.9,ph,0,0,pl?.05:.018);c.strokeStyle='rgba(118,66,124,.22)';c.lineWidth=1.3;c.stroke();
   c.restore();
   // Eccentric, slightly flattened nucleus.
   outline(c,nrx,nry,nph,nx,ny,.04);
@@ -45,19 +46,19 @@ function chronicCell(c,x,y,type,s=1,rot=0,key=0){
   c.fillStyle='#4A2C67';c.beginPath();c.ellipse(nx+.25,ny-.15,.5,.62,.35,0,TAU);c.fill();
   c.restore();
   outline(c,nrx,nry,nph,nx,ny,.04);c.strokeStyle='#3B2353';c.lineWidth=.3;c.stroke();
-  outline(c,rx,ry,ph,0,0,pl?.05:.11);c.strokeStyle='rgba(138,86,134,.25)';c.lineWidth=.34;c.stroke();
+  outline(c,rx,ry,ph,0,0,pl?.05:.018);c.strokeStyle='rgba(138,86,134,.25)';c.lineWidth=.34;c.stroke();
  }else{
   // Lymphocyte: nucleus fills the cell, narrow rim of cytoplasm shows on one side.
   for(let j=0;j<44;j++){const a=R()*TAU,rr=Math.sqrt(R());c.fillStyle=j%3?'rgba(104,64,126,.25)':'rgba(236,203,222,.3)';c.beginPath();c.ellipse(Math.cos(a)*rx*rr,Math.sin(a)*ry*rr,.08+R()*.17,.08+R()*.15,R()*TAU,0,TAU);c.fill();}
   c.restore();
   const nx=(R()-.5)*.5,ny=(R()-.5)*.4,nrx=rx*(.825+R()*.05),nry=ry*(.825+R()*.05),nph=R()*TAU;
-  outline(c,nrx,nry,nph,nx,ny,.085,24);
+  outline(c,nrx,nry,nph,nx,ny,.018,72);
   const ng=c.createRadialGradient(nx-.6,ny-.6,.1,nx,ny,nrx);ng.addColorStop(0,'#80618F');ng.addColorStop(.55,'#624176');ng.addColorStop(1,'#4F2E67');c.fillStyle=ng;c.fill();c.save();c.clip();
   // Coarse, dense chromatin; the interior is mottled, not a flat dot.
   for(let j=0;j<12;j++){const a=(j*.62+R()*.5),rad=.72+R()*.1;c.fillStyle='rgba(37,22,63,.78)';c.beginPath();c.ellipse(nx+Math.cos(a)*nrx*rad,ny+Math.sin(a)*nry*rad,.22+R()*.38,.2+R()*.32,a,0,TAU);c.fill();}
   for(let j=0;j<46;j++){const a=R()*TAU,rr=Math.sqrt(R());c.fillStyle=j%3?'rgba(40,24,66,.5)':'rgba(126,96,150,.5)';c.beginPath();c.ellipse(nx+Math.cos(a)*nrx*rr,ny+Math.sin(a)*nry*rr,.07+R()*.2,.06+R()*.17,R()*TAU,0,TAU);c.fill();}
   c.restore();
-  outline(c,nrx,nry,nph,nx,ny,.085,24);c.strokeStyle='#33204F';c.lineWidth=.18;c.stroke();
+  outline(c,nrx,nry,nph,nx,ny,.018,72);c.strokeStyle='#33204F';c.lineWidth=.18;c.stroke();
   outline(c,rx,ry,ph,0,0,.03);c.strokeStyle='rgba(224,190,209,.12)';c.lineWidth=.08;c.stroke();
  }
  c.restore();
@@ -80,14 +81,14 @@ function buildCells(){
  function add(x,y,type,scale,rot){const rad=(type==='plasma'?7.2:3.9)*scale*.16,gap=-.1;if(occ.some(q=>Math.hypot(x-q.x,y-q.y)<rad+q.r+gap))return false;occ.push({x,y,r:rad});cells.push({x,y,type,s:scale,rot,key:++cellKey});return true;}
  // Highlighted teaching cells: a few neighbours within the high-power field, mostly separated by collagen.
  add(focus.plasma[0]-1.05,focus.plasma[1]-.65,'plasma',1,-.55);
- for(const [dx,dy,rot] of [[-9,5,.4],[8,8,-.8],[7,-8,.7]])add(focus.plasma[0]+dx,focus.plasma[1]+dy,'plasma',1,rot);add(...focus.lymph,'lymph',1,.2);
+ for(const [dx,dy,rot] of [[-5,4,.4],[4.5,4,-.8],[4,-4.5,.7]])add(focus.plasma[0]+dx,focus.plasma[1]+dy,'plasma',1,rot);add(...focus.lymph,'lymph',1,.2);
  for(let i=0;i<4;i++){const a=R()*TAU,r=20+R()*38;add(focus.plasma[0]+Math.cos(a)*r,focus.plasma[1]+Math.sin(a)*r,'plasma',.86+R()*.26,R()*TAU);}
  for(let i=0;i<9;i++){const a=R()*TAU,r=24+R()*66;add(focus.plasma[0]+Math.cos(a)*r,focus.plasma[1]+Math.sin(a)*r,'lymph',.84+R()*.28,R()*TAU);}
  for(let i=0;i<7;i++){const a=R()*TAU,r=14+R()*54;add(focus.lymph[0]+Math.cos(a)*r,focus.lymph[1]+Math.sin(a)*r,'lymph',.84+R()*.26,R()*TAU);}
  add(focus.lymph[0]-18,focus.lymph[1]+12,'plasma',.9,-.2);
 
  // Solid microcolonies: compact centre plus irregular packed neighbours, never an annulus.
- function field(cp,span,count,scale=1){
+ function field(cp,span,count,scale=1,scatter=2){
   for(let k=0;k<count;k++){
    const cx=cp[0]+(R()-.5)*span,cy=cp[1]+(R()-.5)*span;
    const n=3+Math.floor(R()*13),turn=R()*TAU;
@@ -96,9 +97,10 @@ function buildCells(){
     add(cx+Math.cos(a)*d,cy+Math.sin(a)*d,'lymph',(.86+R()*.25)*scale,R()*TAU);
    }
   }
-  for(let k=0;k<count*2;k++)add(cp[0]+(R()-.5)*span,cp[1]+(R()-.5)*span,'lymph',(.86+R()*.25)*scale,R()*TAU);
+  for(let k=0;k<count*scatter;k++)add(cp[0]+(R()-.5)*span,cp[1]+(R()-.5)*span,'lymph',(.86+R()*.25)*scale,R()*TAU);
  }
  field(focus.lymph,220,330);
+ field(focus.lymph,60,70,1,.2);
  field(focus.plasma,95,145);
  // Fibrosis retains scattered inflammation, with the same screen density of small profiles.
  // Keep the middle-power fibrosis field readable: fewer, resolved profiles instead of subpixel stippling.
@@ -116,7 +118,7 @@ function buildCells(){
  {const N=rng(70606);for(let i=0;i<14;i++){const a=N()*TAU,r=4+N()*5;add(focus.plasma[0]+Math.cos(a)*r,focus.plasma[1]+Math.sin(a)*r,'lymph',.86+N()*.25,N()*TAU);}}
  {const N=rng(70607);for(let i=0;i<80;i++)add(focus.lymph[0]+(N()-.5)*60,focus.lymph[1]+(N()-.5)*60,'lymph',.86+N()*.25,N()*TAU);}
  // Resolve every peripheral nucleus before rasterisation, then enforce spacing at its final size.
- const resolved=cells.map(q=>{const d=Math.hypot(q.x-focus.plasma[0],q.y-focus.plasma[1]);const w=Math.min(1,Math.max(0,(d-24)/24));return {...q,s:Math.max(q.s,1+1.65*w)};}).sort((a,b)=>(a.type==='plasma'?0:1)-(b.type==='plasma'?0:1));
+ const resolved=cells.map(q=>{const d=Math.hypot(q.x-focus.plasma[0],q.y-focus.plasma[1]);const w=Math.min(1,Math.max(0,(d-24)/24));const dl=Math.hypot(q.x-focus.lymph[0],q.y-focus.lymph[1]);const wl=Math.min(1,Math.max(0,(dl-75)/30));return {...q,s:Math.max(q.s,1+1.65*w*wl)};}).sort((a,b)=>(a.type==='plasma'?0:1)-(b.type==='plasma'?0:1));
  const kept=[];
  for(const q of resolved){const r=(q.type==='plasma'?7.8:4.5)*q.s*.158;if(kept.some(v=>Math.hypot(v.x-q.x,v.y-q.y)<v.rad+r+.2))continue;kept.push({...q,rad:r});}
  return kept;
@@ -232,19 +234,24 @@ export function prepareChronic(){
   c.restore();
  }
  // Independently seeded local spindle fields, baked into every matching mother tile.
- for(const [centre,span,n,z] of [[focus.lymph,60,8,4.8],[focus.lymph,230,420,4.8],[focus.fib,350,150,1.62],[focus.plasma,95,55,4.8]]){
-  const F=rng(19606+n);
+ for(const [centre,span,n,z] of [[focus.lymph,60,8,4.8],[focus.lymph,230,420,4.8],[focus.fib,350,1350,1.62],[focus.plasma,95,55,4.8]]){
+  const F=rng(19606+n),spindles=[];
   for(let i=0;i<n;i++){
    const x=centre[0]+(F()-.5)*span,y=centre[1]+(F()-.5)*span;
    if(!visible([x,y])||Math.hypot(x-focus.plasma[0],y-focus.plasma[1])<(z===1.62?52:3.5)||(z===1.62&&Math.hypot(x-focus.lymph[0],y-focus.lymph[1])<45))continue;
    c.save();c.translate(x,y);c.rotate(.08+(F()-.5)*.25);
-   const l=(15+F()*5)/z,w=(.8+F()*.55)/z,ph=F()*TAU,bend=(F()-.5)*w*3.5;
+   const l=(z===1.62?12+F()*4:15+F()*5)/z,w=(z===1.62?1.8+F()*.8:.8+F()*.55)/z,ph=F()*TAU,bend=(F()-.5)*w*3.5;
+   if(z===1.62){
+    // Preserve visible collagen clefts: neighbouring spindle profiles may not stack or cross round nuclei.
+    const blocked=spindles.some(q=>Math.pow((x-q.x)/((l+q.l)*.82),2)+Math.pow((y-q.y)/((w+q.w)*1.6),2)<1)||cells.some(q=>Math.abs(x-q.x)<l*.87+q.rad&&Math.abs(y-q.y)<w*.9+q.rad);
+    if(blocked){c.restore();continue;}spindles.push({x,y,l,w});
+   }
    const hw=t=>w*.75*Math.pow(Math.sin(Math.PI*t),.9)*(.9+.1*Math.sin(t*7+ph)),yc=t=>bend*(1-Math.pow(2*t-1,2));
    // Tapered lens with a slightly ragged edge and a gentle bow; no light stripe down the middle.
    c.beginPath();
    for(let k=0;k<=24;k++){const t=k/24;k?c.lineTo((t-.5)*2*l,yc(t)-hw(t)):c.moveTo(-l,yc(0));}
    for(let k=24;k>=0;k--){const t=k/24;c.lineTo((t-.5)*2*l,yc(t)+hw(t));}
-   c.closePath();c.fillStyle=i%3?'#5B3A72':'#6B4A80';c.fill();c.save();c.clip();
+   c.closePath();c.fillStyle=i%3?'#4D2D68':'#624078';c.fill();c.save();c.clip();
    for(let j=0;j<10;j++){c.fillStyle='rgba(46,26,72,.34)';c.beginPath();c.ellipse((F()-.5)*l*1.8,(F()-.5)*w*.9,.12+F()*.4,.08+F()*.14,0,0,TAU);c.fill();}c.restore();
    c.strokeStyle='rgba(48,28,72,.35)';c.lineWidth=.06;c.stroke();
    c.restore();

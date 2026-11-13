@@ -1,4 +1,4 @@
-import {prepareChronic,focus} from '../lib_ext/he_chronic.js';
+import {prepareChronic,focus,plasmaLeader} from '../lib_ext/he_chronic.js';
 let map;const clamp=x=>Math.max(0,Math.min(1,x)),ease=x=>{x=clamp(x);return x*x*(3-2*x);};
 export default {prepare(){map=prepareChronic();},draw(c,t,T){
  c.setTransform(1,0,0,1,0,0);c.fillStyle='#111114';c.fillRect(0,0,1920,1080);
@@ -10,6 +10,6 @@ export default {prepare(){map=prepareChronic();},draw(c,t,T){
  let label=null,target=null,a=1;
  if(t>T.frac(69,.65)&&t<T.end(69)){label='纤维组织增生';target=focus.fib;a=Math.min(ease((t-T.frac(69,.65))/(T.frac(69,.78)-T.frac(69,.65))),ease((T.end(69)-t)/(T.end(69)-T.frac(69,.92))));}
  if(t>T.frac(70,.28)&&t<T.frac(70,.49)){label='淋巴细胞';target=focus.lymph;a=Math.min(ease((t-T.frac(70,.28))/(T.frac(70,.34)-T.frac(70,.28))),ease((T.frac(70,.49)-t)/(T.frac(70,.49)-T.frac(70,.45))));}
- if(t>T.frac(70,.77)){label='浆细胞';target=focus.plasma;a=ease((t-T.frac(70,.77))/(T.frac(70,.84)-T.frac(70,.77)));}
+ if(t>T.frac(70,.77)){label='浆细胞';target=plasmaLeader;a=ease((t-T.frac(70,.77))/(T.frac(70,.84)-T.frac(70,.77)));}
  if(label){c.save();c.globalAlpha=a;c.font='400 27px MixSans';c.fillStyle='#D8C5E7';c.fillText(label,1555,275);c.strokeStyle='#B8A1C8';c.lineWidth=1.2;c.beginPath();c.moveTo(1550,287);c.lineTo(1488,310);c.lineTo(1110+(target[0]-x)*z,475+(target[1]-y)*z);c.stroke();c.restore();}
 }};
