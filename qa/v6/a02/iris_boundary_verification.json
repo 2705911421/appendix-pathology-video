@@ -1,0 +1,26 @@
+[
+  {
+    "frame": 8685,
+    "source_candidates": [
+      0,
+      1
+    ],
+    "MAE": [
+      0.007189477848101266,
+      0.0070927830520393816
+    ],
+    "expected_iris_dark": true
+  },
+  {
+    "frame": 8964,
+    "source_candidates": [
+      278,
+      279
+    ],
+    "MAE": [
+      0.013835413736521331,
+      0.010199286509610876
+    ],
+    "expected_iris_dark": true
+  }
+]
