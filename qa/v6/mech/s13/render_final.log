@@ -1,0 +1,17 @@
+(node:1181053) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+rendering 630 frames × 1 sample(s) @ 1920x1080 30fps with 1 worker(s)…
+  63/630 frames  16s
+  126/630 frames  20s
+  189/630 frames  26s
+  252/630 frames  33s
+  315/630 frames  40s
+  378/630 frames  48s
+  441/630 frames  57s
+  504/630 frames  68s
+  567/630 frames  113s
+  630/630 frames  373s
+done /workspace/病理科普视频/v5_mech_dev/qa/v6/mech/s13/S13.mp4
+  630 frames, 21.00s, 373.9s wall (593 ms/sample)
