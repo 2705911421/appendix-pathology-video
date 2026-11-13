@@ -340,13 +340,13 @@ export function drawCTChanges(c,g,{stage=1,aFat=0,aExud=0,aDefect=0,aGas=0,aAbsc
   const {x,y}=g.appendix,{outer}=appendixRadii(g,stage);
   if(aEnh>0){c.save();c.globalAlpha=aEnh;c.strokeStyle='#F6EFDD';c.lineWidth=outer*.16;c.beginPath();c.arc(x,y,outer*.54,0,TAU);c.stroke();c.restore();}
   if(aDefect>0){c.save();c.globalAlpha=aDefect;sectorPath(c,x,y,outer*.24,outer*.91,-1.35,-.40,840,.03);c.fillStyle='#68645E';c.fill();c.restore();}
-  if(aAbscess>0){c.save();c.globalAlpha=aAbscess;blob(c,x-outer*.85,y+outer*1.9,outer*.75,outer*.57,838,.08,'#605E58');strokeBlob(c,x-outer*.85,y+outer*1.9,outer*.75,outer*.57,838,.08,'#E1DACB',2.5);c.restore();}
+  if(aAbscess>0){c.save();c.globalAlpha=aAbscess;blob(c,x+outer*1.3,y+outer*.9,outer*.75,outer*.57,838,.08,'#605E58');strokeBlob(c,x+outer*1.3,y+outer*.9,outer*.75,outer*.57,838,.08,'#E1DACB',2.5);c.restore();}
   // axial fat stranding (small)
   strands(c,x,y,outer*1.15,outer*2.2,811,10,aFat*.85,1.2);
   if(stage>=2){c.save();ePath(c,g.cx,g.cy,g.R*.76,g.R*.64,17,.02);c.clip();strands(c,x,y,outer*1.15,outer*2.7,812,32,aExud,1.4);c.restore();}
   if(aGas>0){
     c.save();c.globalAlpha=clamp(aGas);
-    for(const [aa,dd,rr] of [[2.4,1.8,.11],[2.9,2.15,.08],[1.9,2.3,.07]]){
+    for(const [aa,dd,rr] of [[2.4,1.3,.11],[2.9,1.35,.08],[1.9,1.4,.07]]){
       const gx=x+Math.cos(aa)*outer*dd,gy=y+Math.sin(aa)*outer*dd;
       c.fillStyle='#141619';c.beginPath();c.arc(gx,gy,outer*rr*1.8,0,TAU);c.fill();
       c.strokeStyle='rgba(238,232,218,.8)';c.lineWidth=1;c.stroke();
