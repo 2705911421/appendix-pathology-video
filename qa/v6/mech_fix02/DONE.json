@@ -1,0 +1,24 @@
+{
+ "task": "mech_fix02",
+ "status": "DONE",
+ "commit": "b1062221d1273a2156b74566c198c5f24b7b0de7",
+ "branch": "s13s14-rescale",
+ "deliverables": [
+  "qa/v6/mech_fix02/S13r.mp4",
+  "qa/v6/mech_fix02/S13r_带配音_720p.mp4",
+  "qa/v6/mech_fix02/keyframes/",
+  "qa/v6/mech_fix02/review_sheet.png",
+  "qa/v6/mech_fix02/metrics.json",
+  "qa/v6/mech_fix02/自检.md"
+ ],
+ "acceptance": {
+  "s13_circle_mae_max": 0.0,
+  "s13_mae_threshold": 1.0,
+  "s14r_mae_max": 0.060375,
+  "s14r_mae_threshold": 0.5,
+  "video_duration_s": 21.0,
+  "duration_delta_frames": 0,
+  "black_frames": 0,
+  "locked_files_unchanged": true
+ }
+}

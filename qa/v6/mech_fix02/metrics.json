@@ -1,0 +1,79 @@
+{
+ "task": "mech_fix02",
+ "goal": "S13 句51-52 相机/缩放恢复为基点 8560137 原值；S14 句54-57 不动",
+ "s13r_code_equals_baseline_8560137": true,
+ "baseline": "8560137",
+ "s13_keyframe_circle_mae": {
+  "circle": {
+   "cx": 1432,
+   "cy": 452,
+   "r": 350
+  },
+  "frames": [
+   {
+    "t": 219.402,
+    "mae_per_255": 0.0,
+    "pass": true
+   },
+   {
+    "t": 221.096,
+    "mae_per_255": 0.0,
+    "pass": true
+   },
+   {
+    "t": 224.833,
+    "mae_per_255": 0.0,
+    "pass": true
+   }
+  ]
+ },
+ "s14r_unchanged": {
+  "reference": "qa/v6/s13s14_rescale/keyframes",
+  "frames": [
+   {
+    "name": "s54_low",
+    "mae": 0.060375,
+    "pass": true
+   },
+   {
+    "name": "s54",
+    "mae": 0.0,
+    "pass": true
+   },
+   {
+    "name": "s55_edge",
+    "mae": 0.044437,
+    "pass": true
+   },
+   {
+    "name": "s55",
+    "mae": 0.017004,
+    "pass": true
+   },
+   {
+    "name": "s56",
+    "mae": 0.0,
+    "pass": true
+   },
+   {
+    "name": "s57",
+    "mae": 0.0,
+    "pass": true
+   }
+  ],
+  "threshold": 0.5
+ },
+ "video": {
+  "file": "qa/v6/mech_fix02/S13r.mp4",
+  "crf": 16,
+  "fps": 30,
+  "workers": 1,
+  "duration_s": 21.0,
+  "frames": 630,
+  "reference_S13_duration_s": 21.0,
+  "duration_delta_frames": 0,
+  "blackdetect": "no black frames (d=0.1,pix_th=0.10)",
+  "voiced": "qa/v6/mech_fix02/S13r_带配音_720p.mp4 (720p, 旁白_v3.wav 句49-53)"
+ },
+ "locked_files_sha256": "qa/v6/mech_fix02/sha256_开工.txt == 收工 (全部 OK)"
+}

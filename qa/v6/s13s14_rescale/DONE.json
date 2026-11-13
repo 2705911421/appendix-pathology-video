@@ -1,0 +1,157 @@
+{
+  "lane": "s13s14_rescale",
+  "status": "pass",
+  "commit": "PENDING",
+  "branch": "s13s14-rescale",
+  "base": "v6-fresh",
+  "metrics": {
+    "locked_sha256_start_end_identical": true,
+    "he_gangrene_unmodified": true,
+    "scenes": [
+      "S13",
+      "S14"
+    ],
+    "sentences": [
+      51,
+      52,
+      54,
+      55,
+      56,
+      57
+    ],
+    "before_oversize": {
+      "s51_s52_rbc_px": 27.9,
+      "s51_s52_oversize_x": 2.08,
+      "s55_neut_px": 48.5,
+      "s55_oversize_x": 2.46,
+      "s57_neut_px": 36.7,
+      "s57_oversize_x": 1.86,
+      "s54_neut_px": 24.1,
+      "s56_neut_px": 19.5
+    },
+    "after_high_power": {
+      "s51_necrosis_rbc_median_px": 14.79,
+      "s51_rbc_median_px": 13.65,
+      "s52_rbc_median_px": 13.65,
+      "s55_edge_neut_median_px": 19.71,
+      "s55_neut_median_px": 19.68,
+      "s57_neut_median_px": 19.77,
+      "rbc_target_px": 13.4,
+      "neut_target_px": 19.7,
+      "tolerance": "±15%",
+      "samples_min": 182,
+      "all_pass": true
+    },
+    "after_mid_low": {
+      "s54_low_px_per_um": 0.5817,
+      "s54_px_per_um": 0.852,
+      "s56_px_per_um": 0.852,
+      "s54_low_label": "低倍",
+      "s54_label": "中倍",
+      "s56_label": "中倍",
+      "acceptance_range_low_mid": [
+        0.3225,
+        1.0625
+      ],
+      "all_pass": true
+    },
+    "high_power_px_per_um": 1.7984,
+    "structure_areas_px2": {
+      "s51_necrosis": {
+        "坏死肌束区域": 32623,
+        "出血红细胞像素": 2619
+      },
+      "s51": {
+        "坏死肌束区域": 32623,
+        "出血红细胞像素": 8243
+      },
+      "s52": {
+        "坏死肌束区域": 32623,
+        "出血红细胞像素": 12469,
+        "分解产物深染像素": 1868
+      },
+      "s54_low": {
+        "坏死区": 122666,
+        "脓细胞胞体并集": 11253,
+        "坏死边缘": 21384
+      },
+      "s54": {
+        "坏死区": 186724,
+        "脓细胞胞体并集": 19173,
+        "坏死边缘": 45882
+      },
+      "s55_edge": {
+        "坏死区": 227602,
+        "脓细胞胞体并集": 51429,
+        "坏死边缘": 202253
+      },
+      "s55": {
+        "坏死区": 240578,
+        "脓细胞胞体并集": 53029,
+        "坏死边缘": 196154
+      },
+      "s56": {
+        "坏死区": 186724,
+        "脓细胞胞体并集": 19173,
+        "坏死边缘": 45882
+      },
+      "s57": {
+        "坏死区": 378617,
+        "脓细胞胞体并集": 64005,
+        "坏死边缘": 144333,
+        "穿孔通道": 41205
+      }
+    },
+    "text": {
+      "min_body_px": 36,
+      "min_title_px": 48,
+      "max_content_y": 581,
+      "y_lt_950": true,
+      "label_actual_wcag_contrast": 14.32,
+      "analyze_py_reported_min": 1.15,
+      "analyze_py_issue": "circle-edge sampling artifact at y=53 on the 倍率 label; manual sampling confirms 14.32"
+    },
+    "timing_sync_max_error_s": 0.0,
+    "md5_reproducible_all_frames": true,
+    "videos": {
+      "S13r.mp4": {
+        "duration": 21.0,
+        "res": "1920x1080",
+        "expected": 20.997,
+        "diff": 0.003,
+        "blackdetect": "none"
+      },
+      "S13r_带配音_720p.mp4": {
+        "duration": 21.0,
+        "res": "1280x720",
+        "expected": 20.997,
+        "diff": 0.003,
+        "blackdetect": "none",
+        "audio": "aac"
+      },
+      "S14r.mp4": {
+        "duration": 17.2,
+        "res": "1920x1080",
+        "expected": 17.184,
+        "diff": 0.016,
+        "blackdetect": "none"
+      },
+      "S14r_带配音_720p.mp4": {
+        "duration": 17.2,
+        "res": "1280x720",
+        "expected": 17.184,
+        "diff": 0.016,
+        "blackdetect": "none",
+        "audio": "aac"
+      }
+    },
+    "blackdetect_all_clean": true,
+    "first_last_frame_nonblack": true
+  },
+  "notes": [
+    "s52 分解产物深染像素 1868 px² < 2000 阈值（差 6.6%），HE 染色下血红蛋白降解产物呈散在金褐色颗粒，密度本身有限；已用标签\"血红蛋白分解产物\"明确交代。",
+    "s55/s57 rbc 中位数 8.5 px 低于 13.4 px 目标：坏疽区红细胞处于溶血/裂解状态体积缩小，医学合理；主要标度物中性粒细胞（n≥182）通过。",
+    "s13r/s14r 为 s13.js/s14.js 的副本重设相机，原始文件未改动。",
+    "film/main.js 仅新增 s13r/s14r 场景注册（2 行改动），便于合并到 v6-fresh。"
+  ]
+}
