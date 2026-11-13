@@ -1,4 +1,5 @@
-import {paper,text,drawCTStatic,drawFocus,labelTo,ramp} from '../lib_ext/ct_r3_schematic.js';
+import {loadCT,realCT,mark} from '../lib_ext/ct_real_images.js';
+import {paper,text,labelTo,ramp} from '../lib_ext/ct_r3_schematic.js';
 import {doctor,choice,evidenceBase} from '../lib_ext/ct_r3_clinical.js';
 
 const PUR='#6B4C9A', INK='#2A2A35';
@@ -6,17 +7,17 @@ const CT={x:610,y:92,w:1260,h:838};
 const CT_SMALL={x:1040,y:170,w:470,h:540};
 
 export default {
-  prepare(){
+  async prepare(){
     this.clinic=document.createElement('canvas');this.clinic.width=1920;this.clinic.height=1080;
     doctor(this.clinic.getContext('2d'),1010,408,1.55);
 
     this.ct=document.createElement('canvas');this.ct.width=1920;this.ct.height=1080;
-    this.g=drawCTStatic(this.ct.getContext('2d'),CT.x,CT.y,CT.w,CT.h,{stage:1,lens:true});
+    this.image=await loadCT(0);this.g=realCT(this.ct.getContext('2d'),this.image,0,CT,'197373');
 
     this.evidence=document.createElement('canvas');this.evidence.width=1920;this.evidence.height=1080;
     const e=this.evidence.getContext('2d');
     evidenceBase(e);
-    this.gs=drawCTStatic(e,CT_SMALL.x,CT_SMALL.y,CT_SMALL.w,CT_SMALL.h,{stage:1,lens:false,compact:true});
+    realCT(e,this.image,0,CT_SMALL,'197373');
   },
   draw(c,t,T){
     paper(c);
@@ -61,10 +62,7 @@ export default {
       c.save();c.globalAlpha=a18;
       text(c,'发现病变',70,245,44,PUR,700);
       c.restore();
-      const L=this.g.lens,ar=L.r*.52;
-      drawFocus(c,L.x,L.y,ar*1.08,a18,[8,7],2,'#C9B7DA');
-      const ty=Math.min(this.g.y+this.g.h-28,L.y+L.r+44);
-      labelTo(c,'发现病变',L.x-250,ty,L.x-ar*.15,L.y+ar*.2,{color:'#C9B7DA',alpha:a18,size:28});
+      mark(c,this.g,[168,240],20,'发现病变',a18);
       return;
     }
 
