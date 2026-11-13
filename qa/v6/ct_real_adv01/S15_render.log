@@ -1,0 +1,99 @@
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real_adv01/S15/stills/t_001.30.png
+/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real_adv01/S15/stills/t_003.54.png
+/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real_adv01/S15/stills/t_006.11.png
+/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real_adv01/S15/stills/t_008.43.png
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+deterministic: 6 frames match across render orders (1.016, 3.416, 4.616, 6.74, 8.586, 9.199 s)
+review_sheet S15 4
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+rendering 277 frames × 1 sample(s) @ 1920x1080 30fps with 1 worker(s)…
+  28/277 frames  2s
+  56/277 frames  4s
+  84/277 frames  5s
+  112/277 frames  6s
+  140/277 frames  8s
+  168/277 frames  9s
+  196/277 frames  11s
+  224/277 frames  12s
+  252/277 frames  14s
+done /workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real_adv01/S15/S15.mp4
+  277 frames, 9.23s, 15.1s wall (55 ms/sample)
+ffmpeg version 7.1.5-0+deb13u1 Copyright (c) 2000-2026 the FFmpeg developers
+  built with gcc 14 (Debian 14.2.0-19)
+  configuration: --prefix=/usr --extra-version=0+deb13u1 --toolchain=hardened --libdir=/usr/lib/x86_64-linux-gnu --incdir=/usr/include/x86_64-linux-gnu --arch=amd64 --enable-gpl --disable-stripping --disable-libmfx --disable-omx --enable-gnutls --enable-libaom --enable-libass --enable-libbs2b --enable-libcdio --enable-libcodec2 --enable-libdav1d --enable-libflite --enable-libfontconfig --enable-libfreetype --enable-libfribidi --enable-libglslang --enable-libgme --enable-libgsm --enable-libharfbuzz --enable-libmp3lame --enable-libmysofa --enable-libopenjpeg --enable-libopenmpt --enable-libopus --enable-librubberband --enable-libshine --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libtheora --enable-libtwolame --enable-libvidstab --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx265 --enable-libxml2 --enable-libxvid --enable-libzimg --enable-openal --enable-opencl --enable-opengl --disable-sndio --enable-libvpl --enable-libdc1394 --enable-libdrm --enable-libiec61883 --enable-chromaprint --enable-frei0r --enable-ladspa --enable-libbluray --enable-libcaca --enable-libdvdnav --enable-libdvdread --enable-libjack --enable-libpulse --enable-librabbitmq --enable-librist --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libx264 --enable-libzmq --enable-libzvbi --enable-lv2 --enable-sdl2 --enable-libplacebo --enable-librav1e --enable-pocketsphinx --enable-librsvg --enable-libjxl --enable-shared
+  libavutil      59. 39.100 / 59. 39.100
+  libavcodec     61. 19.101 / 61. 19.101
+  libavformat    61.  7.103 / 61.  7.103
+  libavdevice    61.  3.100 / 61.  3.100
+  libavfilter    10.  5.100 / 10.  5.100
+  libswscale      8.  3.100 /  8.  3.100
+  libswresample   5.  3.100 /  5.  3.100
+  libpostproc    58.  3.100 / 58.  3.100
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'qa/v6/ct_real_adv01/S15/S15.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    encoder         : Lavf61.7.103
+  Duration: 00:00:09.23, start: 0.000000, bitrate: 1062 kb/s
+  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(tv, bt709/unknown/unknown, progressive), 1920x1080 [SAR 1:1 DAR 16:9], 1058 kb/s, 30 fps, 30 tbr, 15360 tbn (default)
+      Metadata:
+        handler_name    : VideoHandler
+        vendor_id       : [0][0][0][0]
+        encoder         : Lavc61.19.101 libx264
+      Side data:
+        ICC Profile
+[aist#1:0/pcm_s16le @ 0x55fd6926d540] Guessed Channel Layout: mono
+Input #1, wav, from '/workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav':
+  Duration: 00:05:27.83, bitrate: 768 kb/s
+  Stream #1:0: Audio: pcm_s16le ([1][0][0][0] / 0x0001), 48000 Hz, mono, s16, 768 kb/s
+Stream mapping:
+  Stream #0:0 -> #0:0 (h264 (native) -> h264 (libx264))
+  Stream #1:0 -> #0:1 (pcm_s16le (native) -> aac (native))
+Press [q] to stop, [?] for help
+[libx264 @ 0x55fd69220180] using SAR=1/1
+[libx264 @ 0x55fd69220180] using cpu capabilities: MMX2 SSE2Fast SSSE3 SSE4.2 AVX FMA3 BMI2 AVX2 AVX512
+[libx264 @ 0x55fd69220180] profile High, level 3.1, 4:2:0, 8-bit
+[libx264 @ 0x55fd69220180] 264 - core 164 r3108 31e19f9 - H.264/MPEG-4 AVC codec - Copyleft 2003-2023 - http://www.videolan.org/x264.html - options: cabac=1 ref=3 deblock=1:0:0 analyse=0x3:0x113 me=hex subme=7 psy=1 psy_rd=1.00:0.00 mixed_ref=1 me_range=16 chroma_me=1 trellis=1 8x8dct=1 cqm=0 deadzone=21,11 fast_pskip=1 chroma_qp_offset=-2 threads=12 lookahead_threads=2 sliced_threads=0 nr=0 decimate=1 interlaced=0 bluray_compat=0 constrained_intra=0 bframes=3 b_pyramid=2 b_adapt=1 b_bias=0 direct=1 weightb=1 open_gop=0 weightp=2 keyint=250 keyint_min=25 scenecut=40 intra_refresh=0 rc_lookahead=40 rc=crf mbtree=1 crf=16.0 qcomp=0.60 qpmin=0 qpmax=69 qpstep=4 ip_ratio=1.40 aq=1:1.00
+Output #0, mp4, to 'qa/v6/ct_real_adv01/S15/S15_带配音_720p.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    encoder         : Lavf61.7.103
+  Stream #0:0(und): Video: h264 (avc1 / 0x31637661), yuv420p(tv, bt709/unknown/unknown, progressive), 1280x720 [SAR 1:1 DAR 16:9], q=2-31, 30 fps, 15360 tbn (default)
+      Metadata:
+        handler_name    : VideoHandler
+        vendor_id       : [0][0][0][0]
+        encoder         : Lavc61.19.101 libx264
+      Side data:
+        ICC Profile
+        cpb: bitrate max/min/avg: 0/0/0 buffer size: 0 vbv_delay: N/A
+  Stream #0:1: Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, mono, fltp, 192 kb/s
+      Metadata:
+        encoder         : Lavc61.19.101 aac
+frame=  101 fps=0.0 q=22.0 size=     512KiB time=00:00:03.30 bitrate=1271.1kbits/s speed=6.59x    [out#0/mp4 @ 0x55fd69222fc0] video:613KiB audio:192KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: 1.457253%
+frame=  276 fps=0.0 q=-1.0 Lsize=     816KiB time=00:00:09.13 bitrate= 732.1kbits/s speed=12.2x    
+[libx264 @ 0x55fd69220180] frame I:2     Avg QP: 2.83  size: 45472
+[libx264 @ 0x55fd69220180] frame P:81    Avg QP:11.19  size:  5395
+[libx264 @ 0x55fd69220180] frame B:193   Avg QP:10.34  size:   512
+[libx264 @ 0x55fd69220180] consecutive B-frames:  4.3%  6.5%  2.2% 87.0%
+[libx264 @ 0x55fd69220180] mb I  I16..4: 82.2%  9.6%  8.2%
+[libx264 @ 0x55fd69220180] mb P  I16..4:  1.6%  2.0%  0.3%  P16..4:  4.3%  2.8%  2.5%  0.0%  0.0%    skip:86.4%
+[libx264 @ 0x55fd69220180] mb B  I16..4:  0.3%  0.1%  0.0%  B16..8:  3.6%  0.4%  0.0%  direct: 0.5%  skip:95.1%  L0:33.0% L1:47.8% BI:19.2%
+[libx264 @ 0x55fd69220180] 8x8 transform intra:32.7% inter:54.0%
+[libx264 @ 0x55fd69220180] coded y,uvDC,uvAC intra: 16.0% 2.7% 1.8% inter: 2.5% 0.8% 0.2%
+[libx264 @ 0x55fd69220180] i16 v,h,dc,p: 91%  7%  2%  0%
+[libx264 @ 0x55fd69220180] i8 v,h,dc,ddl,ddr,vr,hd,vl,hu: 19% 10% 52%  3%  4%  2%  4%  2%  3%
+[libx264 @ 0x55fd69220180] i4 v,h,dc,ddl,ddr,vr,hd,vl,hu: 28% 22% 16%  5%  8%  5%  7%  4%  5%
+[libx264 @ 0x55fd69220180] i8c dc,h,v,p: 86%  4% 10%  0%
+[libx264 @ 0x55fd69220180] Weighted P-Frames: Y:11.1% UV:9.9%
+[libx264 @ 0x55fd69220180] ref P L0: 70.1% 23.5%  4.9%  1.5%  0.0%
+[libx264 @ 0x55fd69220180] ref B L0: 87.4% 11.6%  1.0%
+[libx264 @ 0x55fd69220180] ref B L1: 94.2%  5.8%
+[libx264 @ 0x55fd69220180] kb/s:545.05
+[aac @ 0x55fd69a69d00] Qavg: 49826.043
+{'S15.mp4': {'duration': 9.233333, 'streams': [{'codec_type': 'video', 'codec_name': 'h264', 'width': 1920, 'height': 1080}]}, 'S15_带配音_720p.mp4': {'duration': 9.232, 'streams': [{'codec_type': 'video', 'codec_name': 'h264', 'width': 1280, 'height': 720}, {'codec_type': 'audio', 'codec_name': 'aac', 'width': None, 'height': None}]}}

@@ -1,0 +1,28 @@
+[ct-dev 7cb6858] ct_real_adv01 (Codex): S12 按官方坐标校正并突出广泛周围条索
+ 27 files changed, 227 insertions(+), 1 deletion(-)
+ create mode 100644 qa/v6/ct_real_adv01/S09_commit.log
+ create mode 100644 qa/v6/ct_real_adv01/S12/S12.mp4
+ create mode 100644 qa/v6/ct_real_adv01/S12/S12_带配音_720p.mp4
+ create mode 100644 qa/v6/ct_real_adv01/S12/keyframes.json
+ create mode 100644 qa/v6/ct_real_adv01/S12/media_check.json
+ create mode 100644 qa/v6/ct_real_adv01/S12/review_sheet.png
+ create mode 100644 qa/v6/ct_real_adv01/S12/review_video720.png
+ create mode 100644 qa/v6/ct_real_adv01/S12/s47_30.png
+ create mode 100644 qa/v6/ct_real_adv01/S12/s47_30_200.png
+ create mode 100644 qa/v6/ct_real_adv01/S12/s47_30_video720.png
+ create mode 100644 qa/v6/ct_real_adv01/S12/s47_82.png
+ create mode 100644 qa/v6/ct_real_adv01/S12/s47_82_200.png
+ create mode 100644 qa/v6/ct_real_adv01/S12/s47_82_video720.png
+ create mode 100644 qa/v6/ct_real_adv01/S12/s48_30.png
+ create mode 100644 qa/v6/ct_real_adv01/S12/s48_30_200.png
+ create mode 100644 qa/v6/ct_real_adv01/S12/s48_30_video720.png
+ create mode 100644 qa/v6/ct_real_adv01/S12/s48_82.png
+ create mode 100644 qa/v6/ct_real_adv01/S12/s48_82_200.png
+ create mode 100644 qa/v6/ct_real_adv01/S12/s48_82_video720.png
+ create mode 100644 qa/v6/ct_real_adv01/S12/stills/t_001.17.png
+ create mode 100644 qa/v6/ct_real_adv01/S12/stills/t_003.19.png
+ create mode 100644 qa/v6/ct_real_adv01/S12/stills/t_005.27.png
+ create mode 100644 qa/v6/ct_real_adv01/S12/stills/t_006.89.png
+ create mode 100644 qa/v6/ct_real_adv01/S12/validation.json
+ create mode 100644 qa/v6/ct_real_adv01/S12/自检.md
+ create mode 100644 qa/v6/ct_real_adv01/S12_render.log
