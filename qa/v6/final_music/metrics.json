@@ -1,0 +1,22 @@
+{
+  "lane": "final_music",
+  "track": "Wholesome",
+  "author": "Kevin MacLeod",
+  "isrc": "USUAN1900022",
+  "license": "CC BY 4.0",
+  "output_wav": "music/mix/audio_final_test.wav",
+  "sha256": "dd7ff618ba0f950a7ac84cab4a1a021cd678a4ee6653d3c4e048692ab330c684",
+  "reproducible_sha256_match": true,
+  "duration_s": 342.0,
+  "duration_error_s": 0.0,
+  "integrated_lufs": -16.0,
+  "true_peak_dbtp": -4.19,
+  "lra_lu": 2.2,
+  "sample_peak": 0.616,
+  "clipped_samples": 0,
+  "intelligibility_min_gap_lu": 43.5,
+  "intelligibility_sentences_below_14lu_count": 0,
+  "voice_level_change_db": 0.38,
+  "fade_out_tail_dbfs": -240.0,
+  "all_pass": true
+}
