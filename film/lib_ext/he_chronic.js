@@ -66,7 +66,7 @@ function chronicCell(c,x,y,type,s=1,rot=0,key=0){
 function ribbon(c,len,w,phase,bend,color,alpha){
  const N=22,pts=[];
  for(let i=0;i<=N;i++){const t=i/N,q=(t-.5)*len;pts.push([q,Math.sin(q/3+phase)*.16+Math.sin(q/1.5+phase*1.6)*.09+bend*(q*q)/(len*len)]);}
- const hw=t=>w*(.22+.78*Math.pow(Math.sin(Math.PI*t),.62));
+ const hw=t=>w*Math.pow(Math.max(0,Math.sin(Math.PI*t)),.72);
  c.beginPath();
  for(let i=0;i<=N;i++){const t=i/N;i?c.lineTo(pts[i][0],pts[i][1]-hw(t)):c.moveTo(pts[i][0],pts[i][1]-hw(t));}
  for(let i=N;i>=0;i--){const t=i/N;c.lineTo(pts[i][0],pts[i][1]+hw(t));}
@@ -98,10 +98,11 @@ function buildCells(){
   for(let k=0;k<count*2;k++)add(cp[0]+(R()-.5)*span,cp[1]+(R()-.5)*span,'lymph',(.86+R()*.25)*scale,R()*TAU);
  }
  field(focus.lymph,220,330);
- field(focus.plasma,95,60);
+ field(focus.plasma,95,145);
  // Fibrosis retains scattered inflammation, with the same screen density of small profiles.
  // Keep the middle-power fibrosis field readable: fewer, resolved profiles instead of subpixel stippling.
- const fibBox=q=>q.x>focus.fib[0]-90&&q.x<focus.fib[0]+100&&q.y>focus.fib[1]-95&&q.y<focus.fib[1]+110;
+ const fibDistance=q=>Math.hypot((q.x-focus.fib[0])/105,(q.y-focus.fib[1])/112);
+ const fibBox=q=>fibDistance(q)<1;
  for(let i=cells.length-1;i>=0;i--)if(fibBox(cells[i]))cells.splice(i,1);
  occ.length=0;for(const q of cells)occ.push({x:q.x,y:q.y,r:(q.type==='plasma'?7.2:3.9)*q.s*.16});
  const K=rng(60669);
@@ -113,13 +114,13 @@ function buildCells(){
  for(let k=0;k<260;k++){const a=-1.58+(R()-.5)*2.4,r=510+R()*335;field(point(a,r),12,1);}
  {const N=rng(70606);for(let i=0;i<14;i++){const a=N()*TAU,r=4+N()*5;add(focus.plasma[0]+Math.cos(a)*r,focus.plasma[1]+Math.sin(a)*r,'lymph',.86+N()*.25,N()*TAU);}}
  {const N=rng(70607);for(let i=0;i<80;i++)add(focus.lymph[0]+(N()-.5)*60,focus.lymph[1]+(N()-.5)*60,'lymph',.86+N()*.25,N()*TAU);}
- return cells.filter(q=>{if(!fibBox(q)||q.s>2)return true;const d=Math.min(q.x-(focus.fib[0]-90),focus.fib[0]+100-q.x,q.y-(focus.fib[1]-95),focus.fib[1]+110-q.y);return d<12&&rng(q.key*7919)()>d/12;});
+ return cells.filter(q=>{if(!fibBox(q)||q.s>2)return true;const d=(1-fibDistance(q))*105;return rng(q.key*7919)()>Math.min(1,d/38);});
 }
 export function prepareChronic(){
  bake('chronic.collagen',(b,P)=>{P.fill(b,P.blob(0,0,80,8,.22,719),'#DF9CB3',100,.35);},{seed:719,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});
  const cells=buildCells();
  function drawPlate(c){const R=rng(69070);
- function visible(p){const t=c.getTransform(),x=p[0]*t.a+t.e,y=p[1]*t.d+t.f;return x>-120&&y>-120&&x<c.canvas.width+120&&y<c.canvas.height+120;}
+ function visible(p){const t=c.getTransform(),x=p[0]*t.a+t.e,y=p[1]*t.d+t.f;return x>-140*Math.abs(t.a)&&y>-140*Math.abs(t.d)&&x<c.canvas.width+140*Math.abs(t.a)&&y<c.canvas.height+140*Math.abs(t.d);}
 
  // One oblique wall, shared by every magnification. No acute-cell assets.
  for(const [r,color] of [[885,'#EAD0D8'],[830,'#E2B1C2'],[740,'#E9C4D0'],[570,'#EAD5E0'],[390,'#D6BCD5'],[290,'#F6EEF0']]){c.beginPath();for(let i=0;i<=360;i++){const a=i/360*TAU,p=point(a,r+8*Math.sin(a*7)+5*Math.sin(a*11));i?c.lineTo(...p):c.moveTo(...p);}c.closePath();c.fillStyle=color;c.fill();}
@@ -130,7 +131,7 @@ export function prepareChronic(){
  for(let i=0;i<150;i++){const a=R()*TAU,r=890+R()*170,p=point(a,r);c.save();c.translate(...p);c.rotate(a+.3+(R()-.5)*1.2);drawWash(c,'chronic.collagen',0,0,45+R()*60,{alpha:.05+R()*.05});c.restore();}
  for(let i=0;i<450;i++){const a=R()*TAU,r=890+R()*150,p=point(a,r);c.save();c.translate(...p);c.rotate(a+.3+(R()-.5)*1.3);ribbon(c,14+R()*46,.25+R()*.55,R()*TAU,(R()-.5)*4,'#D9A0B6',.05+R()*.05);c.restore();}
  // Ground substance: pale washes so the band is continuous with the surrounding stroma.
- for(let i=0;i<1500;i++){const a=-1.58+(R()-.5)*3.0,r=500+R()*360,p=point(a,r);c.save();c.translate(...p);c.rotate(a+Math.PI/2+.3+(R()-.5)*.6);drawWash(c,'chronic.collagen',0,0,75+R()*55,{alpha:.075+R()*.075});c.restore();}
+ for(let i=0;i<1500;i++){const a=-1.58+(R()-.5)*3.0,r=500+R()*360,p=point(a,r);if(!visible(p))continue;c.save();c.translate(...p);c.rotate(a+Math.PI/2+.3+(R()-.5)*.6);drawWash(c,'chronic.collagen',0,0,75+R()*55,{alpha:.075+R()*.075});c.restore();}
  // Broad collagen bundles follow the submucosal and intermuscular arcs, with irregular gaps and bends.
  for(let i=0;i<520;i++){
   const a=-1.58+(R()-.5)*2.5,r=510+R()*330,p=point(a,r),len=12+R()*32,w=1+R()*3.5;
@@ -174,26 +175,59 @@ export function prepareChronic(){
   ribbon(c,20+T()*52,.24+T()*.4,T()*TAU,(T()-.5)*2,i%3?'#D08DA8':'#E3B4C6',.05+T()*.05);
   c.restore();
  }
- // Dense eosinophilic stroma, baked once into the existing mother-plate tiles.
- // Independent seed preserves every approved cell's morphology and chromatin.
- for(let i=0;i<120000;i++){
-  const F=rng(70419+i*7919);
-  const a=-1.58+(F()-.5)*2.8,r=500+F()*365,p=point(a,r);
-  if(F()>Math.exp(-Math.pow((a+1.58)/1.05,2))||!visible(p))continue;
-  c.save();c.translate(...p);c.rotate(a+Math.PI/2+.3+Math.pow(F()-.5,3)*5.2);
-  const fibZone=Math.hypot(p[0]-focus.fib[0],p[1]-focus.fib[1])<145;
-  const len=fibZone?1.4+F()*5: .6+F()*2.5,w=fibZone?.3+F()*.55:.18+F()*.36,ph=F()*TAU;
-  ribbon(c,len,w,ph,(F()-.5)*3,i%3?'#BA6B91':'#E2A0B4',.24+F()*.3);
-  // Small broken pigment deposits give each fibre irregular longitudinal staining.
-  for(let j=0;j<8;j++){c.fillStyle=j%2?'rgba(158,74,119,.16)':'rgba(245,206,213,.3)';c.beginPath();c.ellipse((F()-.5)*len,(F()-.5)*2,.08+F()*.35,.06+F()*.15,0,0,TAU);c.fill();}
+ // Continuous three-layer interstitium; seeded world positions are shared by every tile.
+ // Soft low-frequency rose pools, with no rectangular texture atlas.
+ for(let i=0;i<14000;i++){
+  const F=rng(90419+i*7919),a=-1.58+(F()-.5)*2.8,r=500+F()*365,p=point(a,r);
+  if(!visible(p))continue;
+  const rr=3+F()*19,deep=F()<.56;
+  c.save();c.translate(...p);c.rotate(.12+(F()-.5)*.4);c.scale(1,.2+F()*.35);
+  const g=c.createRadialGradient(0,0,0,0,0,rr);
+  g.addColorStop(0,deep?'rgba(185,72,119,.27)':'rgba(255,239,238,.42)');
+  g.addColorStop(.55,deep?'rgba(204,101,140,.15)':'rgba(255,239,238,.21)');
+  g.addColorStop(1,'rgba(235,180,201,0)');c.fillStyle=g;c.beginPath();c.arc(0,0,rr,0,TAU);c.fill();c.restore();
+ }
+ // Fine swept collagen threads, including pale interbundle clefts.
+ for(let i=0;i<98000;i++){
+  const F=rng(70419+i*7919),a=-1.58+(F()-.5)*2.8,r=500+F()*365,p=point(a,r);
+  if(!visible(p))continue;
+  c.save();c.translate(...p);c.rotate(.10+(F()-.5)*.24);
+  const localZ=Math.hypot(p[0]-focus.plasma[0],p[1]-focus.plasma[1])<55?22:Math.hypot(p[0]-focus.lymph[0],p[1]-focus.lymph[1])<160?4.8:1.62;
+  const len=(6+F()*42)/localZ,w=(.24+F()*.35)/localZ;
+  ribbon(c,len,w,F()*TAU,(F()-.5)*1.8,i%4===0?'#FFF3EF':i%3?'#C47B9D':'#FBE3E6',.18+F()*.29);
   c.restore();
+ }
+ for(let i=0;i<700;i++){
+  const F=rng(96419+i*7919),a=-1.58+(F()-.5)*2.8,r=500+F()*365,p=point(a,r);
+  if(!visible(p))continue;c.save();c.translate(...p);c.rotate(.1+(F()-.5)*.35);
+  ribbon(c,4+F()*19,.12+F()*.27,F()*TAU,(F()-.5)*2,'#FFF0ED',.38+F()*.2);c.restore();
+ }
+ // Native microtexture follows the same plate coordinates at each teaching focus.
+ for(const [cp,span,z,count] of [[focus.fib,560,1.62,18000],[focus.lymph,260,4.8,24000],[focus.plasma,105,22,22000]]){
+  const F=rng(81819+count);
+  for(let i=0;i<count;i++){
+   const x=cp[0]+(F()-.5)*span,y=cp[1]+(F()-.5)*span;
+   if(!visible([x,y]))continue;
+   const fade=Math.min(1,(span/2-Math.max(Math.abs(x-cp[0]),Math.abs(y-cp[1])))/(span*.18));
+   c.save();c.translate(x,y);c.rotate(.10+(F()-.5)*.27);
+   if(i%7===0){
+    const rr=(10+F()*40)/z; c.scale(1,.25+F()*.4);
+    const g=c.createRadialGradient(0,0,0,0,0,rr);
+    g.addColorStop(0,i%2?'rgba(180,62,108,'+(.28*fade)+')':'rgba(255,241,238,'+(.5*fade)+')');g.addColorStop(1,'rgba(230,163,188,0)');
+    c.fillStyle=g;c.beginPath();c.arc(0,0,rr,0,TAU);c.fill();
+   }else{
+    ribbon(c,(3+F()*37)/z,(.16+F()*.36)/z,F()*TAU,(F()-.5)*1.2/z,i%3?'#FCE8E8':'#B86A91',(.16+F()*.32)*fade);
+    for(let j=0;j<3;j++){c.fillStyle='rgba(151,65,107,'+(.12*fade)+')';c.beginPath();c.ellipse((F()-.5)*20/z,(F()-.5)*2/z,(.12+F()*.4)/z,.12/z,0,0,TAU);c.fill();}
+   }
+   c.restore();
+  }
  }
  for(let i=0;i<1900;i++){
   const F=rng(80419+i*7919);
   const a=-1.58+(F()-.5)*2.65,r=510+F()*335,p=point(a,r);
   if(!visible(p)||Math.hypot(p[0]-focus.plasma[0],p[1]-focus.plasma[1])<32)continue;
   c.save();c.translate(...p);c.rotate(a+Math.PI/2+.3+(F()-.5)*.34);
-  const l=1.7+F()*1.9,w=.32+F()*.35;
+  const l=2.8+F()*1.3,w=.24+F()*.22;
   c.beginPath();c.moveTo(-l,0);c.bezierCurveTo(-l*.36,-w*1.1,l*.42,-w,l,0);c.bezierCurveTo(l*.36,w*.95,-l*.4,w,-l,0);c.fillStyle=i%3?'#674078':'#845787';c.fill();
   c.strokeStyle='rgba(48,27,76,.6)';c.lineWidth=.17;c.stroke();
   for(let j=0;j<10;j++){c.fillStyle=j%3?'rgba(44,25,70,.48)':'rgba(159,122,170,.5)';c.beginPath();c.ellipse((F()-.5)*l*1.45,(F()-.5)*w,.12+F()*.33,.12+F()*.22,0,0,TAU);c.fill();}
@@ -206,8 +240,8 @@ export function prepareChronic(){
    const x=centre[0]+(F()-.5)*span,y=centre[1]+(F()-.5)*span;
    if(!visible([x,y])||Math.hypot(x-focus.plasma[0],y-focus.plasma[1])<(z===1.62?52:3.5)||(z===1.62&&Math.hypot(x-focus.lymph[0],y-focus.lymph[1])<45))continue;
    c.save();c.translate(x,y);c.rotate(.08+(F()-.5)*.25);
-   const l=(12.4+F()*7.4)/z,w=(1.4+F()*.8)/z,ph=F()*TAU,bend=(F()-.5)*w*1.1;
-   const hw=t=>w*.75*Math.pow(Math.sin(Math.PI*t),.5)*(.9+.1*Math.sin(t*7+ph)),yc=t=>bend*(1-Math.pow(2*t-1,2));
+   const l=(15+F()*5)/z,w=(.8+F()*.55)/z,ph=F()*TAU,bend=(F()-.5)*w*3.5;
+   const hw=t=>w*.75*Math.pow(Math.sin(Math.PI*t),.9)*(.9+.1*Math.sin(t*7+ph)),yc=t=>bend*(1-Math.pow(2*t-1,2));
    // Tapered lens with a slightly ragged edge and a gentle bow; no light stripe down the middle.
    c.beginPath();
    for(let k=0;k<=24;k++){const t=k/24;k?c.lineTo((t-.5)*2*l,yc(t)-hw(t)):c.moveTo(-l,yc(0));}
@@ -224,9 +258,18 @@ export function prepareChronic(){
  const TILE=1700,TILEH=1250,B=4,SC=3;
  const tiles=[];for(let j=0;j<2;j++)for(let i=0;i<2;i++){const tile=document.createElement('canvas');tile.width=(TILE+2*B)*SC;tile.height=(TILEH+2*B)*SC;const c=tile.getContext('2d',{willReadFrequently:true});c.scale(SC,SC);c.translate(TILE+B-i*TILE,TILEH+B-j*TILEH);drawPlate(c);tiles.push({canvas:tile,x:-TILE-B+i*TILE,y:-TILEH-B+j*TILEH,w:TILE+2*B,h:TILEH+2*B});}
  // Native detail patches of the SAME mother plate preserve subpixel chromatin.
- for(const [centre,size,res] of [[focus.lymph,220,12],[focus.plasma,90,24]]){
+ for(const [centre,size,res] of [[focus.fib,600,4],[focus.lymph,220,12],[focus.plasma,90,24]]){
   const tile=document.createElement('canvas');tile.width=tile.height=size*res;
   const c=tile.getContext('2d');c.scale(res,res);c.translate(size/2-centre[0],size/2-centre[1]);drawPlate(c);
+  const mask=document.createElement('canvas');mask.width=mask.height=tile.width;
+  const m=mask.getContext('2d'),edge=12*res;
+  m.fillStyle='white';m.fillRect(0,0,mask.width,mask.height);
+  for(const vertical of [false,true])for(const reverse of [false,true]){
+   const g=m.createLinearGradient(vertical?0:(reverse?mask.width:0),vertical?(reverse?mask.height:0):0,vertical?0:(reverse?mask.width-edge:edge),vertical?(reverse?mask.height-edge:edge):0);
+   g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(1,'white');
+   m.globalCompositeOperation='destination-in';m.fillStyle=g;m.fillRect(0,0,mask.width,mask.height);
+  }
+  c.save();c.setTransform(1,0,0,1,0,0);c.globalCompositeOperation='destination-in';c.drawImage(mask,0,0);c.restore();
   tiles.push({canvas:tile,x:centre[0]-size/2,y:centre[1]-size/2,w:size,h:size});
  }
  return tiles;
