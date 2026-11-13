@@ -235,9 +235,9 @@
       ],
       "start": 281.0779999999997,
       "end": 289.93558333333294,
-      "video": "/workspace/病理科普视频/v5_chron_dev/qa/v6/chron_s18/S18.mp4",
-      "fallback": true,
-      "source": "chron_s18 (fallback)",
+      "video": "/workspace/病理科普视频/v5_chron_dev/qa/v6/s18_b09/S18.mp4",
+      "fallback": false,
+      "source": "s18_b09/S18",
       "s66_override": "/workspace/病理科普视频/v5_gross_dev/qa/v6/gross_swap/S18_s66/S18_s66.mp4"
     },
     {
@@ -281,5 +281,5 @@
     }
   ],
   "total_dur": 327.8315,
-  "generated": "2026-11-13T07:51:09.098677+00:00"
+  "generated": "2026-11-13T08:25:51.602151+00:00"
 }

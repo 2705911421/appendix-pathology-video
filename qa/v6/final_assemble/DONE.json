@@ -4,28 +4,29 @@
   "commit": "pending",
   "date": "2026-11-13",
   "time_completed": "16:05 CST",
+  "build": "v2 (S18 upgraded to s18_b09 at 16:22)",
   "caveats": [
     "S08 回退到 animatic/S08.mp4（s08_rescale FAILED，符合覆盖条款）",
-    "S13 回退到 mech/s13_adv01/S13.mp4（mech_fix02 渲染中有 .lock，覆盖条款禁用 s13s14_rescale/S13r）",
-    "S18 回退到 chron_s18/S18.mp4（s18_b09 无 DONE.json）",
+    "S13 回退到 mech/s13_adv01/S13.mp4（mech_fix02 status=DONE 非 pass，覆盖条款严格要求 pass）",
+    "S18 升级到 s18_b09/S18.mp4（s18_b09 于 16:06 出 DONE=pass，重跑替换）",
     "S12/S19 MAE 在缩图测量中略超 5.0（非 brief 强制阈值，视觉内容正确）"
   ],
   "metrics": {
     "locked_files": "PASS 16/16",
     "export_verify_ok": true,
     "scenes_total": 20,
-    "fallback_scenes": ["S08", "S13", "S18"],
-    "audio_lufs": -16.38,
-    "audio_tp": -1.84,
-    "duration_1080p_s": 339.333333,
-    "nb_frames_1080p": 10180,
+    "fallback_scenes": ["S08", "S13"],
+    "audio_lufs": -16.35,
+    "audio_tp": -1.8,
+    "duration_1080p_s": 338.833333,
+    "nb_frames_1080p": 10165,
     "blind_decoded_match": true,
     "metadata_clean": true,
     "blackdetect_pass": true,
     "files": {
-      "阑尾_final_1080p.mp4": "18225ccfb2dad67f7ab1e09b0d5be1a93e2e3ab7216080ee4cca8081ce0328fd",
-      "阑尾_final_720p.mp4": "88f6ce90056ca27ed74c7dc005c8c6f1a848669aab095ceda87acc4401782818",
-      "阑尾_blind_1080p.mp4": "9b4899894593fbc8ec4fbba5884530e0d0bfb03f471a57d28f0fa5db05c0a1c7"
+      "阑尾_final_1080p.mp4": "see final/校验.json",
+      "阑尾_final_720p.mp4": "see final/校验.json",
+      "阑尾_blind_1080p.mp4": "see final/校验.json"
     }
   }
 }
