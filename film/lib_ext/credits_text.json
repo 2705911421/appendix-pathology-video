@@ -1,0 +1,78 @@
+{
+  "paper": {
+    "hex": "#F4EFE6",
+    "rgb": [
+      244,
+      239,
+      230
+    ],
+    "sample": "qa/v6/h02_s06/s23_red.png median of the paper field"
+  },
+  "title": "声明与致谢",
+  "ai": [
+    {
+      "text": "旁白由 AI 语音合成生成。",
+      "evidence": "配音/全稿_v3/TASK.md",
+      "verified": true
+    },
+    {
+      "text": "画面由人工设计分镜，借助 AI 编程工具编写代码生成。",
+      "evidence": "分镜/分镜_v1.md; film/chapters/; /workspace/病理科普视频/lane_briefs/",
+      "verified": true
+    },
+    {
+      "text": "CT 图像为真实公开病例图，仅做裁切、缩放与标注。",
+      "evidence": "/workspace/病理科普视频/ct_real/来源与授权.md",
+      "verified": true
+    },
+    {
+      "text": "配乐为授权曲目。",
+      "evidence": "/workspace/病理科普视频/music/来源与授权.md",
+      "verified": true
+    }
+  ],
+  "original": {
+    "text": "分镜与画面为原创设计，由代码绘制。",
+    "evidence": "分镜/分镜_v1.md; film/chapters/",
+    "verified": true
+  },
+  "music": {
+    "lines": [
+      "背景音乐：Wholesome / Kevin MacLeod (incompetech.com)",
+      "授权：Creative Commons: By Attribution 4.0",
+      "https://creativecommons.org/licenses/by/4.0/",
+      "\"Wholesome\" Kevin MacLeod (incompetech.com)",
+      "Licensed under Creative Commons: By Attribution 4.0",
+      "http://creativecommons.org/licenses/by/4.0/"
+    ],
+    "credit": "背景音乐：Wholesome / Kevin MacLeod (incompetech.com)\n授权：Creative Commons: By Attribution 4.0\nhttps://creativecommons.org/licenses/by/4.0/\n\"Wholesome\" Kevin MacLeod (incompetech.com)\nLicensed under Creative Commons: By Attribution 4.0\nhttp://creativecommons.org/licenses/by/4.0/",
+    "source_file": "/workspace/病理科普视频/music/来源与授权.md",
+    "preferred_file": "/workspace/病理科普视频/music/来源与授权.md",
+    "preferred_present": true,
+    "note": "装配时重新运行 assembly/build_credits_text.py。来源与授权.md 的「片尾署名格式」代码块按原文逐行上屏；该文件不存在时才回退到配乐授权说明.md 的署名文本。",
+    "verified": true,
+    "evidence": "/workspace/病理科普视频/music/来源与授权.md"
+  },
+  "ct": {
+    "items": [
+      {
+        "zh": "图像来源：Radiopaedia.org，病例 rID 197373，作者 Michael P. Hartung，CC BY-NC-SA 3.0",
+        "en": "Image: Case courtesy of Michael P. Hartung, Radiopaedia.org, rID: 197373 (CC BY-NC-SA 3.0)"
+      },
+      {
+        "zh": "图像来源：Radiopaedia.org，病例 rID 30389，作者 Jack Ren，CC BY-NC-SA 3.0",
+        "en": "Image: Case courtesy of Jack Ren, Radiopaedia.org, rID: 30389 (CC BY-NC-SA 3.0)"
+      },
+      {
+        "zh": "图像来源：Radiopaedia.org，病例 rID 197370，作者 Michael P. Hartung，CC BY-NC-SA 3.0",
+        "en": "Image: Case courtesy of Michael P. Hartung, Radiopaedia.org, rID: 197370 (CC BY-NC-SA 3.0)"
+      },
+      {
+        "zh": "图像来源：Radiopaedia.org，病例 rID 242634，作者 Diana Reyadh Kadhem，CC BY-NC-SA 3.0",
+        "en": "Image: Case courtesy of Diana Reyadh Kadhem, Radiopaedia.org, rID: 242634 (CC BY-NC-SA 3.0)"
+      }
+    ],
+    "license": "CT 图像许可：CC BY-NC-SA 3.0（https://creativecommons.org/licenses/by-nc-sa/3.0/）",
+    "source_file": "/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real/credits.md"
+  }
+}
