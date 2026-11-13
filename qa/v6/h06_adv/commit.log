@@ -1,0 +1,72 @@
+fatal: Unable to create '/workspace/病理科普视频/v5/.git/index.lock': Read-only file system
+Cloning into '/tmp/main_adv01_git'...
+done.
+[v6-fresh 2be05e8] main_adv01 (Codex): S06 readable neutrophil proportions and reviewed delivery
+ 33 files changed, 109 insertions(+), 1 deletion(-)
+ create mode 100644 qa/v6/h06_adv/s06/S06.mp4
+ create mode 100644 qa/v6/h06_adv/s06/S06_带配音_720p.mp4
+ create mode 100644 qa/v6/h06_adv/s06/determinism.json
+ create mode 100644 qa/v6/h06_adv/s06/determinism_metrics.json
+ create mode 100644 qa/v6/h06_adv/s06/review_sheet.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_red.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_red_200pct.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_red_final_video.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_red_reverse.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_start.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_start_200pct.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_start_final_video.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_start_reverse.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_transition.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_transition_200pct.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_transition_final_video.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_transition_reverse.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_after.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_after_200pct.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_after_final_video.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_after_reverse.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_anchor.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_anchor_200pct.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_anchor_final_video.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_anchor_reverse.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_before.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_before_200pct.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_before_final_video.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_before_reverse.png
+ create mode 100644 qa/v6/h06_adv/s06/修正前后对比.png
+ create mode 100644 qa/v6/h06_adv/s06/自检.md
+ create mode 100644 qa/v6/h06_adv/s06_keyframes.json
+[v6-fresh 3de2749] main_adv01 (Codex): S06 readable neutrophil proportions and reviewed delivery
+ Date: Fri Nov 13 09:04:04 2026 +0800
+ 33 files changed, 109 insertions(+), 1 deletion(-)
+ create mode 100644 qa/v6/h06_adv/s06/S06.mp4
+ create mode 100644 qa/v6/h06_adv/s06/S06_带配音_720p.mp4
+ create mode 100644 qa/v6/h06_adv/s06/determinism.json
+ create mode 100644 qa/v6/h06_adv/s06/determinism_metrics.json
+ create mode 100644 qa/v6/h06_adv/s06/review_sheet.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_red.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_red_200pct.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_red_final_video.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_red_reverse.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_start.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_start_200pct.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_start_final_video.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_start_reverse.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_transition.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_transition_200pct.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_transition_final_video.png
+ create mode 100644 qa/v6/h06_adv/s06/s23_transition_reverse.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_after.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_after_200pct.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_after_final_video.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_after_reverse.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_anchor.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_anchor_200pct.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_anchor_final_video.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_anchor_reverse.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_before.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_before_200pct.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_before_final_video.png
+ create mode 100644 qa/v6/h06_adv/s06/s24_before_reverse.png
+ create mode 100644 qa/v6/h06_adv/s06/修正前后对比.png
+ create mode 100644 qa/v6/h06_adv/s06/自检.md
+ create mode 100644 qa/v6/h06_adv/s06_keyframes.json

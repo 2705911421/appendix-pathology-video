@@ -1,0 +1,151 @@
+{
+  "1080p": {
+    "outside_window_video_packets_identical": 9148,
+    "all_audio_packets_and_timestamps_identical": 15931,
+    "frame_count": 10195,
+    "window": {
+      "start_frame": 2720,
+      "join_frame": 3037,
+      "end_frame": 3767,
+      "gop_start": 2720,
+      "gop_end": 3767
+    }
+  },
+  "_720p": {
+    "outside_window_video_packets_identical": 9148,
+    "all_audio_packets_and_timestamps_identical": 15931,
+    "frame_count": 10195,
+    "window": {
+      "start_frame": 2720,
+      "join_frame": 3037,
+      "end_frame": 3767,
+      "gop_start": 2720,
+      "gop_end": 3767
+    }
+  },
+  "s06": {
+    "determinism": [
+      {
+        "name": "s23_start",
+        "byte_identical": true,
+        "mae": 0.0,
+        "pixels_difference_gt24_fraction": 0.0
+      },
+      {
+        "name": "s23_transition",
+        "byte_identical": true,
+        "mae": 0.0,
+        "pixels_difference_gt24_fraction": 0.0
+      },
+      {
+        "name": "s23_red",
+        "byte_identical": false,
+        "mae": 9.371784979423868e-05,
+        "pixels_difference_gt24_fraction": 0.0
+      },
+      {
+        "name": "s24_anchor",
+        "byte_identical": true,
+        "mae": 0.0,
+        "pixels_difference_gt24_fraction": 0.0
+      },
+      {
+        "name": "s24_before",
+        "byte_identical": true,
+        "mae": 0.0,
+        "pixels_difference_gt24_fraction": 0.0
+      },
+      {
+        "name": "s24_after",
+        "byte_identical": true,
+        "mae": 0.0,
+        "pixels_difference_gt24_fraction": 0.0
+      }
+    ],
+    "seam_check_passed": [],
+    "safe_area": {
+      "all_frames": 318,
+      "below_y950_max_error": 2
+    },
+    "audio_origin_verified_against_timeline": true
+  },
+  "s07": {
+    "determinism": [
+      {
+        "name": "handoff_start",
+        "byte_identical": false,
+        "mae": 0.00024819958847736623,
+        "pixels_difference_gt24_fraction": 0.0
+      },
+      {
+        "name": "handoff_mid",
+        "byte_identical": false,
+        "mae": 0.03299784593621399,
+        "pixels_difference_gt24_fraction": 0.0
+      },
+      {
+        "name": "s25_fluid",
+        "byte_identical": false,
+        "mae": 0.00981835133744856,
+        "pixels_difference_gt24_fraction": 0.0
+      },
+      {
+        "name": "s26_protein",
+        "byte_identical": false,
+        "mae": 9.645061728395062e-07,
+        "pixels_difference_gt24_fraction": 0.0
+      },
+      {
+        "name": "s27_adhesion",
+        "byte_identical": false,
+        "mae": 7.71604938271605e-06,
+        "pixels_difference_gt24_fraction": 0.0
+      },
+      {
+        "name": "s27_crossing",
+        "byte_identical": false,
+        "mae": 9.645061728395062e-07,
+        "pixels_difference_gt24_fraction": 0.0
+      },
+      {
+        "name": "s27_exited",
+        "byte_identical": true,
+        "mae": 0.0,
+        "pixels_difference_gt24_fraction": 0.0
+      },
+      {
+        "name": "s28_defense",
+        "byte_identical": true,
+        "mae": 0.0,
+        "pixels_difference_gt24_fraction": 0.0
+      },
+      {
+        "name": "s29_injury",
+        "byte_identical": true,
+        "mae": 0.0,
+        "pixels_difference_gt24_fraction": 0.0
+      },
+      {
+        "name": "s30_exudation",
+        "byte_identical": true,
+        "mae": 0.0,
+        "pixels_difference_gt24_fraction": 0.0
+      }
+    ],
+    "seam_check_passed": [
+      "s25_fluid",
+      "s26_protein",
+      "s27_adhesion",
+      "s27_crossing",
+      "s27_exited",
+      "s28_defense",
+      "s29_injury",
+      "s30_exudation"
+    ],
+    "safe_area": {
+      "all_frames": 730,
+      "below_y950_max_error": 5
+    },
+    "audio_origin_verified_against_timeline": true
+  }
+}

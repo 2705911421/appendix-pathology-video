@@ -1,0 +1,108 @@
+{
+  "origin": 101.22237500000004,
+  "duration": 24.33458333333334,
+  "rows": [
+    {
+      "n": 25,
+      "seg": "04",
+      "chapter": "红·单纯性",
+      "start": 101.22237500000004,
+      "end": 103.65625000000004,
+      "dur": 2.433875,
+      "text": "血管里的液体和蛋白质渗出，",
+      "en": "Fluid and proteins leak out of blood | vessels,"
+    },
+    {
+      "n": 26,
+      "seg": "04",
+      "chapter": "红·单纯性",
+      "start": 104.10625000000005,
+      "end": 107.33079166666671,
+      "dur": 3.2245416666666666,
+      "text": "积在组织间隙，形成水肿。",
+      "en": "causing tissue edema and swelling."
+    },
+    {
+      "n": 27,
+      "seg": "04",
+      "chapter": "红·单纯性",
+      "start": 107.78079166666672,
+      "end": 111.99695833333338,
+      "dur": 4.216166666666667,
+      "text": "巡逻的白细胞游出血管，挺进受损组织。",
+      "en": "Patrolling white blood cells leave vessels | and advance into injured tissue."
+    },
+    {
+      "n": 28,
+      "seg": "04",
+      "chapter": "红·单纯性",
+      "start": 112.44695833333338,
+      "end": 116.16454166666672,
+      "dur": 3.7175833333333332,
+      "text": "这是身体为抵御损伤，调动的防御。",
+      "en": "Inflammation is the body's protective | response to injury."
+    },
+    {
+      "n": 29,
+      "seg": "04",
+      "chapter": "红·单纯性",
+      "start": 116.61454166666672,
+      "end": 120.71216666666672,
+      "dur": 4.097625,
+      "text": "然而战况一旦失控，也可能伤及自身组织。",
+      "en": "An excessive response can also damage the | body's own tissue."
+    },
+    {
+      "n": 30,
+      "seg": "04",
+      "chapter": "红·单纯性",
+      "start": 121.16216666666672,
+      "end": 125.55695833333338,
+      "dur": 4.394791666666666,
+      "text": "液体、蛋白质和白细胞外出，叫渗出。",
+      "en": "These changes are called exudation."
+    }
+  ],
+  "picks": [
+    {
+      "name": "handoff_start",
+      "t": 0
+    },
+    {
+      "name": "handoff_mid",
+      "t": 0.30423437500000006
+    },
+    {
+      "name": "s25_fluid",
+      "t": 1.9471000000000005
+    },
+    {
+      "name": "s26_protein",
+      "t": 5.463508333333337
+    },
+    {
+      "name": "s27_adhesion",
+      "t": 7.654620000000007
+    },
+    {
+      "name": "s27_crossing",
+      "t": 9.045955000000006
+    },
+    {
+      "name": "s27_exited",
+      "t": 10.521613333333338
+    },
+    {
+      "name": "s28_defense",
+      "t": 14.496056666666679
+    },
+    {
+      "name": "s29_injury",
+      "t": 18.875147916666677
+    },
+    {
+      "name": "s30_exudation",
+      "t": 23.807208333333342
+    }
+  ]
+}

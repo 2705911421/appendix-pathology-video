@@ -1,0 +1,62 @@
+[
+  {
+    "name": "handoff_start",
+    "byte_identical": false,
+    "mae": 0.00024819958847736623,
+    "pixels_difference_gt24_fraction": 0.0
+  },
+  {
+    "name": "handoff_mid",
+    "byte_identical": false,
+    "mae": 0.03299784593621399,
+    "pixels_difference_gt24_fraction": 0.0
+  },
+  {
+    "name": "s25_fluid",
+    "byte_identical": false,
+    "mae": 0.00981835133744856,
+    "pixels_difference_gt24_fraction": 0.0
+  },
+  {
+    "name": "s26_protein",
+    "byte_identical": false,
+    "mae": 9.645061728395062e-07,
+    "pixels_difference_gt24_fraction": 0.0
+  },
+  {
+    "name": "s27_adhesion",
+    "byte_identical": false,
+    "mae": 7.71604938271605e-06,
+    "pixels_difference_gt24_fraction": 0.0
+  },
+  {
+    "name": "s27_crossing",
+    "byte_identical": false,
+    "mae": 9.645061728395062e-07,
+    "pixels_difference_gt24_fraction": 0.0
+  },
+  {
+    "name": "s27_exited",
+    "byte_identical": true,
+    "mae": 0.0,
+    "pixels_difference_gt24_fraction": 0.0
+  },
+  {
+    "name": "s28_defense",
+    "byte_identical": true,
+    "mae": 0.0,
+    "pixels_difference_gt24_fraction": 0.0
+  },
+  {
+    "name": "s29_injury",
+    "byte_identical": true,
+    "mae": 0.0,
+    "pixels_difference_gt24_fraction": 0.0
+  },
+  {
+    "name": "s30_exudation",
+    "byte_identical": true,
+    "mae": 0.0,
+    "pixels_difference_gt24_fraction": 0.0
+  }
+]
