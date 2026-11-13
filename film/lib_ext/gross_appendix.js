@@ -435,11 +435,14 @@ const BLEEDS = (() => {
   return out;
 })();
 
+// Purple-black field along the distal quarter of the centreline (about 27% of length).
+// The dark-red cuff is painted wider than these cores, so the hemorrhagic rim sits outside the black.
 const NECRO = [
-  { s: .752, v: -.22, rx: 30, ry: 23, seed: 7101 },
-  { s: .800, v: -.05, rx: 36, ry: 27, seed: 7102 },
-  { s: .845, v: -.26, rx: 25, ry: 19, seed: 7103 },
-  { s: .785, v: .20, rx: 19, ry: 14, seed: 7104 },
+  { s: .698, v: -.34, rx: 40, ry: 20, seed: 7101 },
+  { s: .790, v: -.04, rx: 36, ry: 20, seed: 7102 },
+  { s: .850, v: -.22, rx: 28, ry: 16, seed: 7103 },
+  { s: .805, v: .20, rx: 14, ry: 10, seed: 7104 },
+  { s: .888, v: -.06, rx: 18, ry: 12, seed: 7105 },
 ];
 
 // ── baked pigment ────────────────────────────────────────────────────────────────────────
@@ -741,81 +744,50 @@ function paintCut(ctx, swell, look) {
   ctx.restore();
 }
 
-// ── pus: yellow fibrinopurulent crust (r6) ──────────────────────────────────────────────
-// r5's radial blooms read as a white fog at 1080p. r6 builds each patch from a few
-// concentric irregular fills (solid core, narrow feather) plus axial fibrin threads.
-// No reused sprite, no outline stroke, no gaussian. Normal/red never reach this code
-// (pus alpha is 0). The gangrenous core keeps the r5 exudate underneath the unchanged
-// necrosis paint; new crust fades out before that core and turns dirty grey-green beside it.
+// ── pus: patchy yellow fibrinopurulent crust (r7) ───────────────────────────────────────
+// r6's coat was one continuous pad. r7 keeps that thick paint (concentric irregular
+// fills, lit shoulder, axial fibrin) but seats it in separated plaques. Gaps are red
+// serosa, so the vessels drawn earlier stay visible. No sprite, no outline, no blur.
+// Normal/red never reach this code (pus alpha is 0). On the black state the plaque
+// nearest the necrosis turns dirty grey-green; the core itself is not repainted.
 const PUS_TONES = [
   [194, 160, 98],   // 灰黄
   [204, 170, 108],  // 灰黄
   [216, 186, 126],  // 乳黄
   [182, 150, 88],   // 深灰黄
-  [188, 174, 104],  // 淡黄绿
+  [188, 174, 104],  // 淡黄绿 — one small fleck only
   [198, 164, 100],  // 灰黄
   [210, 178, 116],  // 乳黄
 ];
-const PUS_DIRTY = [114, 120, 86]; // 污秽灰绿，只在坏疽交界
-// s, v, along-px, across-px, core alpha, tone index. Thick cores do not show red.
+const PUS_DIRTY = [114, 120, 86]; // 污秽灰绿，只挨着坏死区
+// s, v, along-px, across-px, core alpha, tone index.
+// Six plaques. Thin flanks (alpha < 0.5) let red through. The lit rim around s=0.32 stays bare.
 const PUS_CRUSTS = [
-  [0.13, -0.52, 36, 13, 0.94, 0],
-  [0.15, -0.16, 48, 15, 0.97, 2],
-  [0.18, 0.22, 30, 12, 0.90, 4],
-  [0.21, -0.74, 28, 10, 0.88, 1],
-  [0.24, -0.36, 62, 17, 0.98, 3],
-  [0.27, 0.02, 40, 14, 0.93, 5],
-  [0.30, -0.58, 44, 13, 0.95, 0],
-  [0.32, 0.34, 26, 11, 0.86, 6],
-  [0.36, -0.20, 78, 19, 0.98, 2],
-  [0.39, -0.64, 40, 12, 0.94, 1],
-  [0.42, 0.10, 38, 15, 0.92, 4],
-  [0.45, -0.40, 68, 16, 0.98, 6],
-  [0.48, 0.38, 24, 10, 0.84, 5],
-  [0.51, -0.08, 52, 17, 0.97, 2],
-  [0.54, -0.56, 38, 12, 0.93, 0],
-  [0.57, 0.14, 42, 14, 0.91, 3],
-  [0.60, -0.30, 74, 18, 0.98, 1],
-  [0.63, -0.66, 32, 11, 0.90, 4],
-  [0.66, 0.02, 46, 15, 0.95, 2],
-  [0.69, -0.42, 36, 13, 0.92, 5],
-  [0.72, 0.26, 28, 11, 0.84, 0],
-  [0.74, -0.18, 40, 14, 0.90, 6],
-  // reach toward the lit rim so the coat reads yellow, leaving a thin red edge
-  [0.19, -0.84, 36, 12, 0.92, 2],
-  [0.33, -0.80, 44, 13, 0.94, 1],
-  [0.48, -0.82, 40, 12, 0.92, 6],
-  [0.62, -0.78, 36, 12, 0.90, 0],
-  // thin veils — red serosa stays visible
-  [0.16, -0.38, 34, 8, 0.32, 2],
-  [0.28, -0.08, 40, 7, 0.28, 3],
-  [0.41, -0.72, 26, 6, 0.26, 4],
-  [0.50, 0.22, 30, 7, 0.30, 1],
-  [0.62, -0.14, 36, 7, 0.30, 5],
-  [0.22, 0.46, 20, 6, 0.24, 6],
-  [0.56, -0.46, 24, 6, 0.28, 0],
-  // cords along the axis
-  [0.28, -0.48, 96, 4.0, 0.74, 1],
-  [0.46, -0.14, 110, 3.6, 0.70, 3],
-  [0.58, -0.50, 88, 3.4, 0.66, 4],
-  [0.36, 0.18, 76, 3.2, 0.58, 5],
+  // 1 proximal sheet
+  [0.168, -0.42, 44, 26, 0.97, 2],
+  [0.142, -0.68, 24, 14, 0.92, 0],
+  [0.198, -0.18, 22, 15, 0.86, 1],
+  [0.175, -0.55, 16, 9, 0.36, 6],
+  // 2 lower plaque; does not reach the lit rim, so s≈0.32 stays red
+  [0.312, -0.02, 26, 12, 0.90, 5],
+  [0.290, -0.20, 14, 8, 0.66, 3],
+  // 3 sheet under「灰黄色脓苔」
+  [0.432, -0.44, 34, 24, 0.97, 1],
+  [0.400, -0.70, 18, 13, 0.88, 2],
+  [0.462, -0.20, 16, 13, 0.76, 6],
+  [0.428, -0.12, 12, 7, 0.32, 0],
+  // 4 mid sheet, red gap on either side
+  [0.548, -0.40, 20, 20, 0.96, 2],
+  [0.530, -0.66, 14, 11, 0.84, 5],
+  [0.566, -0.16, 12, 10, 0.70, 1],
+  [0.552, -0.52, 8, 4.5, 0.60, 4],
+  // 5 distal sheet against the necrosis; covers「斑驳、片状」
+  [0.642, -0.40, 18, 15, 0.92, 0],
+  [0.626, -0.64, 12, 8, 0.74, 3],
+  [0.658, -0.16, 10, 7, 0.34, 6],
 ];
-const PUS_EXTRA = (() => {
-  const R = rng(72107), out = [];
-  for (let i = 0; i < 16; i++) {
-    const s = 0.14 + R() * 0.60;
-    const v = -0.80 + R() * 1.20;
-    const thick = R() > 0.42;
-    out.push([
-      s, v,
-      (thick ? 14 : 8) + R() * (thick ? 22 : 12),
-      (thick ? 6 : 3.5) + R() * (thick ? 6 : 3),
-      thick ? 0.72 + R() * 0.22 : 0.22 + R() * 0.12,
-      (R() * PUS_TONES.length) | 0,
-    ]);
-  }
-  return out;
-})();
+// No scattered fillers: they fused the r6 plaques into one pad.
+const PUS_EXTRA = [];
 // Specks seated on the necrotic rim (dist in plaque-radii). Painted after the black, so the join is exudate over the halo, not a cut line.
 const PUS_MARGIN = (() => {
   const out = [];
@@ -862,10 +834,9 @@ function exudateKeep(dist) {
 function pusTone(idx, s, necrosis, dist) {
   const base = PUS_TONES[idx % PUS_TONES.length];
   if (necrosis < 0.01) return base;
-  const distal = smooth((s - 0.56) / 0.16);
-  const near = dist < 8 ? smooth((1.55 - dist) / 0.7) : 0;
-  const k = necrosis * Math.min(0.9, Math.max(distal * 0.7, near));
-  return mix3(base, PUS_DIRTY, k);
+  // Dirty grey-green only on the plaque that touches the necrotic field.
+  const near = smooth(clamp((2.35 - dist) / 0.85, 0, 1));
+  return mix3(base, PUS_DIRTY, necrosis * near * 0.86);
 }
 // New exudate may not paint the necrotic plaque. Holes use the opposite winding so overlaps stay empty.
 function clipOutsideNecro(ctx, swell, scale) {
@@ -896,8 +867,9 @@ function clipNecroCore(ctx, swell, scale) {
   ctx.clip();
 }
 function crustBlob(s, v, rx, ry, seed, swell, lobes) {
+  // Chunkier than a sine wave, so a plaque edge is torn rather than one even scallop.
   return surfaceBlob(s, v, Math.max(2, rx), Math.max(1.6, ry), seed, {
-    swell, n: 48, jitter: 0.06, amp: 0.12, lobes,
+    swell, n: 34, jitter: 0.32, amp: 0.08, lobes,
   });
 }
 function paintCrustLayers(ctx, swell, crusts, alpha, necrosis) {
@@ -910,10 +882,11 @@ function paintCrustLayers(ctx, swell, crusts, alpha, necrosis) {
     if (strength < 0.03) continue;
     const tone = pusTone(toneI, s, necrosis, dist);
     const seed = 9100 + i * 13;
-    const lobes = 2 + (i % 3);
+    const lobes = 2;
     const thick = body >= 0.5;
     const steps = thick ? 8 : 4;
-    const feather = thick ? 7.5 : 4.2;
+    // Feather scales with the plaque so a small one does not swell into its neighbour.
+    const feather = thick ? Math.min(6.2, Math.max(2.8, ry * 0.42)) : Math.min(3.2, Math.max(1.8, ry * 0.36));
     for (let k = 0; k < steps; k++) {
       const t = k / (steps - 1);
       const a = strength * (thick ? (0.035 + 0.965 * t * t) : (0.18 + 0.82 * t * t));
@@ -1125,8 +1098,8 @@ function paintSerosalTooth(ctx, swell, cong) {
 function paintNecroDamage(ctx,swell,alpha) {
  const R=rng(94322);
  ctx.save();ctx.globalAlpha*=alpha;
- for(let i=0;i<30;i++) {
-  const s=.735+R()*.14,v=-.58+R()*.95,f=frameAt(s),w=tubeRadius(s,swell);
+ for(let i=0;i<36;i++) {
+  const s=.705+R()*.18,v=-.58+R()*.95,f=frameAt(s),w=tubeRadius(s,swell);
   const x=f.p[0]+f.nx*w*v,y=f.p[1]+f.ny*w*v,len=2+R()*7;
   ctx.strokeStyle='rgba(8,5,13,.48)';ctx.lineWidth=.35+R()*.65;
   ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+f.tx*len*.5+f.nx,y+f.ty*len*.5+f.ny);ctx.lineTo(x+f.tx*len-f.nx,y+f.ty*len-f.ny);ctx.stroke();
@@ -1159,39 +1132,68 @@ function paintBleeds(ctx, swell, alpha) {
 function paintNecro(ctx, swell, alpha) {
   if (alpha <= 0.01) return;
   const R = rng(8807);
-  // 1. Dark-red congested band around the necrotic pole.
+  // 1. Wide dark-red hemorrhagic cuff. Irregular, outside the black, not a smooth halo.
   ctx.save();
   ctx.globalCompositeOperation = 'multiply';
   NECRO.forEach(n => {
-    const band = surfaceBlob(n.s, n.v, n.rx * 1.95, n.ry * 2.05, n.seed + 5, { swell, jitter: .28, amp: .20 });
-    fillPoly(ctx, band, [140, 40, 44], .26 * alpha);
+    const band = surfaceBlob(n.s, n.v, n.rx * 2.15, n.ry * 2.25, n.seed + 5, { swell, n: 28, jitter: .36, amp: .24, lobes: 3 });
+    fillPoly(ctx, band, [128, 28, 34], .34 * alpha);
   });
   ctx.restore();
-  // 2. Dark-red transition band, not a smooth violet halo.
+  // 2. Tighter maroon transition, still outside the purple-black cores.
   NECRO.forEach(n => {
-    fillPoly(ctx, surfaceBlob(n.s, n.v, n.rx * 1.52, n.ry * 1.6, n.seed + 7, { swell, jitter: .32, amp: .22 }), [122, 38, 40], .30 * alpha);
+    fillPoly(ctx, surfaceBlob(n.s, n.v, n.rx * 1.62, n.ry * 1.7, n.seed + 7, { swell, n: 24, jitter: .40, amp: .26, lobes: 4 }), [108, 24, 32], .42 * alpha);
+    fillPoly(ctx, surfaceBlob(n.s, n.v, n.rx * 1.28, n.ry * 1.34, n.seed + 9, { swell, n: 22, jitter: .34, amp: .22, lobes: 3 }), [78, 16, 26], .28 * alpha);
   });
   // 3. Sparse violet mottles where the wall is dying but not yet black.
-  [[.752, -.22, 9, 7, 7701], [.828, .09, 8, 6, 7702], [.792, .22, 7, 5, 7703], [.865, -.10, 6, 4.5, 7704]].forEach(([s, v, rx, ry, sd]) => {
-    fillPoly(ctx, surfaceBlob(s, v, rx, ry, sd, { swell, jitter: .45, amp: .3 }), [78, 46, 68], .28 * alpha);
+  [[.715, -.18, 10, 7, 7701], [.748, -.40, 8, 6, 7702], [.792, .16, 8, 5, 7703],
+   [.835, -.32, 7, 5, 7704], [.868, .02, 9, 6, 7705], [.900, -.12, 6, 4.5, 7706]].forEach(([s, v, rx, ry, sd]) => {
+    fillPoly(ctx, surfaceBlob(s, v, rx, ry, sd, { swell, jitter: .45, amp: .3 }), [78, 46, 68], .30 * alpha);
   });
-  // 4. Textured purple-black plaques (watercolour grain baked in).
+  // 4. Textured purple-black plaques. Scales differ so the baked grain is not a repeated stamp.
   if (NECRO_SPRITE) NECRO.forEach((n, i) => {
     const f = frameAt(n.s), w = tubeRadius(n.s, swell);
     const c = [f.p[0] + f.nx * w * n.v, f.p[1] + f.ny * w * n.v];
     const ang = Math.atan2(f.ty, f.tx);
-    drawSprite(ctx, NECRO_SPRITE, c[0], c[1], n.rx * 3.4, n.ry * 3.6, ang + (R() - .5) * .9, .80 * alpha);
-    drawSprite(ctx, NECRO_SPRITE, c[0] + (R() - .5) * n.rx * .7, c[1] + (R() - .5) * n.ry * .6, n.rx * 2.2, n.ry * 2.4, ang + (R() - .5) * 1.4, .50 * alpha);
+    const k = 0.86 + (i % 3) * 0.12;
+    drawSprite(ctx, NECRO_SPRITE, c[0], c[1], n.rx * 3.15 * k, n.ry * 3.35 * k, ang + (i * 0.9) + (R() - .5) * .4, .82 * alpha);
+    if (i % 2 === 0) {
+      drawSprite(ctx, NECRO_SPRITE, c[0] + (R() - .5) * n.rx * .45, c[1] + (R() - .5) * n.ry * .4, n.rx * 1.7, n.ry * 1.9, ang + 1.7 + (R() - .5) * .5, .42 * alpha);
+    }
   });
-  // 5. Sooty cores: small, irregular, plus one soft band tying them together.
-  fillPoly(ctx, surfaceBlob(.800, -.08, 30, 13, 7203, { swell, jitter: .42, amp: .24 }), [12, 8, 14], .44 * alpha);
-  NECRO.forEach((n, i) => {
-    fillPoly(ctx, surfaceBlob(n.s - .006, n.v - .03, n.rx * .34, n.ry * .34, n.seed + 11, { swell, jitter: .48, amp: .28 }), [10, 7, 12], .55 * alpha);
+  // 5. Sooty cores tying the plaques into one distal field, still irregular.
+  [[.742, -.22, 22, 11, 7201], [.800, -.06, 28, 13, 7203], [.855, -.16, 18, 10, 7204], [.888, -.04, 12, 7, 7205]].forEach(([s, v, rx, ry, sd]) => {
+    fillPoly(ctx, surfaceBlob(s, v, rx, ry, sd, { swell, jitter: .42, amp: .26, lobes: 3 }), [12, 8, 14], .48 * alpha);
   });
-  fillPoly(ctx, surfaceBlob(.818, -.10, 9, 5.5, 7721, { swell, jitter: .48, amp: .3 }), [12, 8, 14], .50 * alpha);
+  NECRO.forEach(n => {
+    fillPoly(ctx, surfaceBlob(n.s - .006, n.v - .03, n.rx * .32, n.ry * .32, n.seed + 11, { swell, jitter: .48, amp: .28 }), [10, 7, 12], .55 * alpha);
+  });
   // 6. Small dull slough islands, low contrast inside the black.
-  fillPoly(ctx, surfaceBlob(.789, -.27, 6.5, 4.4, 7710, { swell, jitter: .45, amp: .28 }), [132, 118, 98], .30 * alpha);
-  fillPoly(ctx, surfaceBlob(.833, .05, 5.5, 3.6, 7711, { swell, jitter: .4, amp: .25 }), [146, 132, 112], .24 * alpha);
+  fillPoly(ctx, surfaceBlob(.760, -.36, 6.5, 4.2, 7710, { swell, jitter: .45, amp: .28 }), [132, 118, 98], .28 * alpha);
+  fillPoly(ctx, surfaceBlob(.828, .02, 5.5, 3.6, 7711, { swell, jitter: .4, amp: .25 }), [146, 132, 112], .22 * alpha);
+  fillPoly(ctx, surfaceBlob(.872, -.24, 5, 3.4, 7712, { swell, jitter: .42, amp: .26 }), [124, 110, 92], .20 * alpha);
+}
+
+// Dark-red spot under the existing「出血斑」leader (s ≈ 0.32, lit rim). Gangrene only.
+function paintAnchorBleed(ctx, swell, alpha) {
+  if (alpha < 0.45) return;
+  const spots = [
+    [0.328, -0.86, 18, 12, 1, 4401],
+    [0.308, -0.68, 10, 7, 0.85, 4402],
+    [0.352, -0.64, 8, 5.5, 0.7, 4403],
+  ];
+  const rings = [
+    [1.45, [132, 36, 40], 0.55],
+    [1.05, [96, 18, 28], 0.78],
+    [0.62, [58, 10, 18], 0.92],
+  ];
+  spots.forEach(([s, v, rx, ry, a, seed], i) => {
+    rings.forEach(([k, col, ka], j) => {
+      fillPoly(ctx, surfaceBlob(s, v, rx * k, ry * k, seed + j * 3, {
+        swell, n: 20, jitter: .40, amp: .26, lobes: 3 + (i % 2),
+      }), col, ka * a * alpha);
+    });
+  });
 }
 
 // A small slough-covered perforation near the necrotic pole; reads as a shallow crater.
@@ -1375,6 +1377,7 @@ export function drawAppendix(ctx, state, pose, { alpha = 1 } = {}) {
   paintNecro(ctx, swell, necA);
   ctx.restore();
   if (necA > .01) paintPus(ctx, swell, pusA * necA, necA, true);
+  paintAnchorBleed(ctx, swell, necA);
   paintNecroDamage(ctx, swell, necA);
   paintPit(ctx, swell, necA);
   paintCut(ctx, swell, look);
