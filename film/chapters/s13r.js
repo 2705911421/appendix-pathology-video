@@ -8,9 +8,8 @@ const mix = (a, b, p) => a + (b - a) * p;
 const TAU = Math.PI * 2;
 
 // thin leader + light-violet text, no box (same convention as S06)
-function tag(c, lines, x, y, px, py, a = 1, { align = 'left', size = 33, color = '#9276A6' } = {}) {
+function tag(c, lines, x, y, px, py, a = 1, { align = 'left', size = 33 } = {}) {
   if (a <= .01) return;
-  if(size===36){window.__rescaleLabels??=[];window.__rescaleLabels.push({text:lines,x,y,px,py,targetScreen:[px,py]});}
   c.save();
   c.globalAlpha = a;
   c.font = `500 ${size}px MixSans`;
@@ -30,7 +29,7 @@ function tag(c, lines, x, y, px, py, a = 1, { align = 'left', size = 33, color =
   c.lineWidth = 5;
   c.lineJoin = 'round';
   arr.forEach((s, i) => c.strokeText(s, x, y + i * (size + 7)));
-  c.fillStyle = color;
+  c.fillStyle = '#9276A6';
   arr.forEach((s, i) => c.fillText(s, x, y + i * (size + 7)));
   c.restore();
 }
@@ -187,12 +186,7 @@ export default {
         const n = smooth((t - T.frac(51, .16)) / (T.end(51) - T.frac(51, .16)));
         const b = smooth((t - T.frac(51, .63)) / (T.end(51) - T.frac(51, .63)));
         const g = smooth((t - T.frac(52, .12)) / (T.end(52) - T.frac(52, .12)));
-        // Camera only: widen the same seeded field; preserve the screen aperture.
-        const z = .49;
-        c.save();c.translate(wx,wy);c.scale(z,z);c.translate(-wx,-wy);
-        drawTissueField(c, { x: wx, y: wy, r:r/z, n, b, g, flow: (t % 9) / 9, alpha: tissueA * contentA });
-        c.restore();
-        window.__rescaleCamera={x:0,y:0,z,cx:wx,cy:wy,r,pxPerUm:700/391.176470588};
+        drawTissueField(c, { x: wx, y: wy, r, n, b, g, flow: (t % 9) / 9, alpha: tissueA * contentA });
       }
       c.restore();
       c.strokeStyle = '#C6B6C9';
@@ -200,16 +194,14 @@ export default {
       c.beginPath(); c.arc(wx, wy, r, 0, TAU); c.stroke();
       c.restore();
 
-      // Microscope caption follows measured scale; no change to non-microscope sentences.
-      if(t>=s51&&t<s53){c.fillStyle='#51336F';c.font='500 36px MixSans';c.fillText('高倍',1130,76);}
       // labels
       const labA = insetA * contentA;
       tag(c, '受压', 1180, 176, wx - 30, wy - 128 - 42, labA * smooth((t - T.frac(50, .34)) / .4) * (1 - tissueA));
       tag(c, '血栓', 1594, 676, wx + 150, wy + 132, labA * smooth((t - T.frac(50, .5)) / .4) * (1 - tissueA));
       tag(c, '缺血', 1610, 228, wx + 120, wy - 150, labA * smooth((t - T.frac(50, .74)) / .3) * (1 - tissueA));
-      tag(c, '坏死', 1810, 470, wx + tissueAnchors.necro[0] * .49, wy + tissueAnchors.necro[1] * .49, labA * smooth((t - T.frac(51, .38)) / .4) * tissueA, {size:36,color:'#51336F'});
-      tag(c, '出血', 1688, 760, wx + tissueAnchors.bleed[0] * .49, wy + tissueAnchors.bleed[1] * .49, labA * smooth((t - T.frac(51, .74)) / .35) * tissueA, {size:36,color:'#51336F'});
-      tag(c, ['血红蛋白', '分解产物'], 1560, 150, wx + tissueAnchors.pigment[0] * .49, wy + tissueAnchors.pigment[1] * .49, labA * smooth((t - T.frac(52, .3)) / .45) * (1 - grossA), {size:36,color:'#51336F'});
+      tag(c, '坏死', 1810, 470, wx + tissueAnchors.necro[0], wy + tissueAnchors.necro[1], labA * smooth((t - T.frac(51, .38)) / .4) * tissueA);
+      tag(c, '出血', 1688, 760, wx + tissueAnchors.bleed[0], wy + tissueAnchors.bleed[1], labA * smooth((t - T.frac(51, .74)) / .35) * tissueA);
+      tag(c, ['血红蛋白', '分解产物'], 1560, 150, wx + tissueAnchors.pigment[0], wy + tissueAnchors.pigment[1], labA * smooth((t - T.frac(52, .3)) / .45) * (1 - grossA));
     }
 
     // ── 53: gross close-up, dark red → black ────────────────────────────────────────
