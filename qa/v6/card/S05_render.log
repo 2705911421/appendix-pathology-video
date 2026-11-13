@@ -1,0 +1,25 @@
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S05/stills/t_000.58.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S05/stills/t_002.18.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S05/stills/t_004.26.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S05/stills/t_005.90.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S05/stills/t_007.37.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S05/stills/t_008.80.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S05/stills/t_011.33.png
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+deterministic: 6 frames match across render orders (1.31, 4.407, 5.956, 8.696, 11.078, 11.879 s)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+rendering 357 frames × 1 sample(s) @ 1920x1080 30fps with 1 worker(s)…
+  36/357 frames  6s
+  72/357 frames  12s
+  108/357 frames  18s
+  144/357 frames  24s
+  180/357 frames  29s
+  216/357 frames  33s
+  252/357 frames  37s
+  288/357 frames  43s
+  324/357 frames  49s
+done /workspace/病理科普视频/v5_card_dev/qa/v6/card/S05/S05_verified.mp4
+  357 frames, 11.90s, 54.3s wall (152 ms/sample)

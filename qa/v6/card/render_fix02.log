@@ -1,0 +1,105 @@
+START 2026-11-13T12:50:26+08:00
+===== RENDER s17 2026-11-13T12:50:26+08:00 =====
+(node:1301588) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S17/stills/t_001.10.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S17/stills/t_003.11.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S17/stills/t_005.03.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S17/stills/t_006.72.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S17/stills/t_008.68.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S17/stills/t_010.60.png
+(node:1301946) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+deterministic: 6 frames match across render orders (1.224, 4.117, 5.564, 8.124, 10.349, 11.095 s)
+(node:1302298) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+rendering 334 frames × 1 sample(s) @ 1920x1080 30fps with 1 worker(s)…
+  33/334 frames  6s
+  66/334 frames  9s
+  99/334 frames  11s
+  132/334 frames  13s
+  165/334 frames  15s
+  198/334 frames  18s
+  231/334 frames  20s
+  264/334 frames  23s
+  297/334 frames  25s
+  330/334 frames  28s
+done /workspace/病理科普视频/v5_card_dev/qa/v6/card/S17/S17_verified.mp4
+  334 frames, 11.13s, 28.5s wall (85 ms/sample)
+===== DONE s17 2026-11-13T12:51:16+08:00 =====
+===== RENDER s20 2026-11-13T12:51:16+08:00 =====
+(node:1303136) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S20/stills/t_000.98.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S20/stills/t_002.79.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S20/stills/t_005.08.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S20/stills/t_007.56.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S20/stills/t_009.73.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S20/stills/t_011.65.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S20/stills/t_013.73.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S20/stills/t_016.11.png
+(node:1303691) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+deterministic: 6 frames match across render orders (1.844, 6.202, 8.381, 12.237, 15.589, 16.729 s)
+(node:1304818) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+rendering 503 frames × 1 sample(s) @ 1920x1080 30fps with 1 worker(s)…
+  50/503 frames  17s
+  100/503 frames  19s
+  150/503 frames  22s
+  200/503 frames  25s
+  250/503 frames  27s
+  300/503 frames  30s
+  350/503 frames  32s
+  400/503 frames  35s
+  450/503 frames  38s
+  500/503 frames  41s
+done /workspace/病理科普视频/v5_card_dev/qa/v6/card/S20/S20_verified.mp4
+  503 frames, 16.77s, 42.0s wall (84 ms/sample)
+===== DONE s20 2026-11-13T12:53:19+08:00 =====
+===== RENDER s05 2026-11-13T12:53:19+08:00 =====
+(node:1305872) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S05/stills/t_000.58.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S05/stills/t_002.18.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S05/stills/t_004.26.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S05/stills/t_005.90.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S05/stills/t_007.37.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S05/stills/t_008.80.png
+/workspace/病理科普视频/v5_card_dev/qa/v6/card/S05/stills/t_011.33.png
+(node:1306121) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+deterministic: 6 frames match across render orders (1.31, 4.407, 5.956, 8.696, 11.078, 11.879 s)
+(node:1306499) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+rendering 357 frames × 1 sample(s) @ 1920x1080 30fps with 1 worker(s)…
+  36/357 frames  2s
+  72/357 frames  4s
+  108/357 frames  6s
+  144/357 frames  8s
+  180/357 frames  10s
+  216/357 frames  12s
+  252/357 frames  14s
+  288/357 frames  16s
+  324/357 frames  18s
+done /workspace/病理科普视频/v5_card_dev/qa/v6/card/S05/S05_verified.mp4
+  357 frames, 11.90s, 19.7s wall (55 ms/sample)
+===== DONE s05 2026-11-13T12:53:48+08:00 =====
+ALL_DONE 2026-11-13T12:53:48+08:00
