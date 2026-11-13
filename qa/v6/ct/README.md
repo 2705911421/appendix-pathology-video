@@ -1,19 +1,13 @@
-# ct 线交付
+# ct_fix01 / r3 交付（Codex）
 
-本目录的 CT 与组织图全部由 Canvas 原创绘制，无外部影像、照片、姓名或学校。库总览是同一腹部断面、同一阑尾锚点的三个表现预设，不表示 CT 能直接确定病理三型。
+本轮处理 S09、S12、S15、S04。审核依据与逐条处理记录见 `r3/审核意见.md`；每场目录包含逐句关键帧、200%局部、review_sheet.png、r2/r3 before_after.png、1080p视频、带真实配音720p视频与自检.md。
 
-代码：film/lib_ext/ct_schematic.js、ct_compare.js；入口仅在 film/main.js 增加场景范围与按需初始化。未修改 timeline.js、既有 lib_ext 或锁定库。时间取自真实 timeline.json 的句号边界；运行前如更换配音，应先执行 film/generate_timeline.mjs。
+本轮入口使用 `film/lib_ext/ct_r3_schematic.js`、`ct_r3_compare.js`、`ct_r3_clinical.js`、`ct_r3_doctor.js`，保留原库，不改main.js或timeline.js。医生实现复制自clin_draw.js，来源文件只读，函数一致性见 `r3/doctor_identity_check.log`。
 
-复现：node qa/v6/ct/deliver.mjs S09（也支持 S12、S15、S04）。render.mjs 使用浏览器原画布导出；音频从旁白_v3.wav 按 timeline 的首句 start 截取至末句 end，不使用估算秒数。
+复现：`node qa/v6/ct/deliver.mjs S09`，支持S12、S15、S04。单进程、workers=1，分镜文字以定稿/本次明确意见为准，句时序与全稿_v3/timeline.json精确对应。重新配音后先执行film/generate_timeline.mjs。真实旁白从旁白_v3.wav按首句start至末句end截取。
 
-200% 图：每张关键帧分别提供 CT 与 tissue 两处局部；review_sheet.png 是关键帧总览。完整时长与流检查见各场景 media_check.json。
+画面为原创Canvas教学示意，无网图、照片、姓名、学校、HU、测量尺度或新增研究数据。放射学横断位患者右侧对应图左，小框及细线将阑尾和放大窗相连；S09轻度改变、S12明显强化与渗出、S15局部不强化及腔外气体/脓肿。组织窗为形态对应，不能凭此独立确定病理分型。S04的2023、1602人见研究卡原表，8项研究按本次要求与配音原文；第18句仅突出发现病变，第19句才显示结合临床。
 
-图像约定：放射学横断位，患者右侧对应画面左侧；三场阑尾中心均位于腹部左下部。为教学而简化腹部器官、强化与组织层次，无测量尺度、HU 或数字阈值。组织窗是对应关系示意，未伪装为真实组织切片。局部壁强化缺损与可能并发症分句显示，不暗示所有坏疽必然穿孔。
+原worktree Git元数据只读，创建index.lock失败。按任务指定备用方式，在 `/tmp/ct-fix01-r3.git` 的ct-dev分支逐场提交，交付 `ct-dev.bundle`。bundle以前提提交 `baf3b0f`（本worktree r2 HEAD）为基础，包含四个r3场景提交，列表见 `r3/commits.log`。没有更改原分支引用，也未合并、push或写入其他并行线。
 
-## Git交付限制与导入
-
-原worktree的 `.git` 指向 `/workspace/病理科普视频/v5/.git/worktrees/v5_ct_dev`，本环境对该位置只读，标准git add/commit报错 `Unable to create .../index.lock: Read-only file system`。未更改该位置、原分支引用或其他并行线目录。
-
-因此逐场提交保存在 `/tmp/ct-dev-delivery.git` 的ct-dev分支，并导出到本目录 `ct-dev.bundle`。bundle以原HEAD `586ce3e3c90d1a45f294e1a7fa3a33ce7c8c1d75` 为前提，包含本线四个提交（按S09→S12→S15→S04）。完整提交列表见 `commits.log`。
-
-在具有Git写权限的原仓库中，可以先执行 `git fetch <本目录绝对路径>/ct-dev.bundle ct-dev`，再按需要审阅或逐个cherry-pick这四个提交。本线未执行push、merge或向主线写入。
+有Git写权限时可执行 `git fetch <本目录绝对路径>/ct-dev.bundle ct-dev`，再审阅FETCH_HEAD中的四个提交。最终bundle校验见 `bundle_verify.log`、`bundle.sha256`。锁定文件开工/收工校验见 `r3/sha256_start.log`、`r3/sha256_end.log`、`r3/sha256_check.log`。

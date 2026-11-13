@@ -38,5 +38,8 @@ text=f'''# {scene} 自检（r3 / Codex）
 '''
 if scene=='S04':
  text=text.replace('- [x] 全图阑尾位置', '- [x] 自绘CT全图阑尾位置')
+ text=text.replace('双窗底边930，放大窗直径约380','CT大窗底边930，医生与证据关系图底边低于950')
+ text='\n'.join(line for line in text.split('\n') if not line.startswith('- [x] 组织有'))
+ text=text.replace('组织窗保持层次对应，细节精度仍低于专门高倍镜下场景；需要主审最终确认视觉风格。','病理玻片仅作证据关系概念，不提前给出病理分型。')
 (p/'自检.md').write_text(text)
 print(scene,'safe frames',len(checks),'duration',m['duration'])
