@@ -1,0 +1,57 @@
+{
+  "e09": {
+    "source_box": [
+      1050,
+      415,
+      1170,
+      535
+    ],
+    "area_pixels": 14400,
+    "lymphocyte_centres": 16,
+    "dark_nuclear_pixel_fraction": 0.20020833333333332
+  },
+  "e10": {
+    "source_box": [
+      1050,
+      415,
+      1170,
+      535
+    ],
+    "area_pixels": 14400,
+    "lymphocyte_centres": 81,
+    "dark_nuclear_pixel_fraction": 0.1457638888888889
+  },
+  "样张": {
+    "source_box": [
+      500,
+      560,
+      620,
+      680
+    ],
+    "area_pixels": 14400,
+    "manually_grouped_acute_cells": 19,
+    "dark_nuclear_pixel_fraction": 0.12743055555555555
+  },
+  "reference_note": "人工归组19个可辨急性细胞；边缘和密集处约±3个的不确定性。多个核叶只算一个细胞；不能与单核淋巴细胞数按1:1匹配。深核面积率仅为统一阈值的图像描述。",
+  "plasma_300x300": {
+    "count": 4,
+    "centres_screen": [
+      [
+        1086.900000000001,
+        460.7000000000005
+      ],
+      [
+        1000.0,
+        563.0
+      ],
+      [
+        1209.0,
+        563.0
+      ],
+      [
+        1198.0,
+        376.0
+      ]
+    ]
+  }
+}

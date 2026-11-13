@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/workspace/病理科普视频/v5_s19_dev/qa/v6/e11_s19/check_video.py", line 12, in <module>
+    mae=float(abs(a-b).mean());out[q['name']]={'scene_time':t,'MAE_after_h264':mae};assert mae<4,(q['name'],mae)
+                                                                                           ^^^^^
+AssertionError: ('transition_2', 8.842805426954733)
