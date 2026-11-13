@@ -1,0 +1,1114 @@
+{
+  "ebur128": {
+    "integrated_lufs": -16.3,
+    "lra": 1.6,
+    "true_peak_dbtp": -1.8
+  },
+  "astats_peak_db": -1.798474,
+  "clipped_samples": 0,
+  "sample_rate": 48000,
+  "channels": 2,
+  "silence_db": -35,
+  "silence_min_duration": 0.1,
+  "silence_segments": [],
+  "onset": {
+    "method": "energy",
+    "threshold_s": 0.1,
+    "threshold_db": -35,
+    "pass": false,
+    "max_abs_delta": 3.5272916666664855,
+    "fail_count": 52,
+    "energy": {
+      "max_abs_delta": 3.5272916666664855,
+      "fail_count": 52,
+      "pass": false
+    },
+    "silencedetect": {
+      "max_abs_delta": 323.88229166666616,
+      "fail_count": 76,
+      "pass": false
+    },
+    "energy_sentences": [
+      {
+        "n": 1,
+        "timeline_start": 0.0,
+        "onset": 0.0,
+        "delta": 0.0,
+        "pass": true,
+        "reason": "loud-run"
+      },
+      {
+        "n": 2,
+        "timeline_start": 4.570916666666667,
+        "onset": 4.46,
+        "delta": -0.11091666666666722,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 3,
+        "timeline_start": 8.401041666666666,
+        "onset": 8.23,
+        "delta": -0.17104166666666565,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 4,
+        "timeline_start": 12.778416666666665,
+        "onset": 12.42,
+        "delta": -0.35841666666666505,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 5,
+        "timeline_start": 16.900874999999996,
+        "onset": 16.87,
+        "delta": -0.030874999999994657,
+        "pass": true,
+        "reason": "loud-run"
+      },
+      {
+        "n": 6,
+        "timeline_start": 21.66695833333333,
+        "onset": 21.59,
+        "delta": -0.07695833333333013,
+        "pass": true,
+        "reason": "loud-run"
+      },
+      {
+        "n": 7,
+        "timeline_start": 24.56283333333333,
+        "onset": 21.59,
+        "delta": -2.9728333333333303,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 8,
+        "timeline_start": 29.199291666666664,
+        "onset": 29.08,
+        "delta": -0.11929166666666546,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 9,
+        "timeline_start": 33.83045833333333,
+        "onset": 31.17,
+        "delta": -2.660458333333331,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 10,
+        "timeline_start": 38.291916666666665,
+        "onset": 38.22,
+        "delta": -0.07191666666666663,
+        "pass": true,
+        "reason": "loud-run"
+      },
+      {
+        "n": 11,
+        "timeline_start": 43.06395833333333,
+        "onset": 42.9,
+        "delta": -0.16395833333333343,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 12,
+        "timeline_start": 46.38691666666667,
+        "onset": 44.78,
+        "delta": -1.6069166666666703,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 13,
+        "timeline_start": 50.137083333333344,
+        "onset": 50.14,
+        "delta": 0.0029166666666569085,
+        "pass": true,
+        "reason": "rising-edge"
+      },
+      {
+        "n": 14,
+        "timeline_start": 53.900833333333345,
+        "onset": 53.61,
+        "delta": -0.29083333333334593,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 15,
+        "timeline_start": 56.956666666666685,
+        "onset": 56.96,
+        "delta": 0.003333333333316091,
+        "pass": true,
+        "reason": "rising-edge"
+      },
+      {
+        "n": 16,
+        "timeline_start": 59.78587500000002,
+        "onset": 59.77,
+        "delta": -0.015875000000015405,
+        "pass": true,
+        "reason": "loud-run"
+      },
+      {
+        "n": 17,
+        "timeline_start": 62.92679166666669,
+        "onset": 62.83,
+        "delta": -0.09679166666668948,
+        "pass": true,
+        "reason": "loud-run"
+      },
+      {
+        "n": 18,
+        "timeline_start": 69.45687500000003,
+        "onset": 69.16,
+        "delta": -0.2968750000000284,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 19,
+        "timeline_start": 73.18883333333336,
+        "onset": 72.89,
+        "delta": -0.2988333333333628,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 20,
+        "timeline_start": 77.9246666666667,
+        "onset": 77.84,
+        "delta": -0.08466666666669198,
+        "pass": true,
+        "reason": "loud-run"
+      },
+      {
+        "n": 21,
+        "timeline_start": 83.01412500000004,
+        "onset": 82.96,
+        "delta": -0.05412500000004172,
+        "pass": true,
+        "reason": "loud-run"
+      },
+      {
+        "n": 22,
+        "timeline_start": 85.95245833333337,
+        "onset": 83.14,
+        "delta": -2.8124583333333675,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 23,
+        "timeline_start": 90.63675000000003,
+        "onset": 90.46,
+        "delta": -0.17675000000004104,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 24,
+        "timeline_start": 96.62233333333337,
+        "onset": 96.58,
+        "delta": -0.04233333333337441,
+        "pass": true,
+        "reason": "loud-run"
+      },
+      {
+        "n": 25,
+        "timeline_start": 101.22237500000004,
+        "onset": 98.46,
+        "delta": -2.7623750000000484,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 26,
+        "timeline_start": 104.10625000000005,
+        "onset": 104.08,
+        "delta": -0.02625000000004718,
+        "pass": true,
+        "reason": "loud-run"
+      },
+      {
+        "n": 27,
+        "timeline_start": 107.78079166666672,
+        "onset": 107.78,
+        "delta": -0.0007916666667142636,
+        "pass": true,
+        "reason": "loud-run"
+      },
+      {
+        "n": 28,
+        "timeline_start": 112.44695833333338,
+        "onset": 112.28,
+        "delta": -0.16695833333338328,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 29,
+        "timeline_start": 116.61454166666672,
+        "onset": 116.51,
+        "delta": -0.10454166666671938,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 30,
+        "timeline_start": 121.16216666666672,
+        "onset": 121.13,
+        "delta": -0.03216666666672552,
+        "pass": true,
+        "reason": "loud-run"
+      },
+      {
+        "n": 31,
+        "timeline_start": 126.00695833333339,
+        "onset": 123.99,
+        "delta": -2.016958333333392,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 32,
+        "timeline_start": 130.5444166666667,
+        "onset": 130.33,
+        "delta": -0.21441666666669335,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 33,
+        "timeline_start": 135.38608333333337,
+        "onset": 135.25,
+        "delta": -0.1360833333333744,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 34,
+        "timeline_start": 138.75091666666668,
+        "onset": 137.82,
+        "delta": -0.9309166666666897,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 35,
+        "timeline_start": 142.26645833333333,
+        "onset": 142.26,
+        "delta": -0.00645833333334167,
+        "pass": true,
+        "reason": "loud-run"
+      },
+      {
+        "n": 36,
+        "timeline_start": 145.46487499999998,
+        "onset": 145.33,
+        "delta": -0.13487499999996544,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 37,
+        "timeline_start": 150.34279166666664,
+        "onset": 150.26,
+        "delta": -0.08279166666665105,
+        "pass": true,
+        "reason": "loud-run"
+      },
+      {
+        "n": 38,
+        "timeline_start": 155.39833333333328,
+        "onset": 155.4,
+        "delta": 0.0016666666667219943,
+        "pass": true,
+        "reason": "rising-edge"
+      },
+      {
+        "n": 39,
+        "timeline_start": 160.11837499999993,
+        "onset": 160.09,
+        "delta": -0.028374999999925876,
+        "pass": true,
+        "reason": "loud-run"
+      },
+      {
+        "n": 40,
+        "timeline_start": 163.85512499999993,
+        "onset": 162.21,
+        "delta": -1.645124999999922,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 41,
+        "timeline_start": 168.2741666666666,
+        "onset": 168.04,
+        "delta": -0.2341666666665958,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 42,
+        "timeline_start": 173.16437499999992,
+        "onset": 171.82,
+        "delta": -1.3443749999999284,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 43,
+        "timeline_start": 177.9077499999999,
+        "onset": 177.91,
+        "delta": 0.002250000000088903,
+        "pass": true,
+        "reason": "rising-edge"
+      },
+      {
+        "n": 44,
+        "timeline_start": 182.73470833333323,
+        "onset": 182.61,
+        "delta": -0.12470833333321707,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 45,
+        "timeline_start": 188.2199583333332,
+        "onset": 187.75,
+        "delta": -0.46995833333321,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 46,
+        "timeline_start": 193.0977083333332,
+        "onset": 192.91,
+        "delta": -0.18770833333320525,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 47,
+        "timeline_start": 198.8695833333332,
+        "onset": 198.41,
+        "delta": -0.45958333333319956,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 48,
+        "timeline_start": 203.21424999999985,
+        "onset": 202.75,
+        "delta": -0.4642499999998506,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 49,
+        "timeline_start": 207.1135833333332,
+        "onset": 206.98,
+        "delta": -0.13358333333320616,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 50,
+        "timeline_start": 212.15308333333317,
+        "onset": 211.65,
+        "delta": -0.5030833333331657,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 51,
+        "timeline_start": 217.07395833333317,
+        "onset": 217.01,
+        "delta": -0.06395833333317569,
+        "pass": true,
+        "reason": "loud-run"
+      },
+      {
+        "n": 52,
+        "timeline_start": 221.75729166666648,
+        "onset": 218.23,
+        "delta": -3.5272916666664855,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 53,
+        "timeline_start": 225.44504166666647,
+        "onset": 225.26,
+        "delta": -0.18504166666647848,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 54,
+        "timeline_start": 228.56074999999979,
+        "onset": 228.46,
+        "delta": -0.10074999999977763,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 55,
+        "timeline_start": 233.81066666666644,
+        "onset": 233.63,
+        "delta": -0.18066666666643982,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 56,
+        "timeline_start": 238.1397916666664,
+        "onset": 237.91,
+        "delta": -0.22979166666641504,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 57,
+        "timeline_start": 241.01920833333307,
+        "onset": 240.72,
+        "delta": -0.29920833333306973,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 58,
+        "timeline_start": 246.19470833333307,
+        "onset": 246.12,
+        "delta": -0.07470833333306359,
+        "pass": true,
+        "reason": "loud-run"
+      },
+      {
+        "n": 59,
+        "timeline_start": 250.9653749999997,
+        "onset": 250.57,
+        "delta": -0.39537499999971715,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 60,
+        "timeline_start": 256.22733333333304,
+        "onset": 256.17,
+        "delta": -0.05733333333301971,
+        "pass": true,
+        "reason": "loud-run"
+      },
+      {
+        "n": 61,
+        "timeline_start": 260.20916666666636,
+        "onset": 260.15,
+        "delta": -0.05916666666638548,
+        "pass": true,
+        "reason": "loud-run"
+      },
+      {
+        "n": 62,
+        "timeline_start": 264.793583333333,
+        "onset": 261.59,
+        "delta": -3.203583333333029,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 63,
+        "timeline_start": 269.14966666666635,
+        "onset": 267.4,
+        "delta": -1.7496666666663714,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 64,
+        "timeline_start": 273.254083333333,
+        "onset": 272.84,
+        "delta": -0.41408333333305336,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 65,
+        "timeline_start": 276.77649999999966,
+        "onset": 276.59,
+        "delta": -0.1864999999996826,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 66,
+        "timeline_start": 281.0779999999997,
+        "onset": 280.57,
+        "delta": -0.5079999999996971,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 67,
+        "timeline_start": 284.64199999999965,
+        "onset": 284.32,
+        "delta": -0.32199999999966167,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 68,
+        "timeline_start": 287.4990416666663,
+        "onset": 284.79,
+        "delta": -2.7090416666662804,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 69,
+        "timeline_start": 289.93558333333294,
+        "onset": 289.9,
+        "delta": -0.035583333332965594,
+        "pass": true,
+        "reason": "loud-run"
+      },
+      {
+        "n": 70,
+        "timeline_start": 294.74970833333293,
+        "onset": 293.59,
+        "delta": -1.1597083333329579,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 71,
+        "timeline_start": 298.55979166666623,
+        "onset": 297.91,
+        "delta": -0.6497916666662036,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 72,
+        "timeline_start": 302.2865833333329,
+        "onset": 299.72,
+        "delta": -2.566583333332858,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 73,
+        "timeline_start": 307.2480833333329,
+        "onset": 307.05,
+        "delta": -0.19808333333287464,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 74,
+        "timeline_start": 310.98574999999954,
+        "onset": 310.74,
+        "delta": -0.24574999999953206,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 75,
+        "timeline_start": 315.77245833333285,
+        "onset": 315.68,
+        "delta": -0.09245833333284281,
+        "pass": true,
+        "reason": "loud-run"
+      },
+      {
+        "n": 76,
+        "timeline_start": 319.3584166666662,
+        "onset": 319.0,
+        "delta": -0.3584166666661872,
+        "pass": false,
+        "reason": "loud-run"
+      },
+      {
+        "n": 77,
+        "timeline_start": 323.88229166666616,
+        "onset": 323.69,
+        "delta": -0.19229166666616493,
+        "pass": false,
+        "reason": "loud-run"
+      }
+    ],
+    "silencedetect_sentences": [
+      {
+        "n": 1,
+        "onset": 0.0,
+        "delta": 0.0,
+        "pass": true
+      },
+      {
+        "n": 2,
+        "onset": 0.0,
+        "delta": -4.570916666666667,
+        "pass": false
+      },
+      {
+        "n": 3,
+        "onset": 0.0,
+        "delta": -8.401041666666666,
+        "pass": false
+      },
+      {
+        "n": 4,
+        "onset": 0.0,
+        "delta": -12.778416666666665,
+        "pass": false
+      },
+      {
+        "n": 5,
+        "onset": 0.0,
+        "delta": -16.900874999999996,
+        "pass": false
+      },
+      {
+        "n": 6,
+        "onset": 0.0,
+        "delta": -21.66695833333333,
+        "pass": false
+      },
+      {
+        "n": 7,
+        "onset": 0.0,
+        "delta": -24.56283333333333,
+        "pass": false
+      },
+      {
+        "n": 8,
+        "onset": 0.0,
+        "delta": -29.199291666666664,
+        "pass": false
+      },
+      {
+        "n": 9,
+        "onset": 0.0,
+        "delta": -33.83045833333333,
+        "pass": false
+      },
+      {
+        "n": 10,
+        "onset": 0.0,
+        "delta": -38.291916666666665,
+        "pass": false
+      },
+      {
+        "n": 11,
+        "onset": 0.0,
+        "delta": -43.06395833333333,
+        "pass": false
+      },
+      {
+        "n": 12,
+        "onset": 0.0,
+        "delta": -46.38691666666667,
+        "pass": false
+      },
+      {
+        "n": 13,
+        "onset": 0.0,
+        "delta": -50.137083333333344,
+        "pass": false
+      },
+      {
+        "n": 14,
+        "onset": 0.0,
+        "delta": -53.900833333333345,
+        "pass": false
+      },
+      {
+        "n": 15,
+        "onset": 0.0,
+        "delta": -56.956666666666685,
+        "pass": false
+      },
+      {
+        "n": 16,
+        "onset": 0.0,
+        "delta": -59.78587500000002,
+        "pass": false
+      },
+      {
+        "n": 17,
+        "onset": 0.0,
+        "delta": -62.92679166666669,
+        "pass": false
+      },
+      {
+        "n": 18,
+        "onset": 0.0,
+        "delta": -69.45687500000003,
+        "pass": false
+      },
+      {
+        "n": 19,
+        "onset": 0.0,
+        "delta": -73.18883333333336,
+        "pass": false
+      },
+      {
+        "n": 20,
+        "onset": 0.0,
+        "delta": -77.9246666666667,
+        "pass": false
+      },
+      {
+        "n": 21,
+        "onset": 0.0,
+        "delta": -83.01412500000004,
+        "pass": false
+      },
+      {
+        "n": 22,
+        "onset": 0.0,
+        "delta": -85.95245833333337,
+        "pass": false
+      },
+      {
+        "n": 23,
+        "onset": 0.0,
+        "delta": -90.63675000000003,
+        "pass": false
+      },
+      {
+        "n": 24,
+        "onset": 0.0,
+        "delta": -96.62233333333337,
+        "pass": false
+      },
+      {
+        "n": 25,
+        "onset": 0.0,
+        "delta": -101.22237500000004,
+        "pass": false
+      },
+      {
+        "n": 26,
+        "onset": 0.0,
+        "delta": -104.10625000000005,
+        "pass": false
+      },
+      {
+        "n": 27,
+        "onset": 0.0,
+        "delta": -107.78079166666672,
+        "pass": false
+      },
+      {
+        "n": 28,
+        "onset": 0.0,
+        "delta": -112.44695833333338,
+        "pass": false
+      },
+      {
+        "n": 29,
+        "onset": 0.0,
+        "delta": -116.61454166666672,
+        "pass": false
+      },
+      {
+        "n": 30,
+        "onset": 0.0,
+        "delta": -121.16216666666672,
+        "pass": false
+      },
+      {
+        "n": 31,
+        "onset": 0.0,
+        "delta": -126.00695833333339,
+        "pass": false
+      },
+      {
+        "n": 32,
+        "onset": 0.0,
+        "delta": -130.5444166666667,
+        "pass": false
+      },
+      {
+        "n": 33,
+        "onset": 0.0,
+        "delta": -135.38608333333337,
+        "pass": false
+      },
+      {
+        "n": 34,
+        "onset": 0.0,
+        "delta": -138.75091666666668,
+        "pass": false
+      },
+      {
+        "n": 35,
+        "onset": 0.0,
+        "delta": -142.26645833333333,
+        "pass": false
+      },
+      {
+        "n": 36,
+        "onset": 0.0,
+        "delta": -145.46487499999998,
+        "pass": false
+      },
+      {
+        "n": 37,
+        "onset": 0.0,
+        "delta": -150.34279166666664,
+        "pass": false
+      },
+      {
+        "n": 38,
+        "onset": 0.0,
+        "delta": -155.39833333333328,
+        "pass": false
+      },
+      {
+        "n": 39,
+        "onset": 0.0,
+        "delta": -160.11837499999993,
+        "pass": false
+      },
+      {
+        "n": 40,
+        "onset": 0.0,
+        "delta": -163.85512499999993,
+        "pass": false
+      },
+      {
+        "n": 41,
+        "onset": 0.0,
+        "delta": -168.2741666666666,
+        "pass": false
+      },
+      {
+        "n": 42,
+        "onset": 0.0,
+        "delta": -173.16437499999992,
+        "pass": false
+      },
+      {
+        "n": 43,
+        "onset": 0.0,
+        "delta": -177.9077499999999,
+        "pass": false
+      },
+      {
+        "n": 44,
+        "onset": 0.0,
+        "delta": -182.73470833333323,
+        "pass": false
+      },
+      {
+        "n": 45,
+        "onset": 0.0,
+        "delta": -188.2199583333332,
+        "pass": false
+      },
+      {
+        "n": 46,
+        "onset": 0.0,
+        "delta": -193.0977083333332,
+        "pass": false
+      },
+      {
+        "n": 47,
+        "onset": 0.0,
+        "delta": -198.8695833333332,
+        "pass": false
+      },
+      {
+        "n": 48,
+        "onset": 0.0,
+        "delta": -203.21424999999985,
+        "pass": false
+      },
+      {
+        "n": 49,
+        "onset": 0.0,
+        "delta": -207.1135833333332,
+        "pass": false
+      },
+      {
+        "n": 50,
+        "onset": 0.0,
+        "delta": -212.15308333333317,
+        "pass": false
+      },
+      {
+        "n": 51,
+        "onset": 0.0,
+        "delta": -217.07395833333317,
+        "pass": false
+      },
+      {
+        "n": 52,
+        "onset": 0.0,
+        "delta": -221.75729166666648,
+        "pass": false
+      },
+      {
+        "n": 53,
+        "onset": 0.0,
+        "delta": -225.44504166666647,
+        "pass": false
+      },
+      {
+        "n": 54,
+        "onset": 0.0,
+        "delta": -228.56074999999979,
+        "pass": false
+      },
+      {
+        "n": 55,
+        "onset": 0.0,
+        "delta": -233.81066666666644,
+        "pass": false
+      },
+      {
+        "n": 56,
+        "onset": 0.0,
+        "delta": -238.1397916666664,
+        "pass": false
+      },
+      {
+        "n": 57,
+        "onset": 0.0,
+        "delta": -241.01920833333307,
+        "pass": false
+      },
+      {
+        "n": 58,
+        "onset": 0.0,
+        "delta": -246.19470833333307,
+        "pass": false
+      },
+      {
+        "n": 59,
+        "onset": 0.0,
+        "delta": -250.9653749999997,
+        "pass": false
+      },
+      {
+        "n": 60,
+        "onset": 0.0,
+        "delta": -256.22733333333304,
+        "pass": false
+      },
+      {
+        "n": 61,
+        "onset": 0.0,
+        "delta": -260.20916666666636,
+        "pass": false
+      },
+      {
+        "n": 62,
+        "onset": 0.0,
+        "delta": -264.793583333333,
+        "pass": false
+      },
+      {
+        "n": 63,
+        "onset": 0.0,
+        "delta": -269.14966666666635,
+        "pass": false
+      },
+      {
+        "n": 64,
+        "onset": 0.0,
+        "delta": -273.254083333333,
+        "pass": false
+      },
+      {
+        "n": 65,
+        "onset": 0.0,
+        "delta": -276.77649999999966,
+        "pass": false
+      },
+      {
+        "n": 66,
+        "onset": 0.0,
+        "delta": -281.0779999999997,
+        "pass": false
+      },
+      {
+        "n": 67,
+        "onset": 0.0,
+        "delta": -284.64199999999965,
+        "pass": false
+      },
+      {
+        "n": 68,
+        "onset": 0.0,
+        "delta": -287.4990416666663,
+        "pass": false
+      },
+      {
+        "n": 69,
+        "onset": 0.0,
+        "delta": -289.93558333333294,
+        "pass": false
+      },
+      {
+        "n": 70,
+        "onset": 0.0,
+        "delta": -294.74970833333293,
+        "pass": false
+      },
+      {
+        "n": 71,
+        "onset": 0.0,
+        "delta": -298.55979166666623,
+        "pass": false
+      },
+      {
+        "n": 72,
+        "onset": 0.0,
+        "delta": -302.2865833333329,
+        "pass": false
+      },
+      {
+        "n": 73,
+        "onset": 0.0,
+        "delta": -307.2480833333329,
+        "pass": false
+      },
+      {
+        "n": 74,
+        "onset": 0.0,
+        "delta": -310.98574999999954,
+        "pass": false
+      },
+      {
+        "n": 75,
+        "onset": 0.0,
+        "delta": -315.77245833333285,
+        "pass": false
+      },
+      {
+        "n": 76,
+        "onset": 0.0,
+        "delta": -319.3584166666662,
+        "pass": false
+      },
+      {
+        "n": 77,
+        "onset": 0.0,
+        "delta": -323.88229166666616,
+        "pass": false
+      }
+    ]
+  }
+}

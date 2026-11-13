@@ -1,0 +1,24 @@
+{
+  "lane": "final_qa",
+  "status": "pass",
+  "commit": "pending",
+  "date": "2026-11-13",
+  "time_completed": "16:28 CST",
+  "caveats": [
+    "音频起声在成片混音后工具失效（配乐覆盖静音）；用 picture_voice_cfr.mp4 验证通过（max_delta=0.006s）",
+    "S13 量尺 n=2 样本不足（mech fallback，brief 覆盖条款）",
+    "S14/S19 量尺略偏小（non-blocking，各 lane 自检已说明）"
+  ],
+  "metrics": {
+    "subtitle_max_delta_s": 0.0005,
+    "onset_max_delta_s": 0.00625,
+    "black_segments": 0,
+    "freeze_segments": 55,
+    "lufs_integrated": -16.3,
+    "true_peak_dbtp": -1.8,
+    "clipped_samples": 0,
+    "verify_ok": true,
+    "metadata_empty": true,
+    "issues": {"info": 2, "low": 3, "medium": 0, "high": 0}
+  }
+}

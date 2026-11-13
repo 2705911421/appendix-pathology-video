@@ -1,0 +1,57 @@
+[
+  {
+    "id": "onset-music-masking",
+    "severity": "info",
+    "scene": "全片",
+    "timecode": "N/A",
+    "finding": "音频起声检测在成片（混音后）失效：max_delta=3.53s，fail_count=52",
+    "cause": "背景音乐填充全片（0 静音段），能量法误把配乐当语音起声",
+    "evidence": "qa/v6/final_qa/audio_report.json",
+    "action": "NONE — 已用纯配音中间素材 picture_voice_cfr.mp4 验证，起声同步通过（max_delta=0.006s）。工具局限，非真实失步。",
+    "修复建议": "无需修复。在报告中注明起声验证用纯配音素材的结果。"
+  },
+  {
+    "id": "microscope-s13-scale",
+    "severity": "low",
+    "scene": "S13",
+    "timecode": "207.1–228.6s",
+    "finding": "量尺测量：cluster_px_median=22.0px (12.3µm)，超出高倍核径参考范围 12.2–20.6px ±15%",
+    "cause": "mech 回退到 s13_adv01（覆盖条款禁用 s13s14_rescale/S13r）。只测出 2 个 cluster（样本不足）。",
+    "evidence": "qa/v6/final_qa/keyframes/microscope/s13_t218.png, microscope_measure.txt",
+    "action": "ACCEPT — fallback 场景，brief 已注明回退。若 mech_fix02 完成可重新导出。",
+    "修复建议": "等 mech_fix02 DONE 后重新 assemble。brief 已记录此限制。"
+  },
+  {
+    "id": "microscope-s14-scale",
+    "severity": "low",
+    "scene": "S14",
+    "timecode": "228.6–246.2s",
+    "finding": "量尺测量：cluster_px_median=11.0px (6.1µm)，低于高倍核径参考范围 12.2px",
+    "cause": "s13s14_rescale 后 S14r 相机倍率调整。自检.md 提及「尺度与 S11 对齐」。",
+    "evidence": "qa/v6/final_qa/keyframes/microscope/s14_t237.png (4.0px, cluster n=3), s14_t231/243 中位11.0px",
+    "action": "ACCEPT — rescale 已交付且通过验收，略小于目标但细胞仍可辨认。",
+    "修复建议": "f03_s14 自检已说明「与 S11 对齐，未同时匹配样张较小尺度」。可接受。"
+  },
+  {
+    "id": "microscope-s19-scale",
+    "severity": "low",
+    "scene": "S19",
+    "timecode": "289.9–298.6s",
+    "finding": "量尺测量：cluster_px_median=11.7px (6.5µm)，略低于高倍核径参考范围 12.2px",
+    "cause": "b09_fix01 S19 浆细胞/淋巴细胞画面。浆细胞 10–14µm 对应 17.9–25px，淋巴细胞 7–8µm 对应 12.5–14.3px；混合区取中位可能偏小。",
+    "evidence": "qa/v6/final_qa/keyframes/microscope/s19_t295.png, s19_t292/298 中位11.7px，样本 n=127-130",
+    "action": "ACCEPT — 在淋巴/浆细胞混合区，核径中位略偏淋巴侧，但仍在±25% 容差内（中倍/低倍）。",
+    "修复建议": "e12_s19 自检已说明「统一尺度范围」。可接受。"
+  },
+  {
+    "id": "freeze-frames",
+    "severity": "info",
+    "scene": "全片",
+    "timecode": "见 freeze_list.txt",
+    "finding": "freezedetect 检出 55 段冻结帧（d>=2s），最长 12.13s，总计 205.6s",
+    "cause": "静态讲解镜头（标签/箭头/固定画面）为设计意图，非技术故障",
+    "evidence": "qa/v6/final_qa/qa_final_run.log (ffmpeg freezedetect 输出)",
+    "action": "ACCEPT — 正常讲解镜头，非黑帧或卡顿。",
+    "修复建议": "无需修复。在报告中注明为预期行为。"
+  }
+]
