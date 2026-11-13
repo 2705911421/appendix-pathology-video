@@ -741,36 +741,288 @@ function paintCut(ctx, swell, look) {
   ctx.restore();
 }
 
-// ── pus: real crust, built from soft overlapping pigment sheets + fibrin + floc ───────────
-function fibrinStrands(ctx, c, ang, rx, ry, seed, alpha) {
-  const R = rng(seed | 0);
-  const ca = Math.cos(ang), sa = Math.sin(ang);
-  ctx.save();
-  ctx.lineCap = 'round';
-  for (let k = 0; k < 7; k++) {
-    const ox = (R() - .5) * rx * .9, oy = (R() - .5) * ry * 1.1;
-    const len = rx * (0.35 + R() * 0.5);
-    const a0 = -0.5 + R();
-    const n = 4;
-    const pts = [];
-    for (let j = 0; j <= n; j++) {
-      const t = j / n, u = ox + (t - .5) * len, v = oy + Math.sin(t * 5 + k) * 2.2 + (R() - .5) * 2;
-      pts.push([c[0] + ca * u - sa * v, c[1] + sa * u + ca * v]);
+// ── pus: yellow fibrinopurulent crust (r6) ──────────────────────────────────────────────
+// r5's radial blooms read as a white fog at 1080p. r6 builds each patch from a few
+// concentric irregular fills (solid core, narrow feather) plus axial fibrin threads.
+// No reused sprite, no outline stroke, no gaussian. Normal/red never reach this code
+// (pus alpha is 0). The gangrenous core keeps the r5 exudate underneath the unchanged
+// necrosis paint; new crust fades out before that core and turns dirty grey-green beside it.
+const PUS_TONES = [
+  [194, 160, 98],   // 灰黄
+  [204, 170, 108],  // 灰黄
+  [216, 186, 126],  // 乳黄
+  [182, 150, 88],   // 深灰黄
+  [188, 174, 104],  // 淡黄绿
+  [198, 164, 100],  // 灰黄
+  [210, 178, 116],  // 乳黄
+];
+const PUS_DIRTY = [114, 120, 86]; // 污秽灰绿，只在坏疽交界
+// s, v, along-px, across-px, core alpha, tone index. Thick cores do not show red.
+const PUS_CRUSTS = [
+  [0.13, -0.52, 36, 13, 0.94, 0],
+  [0.15, -0.16, 48, 15, 0.97, 2],
+  [0.18, 0.22, 30, 12, 0.90, 4],
+  [0.21, -0.74, 28, 10, 0.88, 1],
+  [0.24, -0.36, 62, 17, 0.98, 3],
+  [0.27, 0.02, 40, 14, 0.93, 5],
+  [0.30, -0.58, 44, 13, 0.95, 0],
+  [0.32, 0.34, 26, 11, 0.86, 6],
+  [0.36, -0.20, 78, 19, 0.98, 2],
+  [0.39, -0.64, 40, 12, 0.94, 1],
+  [0.42, 0.10, 38, 15, 0.92, 4],
+  [0.45, -0.40, 68, 16, 0.98, 6],
+  [0.48, 0.38, 24, 10, 0.84, 5],
+  [0.51, -0.08, 52, 17, 0.97, 2],
+  [0.54, -0.56, 38, 12, 0.93, 0],
+  [0.57, 0.14, 42, 14, 0.91, 3],
+  [0.60, -0.30, 74, 18, 0.98, 1],
+  [0.63, -0.66, 32, 11, 0.90, 4],
+  [0.66, 0.02, 46, 15, 0.95, 2],
+  [0.69, -0.42, 36, 13, 0.92, 5],
+  [0.72, 0.26, 28, 11, 0.84, 0],
+  [0.74, -0.18, 40, 14, 0.90, 6],
+  // reach toward the lit rim so the coat reads yellow, leaving a thin red edge
+  [0.19, -0.84, 36, 12, 0.92, 2],
+  [0.33, -0.80, 44, 13, 0.94, 1],
+  [0.48, -0.82, 40, 12, 0.92, 6],
+  [0.62, -0.78, 36, 12, 0.90, 0],
+  // thin veils — red serosa stays visible
+  [0.16, -0.38, 34, 8, 0.32, 2],
+  [0.28, -0.08, 40, 7, 0.28, 3],
+  [0.41, -0.72, 26, 6, 0.26, 4],
+  [0.50, 0.22, 30, 7, 0.30, 1],
+  [0.62, -0.14, 36, 7, 0.30, 5],
+  [0.22, 0.46, 20, 6, 0.24, 6],
+  [0.56, -0.46, 24, 6, 0.28, 0],
+  // cords along the axis
+  [0.28, -0.48, 96, 4.0, 0.74, 1],
+  [0.46, -0.14, 110, 3.6, 0.70, 3],
+  [0.58, -0.50, 88, 3.4, 0.66, 4],
+  [0.36, 0.18, 76, 3.2, 0.58, 5],
+];
+const PUS_EXTRA = (() => {
+  const R = rng(72107), out = [];
+  for (let i = 0; i < 16; i++) {
+    const s = 0.14 + R() * 0.60;
+    const v = -0.80 + R() * 1.20;
+    const thick = R() > 0.42;
+    out.push([
+      s, v,
+      (thick ? 14 : 8) + R() * (thick ? 22 : 12),
+      (thick ? 6 : 3.5) + R() * (thick ? 6 : 3),
+      thick ? 0.72 + R() * 0.22 : 0.22 + R() * 0.12,
+      (R() * PUS_TONES.length) | 0,
+    ]);
+  }
+  return out;
+})();
+// Specks seated on the necrotic rim (dist in plaque-radii). Painted after the black, so the join is exudate over the halo, not a cut line.
+const PUS_MARGIN = (() => {
+  const out = [];
+  NECRO.forEach((n, i) => {
+    const R = rng(88000 + i * 19);
+    for (let k = 0; k < 4; k++) out.push({
+      ni: i, ang: R() * Math.PI * 2, dist: 1.25 + R() * 0.5,
+      rx: 9 + R() * 8, ry: 4 + R() * 3, body: 0.18 + R() * 0.16, tone: (R() * 3) | 0,
+    });
+  });
+  return out;
+})();
+
+function pusAt(swell, s, v) {
+  const f = frameAt(clamp(s, 0, CAP_S)), w = tubeRadius(clamp(s, 0, CAP_S), swell);
+  return [f.p[0] + f.nx * w * v, f.p[1] + f.ny * w * v];
+}
+// 1 at a necrotic centre, 0 outside the plaque.
+function necroMask(s, v, swell) {
+  let m = 0;
+  for (let i = 0; i < NECRO.length; i++) {
+    const n = NECRO[i];
+    const rad = tubeRadius(n.s, swell);
+    const d = Math.hypot((s - n.s) * 760 / n.rx, (v - n.v) * rad / n.ry);
+    m = Math.max(m, clamp(1.05 - d, 0, 1));
+  }
+  return m;
+}
+function necroDist(s, v, swell) {
+  let best = 9;
+  for (let i = 0; i < NECRO.length; i++) {
+    const n = NECRO[i];
+    const rad = tubeRadius(n.s, swell);
+    best = Math.min(best, Math.hypot((s - n.s) * 760 / n.rx, (v - n.v) * rad / n.ry));
+  }
+  return best;
+}
+// 0 on the necrotic plaque, 1 once the exudate is clear of it.
+function exudateKeep(dist) {
+  if (dist >= 1.75) return 1;
+  if (dist <= 1.02) return 0;
+  return smooth((dist - 1.02) / 0.73);
+}
+function pusTone(idx, s, necrosis, dist) {
+  const base = PUS_TONES[idx % PUS_TONES.length];
+  if (necrosis < 0.01) return base;
+  const distal = smooth((s - 0.56) / 0.16);
+  const near = dist < 8 ? smooth((1.55 - dist) / 0.7) : 0;
+  const k = necrosis * Math.min(0.9, Math.max(distal * 0.7, near));
+  return mix3(base, PUS_DIRTY, k);
+}
+// New exudate may not paint the necrotic plaque. Holes use the opposite winding so overlaps stay empty.
+function clipOutsideNecro(ctx, swell, scale) {
+  ctx.beginPath();
+  ctx.rect(-980, -560, 1960, 1120);
+  NECRO.forEach(n => {
+    const pts = surfaceBlob(n.s, n.v, n.rx * scale, n.ry * scale, n.seed + 17, {
+      swell, n: 28, jitter: 0.08, amp: 0.1, lobes: 2,
+    });
+    for (let i = pts.length - 1; i >= 0; i--) {
+      const p = pts[i];
+      if (i === pts.length - 1) ctx.moveTo(p[0], p[1]);
+      else ctx.lineTo(p[0], p[1]);
     }
-    ctx.strokeStyle = `rgba(214, 198, 166, ${.28 * alpha})`;
-    ctx.lineWidth = (.55 + R() * .5);
+    ctx.closePath();
+  });
+  ctx.clip('nonzero');
+}
+function clipNecroCore(ctx, swell, scale) {
+  ctx.beginPath();
+  NECRO.forEach(n => {
+    const pts = surfaceBlob(n.s, n.v, n.rx * scale, n.ry * scale, n.seed + 17, {
+      swell, n: 22, jitter: 0.12, amp: 0.08, lobes: 2,
+    });
+    pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+    ctx.closePath();
+  });
+  ctx.clip();
+}
+function crustBlob(s, v, rx, ry, seed, swell, lobes) {
+  return surfaceBlob(s, v, Math.max(2, rx), Math.max(1.6, ry), seed, {
+    swell, n: 48, jitter: 0.06, amp: 0.12, lobes,
+  });
+}
+function paintCrustLayers(ctx, swell, crusts, alpha, necrosis) {
+  for (let i = 0; i < crusts.length; i++) {
+    const [s, v, rx0, ry0, body, toneI] = crusts[i];
+    const rx = rx0 * 1.12, ry = ry0 * 1.22;
+    const dist = necrosis > 0.01 ? necroDist(s, v, swell) : 9;
+    const keep = exudateKeep(dist);
+    const strength = body * keep * alpha;
+    if (strength < 0.03) continue;
+    const tone = pusTone(toneI, s, necrosis, dist);
+    const seed = 9100 + i * 13;
+    const lobes = 2 + (i % 3);
+    const thick = body >= 0.5;
+    const steps = thick ? 8 : 4;
+    const feather = thick ? 7.5 : 4.2;
+    for (let k = 0; k < steps; k++) {
+      const t = k / (steps - 1);
+      const a = strength * (thick ? (0.035 + 0.965 * t * t) : (0.18 + 0.82 * t * t));
+      if (a < 0.02) continue;
+      const grow = (1 - t) * feather;
+      fillPoly(ctx, crustBlob(s, v, rx + grow, ry + grow * 0.7, seed, swell, lobes), tone, a);
+    }
+    if (!thick) continue;
+    const rad = tubeRadius(s, swell);
+    // Lit shoulder and shadow lip: same family of colour, low alpha, no outline.
+    fillPoly(ctx, crustBlob(s, v - ry * 0.34 / rad, rx * 0.52, ry * 0.42, seed + 3, swell, 2),
+      mix3(tone, [224, 200, 148], 0.38), strength * 0.26);
+    fillPoly(ctx, crustBlob(s, v + ry * 0.42 / rad, rx * 0.66, ry * 0.36, seed + 5, swell, 2),
+      mix3(tone, [128, 100, 56], 0.42), strength * 0.12);
+    const R = rng(seed + 40);
+    const f = frameAt(s);
+    const ang = Math.atan2(f.ty, f.tx);
+    for (let g = 0; g < 5; g++) {
+      const u = (R() - 0.5) * rx * 0.9;
+      const vv = v * rad + (R() - 0.5) * ry * 0.7;
+      const dark = R() < 0.65;
+      const col = dark ? mix3(tone, [110, 86, 48], 0.55) : mix3(tone, [222, 198, 146], 0.3);
+      ctx.fillStyle = css(col, strength * (dark ? 0.18 : 0.1));
+      ctx.beginPath();
+      ctx.ellipse(f.p[0] + f.tx * u + f.nx * vv, f.p[1] + f.ty * u + f.ny * vv,
+        0.6 + R() * 1.2, 0.4 + R() * 0.7, ang, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+}
+function fiberPoints(swell, s0, v0, lenS, driftV, seed) {
+  const R = rng(seed | 0);
+  const pts = [];
+  for (let i = 0; i <= 8; i++) {
+    const t = i / 8;
+    const s = clamp(s0 + (t - 0.5) * lenS, 0.04, 0.88);
+    const wob = Math.sin(t * Math.PI * (1.2 + (seed % 5) * 0.37) + seed) * 0.055;
+    const v = v0 + driftV * (t - 0.5) + wob + (R() - 0.5) * 0.008;
+    pts.push(pusAt(swell, s, v));
+  }
+  return pts;
+}
+function strokeFiber(ctx, pts, col, alpha, width) {
+  if (alpha < 0.04 || pts.length < 2) return;
+  const n = pts.length - 1;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  for (let i = 0; i < n; i++) {
+    const t = (i + 0.5) / n;
+    const k = Math.sin(Math.PI * t);
+    ctx.strokeStyle = css(col, alpha * (0.2 + 0.8 * k));
+    ctx.lineWidth = width * (0.32 + 0.68 * k);
     ctx.beginPath();
-    pts.forEach((p, j) => j ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+    ctx.moveTo(pts[i][0], pts[i][1]);
+    ctx.lineTo(pts[i + 1][0], pts[i + 1][1]);
     ctx.stroke();
-    // Dull highlight-free floc at the tip.
-    const tip = pts[n];
-    ctx.fillStyle = `rgba(214, 200, 170, ${.24 * alpha})`;
-    ctx.beginPath(); ctx.arc(tip[0] + (R() - .5) * 3, tip[1] + (R() - .5) * 3, .7 + R() * 1.4, 0, Math.PI * 2); ctx.fill();
+  }
+}
+function paintFibrin(ctx, swell, crusts, alpha, necrosis) {
+  ctx.save();
+  for (let i = 0; i < crusts.length; i++) {
+    const [s, v, rx, ry, body, toneI] = crusts[i];
+    if (body < 0.6 || ry < 8) continue;
+    const dist = necrosis > 0.01 ? necroDist(s, v, swell) : 9;
+    const keep = exudateKeep(dist);
+    if (body * keep * alpha < 0.45) continue;
+    const tone = pusTone(toneI, s, necrosis, dist);
+    const dark = mix3(tone, [102, 78, 44], 0.42);
+    const lite = mix3(tone, [208, 182, 124], 0.16);
+    const rad = tubeRadius(s, swell);
+    const R = rng(12000 + i * 29);
+    const rows = 3;
+    for (let r = 0; r < rows; r++) {
+      const vv = v + ((r / (rows - 1)) - 0.5) * (ry / rad) * 0.8;
+      const lenS = (rx / 760) * (0.46 + R() * 0.22);
+      const drift = (R() - 0.5) * 0.035;
+      const pts = fiberPoints(swell, s + (R() - 0.5) * lenS * 0.12, vv, lenS, drift, 13000 + i * 20 + r);
+      strokeFiber(ctx, pts, r === 1 ? lite : dark, alpha * keep * (r === 1 ? 0.34 : 0.66), 0.8 + R() * 0.4);
+    }
+    const vv = v + (R() - 0.5) * (ry / rad) * 0.35;
+    const lenS = (rx / 760) * (0.22 + R() * 0.16);
+    const pts = fiberPoints(swell, s, vv, lenS, (R() < 0.5 ? -1 : 1) * (ry / rad) * 0.38, 14000 + i);
+    strokeFiber(ctx, pts, dark, alpha * keep * 0.5, 0.7 + R() * 0.25);
   }
   ctx.restore();
 }
-// Unique surface-coordinate deposits, with zero-alpha edges; no repeated pus sprites.
-function paintPus(ctx, swell, alpha, necrosis = 0, marginOnly = false) {
+function paintMarginRing(ctx, swell, alpha, necrosis) {
+  PUS_MARGIN.forEach((sp, i) => {
+    const n = NECRO[sp.ni];
+    const rad = tubeRadius(n.s, swell);
+    const s = clamp(n.s + Math.cos(sp.ang) * n.rx * sp.dist / 760, 0.05, 0.88);
+    const v = n.v + Math.sin(sp.ang) * n.ry * sp.dist / rad;
+    const dist = necroDist(s, v, swell);
+    if (dist < 1.05) return;
+    const keep = smooth(clamp((dist - 1.05) / 0.28, 0, 1)) * (1 - smooth(clamp((dist - 1.7) / 0.35, 0, 1)));
+    const tone = mix3(PUS_TONES[4 + sp.tone], PUS_DIRTY, 0.78);
+    const a = sp.body * keep * alpha * necrosis;
+    if (a < 0.04) return;
+    for (let k = 0; k < 5; k++) {
+      const t = k / 4;
+      fillPoly(ctx, crustBlob(s, v, sp.rx + 5 * (1 - t), sp.ry + 3.4 * (1 - t), 16000 + i * 9, swell, 3),
+        tone, a * (0.06 + 0.94 * t * t));
+    }
+    const pts = fiberPoints(swell, s, v, sp.rx / 760, (sp.ang % 1) * 0.04 - 0.02, 17000 + i);
+    strokeFiber(ctx, pts, mix3(tone, [70, 78, 52], 0.4), a * 0.7, 1.05);
+  });
+}
+// r5 painter, used only inside the gangrenous core so that core's underlayer matches r5.
+function paintPusLegacy(ctx, swell, alpha, necrosis = 0, marginOnly = false) {
   if (alpha <= .002) return;
   const R = rng(marginOnly ? 59032 : 59031);
   const point = (s, v) => {
@@ -784,7 +1036,6 @@ function paintPus(ctx, swell, alpha, necrosis = 0, marginOnly = false) {
       Math.exp(-(((v - centre) / width) ** 2)) *
       (.56 + .25 * Math.sin(s * 49 + v * 7) + .17 * Math.sin(s * 97 - v * 13));
   };
-  // Independently sized translucent blooms merge into irregular longitudinal sheets.
   for (let i = 0; i < (marginOnly ? 520 : 4200); i++) {
     const s = marginOnly ? .68 + R() * .19 : .105 + R() * .76;
     const v = -.90 + R() * 1.55;
@@ -802,7 +1053,6 @@ function paintPus(ctx, swell, alpha, necrosis = 0, marginOnly = false) {
     g.addColorStop(1, css(tone, 0));
     ctx.fillStyle = g; ctx.fillRect(-1, -1, 2, 2); ctx.restore();
   }
-  // Fine tapered threads follow the curved axis, without outlining the deposits.
   for (let i = 0; i < (marginOnly ? 55 : 530); i++) {
     const s = marginOnly ? .68 + R() * .17 : .12 + R() * .70;
     const v = -.80 + R() * 1.25;
@@ -818,6 +1068,34 @@ function paintPus(ctx, swell, alpha, necrosis = 0, marginOnly = false) {
       ctx.strokeStyle = css(tone, (.12 + R() * .23) * alpha * (marginOnly ? .5 : 1));
       ctx.beginPath(); ctx.moveTo(...pts[j]); ctx.lineTo(...pts[j + 1]); ctx.stroke();
     }
+  }
+}
+function paintPus(ctx, swell, alpha, necrosis = 0, marginOnly = false) {
+  if (alpha <= .002) return;
+  // Inner necrotic core: r5 exudate only, so the unchanged black paint sits on the same ground.
+  if (necrosis > 0.04) {
+    ctx.save();
+    clipNecroCore(ctx, swell, marginOnly ? 1.0 : 1.02);
+    paintPusLegacy(ctx, swell, alpha, necrosis, marginOnly);
+    ctx.restore();
+  }
+  if (marginOnly) {
+    ctx.save();
+    clipOutsideNecro(ctx, swell, 1.04);
+    paintMarginRing(ctx, swell, alpha, necrosis);
+    ctx.restore();
+    return;
+  }
+  const crusts = PUS_CRUSTS.concat(PUS_EXTRA);
+  if (necrosis > 0.04) {
+    ctx.save();
+    clipOutsideNecro(ctx, swell, 0.98);
+    paintCrustLayers(ctx, swell, crusts, alpha, necrosis);
+    paintFibrin(ctx, swell, crusts, alpha, necrosis);
+    ctx.restore();
+  } else {
+    paintCrustLayers(ctx, swell, crusts, alpha, necrosis);
+    paintFibrin(ctx, swell, crusts, alpha, necrosis);
   }
 }
 
