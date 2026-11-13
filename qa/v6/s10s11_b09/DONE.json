@@ -1,0 +1,24 @@
+{
+  "lane": "s10s11_b09",
+  "status": "pass",
+  "commit": "pending",
+  "metrics": {
+    "faithfulness_s31_MAE": 0.0,
+    "faithfulness_s34_MAE": 0.0,
+    "s39_medianPx": 20.4,
+    "s39_pxPerUm": 1.852,
+    "s42_oil_medianPx": 47.2,
+    "s42_oil_pxPerUm": 4.294,
+    "s43_45_medianPx": 19.7,
+    "s43_45_pxPerUm": 1.794,
+    "degRatio_s39": 0.302,
+    "degRatio_s40": 0.306,
+    "deltaE_no_yellow": 2.65,
+    "contrast_left_col": 14.32,
+    "contrast_in_circle": 8.97,
+    "video_duration_s": 48.07,
+    "timeline_duration_s": 48.08,
+    "blackdetect": "pass",
+    "locked_sha256_ok": true
+  }
+}

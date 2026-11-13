@@ -1,0 +1,153 @@
+{
+  "leader_endpoints": {
+    "s40/脓液": {
+      "target": [
+        1108.16,
+        534.85
+      ],
+      "stained_px_in_28x28": 12,
+      "pass": false
+    },
+    "s40/脓细胞": {
+      "target": [
+        1103.91,
+        527.85
+      ],
+      "stained_px_in_28x28": 35,
+      "pass": true
+    },
+    "s40/组织碎屑": {
+      "target": [
+        1149.14,
+        551.65
+      ],
+      "stained_px_in_28x28": 0,
+      "pass": false
+    },
+    "s40/渗出液": {
+      "target": [
+        1201.78,
+        514.39
+      ],
+      "stained_px_in_28x28": 0,
+      "pass": false
+    },
+    "s42/中性粒细胞": {
+      "target": [
+        950.44,
+        453.28
+      ],
+      "stained_px_in_52x52": 544,
+      "pass": true
+    },
+    "s42/脓细胞_1": {
+      "target": [
+        1098.78,
+        533.12
+      ],
+      "stained_px_in_52x52": 507,
+      "pass": true
+    },
+    "s42/脓细胞_2": {
+      "target": [
+        1235.09,
+        506.0
+      ],
+      "stained_px_in_52x52": 728,
+      "pass": true
+    },
+    "s42/脓细胞_3": {
+      "target": [
+        1145.96,
+        412.54
+      ],
+      "stained_px_in_52x52": 530,
+      "pass": true
+    },
+    "s46/浆膜": {
+      "target": [
+        1105.21,
+        488.35
+      ],
+      "exudate_px_in_32x32": 513,
+      "pass": true
+    },
+    "s46/纤维素性脓性渗出": {
+      "target": [
+        1112.05,
+        469.28
+      ],
+      "exudate_px_in_32x32": 348,
+      "pass": true
+    }
+  },
+  "contrast_left_column": {
+    "fg": "#E8DDE9",
+    "bg": "#111114",
+    "ratio": 14.32,
+    "threshold": 4.5,
+    "pass": "True"
+  },
+  "contrast_in_circle": {
+    "fg": "#51336F",
+    "bg": "#F6EEF0",
+    "ratio": 8.97,
+    "threshold": 4.5,
+    "pass": "True"
+  },
+  "measured_bg": {
+    "s42/label_area": {
+      "rgb": [
+        223.4,
+        200.3,
+        214.0
+      ],
+      "contrast_vs_51336F": 6.53
+    },
+    "s46/label_area": {
+      "rgb": [
+        238.0,
+        228.9,
+        233.8
+      ],
+      "contrast_vs_51336F": 8.29
+    }
+  },
+  "font_sizes": {
+    "title_px_bold": 44,
+    "title_weight": 700,
+    "body_px": 36,
+    "body_weight": 400,
+    "label_px": 36,
+    "magnification_px": 36,
+    "min_size_found": 36,
+    "min_size_pass": true,
+    "title_pass": true,
+    "body_pass": true
+  },
+  "all_text_y_under_950": {
+    "max_y": 376,
+    "pass": true,
+    "all_y": [
+      6,
+      320,
+      376
+    ],
+    "note": "950 = 1080 - 130 safe margin"
+  },
+  "no_global_yellow": {
+    "ours_circle_mean_rgb": [
+      221.37,
+      196.58,
+      212.35
+    ],
+    "ref_circle_mean_rgb": [
+      222.73,
+      202.85,
+      217.55
+    ],
+    "deltaE_CIE76": 2.65,
+    "threshold": 8,
+    "pass": true
+  }
+}
