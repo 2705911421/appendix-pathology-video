@@ -1,0 +1,470 @@
+{
+  "lane": "s18_b09",
+  "status": "pass",
+  "commit": "df7a3f8bc2b2d9aa22492d34f43ca644dab53487",
+  "metrics": {
+    "lock_sha256": "pass",
+    "b09_chronic_diff_empty": true,
+    "merge": {
+      "branch": "s19-dev",
+      "head": "31fea4a",
+      "conflict": "film/main.js kept chron-dev",
+      "other_conflicts": []
+    },
+    "handoff": {
+      "mae_255": 0.0,
+      "threshold": 1.5,
+      "pass": true,
+      "center_s18": [
+        1110,
+        475
+      ],
+      "center_s19": [
+        1110,
+        475
+      ],
+      "center_delta_px": 0,
+      "z_end": 0.6,
+      "s19_overview_z": 0.6,
+      "brief_expected_z": 0.5,
+      "note": "合格 S19（s19_b09_fix01）句69首/s69_overview 相机是 center (0,0)、z=0.60，不是 brief 预估的 0.50。终帧按实测相机对齐。"
+    },
+    "acute_fidelity_z27": {
+      "mae_255": 0.10071671009063721,
+      "threshold": 1.0,
+      "pass": true,
+      "ref": "/workspace/病理科普视频/v5/qa/v6/b10/s08_high_s34.png"
+    },
+    "scale": {
+      "Z_HI": 1.0,
+      "Z_MID": 0.5,
+      "Z_END": 0.6,
+      "formula": "px/µm = z/Z_HI*(850/475)，Z_HI=1 对应高倍 FOV 475µm",
+      "s67_mid": {
+        "z": 0.5,
+        "D": 850,
+        "px_per_um": 0.8947368421052632,
+        "fov_um": 950.0,
+        "power": "中倍",
+        "body_median_px": 9.537361447847204,
+        "n": 722,
+        "pass_px_um": true
+      },
+      "s67_high": {
+        "z": 1.0,
+        "D": 850,
+        "px_per_um": 1.7894736842105263,
+        "fov_um": 475,
+        "power": "高倍",
+        "body_median_px": 19.074722895694407,
+        "body_um": 10.659403971123345,
+        "n": 210,
+        "band_px": [
+          18,
+          21
+        ],
+        "pass_body": true
+      },
+      "s68_compare": {
+        "z": 0.5,
+        "D": 600,
+        "px_per_um": 0.8947368421052632,
+        "fov_um": 670.5882352941177,
+        "power": "中倍",
+        "same_z": true,
+        "pass_px_um": true
+      },
+      "s68_end": {
+        "z": 0.6,
+        "D": 850,
+        "px_per_um": 1.0736842105263158,
+        "fov_um": 791.6666666666666,
+        "power": "中倍"
+      }
+    },
+    "pixel_tool_s67_high": {
+      "file": "qa/v6/s18_b09/keyframes/s67_high.png",
+      "px_per_um_if_fov": 1.7894736842105263,
+      "fov_um": 475.0,
+      "n_lobes": 794,
+      "n_clusters": 193,
+      "lobe_px_median": 5.4115163798060095,
+      "cluster_px_median": 13.899748742132399,
+      "cluster_um_median": 7.767506650015164,
+      "lobe_um_median": 3.02408268283277
+    },
+    "medical": {
+      "acute_fibrosis": "无。急性窗是 s08 ulcer 母图，不调用 addChronic，无胶原条带。",
+      "acute_inherited_lymph": "母图固有层含 b09 原有淋巴细胞/浆细胞参照，不是新增慢性炎。",
+      "chronic_neutrophils": 0,
+      "chronic_source": "prepareChronic() 默认 neutrophils:false，与 s19_b09_fix01 同一张图。终帧圆内 MAE=0。"
+    },
+    "text": {
+      "min_contrast": 11.72,
+      "rows": [
+        {
+          "frame": "s66_loop",
+          "text": "反复发作",
+          "contrast": 12.38,
+          "bottom": 338,
+          "baseline": 330,
+          "x": 75,
+          "w": 176.0,
+          "font": "700 44px MixSans"
+        },
+        {
+          "frame": "s66_loop",
+          "text": "可转慢性",
+          "contrast": 12.38,
+          "bottom": 450,
+          "baseline": 442,
+          "x": 75,
+          "w": 176.0,
+          "font": "700 44px MixSans"
+        },
+        {
+          "frame": "s67_mid",
+          "text": "变质",
+          "contrast": 11.72,
+          "bottom": 258,
+          "baseline": 250,
+          "x": 620,
+          "w": 72.0,
+          "font": "500 36px MixSans"
+        },
+        {
+          "frame": "s67_mid",
+          "text": "渗出",
+          "contrast": 11.72,
+          "bottom": 698,
+          "baseline": 690,
+          "x": 620,
+          "w": 72.0,
+          "font": "500 36px MixSans"
+        },
+        {
+          "frame": "s67_mid",
+          "text": "中倍",
+          "contrast": 14.32,
+          "bottom": 72,
+          "baseline": 64,
+          "x": 48,
+          "w": 72.0,
+          "font": "500 36px MixSans"
+        },
+        {
+          "frame": "s67_mid",
+          "text": "反复发作",
+          "contrast": 14.32,
+          "bottom": 338,
+          "baseline": 330,
+          "x": 75,
+          "w": 176.0,
+          "font": "700 44px MixSans"
+        },
+        {
+          "frame": "s67_mid",
+          "text": "可转慢性",
+          "contrast": 14.32,
+          "bottom": 450,
+          "baseline": 442,
+          "x": 75,
+          "w": 176.0,
+          "font": "700 44px MixSans"
+        },
+        {
+          "frame": "s67_mid",
+          "text": "急性：变质、渗出",
+          "contrast": 14.32,
+          "bottom": 574,
+          "baseline": 566,
+          "x": 75,
+          "w": 352.0,
+          "font": "700 44px MixSans"
+        },
+        {
+          "frame": "s67_high",
+          "text": "变质",
+          "contrast": 11.72,
+          "bottom": 258,
+          "baseline": 250,
+          "x": 620,
+          "w": 72.0,
+          "font": "500 36px MixSans"
+        },
+        {
+          "frame": "s67_high",
+          "text": "渗出",
+          "contrast": 11.72,
+          "bottom": 698,
+          "baseline": 690,
+          "x": 620,
+          "w": 72.0,
+          "font": "500 36px MixSans"
+        },
+        {
+          "frame": "s67_high",
+          "text": "高倍",
+          "contrast": 14.32,
+          "bottom": 72,
+          "baseline": 64,
+          "x": 48,
+          "w": 72.0,
+          "font": "500 36px MixSans"
+        },
+        {
+          "frame": "s67_high",
+          "text": "反复发作",
+          "contrast": 14.32,
+          "bottom": 338,
+          "baseline": 330,
+          "x": 75,
+          "w": 176.0,
+          "font": "700 44px MixSans"
+        },
+        {
+          "frame": "s67_high",
+          "text": "可转慢性",
+          "contrast": 14.32,
+          "bottom": 450,
+          "baseline": 442,
+          "x": 75,
+          "w": 176.0,
+          "font": "700 44px MixSans"
+        },
+        {
+          "frame": "s67_high",
+          "text": "急性：变质、渗出",
+          "contrast": 14.32,
+          "bottom": 574,
+          "baseline": 566,
+          "x": 75,
+          "w": 352.0,
+          "font": "700 44px MixSans"
+        },
+        {
+          "frame": "s68_compare",
+          "text": "急性",
+          "contrast": 14.32,
+          "bottom": 823,
+          "baseline": 815,
+          "x": 914.0,
+          "w": 72.0,
+          "font": "500 36px MixSans"
+        },
+        {
+          "frame": "s68_compare",
+          "text": "慢性",
+          "contrast": 14.32,
+          "bottom": 823,
+          "baseline": 815,
+          "x": 1544.0,
+          "w": 72.0,
+          "font": "500 36px MixSans"
+        },
+        {
+          "frame": "s68_compare",
+          "text": "纤维组织增生",
+          "contrast": 11.72,
+          "bottom": 878,
+          "baseline": 870,
+          "x": 1470,
+          "w": 216.0,
+          "font": "500 36px MixSans"
+        },
+        {
+          "frame": "s68_compare",
+          "text": "中倍",
+          "contrast": 14.32,
+          "bottom": 72,
+          "baseline": 64,
+          "x": 48,
+          "w": 72.0,
+          "font": "500 36px MixSans"
+        },
+        {
+          "frame": "s68_compare",
+          "text": "反复发作",
+          "contrast": 14.32,
+          "bottom": 338,
+          "baseline": 330,
+          "x": 75,
+          "w": 176.0,
+          "font": "700 44px MixSans"
+        },
+        {
+          "frame": "s68_compare",
+          "text": "可转慢性",
+          "contrast": 14.32,
+          "bottom": 450,
+          "baseline": 442,
+          "x": 75,
+          "w": 176.0,
+          "font": "700 44px MixSans"
+        },
+        {
+          "frame": "s68_compare",
+          "text": "急性：变质、渗出",
+          "contrast": 14.32,
+          "bottom": 574,
+          "baseline": 566,
+          "x": 75,
+          "w": 352.0,
+          "font": "700 44px MixSans"
+        },
+        {
+          "frame": "s68_compare",
+          "text": "慢性：增生",
+          "contrast": 14.32,
+          "bottom": 656,
+          "baseline": 648,
+          "x": 75,
+          "w": 220.0,
+          "font": "700 44px MixSans"
+        },
+        {
+          "frame": "s68_end",
+          "text": "中倍",
+          "contrast": 14.32,
+          "bottom": 72,
+          "baseline": 64,
+          "x": 48,
+          "w": 72.0,
+          "font": "500 36px MixSans"
+        },
+        {
+          "frame": "s68_end",
+          "text": "反复发作",
+          "contrast": 14.32,
+          "bottom": 338,
+          "baseline": 330,
+          "x": 75,
+          "w": 176.0,
+          "font": "700 44px MixSans"
+        },
+        {
+          "frame": "s68_end",
+          "text": "可转慢性",
+          "contrast": 14.32,
+          "bottom": 450,
+          "baseline": 442,
+          "x": 75,
+          "w": 176.0,
+          "font": "700 44px MixSans"
+        },
+        {
+          "frame": "s68_end",
+          "text": "急性：变质、渗出",
+          "contrast": 14.32,
+          "bottom": 574,
+          "baseline": 566,
+          "x": 75,
+          "w": 352.0,
+          "font": "700 44px MixSans"
+        },
+        {
+          "frame": "s68_end",
+          "text": "慢性：增生",
+          "contrast": 14.32,
+          "bottom": 656,
+          "baseline": 648,
+          "x": 75,
+          "w": 220.0,
+          "font": "700 44px MixSans"
+        }
+      ],
+      "all_baseline_lt_950": true,
+      "titles_px": 44,
+      "labels_px": 36
+    },
+    "leaders": {
+      "变质_mid": [
+        1110,
+        475
+      ],
+      "渗出_mid": [
+        1107.2039792522105,
+        496.3207415738431
+      ],
+      "变质_high": [
+        1314.203484927991,
+        546.717492748605
+      ],
+      "渗出_high": [
+        1308.6114434324118,
+        589.3589758962912
+      ],
+      "纤维组织增生_compare": [
+        1515.5971685138602,
+        232.51203684123013
+      ],
+      "endpoint_error_px": 0,
+      "verified_pixel": "#D8C5E7 at the rounded endpoint, max channel delta 0"
+    },
+    "sync_error_s": 0.05,
+    "determinism_md5": {
+      "s66_loop": [
+        "9da073ac1d42f85d9a7a9baee2b5a822",
+        "9da073ac1d42f85d9a7a9baee2b5a822"
+      ],
+      "s67_mid": [
+        "30db908615359b9511ce62b16ae95077",
+        "30db908615359b9511ce62b16ae95077"
+      ],
+      "s67_high": [
+        "56618e9ebe9540a01ee3873e80951c07",
+        "56618e9ebe9540a01ee3873e80951c07"
+      ],
+      "s68_compare": [
+        "06ab5e1ac19a9e20e3d2ae1913cdde2f",
+        "06ab5e1ac19a9e20e3d2ae1913cdde2f"
+      ],
+      "s68_end": [
+        "c664a7c3487ec7162709ed81627226f1",
+        "c664a7c3487ec7162709ed81627226f1"
+      ]
+    },
+    "video": {
+      "S18.mp4": {
+        "duration_s": 8.4,
+        "frames": 252,
+        "fps": 30,
+        "width": 1920,
+        "height": 1080,
+        "codec": "h264",
+        "timeline_span_s": 8.407583333333264,
+        "delta_s": 0.007583333333263553,
+        "blackdetect": "no output"
+      },
+      "S18_带配音_720p.mp4": {
+        "duration_s": 8.407,
+        "width": 1280,
+        "height": 720,
+        "audio": "aac 48000",
+        "timeline_span_s": 8.407583333333264,
+        "delta_s": 0.0005833333332638801,
+        "threshold_s": 0.05,
+        "pass": true,
+        "blackdetect": "no output"
+      }
+    },
+    "column_vs_window": {
+      "column_right_x": 427,
+      "single_window_left_x": 685,
+      "pair_window_left_x": 650,
+      "gap_px": 223
+    },
+    "audio": {
+      "source": "配音/全稿_v3/旁白_v3.wav",
+      "start_s": 281.078,
+      "duration_s": 8.407583333333264,
+      "sentences": [
+        66,
+        67,
+        68
+      ],
+      "subtitles": false
+    },
+    "rounds": 1
+  }
+}
