@@ -7,6 +7,6 @@ const tool='/workspace/garden-skills/skills/motion-showreel/scripts/render.mjs';
 function render(args){run('node',[tool,'film','--q',`scene=${scene.toLowerCase()}`,...args],{stdio:'inherit'});}
 render(['--still',picks.map(p=>p.t.toFixed(6)).join(','),'--out',P+'/stills']);render(['--determinism']);
 run('python3',['qa/v6/ct/review.py',scene],{stdio:'inherit'});
-render(['--out',`${P}/${scene}.mp4`,'--fps','30','--workers','3','--crf','16']);
+render(['--out',`${P}/${scene}.mp4`,'--fps','30','--workers','1','--crf','16']);
 run('ffmpeg',['-y','-i',`${P}/${scene}.mp4`,'-ss',String(origin),'-t',String(duration),'-i','/workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav','-map','0:v:0','-map','1:a:0','-vf','scale=1280:720','-c:v','libx264','-crf','16','-c:a','aac','-b:a','192k','-shortest',`${P}/${scene}_带配音_720p.mp4`],{stdio:'inherit'});
 run('python3',['qa/v6/ct/check.py',scene],{stdio:'inherit'});

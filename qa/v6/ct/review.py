@@ -25,8 +25,8 @@ for i,(f,pick) in enumerate(zip(files,picks)):
             crop2(im,(560,220,1880,960),pick['name']+'_200.png')
         crop2(im,(40,140,540,760),pick['name']+'_sidebar_200.png')
     else:
-        crop2(im,(955,530,1330,880),pick['name']+'_200.png')
-        crop2(im,(1326,120,1850,760),pick['name']+'_tissue_200.png')
+        crop2(im,(865,480,1320,910),pick['name']+'_200.png')
+        crop2(im,(1340,150,1870,920),pick['name']+'_tissue_200.png')
     sheet.paste(im.resize((480,270),Image.LANCZOS),((i%2)*480,(i//2)*310))
     d.text(((i%2)*480+12,(i//2)*310+276),pick['name'],fill='#2A2A35')
 sheet.save(p/'review_sheet.png')
