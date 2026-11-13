@@ -62,39 +62,41 @@ export function ctGeom(x,y,w,h,{lens=true,compact=false}={}){
     return {x,y,w,h,R,cx:x+w*.5,cy:y+h*.46,lens:null,appendix:{x:x+w*.5-R*.50,y:y+h*.46+R*.12},compact:true};
   }
   const wide=w/h>1.05;
-  const R=wide?Math.min(w*.23,h*.34):Math.min(w*.35,h*.31);
-  const cx=wide?x+w*.30:x+w*.47;
-  const cy=y+h*.38;
-  const lr=wide?Math.min(w*.14,h*.19):Math.min(w*.20,h*.18);
-  const lx=wide?x+w*.75:x+w*.77;
-  const ly=wide?y+h*.72:y+h*.79;
+  // Wide is the S04 single window: larger axial slice plus a lens that still sits in the lower-right of the panel.
+  const R=wide?Math.min(w*.26,h*.40):Math.min(w*.35,h*.31);
+  const cx=wide?x+w*.32:x+w*.47;
+  const cy=wide?y+h*.46:y+h*.38;
+  const lr=wide?Math.min(w*.12,h*.19):Math.min(w*.20,h*.18);
+  const lx=wide?x+w*.762:x+w*.77;
+  const ly=wide?y+h*.70:y+h*.79;
   return {x,y,w,h,R,cx,cy,lens:lens?{x:lx,y:ly,r:lr}:null,appendix:{x:cx-R*.50,y:cy+R*.12},wide};
 }
 
 function drawBody(c,g,seed=11){
   const {cx,cy,R}=g;
-  // skin + subcutaneous fat (lobulated, not a smooth ring)
-  ePath(c,cx,cy,R,R*.86,seed,.026);c.fillStyle='#BAB5AD';c.fill();
-  c.strokeStyle='#E8E2D7';c.lineWidth=1.6;c.stroke();
-  mottle(c,cx,cy,R*.97,R*.83,seed+2,80,'#8F8B84',.05,26);
-  mottle(c,cx,cy,R*.97,R*.83,seed+3,60,'#E4DED3',.05,22);
-  // abdominal wall muscle
-  ePath(c,cx,cy,R*.92,R*.78,seed+4,.022);c.fillStyle='#8B8882';c.fill();
-  mottle(c,cx,cy,R*.91,R*.77,seed+5,52,'#6F6C67',.05,24);
-  // rectus muscles + linea alba
+  // skin rim, then a darker subcutaneous-fat band, then muscle, then darker mesenteric fat.
+  // Fat sits darker than muscle so the abdominal-wall fat layer reads on a soft-tissue gray scale.
+  ePath(c,cx,cy,R,R*.90,seed,.026);c.fillStyle='#C8C3BA';c.fill();
+  c.strokeStyle='#E6E0D4';c.lineWidth=1.5;c.stroke();
+  ePath(c,cx,cy,R*.965,R*.855,seed+1,.024);c.fillStyle='#5E5B56';c.fill();
+  mottle(c,cx,cy,R*.96,R*.85,seed+2,70,'#7A756E',.07,22);
+  mottle(c,cx,cy,R*.96,R*.85,seed+3,50,'#3E3C39',.06,18);
+  ePath(c,cx,cy,R*.84,R*.73,seed+4,.02);c.fillStyle='#908C86';c.fill();
+  mottle(c,cx,cy,R*.83,R*.72,seed+5,40,'#6E6B66',.05,20);
+  // rectus muscles + linea alba, sitting in the anterior wall
   for(const s of [-1,1]){
-    blob(c,cx+s*R*.20,cy-R*.60,R*.085,R*.105,seed+21+s,.04,'#96928B');
-    strokeBlob(c,cx+s*R*.20,cy-R*.60,R*.085,R*.105,seed+21+s,.04,'#B6B1A7',1.1);
+    blob(c,cx+s*R*.18,cy-R*.58,R*.09,R*.12,seed+21+s,.04,'#A09B94');
+    strokeBlob(c,cx+s*R*.18,cy-R*.58,R*.09,R*.12,seed+21+s,.04,'#C2BDB2',1.15);
   }
-  c.strokeStyle='rgba(190,185,175,.45)';c.lineWidth=1.4;
-  c.beginPath();c.moveTo(cx,cy-R*.70);c.lineTo(cx,cy-R*.53);c.stroke();
-  // intra-abdominal fat
-  ePath(c,cx,cy,R*.85,R*.70,seed+6,.02);c.fillStyle='#6D6A65';c.fill();
-  mottle(c,cx,cy,R*.84,R*.69,seed+7,110,'#8E8A83',.05,30);
-  mottle(c,cx,cy,R*.84,R*.69,seed+8,80,'#55534F',.05,26);
+  c.strokeStyle='rgba(214,208,196,.55)';c.lineWidth=1.5;
+  c.beginPath();c.moveTo(cx,cy-R*.70);c.lineTo(cx,cy-R*.50);c.stroke();
+  // intraperitoneal fat
+  ePath(c,cx,cy,R*.76,R*.64,seed+6,.02);c.fillStyle='#64615C';c.fill();
+  mottle(c,cx,cy,R*.75,R*.63,seed+7,90,'#7E7A73',.06,26);
+  mottle(c,cx,cy,R*.75,R*.63,seed+8,70,'#4A4844',.06,22);
   // mesenteric strands
   const r=rand(seed+9);
-  c.save();ePath(c,cx,cy,R*.83,R*.68,seed+6,.014);c.clip();
+  c.save();ePath(c,cx,cy,R*.75,R*.63,seed+6,.014);c.clip();
   for(let i=0;i<46;i++){
     const a=r()*TAU,d=.25+r()*.7;
     const x1=cx+Math.cos(a)*R*d,y1=cy+Math.sin(a)*R*d*.82;
@@ -109,19 +111,19 @@ function drawPosterior(c,g,seed=31){
   const {cx,cy,R}=g;
   // psoas muscles
   for(const s of [-1,1]){
-    blob(c,cx+s*R*.40,cy+R*.37,R*.145,R*.205,seed+s,.03,'#918E87');
-    strokeBlob(c,cx+s*R*.40,cy+R*.37,R*.145,R*.205,seed+s,.03,'#B7B2A8',1.2);
+    blob(c,cx+s*R*.40,cy+R*.36,R*.16,R*.22,seed+s,.03,'#9A968F');
+    strokeBlob(c,cx+s*R*.40,cy+R*.36,R*.16,R*.22,seed+s,.03,'#C8C3B8',1.5);
     const r=rand(seed+7+s);
-    c.save();ePath(c,cx+s*R*.40,cy+R*.37,R*.14,R*.20,seed+s,.03);c.clip();
-    for(let i=0;i<22;i++){c.strokeStyle=`rgba(198,193,183,${.10+r()*.14})`;c.lineWidth=1;c.beginPath();const yy=cy+R*.37-R*.19+i*R*.017;c.moveTo(cx+s*R*.52,yy);c.lineTo(cx+s*R*.28,yy+3);c.stroke();}
+    c.save();ePath(c,cx+s*R*.40,cy+R*.36,R*.15,R*.21,seed+s,.03);c.clip();
+    for(let i=0;i<22;i++){c.strokeStyle=`rgba(210,204,194,${.12+r()*.16})`;c.lineWidth=1;c.beginPath();const yy=cy+R*.36-R*.20+i*R*.018;c.moveTo(cx+s*R*.54,yy);c.lineTo(cx+s*R*.26,yy+3);c.stroke();}
     c.restore();
   }
-  // iliac bones (bright cortical crescents)
+  // iliac bones (bright cortical crescents, lateral and posterior)
   for(const s of [-1,1]){
-    c.save();c.strokeStyle='#D9D4C9';c.lineWidth=R*.052;c.lineCap='round';
-    c.beginPath();c.moveTo(cx+s*R*.56,cy+R*.05);c.quadraticCurveTo(cx+s*R*.79,cy+R*.16,cx+s*R*.70,cy+R*.35);c.stroke();
-    c.strokeStyle='#A7A39A';c.lineWidth=R*.026;
-    c.beginPath();c.moveTo(cx+s*R*.58,cy+R*.08);c.quadraticCurveTo(cx+s*R*.74,cy+R*.17,cx+s*R*.67,cy+R*.31);c.stroke();
+    c.save();c.strokeStyle='#E4DFD4';c.lineWidth=Math.max(7,R*.075);c.lineCap='round';
+    c.beginPath();c.moveTo(cx+s*R*.52,cy+R*.02);c.quadraticCurveTo(cx+s*R*.86,cy+R*.18,cx+s*R*.68,cy+R*.42);c.stroke();
+    c.strokeStyle='#B7B2A6';c.lineWidth=Math.max(3,R*.032);
+    c.beginPath();c.moveTo(cx+s*R*.54,cy+R*.08);c.quadraticCurveTo(cx+s*R*.78,cy+R*.20,cx+s*R*.66,cy+R*.36);c.stroke();
     c.restore();
   }
   // vertebral body, canal and process
@@ -132,48 +134,56 @@ function drawPosterior(c,g,seed=31){
   blob(c,cx,cy+R*.78,R*.050,R*.040,seed+5,.03,'#B9B4AA');
 }
 
-function loopStyle(type){
-  if(type==='gas')return {lumen:'#23252A',rim:'#C9C4B7',fold:null};
-  if(type==='mixed')return {lumen:'#6E6B66',rim:'#BCB7AC',fold:'#9C978E'};
-  return {lumen:'#76726C',rim:'#BEB9AE',fold:'#9F9A91'};
-}
-function drawLoop(c,cx,cy,rx,ry,seed,type){
-  blob(c,cx,cy,rx,ry,seed,.035,'#A9A49D');
-  strokeBlob(c,cx,cy,rx,ry,seed,.035,'#C6C1B6',1.3);
-  const st=loopStyle(type);
-  blob(c,cx,cy,rx*.86,ry*.84,seed+1,.045,st.lumen);
-  // mucosal rim
-  strokeBlob(c,cx,cy,rx*.86,ry*.84,seed+1,.045,st.rim,1.5);
+function drawLoop(c,cx,cy,rx,ry,rot,seed,type){
+  c.save();c.translate(cx,cy);c.rotate(rot);
+  blob(c,0,0,rx,ry,seed,.045,'#A7A299');
+  strokeBlob(c,0,0,rx,ry,seed,.045,'#D0CBC0',1.4);
+  const lumen=type==='gas'?'#1A1C20':'#8C8881';
+  blob(c,0,0,rx*.82,ry*.80,seed+1,.055,lumen);
+  strokeBlob(c,0,0,rx*.82,ry*.80,seed+1,.055,type==='gas'?'#DDD7C8':'#C8C2B4',1.5);
   if(type!=='gas'){
     const r=rand(seed+4);
-    c.save();ePath(c,cx,cy,rx*.86,ry*.84,seed+1,.045);c.clip();
-    for(let i=0;i<5;i++){
-      c.strokeStyle=`rgba(169,163,153,${.22+r()*.22})`;c.lineWidth=1.1+r();
-      const a=-.9+i*.42;c.beginPath();c.moveTo(cx-rx*.7,cy+Math.sin(a)*ry*.55);c.quadraticCurveTo(cx,cy+Math.sin(a)*ry*.9,cx+rx*.7,cy+Math.sin(a)*ry*.55);c.stroke();
+    c.save();ePath(c,0,0,rx*.82,ry*.80,seed+1,.055);c.clip();
+    const folds=rx/ry>2.2?2:4;
+    for(let i=0;i<folds;i++){
+      c.strokeStyle=`rgba(186,180,168,${.28+r()*.28})`;c.lineWidth=1.15+r()*1.1;
+      const a=-.7+i*(1.1/folds);
+      c.beginPath();c.moveTo(-rx*.65,Math.sin(a)*ry*.45);c.quadraticCurveTo(0,Math.sin(a)*ry*.9,rx*.62,Math.sin(a)*ry*.35);c.stroke();
     }
     c.restore();
   }
   if(type==='mixed'){
-    const a=-1.2;blob(c,cx+Math.cos(a)*rx*.30,cy+Math.sin(a)*ry*.30,rx*.46,ry*.34,seed+6,.05,'#26282C');
-    strokeBlob(c,cx+Math.cos(a)*rx*.30,cy+Math.sin(a)*ry*.30,rx*.46,ry*.34,seed+6,.05,'#C9C4B7',1.2);
+    // Supine air-fluid level: gas is anterior (up on the axial image), interface stays horizontal.
+    c.save();
+    ePath(c,0,0,rx*.82,ry*.80,seed+1,.055);c.clip();
+    c.setTransform(1,0,0,1,0,0);
+    const rad=Math.max(rx,ry)+4;
+    const level=cy-ry*.10;
+    c.fillStyle='#16181C';c.fillRect(cx-rad,cy-rad,rad*2,level-(cy-rad));
+    c.strokeStyle='rgba(236,230,216,.8)';c.lineWidth=1.35;
+    c.beginPath();c.moveTo(cx-rad,level);c.lineTo(cx+rad,level);c.stroke();
+    c.restore();
   }
+  c.restore();
 }
 
 function drawBowel(c,g,seed=51){
   const {cx,cy,R}=g;
+  // Ileocecal level: one large cecum, then loops that differ in size, elongation and contents.
+  // Kept anterior to the psoas/vertebra and clear of the appendix anchor (-0.50R, +0.12R).
   const loops=[
-    [-.55,-.30,.175,.135,'fluid',1],
-    [-.18,-.38,.155,.118,'gas',2],
-    [.17,-.32,.192,.142,'fluid',3],
-    [.50,-.19,.150,.180,'gas',4],
-    [-.23,.06,.170,.132,'mixed',5],
-    [.16,.03,.162,.128,'fluid',6],
-    [.48,.13,.138,.155,'fluid',7],
-    [-.15,.38,.140,.112,'fluid',8],
-    [.20,.36,.150,.115,'gas',9]
+    [-.28,-.36,.25,.16,-.22,'mixed',1],
+    [.08,-.42,.17,.12,.40,'gas',2],
+    [-.50,-.44,.13,.048,.62,'fluid',3],
+    [.24,-.18,.115,.085,-.18,'fluid',4],
+    [.42,-.32,.095,.034,1.1,'fluid',5],
+    [-.06,-.16,.07,.055,.45,'gas',6],
+    [.38,-.06,.10,.08,.25,'mixed',7],
+    [.06,.00,.052,.04,-.4,'fluid',8],
+    [-.14,.00,.09,.036,.28,'fluid',9]
   ];
-  for(const [ux,uy,vx,vy,t,s] of loops){
-    drawLoop(c,cx+ux*R,cy+uy*R,vx*R,vy*R,seed+s*7,t);
+  for(const [ux,uy,vx,vy,rot,t,s] of loops){
+    drawLoop(c,cx+ux*R,cy+uy*R,vx*R,vy*R,rot,seed+s*7,t);
   }
   // a few small vessels in the mesentery
   const r=rand(seed+99);
@@ -191,10 +201,12 @@ export function appendixRadii(g,stage){
 }
 function drawAppendixAxial(c,g,stage){
   const {x,y}=g.appendix,{outer,wall}=appendixRadii(g,stage);
-  // fat halo
-  const gr=c.createRadialGradient(x,y,outer*.8,x,y,outer*2.3);
-  gr.addColorStop(0,'rgba(190,185,173,.28)');gr.addColorStop(1,'rgba(190,185,173,0)');
-  c.fillStyle=gr;c.beginPath();c.arc(x,y,outer*2.3,0,TAU);c.fill();
+  // fat halo (solid lobes, avoids gradient dithering)
+  c.save();c.globalAlpha=.18;c.fillStyle='#BEB9AD';
+  for(const [aa,dd,rr] of [[-.6,1.25,1.15],[.9,1.20,1.0],[2.2,1.35,.9]]){
+    c.beginPath();c.ellipse(x+Math.cos(aa)*outer*dd,y+Math.sin(aa)*outer*dd,outer*rr,outer*rr*.75,aa,0,TAU);c.fill();
+  }
+  c.restore();
   blob(c,x,y,outer,outer*.94,401,.05,'#B9B4AA');
   ring(c,x,y,outer-wall,outer*.96,'#9A968E',402,.04);
   ring(c,x,y,outer*.46,outer-wall,'#716E68',403,.05);
@@ -214,10 +226,15 @@ function drawLensBase(c,g,stage){
   c.beginPath();c.arc(x,y,r,0,TAU);c.fillStyle='#6C6963';c.fill();
   c.save();c.beginPath();c.arc(x,y,r,0,TAU);c.clip();
   // periappendiceal fat lobules and septa
-  // smooth fat gradient; the wispy strands carry the texture
-  const gr=c.createRadialGradient(x-r*.32,y-r*.28,12,x,y,r);
-  gr.addColorStop(0,'#78746D');gr.addColorStop(.62,'#6C6963');gr.addColorStop(1,'#5E5B56');
-  c.fillStyle=gr;c.beginPath();c.arc(x,y,r,0,TAU);c.fill();
+  // flat fat base with a few large solid lobes (no gradient dithering)
+  c.fillStyle='#6C6963';c.beginPath();c.arc(x,y,r,0,TAU);c.fill();
+  const rb=rand(706);
+  for(let i=0;i<16;i++){
+    const a=rb()*TAU,d=Math.sqrt(rb())*(r-22);
+    c.globalAlpha=.03+rb()*.04;c.fillStyle=rb()>.5?'#76726B':'#605D58';
+    c.beginPath();c.ellipse(x+Math.cos(a)*d,y+Math.sin(a)*d,18+rb()*38,12+rb()*26,rb()*TAU,0,TAU);c.fill();
+  }
+  c.globalAlpha=1;
   const rr=rand(703);
   for(let i=0;i<26;i++){
     const a=rr()*TAU,d=ar*(1.12+rr()*(r/ar-1.1));
@@ -546,6 +563,27 @@ export function drawTissueChanges(c,g,{stage=1,aExud=0,aDefect=0,agitate=0}={}){
 export function tissueFocus(x,y,w,h){
   const g=tissueGeom(x,y,w,h);const a=g.a0+(g.a1-g.a0)*.58,rad=(g.R1+g.R2)/2;
   return {x:g.CX+Math.cos(a)*rad,y:g.CY+Math.sin(a)*rad,a,rad};
+}
+
+// Short dashed arc on one wall band. No box. Returns the midpoint for a leader.
+export function drawTissueMark(c,x,y,w,h,kind,alpha){
+  if(alpha<=.001)return null;
+  const g=tissueGeom(x,y,w,h);
+  const span=g.a1-g.a0;
+  let a0=g.a0+span*.50,a1=g.a0+span*.68,rad=(g.R1+g.R2)/2;
+  if(kind==='wall')rad=(g.R2+g.R3)/2;
+  else if(kind==='fat'){rad=g.R5+g.h*.07;a0=g.a0+span*.52;a1=g.a0+span*.66;}
+  else if(kind==='serosa')rad=(g.R4+g.R5)/2+2;
+  else if(kind==='necrosis'){const mid=g.a0+span*.62;a0=mid-span*.07;a1=mid+span*.07;rad=(g.R1+g.R3)/2;}
+  const am=(a0+a1)/2;
+  c.save();
+  c.beginPath();c.roundRect(g.x,g.y,g.w,g.h,22);c.clip();
+  c.globalAlpha=clamp(alpha)*.9;c.strokeStyle='#A88DBD';c.lineWidth=1.6;c.setLineDash([6,5]);c.lineCap='round';
+  c.beginPath();
+  for(let i=0;i<=24;i++){const a=a0+(a1-a0)*i/24,xx=g.CX+Math.cos(a)*rad,yy=g.CY+Math.sin(a)*rad;i?c.lineTo(xx,yy):c.moveTo(xx,yy);}
+  c.stroke();
+  c.restore();
+  return {x:g.CX+Math.cos(am)*rad,y:g.CY+Math.sin(am)*rad};
 }
 
 // ── labels ───────────────────────────────────────────────────────────────────

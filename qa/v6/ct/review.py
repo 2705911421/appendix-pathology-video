@@ -15,16 +15,18 @@ for i,(f,pick) in enumerate(zip(files,picks)):
     im=Image.open(f).convert('RGB');im.save(p/(pick['name']+'.png'))
     n=int(pick['name'][1:3])
     if scene=='S04':
-        if n<=15:
-            crop2(im,(880,220,1480,760),pick['name']+'_200.png')
+        if n==14:
+            crop2(im,(760,260,1340,940),pick['name']+'_200.png')
+        elif n==15:
+            crop2(im,(760,240,1760,940),pick['name']+'_200.png')
         elif n<=18:
-            crop2(im,(1250,400,1850,940),pick['name']+'_200.png')
+            crop2(im,(1280,430,1780,920),pick['name']+'_200.png')
         else:
-            crop2(im,(980,240,1580,780),pick['name']+'_200.png')
-        crop2(im,(60,150,560,500),pick['name']+'_sidebar_200.png')
+            crop2(im,(560,220,1880,960),pick['name']+'_200.png')
+        crop2(im,(40,140,540,760),pick['name']+'_sidebar_200.png')
     else:
         crop2(im,(955,530,1330,880),pick['name']+'_200.png')
-        crop2(im,(1340,300,1840,650),pick['name']+'_tissue_200.png')
+        crop2(im,(1326,120,1850,760),pick['name']+'_tissue_200.png')
     sheet.paste(im.resize((480,270),Image.LANCZOS),((i%2)*480,(i//2)*310))
     d.text(((i%2)*480+12,(i//2)*310+276),pick['name'],fill='#2A2A35')
 sheet.save(p/'review_sheet.png')
