@@ -1,14 +1,20 @@
-/** QA STATUS: FAILED medical acceptance. Preserved drawHE still renders lumen kind=pus and ulcer=.16 surface gap. See qa/v6/s19_b09/自检.md before reuse.
- * b09 mother-map copy. Exports: prepareChronic(opts={neutrophils:false,chronic:true}) -> canvas (3200x2100, draw at -1600,-1050); focus={fib,lymph,plasma} in map coordinates; cameraFor(z,center=focus.fib) -> [x,y,z]. point(x,y), populations for QA. No cell drawing functions modified. */
+/** b09 mother-map copy for S19 chronic microscopy.
+ * Exports used by S18 and S19: prepareChronic(opts={neutrophils:false,chronic:true}) -> canvas (3200x2100, draw at -1600,-1050); focus={fib,lymph,plasma} in map coordinates; cameraFor(z,center=focus.fib) -> [x,y,z]; point(x,y); populations.
+ * opts.chronic===false keeps the S08 call (ulcer:.16, lumen pus painted by drawHE). opts.chronic===true passes ulcer:0 and covers every kind=pus footprint with the same lumen wash drawHE paints where no cell sits. cell/detailedNeutrophil/drawHE are not modified. */
 import {bake,drawWash} from '../lib/wash.js';
 import {drawHE,CELLS} from '../lib/he.js';
-import {detailedNeutrophil} from '../lib/he_detail.js';
-import {rng} from '../lib/motion.js';
+import {detailedNeutrophil,tissueTexture} from '../lib/he_detail.js';
+import {rng,noise2} from '../lib/motion.js';
 import {drawHE as drawMucosa} from '../lib_ext/he_mucosa.js';
 import {cryptNucleus,columnar,erythrocyte,cell,follicle} from '../lib_ext/cells_ext.js';
 const TAU=Math.PI*2;
+function fieldCall(c,mode,ulcer){(mode==='original'?drawHE:drawMucosa)(c,{ulcer,neut:0,fibrin:0,t:0,detail:1,crypts:mode!=='low',gap:mode==='ulcer'?[-25,45]:null});}
+function epithelium(ctx){ctx.strokeStyle='#6B4C9A';ctx.lineWidth=7;ctx.lineCap='round';const stroke=(x0,x1)=>{ctx.beginPath();for(let x=x0;x<=x1;x+=10){const y=-290+5*Math.sin(x*.05)+4*(noise2(x/40,2)-.5);x===x0?ctx.moveTo(x,y):ctx.lineTo(x,y);}ctx.stroke();};stroke(-430,10);stroke(10,430);}
+function paintUnderlayer(ctx){ctx.save();ctx.fillStyle='#F6EEF0';ctx.fillRect(-430,-430,860,900);drawWash(ctx,'he.bands',0,0,1024);tissueTexture(ctx,1);epithelium(ctx);ctx.restore();}
+function footprint(p){const sc=p.sz||1;return {x:p.x+Math.sin(p.rot*5)*1.3,y:p.y+Math.cos(p.rot*3)*.9,rx:10.2*sc+3.4,ry:9.6*sc+3.4,rot:p.rot};}
+function coverLumenPus(c){const clean=document.createElement('canvas');clean.width=840;clean.height=620;const k=clean.getContext('2d');k.translate(420,320);paintUnderlayer(k);for(const p of CELLS){if(p.kind!=='pus')continue;const f=footprint(p);c.save();c.beginPath();c.ellipse(f.x,f.y,f.rx,f.ry,f.rot,0,TAU);c.clip();c.drawImage(clean,-420,-320);c.restore();}}
 export function point(x,y){const a=x/620-Math.PI/2,r=620+y+12*Math.sin(a*3)+9*Math.sin(a*5),u=1.6*Math.cos(a)*r,v=Math.sin(a)*r;return [u*Math.cos(.14)-v*Math.sin(.14),u*Math.sin(.14)+v*Math.cos(.14)];}
-function buildSource(mode,opts={neutrophils:true,chronic:false}){const source=document.createElement('canvas');source.width=840;source.height=620;const c=source.getContext('2d'),R=rng(40802);c.translate(420,320);(mode==='original'?drawHE:drawMucosa)(c,{ulcer:.16,neut:0,fibrin:0,t:0,detail:1,crypts:mode!=='low',gap:mode==='ulcer'?[-25,45]:null});
+function buildSource(mode,opts={neutrophils:true,chronic:false}){const source=document.createElement('canvas');source.width=840;source.height=620;const c=source.getContext('2d'),R=rng(40802);c.translate(420,320);if(opts.chronic){fieldCall(c,mode,0);coverLumenPus(c);}else fieldCall(c,mode,.16);
 const copy=document.createElement('canvas');copy.width=840;copy.height=620;copy.getContext('2d').drawImage(source,0,0);
 c.drawImage(copy,0,155,840,18,-420,140,840,90);c.drawImage(copy,0,330,840,5,-420,-153,840,5);
 for(let i=0;i<150;i++){const x=-410+R()*820,y=-280+R()*120,sz=.7+R()*.2,rot=R()*TAU;if(mode==='ulcer'&&x>-31&&x<51&&y<-273)continue;cell(c,x,y,i%7?'lymph':'plasma',sz,rot,i);}
