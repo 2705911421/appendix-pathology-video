@@ -1,4 +1,4 @@
-import {prepareChronic,focus,plasmaLeader} from '../lib_ext/s19_fix11_chronic.js';
+import {prepareChronic,focus,plasmaLeader} from '../lib_ext/s19_fix12_chronic.js';
 let map;const clamp=x=>Math.max(0,Math.min(1,x)),ease=x=>{x=clamp(x);return x*x*(3-2*x);};
 export default {prepare(){map=prepareChronic();},draw(c,t,T){
  c.setTransform(1,0,0,1,0,0);c.fillStyle='#111114';c.fillRect(0,0,1920,1080);
