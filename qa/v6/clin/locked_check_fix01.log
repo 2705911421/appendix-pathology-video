@@ -1,0 +1,15 @@
+clin_fix01 锁定文件校验（开工 / 收工）
+==================================================================
+开工：qa/v6/clin/locked_start.sha256（2026-11-12 22:35）
+收工：qa/v6/clin/locked_end_fix01.sha256（2026-11-13）
+
+sha256 完全一致，diff 无输出：
+a2e658fc...  engine/lib/he.js
+899d24ba...  engine/lib/he_detail.js
+889bacbc...  engine/lib/wash.js
+a1168fc7...  engine/lib/ann.js
+6c6079ad...  engine/lib/scope.js
+25ada270...  engine/lib/camera.js
+4f83add2...  parity_r4/chapters/04.js
+
+结论：锁定文件未改动。

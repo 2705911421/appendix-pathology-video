@@ -1,0 +1,63 @@
+{
+  "source": "/workspace/病理科普视频/配音/全稿_v3/timeline.json",
+  "origin": 256.22733333333304,
+  "duration": 12.472333333333324,
+  "rows": [
+    {
+      "n": 60,
+      "seg": "07",
+      "chapter": "治疗落点",
+      "start": 256.22733333333304,
+      "end": 259.7591666666664,
+      "dur": 3.531833333333333,
+      "text": "读懂分型，是为了把握治疗的紧迫性。",
+      "en": "Classification helps determine treatment | urgency."
+    },
+    {
+      "n": 61,
+      "seg": "07",
+      "chapter": "治疗落点",
+      "start": 260.20916666666636,
+      "end": 264.343583333333,
+      "dur": 4.134416666666667,
+      "text": "最终分型，仍靠切除后的病理切片确认。",
+      "en": "The final type is confirmed by pathology | after removal."
+    },
+    {
+      "n": 62,
+      "seg": "07",
+      "chapter": "治疗落点",
+      "start": 264.793583333333,
+      "end": 268.69966666666636,
+      "dur": 3.906083333333333,
+      "text": "CT也帮助发现坏疽、穿孔、脓肿等并发症。[3][4]",
+      "en": "CT also helps detect gangrene, | perforation, and abscesses."
+    }
+  ],
+  "picks": [
+    {
+      "name": "s60_early",
+      "t": 0.7770033333333345
+    },
+    {
+      "name": "s60_late",
+      "t": 3.037376666666671
+    },
+    {
+      "name": "s61_early",
+      "t": 4.891404999999991
+    },
+    {
+      "name": "s61_late",
+      "t": 7.537431666666649
+    },
+    {
+      "name": "s62_early",
+      "t": 9.425588333333307
+    },
+    {
+      "name": "s62_late",
+      "t": 11.925481666666654
+    }
+  ]
+}

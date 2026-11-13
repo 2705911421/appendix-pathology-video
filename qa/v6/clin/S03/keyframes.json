@@ -1,0 +1,63 @@
+{
+  "source": "/workspace/病理科普视频/配音/全稿_v3/timeline.json",
+  "origin": 43.06395833333333,
+  "duration": 10.38687500000001,
+  "rows": [
+    {
+      "n": 11,
+      "seg": "02",
+      "chapter": "就诊",
+      "start": 43.06395833333333,
+      "end": 45.93691666666667,
+      "dur": 2.8729583333333335,
+      "text": "有些人的信号，却并不典型。",
+      "en": "Some people have atypical symptoms."
+    },
+    {
+      "n": 12,
+      "seg": "02",
+      "chapter": "就诊",
+      "start": 46.38691666666667,
+      "end": 49.68708333333334,
+      "dur": 3.3001666666666667,
+      "text": "医生先循着症状和体格检查寻找线索，",
+      "en": "Doctors begin with symptoms and physical | examination,"
+    },
+    {
+      "n": 13,
+      "seg": "02",
+      "chapter": "就诊",
+      "start": 50.137083333333344,
+      "end": 53.45083333333334,
+      "dur": 3.31375,
+      "text": "再参考化验，判断是否阑尾炎。",
+      "en": "then use laboratory results to help assess | appendicitis."
+    }
+  ],
+  "picks": [
+    {
+      "name": "s11_early",
+      "t": 0.632050833333334
+    },
+    {
+      "name": "s11_late",
+      "t": 2.4707441666666696
+    },
+    {
+      "name": "s12_early",
+      "t": 4.048995000000007
+    },
+    {
+      "name": "s12_late",
+      "t": 6.161101666666675
+    },
+    {
+      "name": "s13_early",
+      "t": 7.802150000000012
+    },
+    {
+      "name": "s13_late",
+      "t": 9.92295000000001
+    }
+  ]
+}
