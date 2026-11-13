@@ -57,10 +57,10 @@ export default {
     c.fillStyle = PAPER; c.fillRect(0, 0, 1920, 1080);
 
     // ── right: 01 location → normal specimen → 02 three appearances → 03 wall push ──
-    const abA = smooth(t / .55) * (1 - smooth((t - F(1, .18)) / (F(1, .42) - F(1, .18))));
+    const abA = smooth(t / .55) * (1 - smooth((t - F(1, .30)) / (F(1, .52) - F(1, .30))));
     const apA = smooth((t - F(1, .40)) / (F(1, .60) - F(1, .40)));
     const g = smooth((t - F(1, .40)) / (F(1, .74) - F(1, .40)));
-    const lx = 1119, ly = 588;
+    const lx = 1069, ly = 567;
     const pose1 = {x: 1215, y: 420, sc: mix(.90, 1.06, g), rot: -.78};
     const shrink = smooth((t - T.at(2)) / (F(2, .38) - T.at(2)));
     const normalA = apA * (1 - smooth((t - T.at(2)) / (F(2, .30) - T.at(2))));
@@ -74,17 +74,18 @@ export default {
     // 01 — the abdomen, with the appendix site marked on the lower right
     if (abA > .01) {
       c.save(); c.globalAlpha = abA;
-      abdomen(c, 1230, 415, 1.7, 1, 'atypical');
+      c.save(); c.translate(1230, 400); c.scale(1.45, 1);
+      abdomen(c, 0, 0, 1.7, 1, 'atypical'); c.restore();
       // Costal margin arcs: enough anatomy for the lower chest to read as a torso.
       c.strokeStyle = VIO; c.globalAlpha = abA * .34; c.lineWidth = 1.4;
       for (const s of [-1, 1]) {
         c.beginPath(); c.moveTo(1230, 415 - 150 * 1.7);
-        c.bezierCurveTo(1230 + s * 40 * 1.7, 415 - 120 * 1.7, 1230 + s * 95 * 1.7, 415 - 100 * 1.7, 1230 + s * 104 * 1.7, 415 - 62 * 1.7);
+        c.bezierCurveTo(1230 + s * 40 * 2.465, 415 - 120 * 1.7, 1230 + s * 95 * 2.465, 415 - 100 * 1.7, 1230 + s * 104 * 2.465, 415 - 62 * 1.7);
         c.stroke();
       }
       c.globalAlpha = abA;
       c.strokeStyle = VIO; c.lineWidth = 2;
-      c.beginPath(); c.arc(lx, ly, 34, 0, 7); c.stroke();
+      c.beginPath(); c.arc(lx, ly, 42, 0, 7); c.stroke();
       c.beginPath(); c.moveTo(lx - 5, ly - 12); c.bezierCurveTo(lx + 14, ly - 9, lx + 11, ly + 11, lx - 5, ly + 12); c.stroke();
       c.restore();
     }
@@ -102,7 +103,7 @@ export default {
     });
     // 03 — the yellow wall alone, large: the camera has moved in
     if (closeP > .01) {
-      blit(c, SPR.yellowBig, 1240, 408, 1.16, closeP * dim);
+      blit(c, SPR.yellowBig, 1240, 385, 1.02, closeP * dim);
     }
 
     // tags (screen space, anchored at each cut face)
@@ -120,7 +121,7 @@ export default {
     }
 
     // 01 — "阑尾" on the body, then "盲管" on the specimen
-    if (abA > .02 && t < F(1, .52)) tag(c, '阑尾', 1232, 628, lx + 34, ly + 4, {alpha: Math.min(1, abA * 1.4) * (1 - smooth((t - F(1, .30)) / .4))});
+    if (abA > .02 && t < F(1, .52)) tag(c, '阑尾', 1195, 614, lx + 42, ly + 4, {alpha: abA, size: 36, side: -1});
     if (normalA > .02 && g > .55) {
       const f = frameAt(.965);
       const q = toScreen({...pose1, sc: scN}, [f.p[0], f.p[1]]);
