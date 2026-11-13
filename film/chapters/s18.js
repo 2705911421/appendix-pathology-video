@@ -1,24 +1,21 @@
-// S18 (sentences 66–68): repeated episodes may turn chronic.
-// Left column: 反复发作 → 可转慢性, then 急性：变质、渗出 / 慢性：增生.
-// Right: a non-counting recurrence loop around a small gross appendix, an iris into
-// the acute H&E wall, then one acute / chronic comparison pair.
-// Acute drawing vocabulary comes from the approved S10/S11 segment; chronic tissue
-// is the S19 candidate plate (read-only copy).
-import {bake} from '../lib/wash.js';
+// S18 (sentences 66–68). Sentence 66 keeps the recurrence loop.
+// Microscopy is b09 only: acute window = s08 ulcer map; chronic window = S19 b09_chronic.
+// Sentence 68 ends on the S19 overview camera so the circular field matches s69_overview.
 import {arrow} from '../lib/ann.js';
-import {prepareAcute,ACUTE_RECT} from '../lib_ext/gross_swap_chron_acute.js';
-import {prepareChronic,focus} from '../lib_ext/gross_swap_chron_he_chronic.js';
-import {prepareAppendix,drawRecurrenceAppendix} from '../lib_ext/gross_swap_recurrence.js';
+import {prepareAcute,point} from '../lib_ext/b09_acute_window.js';
+import {prepareChronic,focus} from '../lib_ext/b09_chronic.js';
+import {prepareAppendix,drawRecurrenceAppendix} from '../lib_ext/chron_appendix.js';
 const TAU=Math.PI*2;
 const clamp=x=>Math.max(0,Math.min(1,x));
 const ease=x=>{x=clamp(x);return x*x*(3-2*x);};
-// Loop and the acute window it opens into sit center-right. Diameter is 55% of the frame height.
-const LX=1340,LY=470,LOOP_R=1080*.55/2,SCOPE_R=425;
-// Sentence 68 pair: each window is 62% of the frame height, to the right of the left column.
-const CMP={ax:845,ay:493,ar:335,bx:1551,by:493,br:335};
+// High power is s08 z≈1 (neutrophil body ~20 px). Medium power is half of that.
+export const Z_HI=1,Z_MID=.5,Z_END=.6;
+export const SCOPE={x:1110,y:475,r:425},WIN_A={x:950,y:475,r:300},WIN_C={x:1580,y:475,r:300};
+const DEFECT=[10,-285],EXUDATE=[12,-328],INFIL=[-200,-226];
+const LX=1340,LY=470,LOOP_R=1080*.55/2;
 let acute,chronic,off,offc;
-// One lap of the warm pulse is one blush. Residue rises after every return and is not cleared.
-// The offset (a fraction of sentence 66) puts the review stills on a flush and on the settled colour.
+export const audit={boxes:[],targets:{},camera:null,chronicCamera:null,windows:null,power:''};
+
 function lapState(t,T){
  const t0=T.at(66),dur=Math.max(1e-3,T.end(66)-t0),period=dur/3,offset=dur*.0877;
  const u=(t-t0-offset)/period;
@@ -28,7 +25,6 @@ function lapState(t,T){
  const prev=done*.16,next=Math.min(.64,prev+.16);
  return {phase,flash:fade,floor:prev+(next-prev)*(1-fade),ang:-2.85+phase*TAU};
 }
-// ---------------------------------------------------------------- paper: recurrence loop
 function loopPath(c,cx,cy,rr,a0,a1){c.beginPath();for(let i=0;i<=48;i++){const a=a0+(a1-a0)*i/48,f=1+.020*Math.sin(a*5+1.2)+.011*Math.sin(a*9);const x=cx+Math.cos(a)*rr*f,y=cy+Math.sin(a)*rr*f;i?c.lineTo(x,y):c.moveTo(x,y);}}
 function head(c,x,y,ang,size=.42){c.save();c.translate(x,y);c.rotate(ang);c.beginPath();c.moveTo(size*26,0);c.lineTo(-size*10,-size*17);c.quadraticCurveTo(-size*3,0,-size*10,size*17);c.closePath();c.fill();c.restore();}
 function drawLoop(c,t,T){
@@ -37,18 +33,15 @@ function drawLoop(c,t,T){
  c.save();
  const appA=ease((t-t0)/.30);
  if(appA>0){c.save();c.globalAlpha*=appA;drawRecurrenceAppendix(c,LX,LY,.74,-.62,lap);c.restore();}
- // A broad watercolour band follows the ring; no filled disc, no ticking marks.
  c.save();c.filter='blur(7px)';c.strokeStyle='rgba(214,69,58,.16)';c.lineCap='round';c.lineWidth=26;
  for(const [a0,a1] of [[-3.0,-.5],[.15,2.62]]){loopPath(c,LX,LY,rr,a0,a0+(a1-a0)*p1);c.stroke();}
  c.restore();
- // One warm pulse runs around the ring. Each return is the blush above; never a count.
  const pa=lap.ang;
  c.save();c.globalAlpha=.55*p1;c.filter='blur(2.5px)';c.strokeStyle='#C9503F';c.lineWidth=8;c.lineCap='round';
  loopPath(c,LX,LY,rr,pa,pa+.72);c.stroke();
  const hx=LX+Math.cos(pa+.72)*rr,hy=LY+Math.sin(pa+.72)*rr;
  const g0=c.createRadialGradient(hx,hy,1,hx,hy,40);g0.addColorStop(0,'rgba(214,69,58,.42)');g0.addColorStop(1,'rgba(214,69,58,0)');
  c.fillStyle=g0;c.beginPath();c.arc(hx,hy,40,0,TAU);c.fill();c.restore();
- // Two hand-drawn arcs with arrowheads. Ink is at least 5px. No ticks and no numbers.
  c.strokeStyle='#2A2A35';c.fillStyle='#2A2A35';c.lineWidth=5.6;c.lineCap='round';c.lineJoin='round';
  const arcs=[[-3.0,-.5],[.15,2.62]];
  arcs.forEach(([a0,a1],i)=>{
@@ -62,112 +55,125 @@ function drawLoop(c,t,T){
  for(const [a0,a1] of arcs){loopPath(c,LX,LY,rr-8,a0,a1);c.stroke();}
  c.restore();
 }
-// ---------------------------------------------------------------- left column
+function note(c,text,x,y,font,align){
+ c.font=font;const w=c.measureText(text).width,size=+font.match(/(\d+)px/)[1];
+ const left=align==='center'?x-w/2:x;
+ audit.boxes.push({text,x:left,y:y-size,w,h:size+8,baseline:y,font,align:align||'left'});
+}
 function drawLeft(c,t,T,light){
- const ink=light?'#EFE8DC':'#2A2A35',red=light?'#F07A63':'#D6453A',rule=light?'rgba(239,232,220,.30)':'rgba(42,42,53,.22)';
+ const ink=light?'#E8DDE9':'#2A2A35',red=light?'#F07A63':'#D6453A',rule=light?'rgba(232,221,233,.30)':'rgba(42,42,53,.22)';
  const a1=ease((t-T.frac(66,.06))/.18),a2=ease((t-T.frac(66,.30))/.16),a3=ease((t-T.frac(66,.44))/.18);
- const r67=ease((t-T.at(67)-.06)/.24),r68=ease((t-T.frac(68,.08))/.22);
+ const r67=ease((t-T.frac(67,.10))/.20),r68=ease((t-T.frac(68,.08))/.18);
  c.save();c.textAlign='left';c.textBaseline='alphabetic';
- c.globalAlpha=a1;c.fillStyle=ink;c.font='700 40px MixSans';c.fillText('反复发作',75,330);
- c.globalAlpha=a2;
- arrow(c,[95,348],[95,398],{k:a2,col:red,w:2.4,head:13});
- c.globalAlpha=a3;c.fillStyle=ink;c.font='700 40px MixSans';c.fillText('可转慢性',75,442);
+ if(a1>0){c.globalAlpha=a1;c.fillStyle=ink;c.font='700 44px MixSans';c.fillText('反复发作',75,330);if(a1>.8)note(c,'反复发作',75,330,'700 44px MixSans','left');}
+ if(a2>0){c.globalAlpha=a2;arrow(c,[95,356],[95,390],{k:a2,col:red,w:2.4,head:13});}
+ if(a3>0){c.globalAlpha=a3;c.fillStyle=ink;c.font='700 44px MixSans';c.fillText('可转慢性',75,442);if(a3>.8)note(c,'可转慢性',75,442,'700 44px MixSans','left');}
  if(r67>0){
-  c.globalAlpha=r67;c.strokeStyle=rule;c.lineWidth=1.2;c.beginPath();c.moveTo(75,492);c.lineTo(462,492);c.stroke();
-  c.globalAlpha=r67*ease((t-T.frac(67,.10))/.26);c.fillStyle=ink;c.font='700 34px MixSans';c.fillText('急性：变质、渗出',75,566);
+  c.globalAlpha=r67;c.strokeStyle=rule;c.lineWidth=1.2;c.beginPath();c.moveTo(75,500);c.lineTo(430,500);c.stroke();
+  c.fillStyle=ink;c.font='700 44px MixSans';c.fillText('急性：变质、渗出',75,566);if(r67>.8)note(c,'急性：变质、渗出',75,566,'700 44px MixSans','left');
  }
- if(r68>0){c.globalAlpha=r68;c.fillStyle=ink;c.font='700 34px MixSans';c.fillText('慢性：增生',75,648);}
+ if(r68>0){c.globalAlpha=r68;c.fillStyle=ink;c.font='700 44px MixSans';c.fillText('慢性：增生',75,648);if(r68>.8)note(c,'慢性：增生',75,648,'700 44px MixSans','left');}
  c.restore();
 }
-// ---------------------------------------------------------------- dark field helpers
-function field(c,plate,rect,cam,cx,cy,rr,sz,alpha=1){
- const [px,py,pw,ph]=rect;
- c.save();c.globalAlpha=alpha;
- c.beginPath();c.arc(cx,cy,rr,0,TAU);c.clip();
- c.fillStyle='#F6EEF0';c.fillRect(cx-rr,cy-rr,rr*2,rr*2);
- c.translate(cx,cy);c.scale(sz,sz);c.translate(-cam[0],-cam[1]);
- c.drawImage(plate,px,py,pw,ph);
- c.restore();
- c.save();
- c.beginPath();c.arc(cx,cy,rr,0,TAU);
- const g=c.createRadialGradient(cx,cy,rr*.76,cx,cy,rr);
- g.addColorStop(0,'rgba(42,42,53,0)');g.addColorStop(1,'rgba(42,42,53,.22)');
- c.fillStyle=g;c.fill();
- c.strokeStyle='#4C4555';c.lineWidth=1.6;c.stroke();
- c.globalAlpha=alpha*.5;c.strokeStyle='#2E2933';c.lineWidth=1.2;c.beginPath();c.arc(cx,cy,rr+7,0,TAU);c.stroke();
- c.restore();
+export function cameraAt(t,T){
+ const def=point(...DEFECT),inf=point(...INFIL);
+ const mid=[def[0],def[1],Z_MID],hi=[inf[0],inf[1],Z_HI];
+ if(!T.has(67)||t<T.at(67))return mid;
+ if(t<T.at(68)){
+  const a=T.frac(67,.30),b=T.frac(67,.62);
+  if(t<=a)return mid;if(t>=b)return hi;
+  const k=ease((t-a)/(b-a));return mid.map((v,i)=>v+(hi[i]-v)*k);
+ }
+ const back=[def[0],def[1],Z_MID],a=T.at(68),b=T.frac(68,.32);
+ if(t>=b)return back;
+ const k=ease((t-a)/(b-a));return hi.map((v,i)=>v+(back[i]-v)*k);
 }
-// Leader ends in an arrowhead and a dot, both on the anchor. Size is screen pixels.
-function tag(c,text,tx,ty,px,py,a,size=30){
- if(a<=0)return;
- c.save();c.globalAlpha=a;c.font=`500 ${size}px MixSans`;c.textAlign='left';c.textBaseline='alphabetic';
- c.fillStyle='#D8C5E7';c.fillText(text,tx,ty);
- const x0=tx+8,y0=ty+8;
- const x1=tx+Math.max(28,Math.min(84,(px-tx)*.2));
- const y1=y0+Math.sign(py-y0||1)*14;
- const stroke=(w,col)=>{c.strokeStyle=col;c.lineWidth=w;c.lineJoin='round';c.lineCap='round';c.beginPath();c.moveTo(x0,y0);c.lineTo(x1,y1);c.lineTo(px,py);c.stroke();};
- stroke(2.3,'rgba(17,17,20,.42)');
- stroke(1.6,'rgba(216,197,231,.98)');
- const ang=Math.atan2(py-y1,px-x1),ah=12;
- c.fillStyle='#111114';c.beginPath();
- c.moveTo(px,py);
- c.lineTo(px-Math.cos(ang-.5)*ah-Math.cos(ang)*1.5,py-Math.sin(ang-.5)*ah-Math.sin(ang)*1.5);
- c.lineTo(px-Math.cos(ang+.5)*ah-Math.cos(ang)*1.5,py-Math.sin(ang+.5)*ah-Math.sin(ang)*1.5);
- c.closePath();c.fill();
- c.fillStyle='#E7D8F2';c.beginPath();
- c.moveTo(px,py);
- c.lineTo(px-Math.cos(ang-.42)*(ah-3),py-Math.sin(ang-.42)*(ah-3));
- c.lineTo(px-Math.cos(ang+.42)*(ah-3),py-Math.sin(ang+.42)*(ah-3));
- c.closePath();c.fill();
- c.fillStyle='#111114';c.beginPath();c.arc(px,py,5,0,TAU);c.fill();
- c.fillStyle='#E7D8F2';c.beginPath();c.arc(px,py,3.4,0,TAU);c.fill();
- c.restore();
+// S19 s69_overview (frac .10, still on the opening hold) is center (0,0), z=0.60.
+// The compare pair uses z_mid; the iris settles on that S19 camera 0.05s before the sentence ends
+// so the encoded last frame is already the handoff, then holds through T.end(68).
+export function chronicCameraAt(t,T){
+ const settle=T.end(68)-.05,a=T.frac(68,.40);
+ if(t<=a)return [0,0,Z_MID];
+ const k=ease((t-a)/(settle-a));
+ return [0,0,Z_MID+(Z_END-Z_MID)*k];
+}
+export function pxPerUm(z){return z/Z_HI*(850/475);}
+function powerOf(z){const p=pxPerUm(z);return p>1.23?'高倍':p>=.6?'中倍':'低倍';}
+function windowsAt(t,T){
+ if(t<T.at(68))return {acute:{...SCOPE,a:1},chronic:null,split:0,iris:0};
+ const split=ease((t-T.at(68))/(T.frac(68,.32)-T.at(68)));
+ const settle=T.end(68)-.05,iris=t<=T.frac(68,.40)?0:ease((t-T.frac(68,.40))/(settle-T.frac(68,.40)));
+ const acute={x:SCOPE.x+(WIN_A.x-SCOPE.x)*split,y:475,r:SCOPE.r+(WIN_A.r-SCOPE.r)*split,a:1-iris};
+ const chronic={x:WIN_C.x+(SCOPE.x-WIN_C.x)*iris,y:475,r:(iris>0?WIN_C.r+(SCOPE.r-WIN_C.r)*iris:WIN_C.r*split),a:iris>0?1:split};
+ return {acute,chronic,split,iris};
+}
+function scope(c,plate,cam,win){
+ if(!win||win.a<=.001||win.r<2)return;
+ c.save();c.globalAlpha*=win.a;
+ c.beginPath();c.arc(win.x,win.y,win.r,0,TAU);c.clip();
+ c.fillStyle='#F6EEF0';c.fillRect(win.x-win.r-2,win.y-win.r-2,win.r*2+4,win.r*2+4);
+ c.translate(win.x,win.y);c.scale(cam[2],cam[2]);c.translate(-cam[0],-cam[1]);
+ c.drawImage(plate,-1600,-1050);c.restore();
+ c.save();c.globalAlpha*=win.a;c.beginPath();c.arc(win.x,win.y,win.r+6,0,TAU);
+ c.strokeStyle='#4C4555';c.lineWidth=1.6;c.stroke();c.restore();
+}
+function leader(c,text,tx,ty,px,py,a){
+ if(a<=.01)return;
+ c.save();c.globalAlpha=a;c.font='500 36px MixSans';c.textAlign='left';c.textBaseline='alphabetic';c.fillStyle='#D8C5E7';
+ c.fillText(text,tx,ty);
+ c.strokeStyle='#D8C5E7';c.lineWidth=1.5;c.lineCap='round';c.beginPath();c.moveTo(tx+4,ty+8);c.lineTo(px,py);c.stroke();
+ c.beginPath();c.arc(px,py,3.2,0,TAU);c.fill();c.restore();
+ if(a>.8)note(c,text,tx,ty,'500 36px MixSans','left');
 }
 function caption(c,text,x,y,a){
- if(a<=0)return;c.save();c.globalAlpha=a;c.font='700 42px MixSans';c.fillStyle='#E4D4F0';c.textAlign='center';c.textBaseline='alphabetic';c.fillText(text,x,y);c.restore();
+ if(a<=.01)return;
+ c.save();c.globalAlpha=a;c.font='500 36px MixSans';c.fillStyle='#E8DDE9';c.textAlign='center';c.textBaseline='alphabetic';c.fillText(text,x,y);c.restore();
+ if(a>.8)note(c,text,x,y,'500 36px MixSans','center');
 }
-function acuteCam(t,T){
- const k=[[T.at(67),[10,-80,1.18]],[T.frac(67,.62),[0,-90,1.34]],[T.end(67),[0,-94,1.38]]];
- let v=k[0][1];for(let i=1;i<k.length;i++){if(t>=k[i][0]){v=k[i][1];continue;}const a=k[i-1],b=k[i],f=ease((t-a[0])/(b[0]-a[0]));v=a[1].map((q,j)=>q+(b[1][j]-q)*f);break;}return v;
-}
+function screenPoint(src,cam,win){const p=point(src[0],src[1]);return [win.x+(p[0]-cam[0])*cam[2],win.y+(p[1]-cam[1])*cam[2]];}
 function drawDark(c,t,T){
  c.setTransform(1,0,0,1,0,0);c.fillStyle='#111114';c.fillRect(0,0,1920,1080);
- const cam=acuteCam(t,T),sz=cam[2];
- const S=(fx,fy)=>[LX+(fx-cam[0])*sz,LY+(fy-cam[1])*sz];
- if(t<T.at(68)){
-  field(c,acute,ACUTE_RECT,cam,LX,LY,SCOPE_R,sz);
-  const inA=ease((t-T.frac(67,.30))/.20),outA=ease((T.at(68)-t)/.22);
-  const a=Math.min(inA,outA);
-  // 变质: upper edge of the mucosal necrosis, in the pale ground just under the broken epithelium.
-  let p=S(0,-308);tag(c,'变质',620,168,p[0],p[1],a,30);
-  // 渗出: submucosa, inflammatory cells in the pale edematous ground.
-  p=S(30,-90);tag(c,'渗出',620,690,p[0],p[1],a*ease((t-T.frac(67,.55))/.2),30);
- } else {
-  const q=ease((t-T.at(68))/.46),qc=ease((q-.55)/.45);
-  const ax=LX+(CMP.ax-LX)*q,ay=LY+(CMP.ay-LY)*q,ar=SCOPE_R+(CMP.ar-SCOPE_R)*q;
-  field(c,acute,ACUTE_RECT,cam,ax,ay,ar,sz*ar/SCOPE_R);
-  if(qc>0)field(c,chronic,[focus.fib[0]-300,focus.fib[1]-300,600,600],[focus.fib[0]+6,focus.fib[1]+4],CMP.bx,CMP.by,CMP.br*qc,1.32,qc);
-  caption(c,'急性',ax,136,qc);caption(c,'慢性',CMP.bx,136,qc);
-  const fa=ease((t-T.frac(68,.42))/.26);
-  // Collagen inside the chronic window, clear of the vignette.
-  tag(c,'纤维组织增生',1288,882,CMP.bx+36,CMP.by+78,fa,34);
- }
- c.save();c.fillStyle='#E8DDE9';c.font='500 30px MixSans';c.textAlign='left';c.fillText('中倍',1188,36);c.restore();
+ const cam=cameraAt(t,T),chr=chronicCameraAt(t,T),w=windowsAt(t,T);
+ audit.camera=cam;audit.chronicCamera=chr;audit.windows=w;
+ scope(c,acute,cam,w.acute);scope(c,chronic,chr,w.chronic);
+ const labelA=t<T.at(68)?ease((t-T.frac(67,.08))/.12)*ease((T.at(68)-t)/.16):0;
+ const pDef=w.acute?screenPoint(DEFECT,cam,w.acute):[0,0];
+ const pExu=w.acute?screenPoint(EXUDATE,cam,w.acute):[0,0];
+ leader(c,'变质',620,250,pDef[0],pDef[1],labelA);
+ leader(c,'渗出',620,690,pExu[0],pExu[1],labelA*ease((t-T.frac(67,.12))/.10));
+ audit.targets.变质={screen:pDef,source:DEFECT,map:point(...DEFECT)};
+ audit.targets.渗出={screen:pExu,source:EXUDATE,map:point(...EXUDATE)};
+ const cap=w.split*ease((T.frac(68,.55)-t)/.12);
+ caption(c,'急性',WIN_A.x,815,cap*(w.acute?w.acute.a:0));
+ caption(c,'慢性',WIN_C.x,815,cap*(w.chronic?Math.min(1,w.chronic.a*2):0));
+ const fibA=ease((t-T.frac(68,.26))/.06)*ease((T.frac(68,.62)-t)/.12);
+ const fib=[w.chronic?w.chronic.x+(focus.fib[0]-chr[0])*chr[2]:0,w.chronic?w.chronic.y+(focus.fib[1]-chr[1])*chr[2]:0];
+ leader(c,'纤维组织增生',1470,870,fib[0],fib[1],fibA*(w.chronic?w.chronic.a:0));
+ audit.targets.纤维组织增生={screen:fib,map:focus.fib};
+ const zShow=w.iris>.85?chr[2]:cam[2];
+ audit.power=powerOf(zShow);
+ c.save();c.fillStyle='#E8DDE9';c.font='500 36px MixSans';c.textAlign='left';c.fillText(audit.power,48,64);c.restore();
+ note(c,audit.power,48,64,'500 36px MixSans','left');
  drawLeft(c,t,T,true);
 }
-// ---------------------------------------------------------------- scene
+export function faithfulAcute(c){
+ const p=point(...DEFECT);
+ c.setTransform(1,0,0,1,0,0);c.fillStyle='#111114';c.fillRect(0,0,1920,1080);
+ c.save();c.beginPath();c.arc(1110,475,425,0,TAU);c.clip();c.fillStyle='#F6EEF0';c.fillRect(0,0,1920,1080);
+ c.translate(1110,475);c.scale(2.7,2.7);c.translate(-p[0],-p[1]);c.drawImage(acute,-1600,-1050);c.restore();
+ c.strokeStyle='#4C4555';c.lineWidth=1.6;c.beginPath();c.arc(1110,475,431,0,TAU);c.stroke();
+}
 export default {
  prepare(){
-  bake('chron.edema',(b,P)=>P.fill(b,P.blob(0,0,230,24,.3,719),'#F5DFE8',85,.65),{seed:719,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});
-  prepareAppendix();
+  // Chronic plate first, same bakeHE → prepareChronic order as S19, before any S18 bake.
+  chronic=prepareChronic();
   acute=prepareAcute();
-  const tiles=prepareChronic();
-  chronic=document.createElement('canvas');chronic.width=chronic.height=1800;
-  const cc=chronic.getContext('2d');cc.scale(3,3);cc.translate(300,300);cc.translate(-focus.fib[0],-focus.fib[1]);
-  for(const q of tiles)cc.drawImage(q.canvas,q.x,q.y,q.w,q.h);
+  prepareAppendix();
   off=document.createElement('canvas');off.width=1920;off.height=1080;offc=off.getContext('2d');
  },
+ plates(){return {acute,chronic};},
  draw(c,t,T){
+  audit.boxes=[];
   const enterStart=T.at(67)-.45,enterEnd=T.at(67)+.25;
   const d=ease((t-enterStart)/(enterEnd-enterStart));
   c.setTransform(1,0,0,1,0,0);
