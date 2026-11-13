@@ -1,0 +1,14 @@
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+Initialized empty Git repository in /tmp/open_adv01_git/
+本 worktree 的真实 git 元数据 /workspace/病理科普视频/v5/.git/worktrees/v5_open_dev 只读。
+git add 实测失败：Unable to create index.lock: Read-only file system。
+按任务要求，使用 /tmp/open_adv01_git 独立元数据记录逐场提交，最后创建以 fe72b98 为前提的增量 bundle；不修改主线元数据、不 push、不合并。
