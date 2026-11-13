@@ -1,0 +1,24 @@
+先读画风规范、引擎接口和 film 的多场景写法，再动手画四种阑尾大体样张。接着读引擎、film 多场景入口，以及大体参考图。继续读 ink/tokens/ann、现有章节和旧大体画法。参考图读到了。接着查旧大体画法和 film 的 lib 链接。旧章 02 的标本画法和参考图还要细看。几何和烘焙接口已经清楚。开始写 `gross_appendix.js`、场景入口，并接上 `?scene=gross_test`。接着把大体几何、水彩烘焙和四态绘制写进 `film/lib_ext/gross_appendix.js`。开始渲第一轮静帧，看形状和水彩落得对不对。静帧已经出来了，先看四态和拼图的实际画面。第一轮能看清问题：系膜太像楔子，脓苔发白，坏疽不够黑，2×2 里黄/黑的管身水彩几乎没了。先量像素再改。2×2 里黄/黑管身水彩被大画布踢掉了；系膜也太像楔子。接下来会钉住烘焙、重做系膜和四态色素。2×2 的管身水彩已经回来了。接下来去掉透明层上的正片叠底（系膜发黑），并修切割面、标签和血管。2×2 仍会把后画的水彩挤掉。改成每格在纸色画布上单独画，交付拼图则用四张单图合成。确定性没过，多半是上一帧的 clip 或 `multiply` 留在了画布上。每帧先把画布状态清干净。两次失败的百分比完全一样，说明不是随机抖动。接着把两帧差分存下来看。根因是 2048 水彩画布被 GPU 挤掉。把像素钉在 `ImageData` 里，绘制时再贴回去。差在墨线：`ink.js` 按 key 缓存，2×2 的线宽把单图的轮廓盖掉了。改成每次按当前线宽重算。确定性已经过了。重新出静帧，并更新说明。水彩丢了，是因为烘焙全做完再读像素，前面的 2048 画布已经被挤掉。改为每烘完一张立刻钉住。四态样张已经交到 `qa/gross/`，未 commit。
+
+**交付**
+- `qa/gross/gross_正常.png` — 灰粉、浆膜高光、细系膜血管
+- `qa/gross/gross_红.png` — 朱红充血、轻度肿胀、表面血管扩张
+- `qa/gross/gross_黄.png` — 明显增粗，浆膜上斑驳 `#CDB98A` 脓苔，不是整根涂黄
+- `qa/gross/gross_黑.png` — 远端局部暗红发黑，近端仍有红/黄
+- `qa/gross/gross_四态.png` — 四张带标注单图的 2×2
+- `qa/gross/说明.md` — 色值、函数、自认不足
+
+场景：`?scene=gross_test`（t=0/1/2/3/4）。`--determinism` 六个时点乱序一致。新代码在 `film/lib_ext/gross_appendix.js` 和 `film/chapters/gross_test.js`，引擎只读。
+
+**还不够好（说明里也写了）**
+- 系膜偏薄，更像血管示意图，脂肪体积不够
+- 脓苔有 `keepWhite` 留下的浅色笔触条
+- 坏疽是暗红褐，不是炭黑；出血斑和充血底分不太开
+- 正常浆膜光泽偏弱，尖端沿引擎轮廓收得偏尖
+
+重建：
+
+```bash
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --q scene=gross_test --still 0,1,2,3,4 --out qa/gross
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --q scene=gross_test --determinism
+```

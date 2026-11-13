@@ -1,0 +1,58 @@
+START
+{
+  "engine/lib/ann.js": "a1168fc75660bf23424cffff32533dc7289672ffe943537bc6276d6d04742ed6",
+  "engine/lib/camera.js": "25ada270e774274d72d5eb0789f9f9c8e5167cd49b28e3b16b55c6bf7c59ee83",
+  "engine/lib/chapter.js": "87da05d328d75866e3af1110d95aa465292c0c9d2473271b33973fddd7baa1d3",
+  "engine/lib/figure.js": "469a82fb2770029cd58367a5d1129574fd506befd48361519d16451b169feeb0",
+  "engine/lib/he.js": "a2e658fc107c4a43c689607337db996fe8da13ea7e4b730f76d9789442b771bf",
+  "engine/lib/he_detail.js": "899d24ba596208caa026512c824025a5eb648b86d6bdfd7bc4920bab143544d0",
+  "engine/lib/ink.js": "b011bfec410a0546af527e80c1396e8b9e02ad6f36c8280dcdcaf68378f4551c",
+  "engine/lib/mood.js": "795da3e2db1faf818a34a2a3f70d4fc720db1f4a0d9202fd57c7a32d0080cb1c",
+  "engine/lib/motion.js": "7b4831e12701871770577f581d3fb815b650188e4ea046717a9cf0695000f472",
+  "engine/lib/scope.js": "6c6079ad8a12ded36b5c203f9a3416d51d83c46c757a50d06768dda6bac9a0b2",
+  "engine/lib/subtitle.js": "1650f7dea7f02235c47188889dd4456df7c8f15d97f08c2476a13368d8786909",
+  "engine/lib/timeline.js": "2d5b18ef9492c5dfb9d52c7200a253ed2a9e884f059766dc8ed435183538c133",
+  "engine/lib/tokens.js": "187410669a6f4ae7adf51131e00862020d861b3e6c13d8a176d50a9154e2a307",
+  "engine/lib/wash.js": "889bacbc5c54cd57b7c6018afa33fb1df6bbcb9e8a3b744efece3539826308b9",
+  "parity_r4/chapters/04.js": "4f83add26190441d4c71ed39f2ba83a950fef9933cbdaae95cabda2106542fb4"
+}
+
+RESUME START
+{
+  "engine/lib/ann.js": "a1168fc75660bf23424cffff32533dc7289672ffe943537bc6276d6d04742ed6",
+  "engine/lib/camera.js": "25ada270e774274d72d5eb0789f9f9c8e5167cd49b28e3b16b55c6bf7c59ee83",
+  "engine/lib/chapter.js": "87da05d328d75866e3af1110d95aa465292c0c9d2473271b33973fddd7baa1d3",
+  "engine/lib/figure.js": "469a82fb2770029cd58367a5d1129574fd506befd48361519d16451b169feeb0",
+  "engine/lib/he.js": "a2e658fc107c4a43c689607337db996fe8da13ea7e4b730f76d9789442b771bf",
+  "engine/lib/he_detail.js": "899d24ba596208caa026512c824025a5eb648b86d6bdfd7bc4920bab143544d0",
+  "engine/lib/ink.js": "b011bfec410a0546af527e80c1396e8b9e02ad6f36c8280dcdcaf68378f4551c",
+  "engine/lib/mood.js": "795da3e2db1faf818a34a2a3f70d4fc720db1f4a0d9202fd57c7a32d0080cb1c",
+  "engine/lib/motion.js": "7b4831e12701871770577f581d3fb815b650188e4ea046717a9cf0695000f472",
+  "engine/lib/scope.js": "6c6079ad8a12ded36b5c203f9a3416d51d83c46c757a50d06768dda6bac9a0b2",
+  "engine/lib/subtitle.js": "1650f7dea7f02235c47188889dd4456df7c8f15d97f08c2476a13368d8786909",
+  "engine/lib/timeline.js": "2d5b18ef9492c5dfb9d52c7200a253ed2a9e884f059766dc8ed435183538c133",
+  "engine/lib/tokens.js": "187410669a6f4ae7adf51131e00862020d861b3e6c13d8a176d50a9154e2a307",
+  "engine/lib/wash.js": "889bacbc5c54cd57b7c6018afa33fb1df6bbcb9e8a3b744efece3539826308b9",
+  "parity_r4/chapters/04.js": "4f83add26190441d4c71ed39f2ba83a950fef9933cbdaae95cabda2106542fb4"
+}
+PASS: matches original START
+
+END
+{
+  "engine/lib/ann.js": "a1168fc75660bf23424cffff32533dc7289672ffe943537bc6276d6d04742ed6",
+  "engine/lib/camera.js": "25ada270e774274d72d5eb0789f9f9c8e5167cd49b28e3b16b55c6bf7c59ee83",
+  "engine/lib/chapter.js": "87da05d328d75866e3af1110d95aa465292c0c9d2473271b33973fddd7baa1d3",
+  "engine/lib/figure.js": "469a82fb2770029cd58367a5d1129574fd506befd48361519d16451b169feeb0",
+  "engine/lib/he.js": "a2e658fc107c4a43c689607337db996fe8da13ea7e4b730f76d9789442b771bf",
+  "engine/lib/he_detail.js": "899d24ba596208caa026512c824025a5eb648b86d6bdfd7bc4920bab143544d0",
+  "engine/lib/ink.js": "b011bfec410a0546af527e80c1396e8b9e02ad6f36c8280dcdcaf68378f4551c",
+  "engine/lib/mood.js": "795da3e2db1faf818a34a2a3f70d4fc720db1f4a0d9202fd57c7a32d0080cb1c",
+  "engine/lib/motion.js": "7b4831e12701871770577f581d3fb815b650188e4ea046717a9cf0695000f472",
+  "engine/lib/scope.js": "6c6079ad8a12ded36b5c203f9a3416d51d83c46c757a50d06768dda6bac9a0b2",
+  "engine/lib/subtitle.js": "1650f7dea7f02235c47188889dd4456df7c8f15d97f08c2476a13368d8786909",
+  "engine/lib/timeline.js": "2d5b18ef9492c5dfb9d52c7200a253ed2a9e884f059766dc8ed435183538c133",
+  "engine/lib/tokens.js": "187410669a6f4ae7adf51131e00862020d861b3e6c13d8a176d50a9154e2a307",
+  "engine/lib/wash.js": "889bacbc5c54cd57b7c6018afa33fb1df6bbcb9e8a3b744efece3539826308b9",
+  "parity_r4/chapters/04.js": "4f83add26190441d4c71ed39f2ba83a950fef9933cbdaae95cabda2106542fb4"
+}
+PASS: all read-only SHA256 match original START and RESUME START

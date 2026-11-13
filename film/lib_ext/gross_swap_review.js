@@ -1,0 +1,14 @@
+import {reference} from './gross_swap_reference.js';
+import {prepare as prepareCanonical} from './gross_swap_canonical.js';
+import {initBaker,bake} from '../lib/wash.js';
+import {bakeHE} from '../lib/he.js';
+import {forScene} from '../timeline.js';
+import {timing} from '../timing_snapshot.js';
+const p=new URLSearchParams(location.search),name=p.get('scene')||'s01',before=p.has('before');
+const ranges={s01:[1,5,.9],s05:[20,22,0],s06:[23,24,timing.find(s=>s.n===25).start-timing.find(s=>s.n===24).end],s11:[37,46,.8],s18:[66,68,.8]};
+const clock=name==='gross_reference'?{duration:5,T:null}:forScene(...ranges[name]);
+const scene=(await import(name==='gross_reference'?'./gross_swap_refscene.js':before?`./gross_swap_before_${name}.js`:`../chapters/${name}.js`)).default;
+const c=document.getElementById('c');c.width=1920;c.height=1080;const ctx=c.getContext('2d');
+await document.fonts.load('500 36px MixSans');await document.fonts.load('700 36px MixSans');await document.fonts.load('800 36px MixSans');
+await initBaker();if(!before)prepareCanonical();if(name!=='s05'&&name!=='gross_reference')bakeHE((k,r,o)=>bake(k,r,{...o,hd:true,soft:true,grain:.12,edge:.3,bleed:.5}));
+await scene.prepare();window.DUR=clock.duration;window.render=t=>p.has('reference')?reference(ctx,name,t,clock.T):scene.draw(ctx,t,clock.T);window.READY=true;

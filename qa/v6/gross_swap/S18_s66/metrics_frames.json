@@ -1,0 +1,29 @@
+{
+  "frames": [
+    {
+      "sentence": 66,
+      "fraction": 0.1,
+      "time": 0.3113999999999976,
+      "outside_mae_255": 0.0,
+      "outside_changed_px": 0,
+      "reference": [
+        {
+          "state": "red",
+          "mae_255": 0.0,
+          "inner_mae_255": 0.0,
+          "region_px": 32748
+        }
+      ]
+    },
+    {
+      "sentence": 66,
+      "fraction": 0.84,
+      "time": 2.61575999999998,
+      "outside_mae_255": 0.0,
+      "outside_changed_px": 0,
+      "reference": []
+    }
+  ],
+  "outside_mae_max": 0.0,
+  "reference_mae_max": 0.0
+}

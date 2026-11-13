@@ -1,0 +1,1999 @@
+OpenAI Codex v0.163.0
+--------
+workdir: /workspace/病理科普视频/v5_gross_dev
+model: gpt-6.1-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, /workspace/病理科普视频, /workspace/garden-skills] (network access enabled)
+reasoning effort: none
+reasoning summaries: none
+session id: 01a1ce06-e151-71b2-b6c7-b5b9e7194df4
+--------
+user
+# g_gross02b：接续 g_gross02（上一轮 Grok Build 因额度用完中断）
+
+上一轮已在工作区改了 film/lib_ext/gross_appendix.js 和 film/chapters/gross_test.js，尚未提交。先 git diff 看清已有改动，在此基础上继续，不要推倒重来。中断前它发现：系膜被抹成米色，是因为墨线路径的 fill: none 仍被当成填充，开口曲线被纸色盖住，描边时要关掉填充。其余要求和交付与下面原 brief 完全一致。
+
+
+接着 gross01（film/lib_ext/gross_appendix.js，?scene=gross_test）改。引擎 engine/lib/*.js 和 parity_r4/chapters/04.js 只读，开始和结束各做一次 sha256 校验，写进 qa/gross/sha256_02.log。不要动 .mimo.env，也不要打印任何密钥。
+
+画风标准：v4_mix/qa/style/风格规范_v1.md。纸底 #F4EFE6，墨线 #2A2A35，大体脓苔 #CDB98A，水彩参数 hd/soft/grain .12/edge .3/bleed .5。画面上不出现任何数字。
+
+## 必须修的问题
+1. 立体感：管身要有圆柱的明暗，一侧受光、一侧背光，带浆膜高光。正常阑尾要是灰粉色，表面光滑有光泽，不能扁、不能淡到看不出来。尖端改成圆钝的盲端，不要尖。
+2. 系膜：做成有体积的黄色脂肪组织，血管在系膜里走行，不要画成楔形或血管示意图。
+3. 化脓（黄）：在充血肿胀的管身上，用斑片状、不规则的灰黄色 #CDB98A 脓苔覆盖，去掉 keepWhite 留下的浅色笔触条。脓苔边缘要不规则，不要发白。
+4. 坏疽（黑）：只在局部，用接近黑色的暗紫黑色（不是暗红褐），可以带一点穿孔样凹陷；周围仍是红、黄。出血斑和充血底要分得开。
+5. 四态的轮廓、大小和摆放保持一致，方便后面在片子里做"红→黄→黑"的连续过渡。如果能做，给 gross_appendix.js 加一个 0–3 的连续 stage 参数（stage 在 0.5 之类的中间值时两态之间平滑混合），再渲染一组 0、0.5、1、1.5、2、2.5、3 的过渡条 qa/gross/过渡条.png。
+
+## 交付
+- qa/gross/ 下重渲四张单图和 gross_四态.png（覆盖旧图前先把旧图移到 qa/gross/r1/）
+- 过渡条.png
+- 确定性检查通过（--determinism）
+- 说明.md 更新：写清改了什么、还剩哪些不足
+- 在 v5_gross_dev 里 git commit（git -c user.name=mini -c user.email=mini@local）
+
+2026-11-12T04:32:02.575008Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer realm=\"OAuth\", resource_metadata=\"https://mcp.notion.com/.well-known/oauth-protected-resource/mcp\", scope=\"default\"" })
+codex
+我先查看未提交改动和项目约定，记录只读文件的起始校验值，再接着现有修改修复、渲染和验证。
+
+exec
+/bin/bash -lc "pwd; git status --short; git diff -- film/lib_ext/gross_appendix.js film/chapters/gross_test.js; rg --files -g AGENTS.md -g '*gross*' -g '*风格规范*' -g '*render*' -g '*说明*'" in /workspace/病理科普视频/v5_gross_dev
+ succeeded in 0ms:
+/workspace/病理科普视频/v5_gross_dev
+ M film/chapters/gross_test.js
+ M film/lib_ext/gross_appendix.js
+?? qa/briefs/g_gross02.md
+?? qa/briefs/g_gross02b.md
+?? qa/briefs/run_g_gross02.log
+?? qa/briefs/run_g_gross02b.log
+?? qa/gross/sha256_02.log
+diff --git a/film/chapters/gross_test.js b/film/chapters/gross_test.js
+index 6c742b8..8851936 100644
+--- a/film/chapters/gross_test.js
++++ b/film/chapters/gross_test.js
+@@ -8,9 +8,9 @@ import {
+   STATES, META,
+ } from '../lib_ext/gross_appendix.js';
+ 
+-const POSE = { x: 1210, y: 400, rot: -.16, sc: 1.48 };
++const POSE = { x: 1210, y: 390, rot: -.16, sc: 1.42 };
+ 
+-function paper(ctx) {
++function paper(ctx, { ruled = true } = {}) {
+   // Reset clip / composite leftovers from a previous render(t). Assigning width clears the stack.
+   ctx.canvas.width = 1920;
+   ctx.setTransform(1, 0, 0, 1, 0, 0);
+@@ -18,7 +18,12 @@ function paper(ctx) {
+   ctx.globalCompositeOperation = 'source-over';
+   ctx.fillStyle = C.paper;
+   ctx.fillRect(0, 0, 1920, 1080);
+-  ctx.save(); ctx.globalAlpha = .85; grid(ctx, -40, -40, 1960, 1120, 40); ctx.restore();
++  if (ruled) { ctx.save(); ctx.globalAlpha = .85; grid(ctx, -40, -40, 1960, 1120, 40); ctx.restore(); }
++}
++
++function viewMode() {
++  try { return new URLSearchParams(location.search).get('view') || ''; }
++  catch { return ''; }
+ }
+ 
+ function drawOne(ctx, state) {
+@@ -70,6 +75,13 @@ function drawGrid(ctx) {
+ export default {
+   prepare() { bakeGross(); },
+   draw(ctx, t) {
++    // view=morph: continuous stage = t (0–3), specimen only, no labels and no digits.
++    if (viewMode() === 'morph') {
++      paper(ctx, { ruled: false });
++      const stage = Math.max(0, Math.min(3, t));
++      drawAppendix(ctx, stage, { x: 960, y: 500, rot: -.16, sc: 1.28 });
++      return;
++    }
+     paper(ctx);
+     const i = Math.min(4, Math.max(0, Math.floor(t + 1e-9)));
+     if (i < 4) drawOne(ctx, STATES[i]);
+diff --git a/film/lib_ext/gross_appendix.js b/film/lib_ext/gross_appendix.js
+index 338ecf3..fa1ac5a 100644
+--- a/film/lib_ext/gross_appendix.js
++++ b/film/lib_ext/gross_appendix.js
+@@ -1,302 +1,677 @@
+-// Resected appendix specimen — four gross states (normal / red / yellow / black).
+-// Geometry from engine/lib/figure.js (spine, halfW, specimenOutline). Washes baked once.
+-// Ink via engine/lib/ink.js. No Math.random; all jitter is rng(fixed seed) or bake seeds.
++// Resected appendix — four gross states on one rig.
++// stage 0 normal · 1 red · 2 yellow · 3 black. In-between values (0.5, 1.5, …)
++// smoothstep the swell, the serosal palette, and the pus / necrosis / hemorrhage layers.
++// Spine and shaft width come from figure.js. The blind end is a round cap — figure.js
++// leaves specimenOutline's tip array empty and pinches s>0.9 to a point, so the cap is built here.
++// No Math.random. Ink via ink.js. Watercolour via wash.js (hd / soft / grain .12 / edge .3 / bleed .5).
+ import { C } from '../lib/tokens.js';
+ import { bake, get } from '../lib/wash.js';
+-import { shape, draw } from '../lib/ink.js';
+-import { specimenOutline, spine, halfW } from '../lib/figure.js';
++import { shape, draw as inkDraw } from '../lib/ink.js';
++import { spine, halfW } from '../lib/figure.js';
+ import { rng } from '../lib/motion.js';
+ import * as A from '../lib/ann.js';
+ 
+-export const PUS = '#CDB98A';          // 大体脓苔 — 风格规范 §2 / 02 章
++export const PUS = '#CDB98A';
+ export const STATES = ['normal', 'red', 'yellow', 'black'];
+-export const SWELL = { normal: .22, red: .48, yellow: 1, black: .96 };
+-const MESO_TIP = .8;
+-const N_WALL = 48;
+-const HD = { hd: true, soft: true, grain: .12, edge: .3, bleed: .5, scale: 2.4 };
+-const HD_PALE = { hd: true, soft: true, grain: .12, edge: 0, bleed: .5, scale: 2.4, keepWhite: true };
++// Same pose and the same outline function for every state. Yellow and black share a swell,
++// so 黄→黑 does not move the contour. Normal → red → yellow only thickens.
++const SWELL_K = [0.64, 0.86, 1, 1];
++export const SWELL = { normal: SWELL_K[0], red: SWELL_K[1], yellow: SWELL_K[2], black: SWELL_K[3] };
++
++const CAP_S = 0.9;
++const MESO_TIP = 0.8;
++const N_SHAFT = 40;
++const WASH = { hd: true, soft: true, grain: .12, edge: .3, bleed: .5 };
+ 
+ export const META = {
+   normal: { name: '正常', diag: '正常阑尾', sub: '灰粉色 · 浆膜光滑有光泽', tone: C.ink },
+   red:    { name: '红',   diag: '单纯性阑尾炎', sub: '朱红充血 · 轻度肿胀', tone: C.red },
+   yellow: { name: '黄',   diag: '化脓性阑尾炎', sub: '肿胀增粗 · 斑驳灰黄脓苔', tone: '#8A7348' },
+-  black:  { name: '黑',   diag: '坏疽性阑尾炎', sub: '局部坏死发黑 · 周围仍有红黄', tone: '#5A3038' },
++  black:  { name: '黑',   diag: '坏疽性阑尾炎', sub: '局部坏死发黑 · 周围仍有红黄', tone: '#3A2438' },
+ };
+ 
++// Serosal lighting. base is the opaque midtone of the cylinder (t≈0.5 across the tube).
++// shadow is the mesenteric side, gloss is the serosal band on the lit side. All three are mixed
++// into solid colours — a multiply gradient leaves 1px gaps that read as stripes.
++const LOOK = [
++  { base: [198, 154, 144], shadow: [64, 36, 34], gloss: [246, 234, 228] },
++  { base: [206, 64, 56],   shadow: [58, 12, 18], gloss: [255, 228, 220] },
++  { base: [196, 56, 50],   shadow: [52, 10, 16], gloss: [255, 224, 216] },
++  { base: [184, 50, 46],   shadow: [44, 8, 14],  gloss: [248, 214, 208] },
++];
++
++const smooth = t => { const x = Math.max(0, Math.min(1, t)); return x * x * (3 - 2 * x); };
++const lerp = (a, b, t) => a + (b - a) * t;
++const mix3 = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
++const css = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
++function ramp(stage, a, b) {
++  if (stage <= a) return 0;
++  if (stage >= b) return 1;
++  return smooth((stage - a) / (b - a));
++}
++function knot(stage, table) {
++  const s = Math.max(0, Math.min(3, stage));
++  if (s >= 3) return table[3];
++  const i = Math.floor(s), f = smooth(s - i);
++  const A = table[i], B = table[i + 1];
++  return typeof A === 'number' ? lerp(A, B, f) : mix3(A, B, f);
++}
++
++export function asStage(state) {
++  if (typeof state === 'number' && Number.isFinite(state)) return Math.max(0, Math.min(3, state));
++  const i = STATES.indexOf(state);
++  return i < 0 ? 0 : i;
++}
++export function swellAt(stage) { return knot(asStage(stage), SWELL_K); }
++
+ export function frameAt(s) {
+   const p = spine(s), q = spine(Math.min(1, s + .01)), r = spine(Math.max(0, s - .01));
+   const dx = q[0] - r[0], dy = q[1] - r[1], L = Math.hypot(dx, dy) || 1;
+   return { p, tx: dx / L, ty: dy / L, nx: -dy / L, ny: dx / L };
+ }
++// Shaft uses halfW. Past 0.8 the radius eases so it meets the round cap without a kink.
++export function tubeRadius(s, swell) {
++  const u = Math.max(0, Math.min(CAP_S, s));
++  if (u <= 0.8) return halfW(u, swell);
++  const w0 = halfW(0.8, swell), w1 = halfW(CAP_S, swell);
++  const e = smooth((u - 0.8) / (CAP_S - 0.8));
++  return w0 + (w1 - w0) * e;
++}
++function addN(f, w) { return [f.p[0] + f.nx * w, f.p[1] + f.ny * w]; }
++
++export function tubeOutline(swell) {
++  const L = [], R = [];
++  for (let i = 0; i <= N_SHAFT; i++) {
++    const s = CAP_S * (i / N_SHAFT), f = frameAt(s), w = tubeRadius(s, swell);
++    L.push(addN(f, w));
++    R.push(addN(f, -w));
++  }
++  const f = frameAt(CAP_S), rad = tubeRadius(CAP_S, swell), arc = [];
++  for (let i = 1; i < 14; i++) {
++    const a = Math.PI * (i / 14);
++    arc.push([
++      f.p[0] + f.nx * Math.cos(a) * rad + f.tx * Math.sin(a) * rad,
++      f.p[1] + f.ny * Math.cos(a) * rad + f.ty * Math.sin(a) * rad,
++    ]);
++  }
++  // Elliptical cut face: from the lit lip (−normal) back to the mesenteric lip, bulging out of the base.
++  const f0 = frameAt(0), w0 = tubeRadius(0, swell), base = [];
++  for (let i = 1; i < 8; i++) {
++    const ang = Math.PI * (1 - i / 8);
++    const bulge = Math.sin(ang) * w0 * 0.34;
++    base.push([
++      f0.p[0] + f0.nx * Math.cos(ang) * w0 - f0.tx * bulge,
++      f0.p[1] + f0.ny * Math.cos(ang) * w0 - f0.ty * bulge,
++    ]);
++  }
++  return L.concat(arc, R.reverse(), base);
++}
++
++// Fatty mesoappendix: thick through the middle, lobulated free edge, blunt end.
++// Not a triangle and not a vessel chart. `extra` is pixels past the wall.
++export function mesoHang(s) {
++  if (s >= MESO_TIP) return 0;
++  const u = Math.max(0, s) / MESO_TIP;
++  const belly = Math.sin(Math.PI * Math.min(u * 0.96, 1)) ** 0.62;
++  let h = 44 + 78 * belly;
++  h += 16 * (0.5 + 0.5 * Math.sin(u * Math.PI * 3.15 + 0.35)) ** 1.35;
++  h += 8 * Math.sin(u * Math.PI * 6.5 + 1.05);
++  h += 4 * Math.sin(u * 20.5 + 0.4);
++  if (u > 0.76) h *= Math.cos(((u - 0.76) / 0.24) * Math.PI * 0.5);
++  return Math.max(0, h);
++}
+ export function mesoPt(s, sw, extra) {
+-  const f = frameAt(Math.max(0, Math.min(1, s))), w = halfW(Math.max(0, Math.min(.9, s)), sw) + extra;
++  const f = frameAt(Math.max(0, Math.min(1, s)));
++  const w = tubeRadius(Math.max(0, Math.min(CAP_S, s)), sw) + extra;
+   return [f.p[0] + f.nx * w, f.p[1] + f.ny * w];
+ }
+ export function sidePt(s, sw, extra) {
+-  const f = frameAt(Math.max(0, Math.min(1, s))), w = halfW(Math.max(0, Math.min(.9, s)), sw) + extra;
++  const f = frameAt(Math.max(0, Math.min(1, s)));
++  const w = tubeRadius(Math.max(0, Math.min(CAP_S, s)), sw) + extra;
+   return [f.p[0] - f.nx * w, f.p[1] - f.ny * w];
+ }
+-// Cut face of the mesoappendix has real width (s=0); free edge scallops; tapers out near the tip.
+-function mesoHang(s) {
+-  if (s >= MESO_TIP) return 0;
+-  const u = Math.max(0, s) / MESO_TIP;
+-  const profile = 54 * (1 - Math.pow(u, 1.35)) + 38 * Math.sin(Math.PI * Math.min(1, u * 1.05));
+-  const scallop = 1 + .16 * Math.sin(s * 14.2 + .5) + .08 * Math.sin(s * 27.6 + 1.1) + .04 * Math.sin(s * 41 + .2);
+-  return Math.max(0, profile * scallop);
+-}
+ function mesoLoop(sw) {
+-  const wall = [], free = [], N = 26;
+-  for (let i = 0; i <= N; i++) wall.push(mesoPt((i / N) * MESO_TIP, sw, .4));
++  const wall = [], free = [];
++  const N = 28;
++  for (let i = 0; i <= N; i++) wall.push(mesoPt((i / N) * MESO_TIP, sw, 0));
+   for (let i = N; i >= 0; i--) free.push(mesoPt((i / N) * MESO_TIP, sw, mesoHang((i / N) * MESO_TIP)));
+   return wall.concat(free);
+ }
+ function mesoFreeEdge(sw) {
+-  const pts = [mesoPt(0, sw, 0)];
+-  const N = 26;
+-  for (let i = 0; i <= N; i++) pts.push(mesoPt((i / N) * MESO_TIP, sw, mesoHang((i / N) * MESO_TIP)));
+-  pts.push(mesoPt(MESO_TIP, sw, 0));
++  const pts = [];
++  const N = 32;
++  for (let i = 0; i <= N; i++) {
++    const s = (i / N) * MESO_TIP;
++    pts.push(mesoPt(s, sw, mesoHang(s)));
++  }
+   return pts;
+ }
+-function baseCap(sw) {
+-  const a = mesoPt(0, sw, 0), b = sidePt(0, sw, 0), f = frameAt(0);
+-  return [a, [(a[0] + b[0]) / 2 - f.tx * 8, (a[1] + b[1]) / 2 - f.ty * 8], b];
+-}
+ export function toScreen(pose, p) {
+-  const c = Math.cos(pose.rot), s = Math.sin(pose.rot);
+-  return [pose.x + (p[0] * c - p[1] * s) * pose.sc, pose.y + (p[0] * s + p[1] * c) * pose.sc];
++  const c = Math.cos(pose.rot), sn = Math.sin(pose.rot);
++  return [pose.x + (p[0] * c - p[1] * sn) * pose.sc, pose.y + (p[0] * sn + p[1] * c) * pose.sc];
+ }
+ function path(ctx, pts, close = true) {
+   ctx.beginPath();
+-  pts.forEach((p, i) => i ? ctx.lineTo(...p) : ctx.moveTo(...p));
++  pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+   if (close) ctx.closePath();
+ }
+ 
+-function along(b, P, sw, col, a, rK, seed, step = .065) {
+-  for (let u = 0; u <= 1.001; u += step) {
++function along(b, P, col, a, rK, seed, step) {
++  const sw = 1;
++  for (let u = 0; u <= CAP_S; u += step) {
+     const p = spine(u);
+-    P.fill(b, P.blob(p[0], p[1], halfW(Math.min(u, .9), sw) * rK, 22, .28, seed + u * 100), col, a, .2, [.42, .52]);
+-  }
+-}
+-function alongOffset(b, P, sw, side, inset, col, a, rK, seed, step = .09) {
+-  for (let u = .03; u <= .97; u += step) {
+-    const f = frameAt(u), w = halfW(Math.min(u, .9), sw);
+-    const p = [f.p[0] + f.nx * w * inset * side, f.p[1] + f.ny * w * inset * side];
+-    P.fill(b, P.blob(p[0], p[1], w * rK, 18, .3, seed + u * 80), col, a, .22, [.38, .48]);
++    P.fill(b, P.blob(p[0], p[1], tubeRadius(u, sw) * rK, 20, .32, seed + u * 100), col, a, .2, [.4, .5]);
+   }
+ }
+-function smear(P, s, across, len, wid, seed) {
+-  const f = frameAt(s), R = rng(seed);
+-  const o = [];
+-  for (let i = 0; i < 22; i++) {
+-    const a = i / 22 * Math.PI * 2, rr = 1 + .38 * (R() - .5);
+-    const u = Math.cos(a) * len * rr, v = Math.sin(a) * wid * rr;
+-    o.push([f.p[0] + f.tx * u + f.nx * (across + v), f.p[1] + f.ty * u + f.ny * (across + v)]);
++function smearPoly(s, vFrac, len, wid, seed) {
++  const sw = 1, f = frameAt(s), w = tubeRadius(Math.min(s, CAP_S), sw);
++  const R = rng(seed | 0);
++  const n = 10 + (seed % 4);
++  const pts = [];
++  for (let i = 0; i < n; i++) {
++    const a = (i / n) * Math.PI * 2;
++    const jag = 0.42 + R() * 0.9;
++    const spike = R() > 0.8 ? 1.38 : 1;
++    const u = Math.cos(a) * len * jag * spike;
++    const v = Math.sin(a) * wid * (0.5 + R());
++    const across = w * vFrac + v;
++    pts.push([f.p[0] + f.tx * u + f.nx * across, f.p[1] + f.ty * u + f.ny * across]);
+   }
+-  return o;
++  return pts;
+ }
+ 
++// Irregular serosal sheets. Gaps stay red. Same polygons at every stage; alpha carries the mix.
++const PUS_PATCHES = [
++  [0.16, -0.22, 48, 18], [0.28, 0.18, 34, 15], [0.38, -0.42, 56, 20],
++  [0.48, 0.02, 40, 17], [0.56, -0.28, 32, 13], [0.64, 0.26, 46, 16],
++  [0.72, -0.08, 28, 13], [0.24, 0.46, 20, 10], [0.44, -0.58, 22, 9],
++  [0.60, 0.48, 16, 8], [0.33, -0.02, 18, 11], [0.68, -0.40, 24, 11],
++];
++// Distal, mostly the lit serosa — the mesenteric side of the tip stays red and yellow.
++const NEC_PATCHES = [
++  [0.73, -0.38, 44, 22, '#161018'],
++  [0.80, -0.06, 52, 26, '#1C1224'],
++  [0.86, -0.30, 32, 16, '#24182C'],
++  [0.77, 0.18, 18, 11, '#100C14'],
++];
++
+ const PIX = new Map();
+ function pin(k) {
+-  const src = get(k); if (!src) return;
++  const src = get(k); if (!src) return null;
+   const im = src.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, src.width, src.height);
+   const held = document.createElement('canvas');
+   held.width = src.width; held.height = src.height;
+   held.getContext('2d', { willReadFrequently: true }).putImageData(im, 0, 0);
+   PIX.set(k, held);
++  return held;
++}
++// keepWhite used to leave opaque paper-white brush streaks. Pus is only #CDB98A;
++// near-white pixels are dropped, and the dry edge stays a darker ochre, not a white rim.
++function lockPus(cv) {
++  const ctx = cv.getContext('2d', { willReadFrequently: true });
++  const im = ctx.getImageData(0, 0, cv.width, cv.height), d = im.data;
++  const pr = 0xCD, pg = 0xB9, pb = 0x8A, pLum = (pr + pg + pb) / 3;
++  for (let i = 0; i < d.length; i += 4) {
++    const a = d[i + 3] / 255;
++    if (a < 0.025) { d[i + 3] = 0; continue; }
++    const lum = (d[i] + d[i + 1] + d[i + 2]) / 3;
++    const chroma = Math.max(d[i], d[i + 1], d[i + 2]) - Math.min(d[i], d[i + 1], d[i + 2]);
++    if (lum > 208 && chroma < 32) { d[i + 3] = 0; continue; }
++    const dark = 0.78 + 0.22 * Math.max(0, Math.min(1, lum / pLum));
++    d[i] = pr * dark; d[i + 1] = pg * dark; d[i + 2] = pb * dark;
++    d[i + 3] = Math.min(255, a * 2.35 * 255);
++  }
++  ctx.putImageData(im, 0, 0);
++}
++// Pull any red-brown fringe to purple-black. The interior is opaque so the red serosa
++// does not show through and turn the patch mahogany. Pale halos go away.
++function lockNecro(cv) {
++  const ctx = cv.getContext('2d', { willReadFrequently: true });
++  const im = ctx.getImageData(0, 0, cv.width, cv.height), d = im.data;
++  const pr = 0x1A, pg = 0x12, pb = 0x1E;
++  for (let i = 0; i < d.length; i += 4) {
++    const a = d[i + 3] / 255;
++    if (a < 0.05) { d[i + 3] = 0; continue; }
++    const lum = (d[i] + d[i + 1] + d[i + 2]) / 3;
++    if (lum > 140) { d[i + 3] = 0; continue; }
++    const k = 0.32 + 0.5 * Math.max(0, Math.min(1, lum / 80));
++    d[i] = pr * k; d[i + 1] = pg * k; d[i + 2] = pb * k;
++    const na = a > 0.18 ? 1 : (a - 0.05) / 0.13;
++    d[i + 3] = Math.round(Math.max(0, Math.min(1, na)) * 255);
++  }
++  ctx.putImageData(im, 0, 0);
+ }
+ function drawPinned(ctx, key, x, y, size, { alpha = 1, blend = 'multiply' } = {}) {
+-  const img = PIX.get(key); if (!img || alpha <= 0) return;
++  const img = PIX.get(key); if (!img || alpha <= 0.001) return;
+   ctx.save();
+   ctx.globalAlpha *= alpha;
+-  if (blend) ctx.globalCompositeOperation = blend;
++  ctx.globalCompositeOperation = blend;
+   ctx.translate(x, y);
+   ctx.drawImage(img, -size / 2, -size / 2, size, size);
+   ctx.restore();
+ }
+ 
++// Exact #CDB98A sheets. The watercolour bake is only a mask: filling the live canvas
++// with destination-in would punch holes in the tube. Interior alpha is hardened so the
++// red serosa does not blush through, and the feather stays short and ochre, not white.
++let pusLayer = null;
++function buildPus() {
++  const src = PIX.get('g.pus');
++  if (!src) return;
++  const S = src.width;
++  const cv = document.createElement('canvas');
++  cv.width = S; cv.height = S;
++  const c = cv.getContext('2d', { willReadFrequently: true });
++  c.setTransform(S / 1024, 0, 0, S / 1024, S / 2, S / 2);
++  c.fillStyle = PUS;
++  PUS_PATCHES.forEach((spec, j) => {
++    path(c, smearPoly(spec[0], spec[1], spec[2], spec[3], 2400 + j * 17));
++    c.fill();
++  });
++  c.setTransform(1, 0, 0, 1, 0, 0);
++  c.globalCompositeOperation = 'destination-in';
++  c.drawImage(src, 0, 0);
++  const im = c.getImageData(0, 0, S, S), d = im.data;
++  for (let i = 0; i < d.length; i += 4) {
++    const a = d[i + 3] / 255;
++    const na = a > 0.2 ? 1 : a > 0.07 ? (a - 0.07) / 0.13 : 0;
++    d[i] = 0xCD; d[i + 1] = 0xB9; d[i + 2] = 0x8A;
++    d[i + 3] = Math.round(na * 255);
++  }
++  c.putImageData(im, 0, 0);
++  pusLayer = cv;
++}
++function drawPus(ctx, alpha) {
++  if (!pusLayer || alpha <= 0.001) return;
++  ctx.save();
++  ctx.globalAlpha *= alpha;
++  ctx.globalCompositeOperation = 'source-over';
++  ctx.drawImage(pusLayer, -512, -512, 1024, 1024);
++  ctx.restore();
++}
++
+ export function prepare() {
+-  const swN = SWELL.normal, swR = SWELL.red, swY = SWELL.yellow, swB = SWELL.black;
+-  bake('g.normal', (b, P) => {
+-    along(b, P, swN, '#D9C0B8', 155, 1.7, 3, .055);
+-    along(b, P, swN, '#E8B9B0', 110, 1.25, 4, .08);
+-    alongOffset(b, P, swN, 1, .58, '#C4A39A', 90, .8, 5, .08);
+-    alongOffset(b, P, swN, -1, .62, '#EBD3CC', 70, .55, 6, .14);
+-  }, { ...HD, seed: 21 }); pin('g.normal');
++  // scaleBrushes multiplies. One ×2.4, then hold it — later bakes pass scale 1.
++  bake('g.pink', (b, P) => {
++    along(b, P, '#C4A094', 120, 1.55, 3, .06);
++    along(b, P, '#A88880', 90, 1.05, 4, .09);
++    along(b, P, '#8A7068', 70, .7, 5, .12);
++  }, { ...WASH, seed: 21, scale: 2.4 });
++  pin('g.pink');
+   bake('g.red', (b, P) => {
+-    along(b, P, swR, '#E8B9B0', 80, 1.5, 7);
+-    along(b, P, swR, C.red, 155, 1.38, 8, .06);
+-    along(b, P, swR, '#C9455A', 110, 1.08, 9, .09);
+-    alongOffset(b, P, swR, 1, .52, '#6E1A24', 105, .78, 10, .08);
+-    alongOffset(b, P, swR, -1, .38, '#A8404E', 80, .58, 11, .11);
+-  }, { ...HD, seed: 22 }); pin('g.red');
+-  bake('g.yellow', (b, P) => {
+-    along(b, P, swY, C.red, 150, 1.38, 12, .06);
+-    along(b, P, swY, '#C9455A', 100, 1.1, 13, .09);
+-    alongOffset(b, P, swY, 1, .5, '#6E1A24', 115, .72, 14, .08);
+-    alongOffset(b, P, swY, -1, .4, '#A8404E', 85, .55, 15, .11);
+-  }, { ...HD, seed: 23 }); pin('g.yellow');
+-  bake('g.black', (b, P) => {
+-    along(b, P, swB, C.red, 140, 1.35, 16, .06);
+-    along(b, P, swB, '#A8404E', 100, 1.12, 17, .09);
+-    alongOffset(b, P, swB, 1, .5, '#6E1A24', 110, .72, 18, .08);
+-  }, { ...HD, seed: 24 }); pin('g.black');
++    along(b, P, C.red, 150, 1.45, 8, .055);
++    along(b, P, '#C9455A', 120, 1.1, 9, .08);
++    along(b, P, '#6E1A24', 100, .72, 10, .1);
++  }, { ...WASH, seed: 22, scale: 1 });
++  pin('g.red');
+   bake('g.pus', (b, P) => {
+-    // Irregular elongated sheets along the serosa, not a solid yellow coat.
+-    [[.26, 8, 42, 16], [.38, -6, 50, 14], [.47, 14, 36, 13], [.58, -2, 54, 18],
+-     [.66, 12, 40, 15], [.74, -10, 46, 17], [.83, 6, 32, 12], [.31, -16, 28, 11],
+-     [.54, 18, 24, 10], [.7, 4, 30, 13]].forEach(([s, across, len, wid], j) => {
+-      P.fill(b, smear(P, s, across, len, wid, 200 + j), PUS, 170, .24, [.22, .34]);
+-    });
+-  }, { ...HD_PALE, seed: 25 }); pin('g.pus');
+-  bake('g.pusStain', (b, P) => {
+-    [[.26, 6, 36, 14], [.38, -8, 40, 13], [.5, 10, 34, 12], [.62, -4, 42, 15],
+-     [.74, 8, 30, 12], [.82, -6, 24, 10], [.33, 14, 20, 8], [.58, -14, 22, 9]].forEach(([s, across, len, wid], j) => {
+-      P.fill(b, smear(P, s, across, len, wid, 310 + j), PUS, 90, .3, [.4, .5]);
++    PUS_PATCHES.forEach((spec, j) => {
++      P.fill(b, smearPoly(spec[0], spec[1], spec[2], spec[3], 2400 + j * 17), PUS, 200, .22, [.24, .34]);
+     });
+-  }, { ...HD, seed: 26, edge: .2, bleed: .4 }); pin('g.pusStain');
++  }, { ...WASH, seed: 25, scale: 1 });
++  lockPus(pin('g.pus'));
+   bake('g.necro', (b, P) => {
+-    // Distal third only: brown-red halo then near-black core.
+-    [[.72, 0, 70, 38, '#7A3038', 130], [.8, 4, 62, 34, '#8E3A3E', 140],
+-     [.88, -6, 48, 28, '#A8404E', 120]].forEach(([s, ac, len, wid, col, a], j) => {
+-      P.fill(b, smear(P, s, ac, len, wid, 400 + j), col, a, .28, [.4, .5]);
+-    });
+-    [[.78, 2, 52, 28, '#2A1014', 210], [.86, -4, 46, 24, '#1A0C0E', 220],
+-     [.93, 2, 30, 16, '#14080A', 220], [.74, 10, 32, 16, '#4E1019', 180]].forEach(([s, ac, len, wid, col, a], j) => {
+-      P.fill(b, smear(P, s, ac, len, wid, 420 + j), col, a, .2, [.32, .42]);
++    NEC_PATCHES.forEach((spec, j) => {
++      P.fill(b, smearPoly(spec[0], spec[1], spec[2], spec[3], 4200 + j * 19), spec[4], 230, .18, [.3, .4]);
+     });
+-  }, { ...HD, seed: 27, edge: .42, bleed: .32 }); pin('g.necro');
+-  bake('g.bleed', (b, P) => {
+-    [[.34, 12, 14, 9, '#A8404E'], [.46, -10, 12, 8, '#8E3A3E'],
+-     [.55, 8, 16, 10, '#9A3E48'], [.63, -14, 11, 7, '#7A3038']].forEach(([s, ac, len, wid, col], j) => {
+-      P.fill(b, smear(P, s, ac, len, wid, 500 + j), col, 170, .2, [.4, .5]);
+-    });
+-  }, { ...HD, seed: 28 }); pin('g.bleed');
++  }, { ...WASH, seed: 27, scale: 1 });
++  lockNecro(pin('g.necro'));
+   bake('g.meso', (b, P) => {
+-    P.fill(b, P.blob(0, 0, 260, 26, .32, 8), '#EFD9A0', 155, .5, [.3, .4]);
+-    P.fill(b, P.blob(-50, 18, 150, 20, .3, 9), '#E4C78A', 80, .42, [.28, .38]);
+-    P.fill(b, P.blob(40, -10, 110, 18, .34, 10), '#F3E4B8', 70, .45, [.3, .4]);
+-  }, { ...HD, seed: 29, scale: 1.6 }); pin('g.meso');
++    P.fill(b, P.blob(0, 0, 240, 26, .34, 8), '#E2B45A', 150, .4, [.32, .42]);
++    P.fill(b, P.blob(-40, 16, 140, 18, .3, 9), '#C99840', 100, .35, [.28, .38]);
++    P.fill(b, P.blob(36, -12, 110, 16, .32, 10), '#E8C878', 80, .35, [.3, .4]);
++  }, { ...WASH, seed: 29, scale: 1 });
++  pin('g.meso');
++  buildPus();
+ }
+ 
+-function clipTube(ctx, sw) { path(ctx, specimenOutline(sw, N_WALL)); ctx.clip(); }
+-
+-function stampMeso(ctx, sw, alpha) {
++function paintMeso(ctx, swell) {
++  const loop = mesoLoop(swell);
+   ctx.save();
+-  ctx.beginPath(); ctx.rect(-2400, -2400, 4800, 4800);
+-  specimenOutline(sw, N_WALL).forEach((p, i) => i ? ctx.lineTo(...p) : ctx.moveTo(...p));
+-  ctx.closePath(); ctx.clip('evenodd');
+-  path(ctx, mesoLoop(sw)); ctx.clip();
+-  for (let s = 0; s < MESO_TIP; s += .04) {
+-    const extra = mesoHang(s);
+-    if (extra < 6) continue;
+-    [[.38, .62, .82], [.7, .4, .52]].forEach(([frac, radK, a]) => {
+-      const p = mesoPt(s, sw, extra * frac);
+-      drawPinned(ctx, 'g.meso', p[0], p[1], extra * radK / 260 * 1024, { alpha: alpha * a * 1.15, blend: 'multiply' });
+-    });
++  path(ctx, loop); ctx.clip();
++  ctx.fillStyle = '#E2B85A';
++  path(ctx, loop); ctx.fill();
++  const N = 26;
++  for (let i = 0; i < N; i++) {
++    const step = MESO_TIP / N;
++    const s0 = step * i, s1 = Math.min(MESO_TIP, step * (i + 1.25));
++    const h0 = mesoHang(s0), h1 = mesoHang(s1);
++    if (h0 < 4 && h1 < 4) continue;
++    const a = mesoPt(s0, swell, 0), b = mesoPt(s1, swell, 0);
++    const c = mesoPt(s1, swell, h1), d = mesoPt(s0, swell, h0);
++    const g = ctx.createLinearGradient(a[0], a[1], d[0], d[1]);
++    // Whole hang stays yellow fat. The old 0.8 stop (#F6E6BC) turned the lower two-thirds cream.
++    g.addColorStop(0, '#C4923E');
++    g.addColorStop(0.14, '#D4A84E');
++    g.addColorStop(0.48, '#E4BE62');
++    g.addColorStop(0.78, '#E8C56E');
++    g.addColorStop(1, '#D4A84E');
++    ctx.fillStyle = g;
++    ctx.beginPath();
++    ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(c[0], c[1]); ctx.lineTo(d[0], d[1]);
++    ctx.closePath(); ctx.fill();
++  }
++  for (let s = 0.04; s < MESO_TIP; s += 0.07) {
++    const h = mesoHang(s);
++    if (h < 20) continue;
++    const p = mesoPt(s, swell, h * 0.62);
++    drawPinned(ctx, 'g.meso', p[0], p[1], h * 0.55 / 240 * 1024, { alpha: 0.22, blend: 'multiply' });
+   }
+   ctx.restore();
+ }
+ 
+-function inkStroke(ctx, key, kind, args, o, alpha) {
+-  // dynamic: strokeWidth follows pose.sc; a cached shape from the 2×2 would leak into singles.
+-  draw(ctx, shape(key, kind, args, { boil: false, ...o }, true), { alpha });
++function vesselGeom(swell) {
++  const R = rng(12007);
++  const artery = [], vein = [];
++  let s = 0.04, fa = 0.62, fv = 0.4;
++  while (s < 0.74) {
++    const h = mesoHang(s);
++    artery.push(mesoPt(s, swell, Math.max(3, h * fa)));
++    vein.push(mesoPt(s, swell, Math.max(3, h * fv)));
++    s += 0.048;
++    fa = Math.max(0.3, Math.min(0.78, fa + (R() - 0.5) * 0.16));
++    fv = Math.max(0.22, Math.min(0.58, fv + (R() - 0.5) * 0.12));
++  }
++  const branches = [];
++  [0.14, 0.32, 0.5].forEach((s0, i) => {
++    const h = mesoHang(s0);
++    const f = frameAt(s0);
++    const start = mesoPt(s0, swell, h * (0.5 + 0.08 * i));
++    const mid = mesoPt(s0 + 0.03, swell, h * 0.28);
++    const end = mesoPt(s0 + 0.02, swell, h * 0.06);
++    // A small sideways jog so the branch is not a ruler line.
++    mid[0] += f.tx * (i % 2 ? 8 : -8);
++    mid[1] += f.ty * (i % 2 ? 8 : -8);
++    branches.push([start, mid, end]);
++  });
++  return { artery, vein, branches };
+ }
+ 
+-function drawMesoInk(ctx, state, sw, px, alpha) {
+-  inkStroke(ctx, `g.${state}.mesoE`, 'curve', [mesoFreeEdge(sw)], { strokeWidth: 1.55 * px, roughness: .75, bowing: .5, seed: 61 }, alpha * .62);
+-  const cap = [mesoPt(0, sw, 0), mesoPt(0, sw, mesoHang(0))];
+-  inkStroke(ctx, `g.${state}.mesoCap`, 'linearPath', [cap], { strokeWidth: 1.8 * px, roughness: .8, bowing: .4, seed: 62 }, alpha * .7);
+-  const col = state === 'black' ? '#7A3038' : C.red;
+-  const alongFold = frac => {
+-    const pts = [];
+-    for (let i = 0; i <= 18; i++) pts.push(mesoPt(.02 + .72 * (i / 18), sw, Math.max(1, mesoHang(.02 + .72 * (i / 18)) * frac)));
+-    return pts;
+-  };
+-  inkStroke(ctx, `g.${state}.vein`, 'curve', [alongFold(.55)], { stroke: '#7A4A55', strokeWidth: (.8 + .2 * (state !== 'normal')) * px, roughness: .45, bowing: .18, seed: 142 }, alpha * .48);
+-  inkStroke(ctx, `g.${state}.art`, 'curve', [alongFold(.82)], { stroke: col, strokeWidth: (state === 'normal' ? 1.15 : 1.75) * px, roughness: .42, bowing: .16, seed: 141 }, alpha * .84);
+-  const branches = [];
+-  [[.06, 54], [.15, 62], [.25, 48], [.36, 68], [.48, 56]].forEach(([s, deg], i) => {
+-    const extra = mesoHang(s); if (extra < 10) return;
+-    const f = frameAt(s), th = deg * Math.PI / 180, side = i % 2 ? 1 : -1;
+-    const sin = Math.sin(th), cos = Math.cos(th);
+-    const start = mesoPt(s, sw, extra * .82);
+-    const dx = f.tx * cos * side - f.nx * sin, dy = f.ty * cos * side - f.ny * sin;
+-    const L = extra * .82 / Math.max(.22, sin);
+-    const s2 = Math.max(.02, Math.min(.74, s + cos * side * L / 760));
+-    const end = mesoPt(s2, sw, .3);
+-    const p1 = [start[0] + dx * L * .3, start[1] + dy * L * .3];
+-    const p2 = [start[0] + dx * L * .6 - f.nx * extra * .05, start[1] + dy * L * .6 - f.ny * extra * .05];
+-    const pts = [start, p1, p2, end];
+-    branches.push(pts);
+-    inkStroke(ctx, `g.${state}.br${i}`, 'curve', [pts], { stroke: col, strokeWidth: (state === 'normal' ? 1.0 : 1.4) * px, roughness: .5, bowing: .22, seed: 171 + i }, alpha * .78);
++function lobules(swell) {
++  const out = [];
++  for (let i = 1; i < 36; i++) {
++    const s0 = MESO_TIP * (i - 1) / 36, s1 = MESO_TIP * i / 36, s2 = MESO_TIP * (i + 1) / 36;
++    const h1 = mesoHang(s1);
++    if (h1 >= mesoHang(s0) && h1 >= mesoHang(s2) && h1 > 56) out.push({ s: s1, h: h1 });
++  }
++  return out;
++}
++
++// Small warm caps on the free-edge bulges. No cream coins and no white centres.
++function paintLobules(ctx, swell, alpha) {
++  if (alpha <= 0) return;
++  ctx.save();
++  path(ctx, mesoLoop(swell)); ctx.clip();
++  lobules(swell).forEach(L => {
++    const f = frameAt(L.s);
++    const ang = Math.atan2(f.ty, f.tx);
++    const belly = mesoPt(L.s, swell, L.h * 0.8);
++    const lit = mesoPt(L.s, swell, L.h * 0.6);
++    ctx.fillStyle = `rgba(168, 112, 40, ${0.62 * alpha})`;
++    ctx.beginPath();
++    ctx.ellipse(belly[0], belly[1], L.h * 0.2, L.h * 0.12, ang, 0, Math.PI * 2);
++    ctx.fill();
++    ctx.fillStyle = `rgba(226, 176, 78, ${0.78 * alpha})`;
++    ctx.beginPath();
++    ctx.ellipse(lit[0], lit[1], L.h * 0.16, L.h * 0.1, ang, 0, Math.PI * 2);
++    ctx.fill();
+   });
+-  for (let i = 0; i < branches.length - 1; i++) {
+-    const A = branches[i][2], B = branches[i + 1][2];
+-    const mid = [(A[0] + B[0]) / 2 + (branches[i][0][0] - A[0]) * .26, (A[1] + B[1]) / 2 + (branches[i][0][1] - A[1]) * .26];
+-    inkStroke(ctx, `g.${state}.loop${i}`, 'curve', [[A, mid, B]], { stroke: col, strokeWidth: .8 * px, roughness: .48, bowing: .2, seed: 181 + i }, alpha * .52);
++  ctx.restore();
++}
++
++// Opaque yellow dabs laid across the artery so it dives through the fat instead of sitting on top.
++function paintFatDabs(ctx, swell) {
++  const R = rng(8801);
++  ctx.save();
++  path(ctx, mesoLoop(swell)); ctx.clip();
++  for (let i = 0; i < 11; i++) {
++    const s = 0.08 + i * 0.058;
++    const h = mesoHang(s);
++    if (h < 22) continue;
++    const c = mesoPt(s, swell, h * (0.4 + R() * 0.28));
++    const f = frameAt(s);
++    const ang = Math.atan2(f.ty, f.tx) + (R() - 0.5) * 0.5;
++    ctx.fillStyle = i % 2 ? 'rgba(232, 196, 108, 0.9)' : 'rgba(210, 162, 62, 0.9)';
++    ctx.beginPath();
++    ctx.ellipse(c[0], c[1], 8 + R() * 12, 5 + R() * 5, ang, 0, Math.PI * 2);
++    ctx.fill();
++  }
++  ctx.restore();
++}
++
++// t = 0 on the mesenteric (shadow) wall, t = 1 on the lit serosa. Opaque, so overlaps do not darken.
++function crossColor(look, t) {
++  const sh = look.shadow, base = look.base, gl = look.gloss;
++  const u = Math.max(0, Math.min(1, t));
++  const stops = [0, 0.16, 0.34, 0.52, 0.74, 0.9, 1];
++  const cols = [
++    mix3(sh, base, 0.16),
++    mix3(sh, base, 0.42),
++    mix3(sh, base, 0.76),
++    base,
++    mix3(base, gl, 0.32),
++    mix3(base, gl, 0.58),
++    mix3(base, gl, 0.16),
++  ];
++  let i = 0;
++  while (i < stops.length - 2 && u > stops[i + 1]) i++;
++  const span = stops[i + 1] - stops[i] || 1;
++  return mix3(cols[i], cols[i + 1], (u - stops[i]) / span);
++}
++function quad(ctx, a, b, c, d) {
++  ctx.beginPath();
++  ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(c[0], c[1]); ctx.lineTo(d[0], d[1]);
++  ctx.closePath(); ctx.fill();
++}
++
++function paintCylinder(ctx, swell, look) {
++  const outline = tubeOutline(swell);
++  ctx.save();
++  path(ctx, outline); ctx.clip();
++  ctx.fillStyle = css(look.base);
++  path(ctx, outline); ctx.fill();
++
++  const N = 32;
++  for (let i = 0; i < N; i++) {
++    const step = CAP_S / N;
++    const s0 = step * i;
++    const s1 = Math.min(CAP_S, s0 + step * 1.22);
++    const f0 = frameAt(s0), f1 = frameAt(s1);
++    const w0 = tubeRadius(s0, swell), w1 = tubeRadius(s1, swell);
++    const sh = addN(f0, w0), li = addN(f0, -w0);
++    const g = ctx.createLinearGradient(sh[0], sh[1], li[0], li[1]);
++    for (let k = 0; k <= 8; k++) g.addColorStop(k / 8, css(crossColor(look, k / 8)));
++    ctx.fillStyle = g;
++    quad(ctx,
++      addN(f0, w0), addN(f1, w1),
++      addN(f1, -w1), addN(f0, -w0));
+   }
+-  [[.1, .48, 10], [.2, .55, 8], [.32, .42, 7]].forEach(([s, frac, d], i) => {
+-    const extra = mesoHang(s); if (extra < 14) return;
+-    const c = mesoPt(s, sw, extra * frac);
+-    inkStroke(ctx, `g.${state}.lob${i}`, 'circle', [c[0], c[1], d], { strokeWidth: .7 * px, roughness: .55, bowing: .15, seed: 191 + i }, alpha * .2);
++  paintCap(ctx, swell, look);
++  ctx.restore();
++  return outline;
++}
++
++// Blind end: chords parallel to the tangent, same cross-section colours as the shaft.
++// A triangle fan left radial spokes; a gradient of solid strips does not.
++function paintCap(ctx, swell, look) {
++  const f = frameAt(CAP_S), R = tubeRadius(CAP_S, swell), c = f.p;
++  const strips = 28;
++  const pt = (u, h) => [
++    c[0] + f.nx * u * R + f.tx * h,
++    c[1] + f.ny * u * R + f.ty * h,
++  ];
++  for (let i = 0; i < strips; i++) {
++    const a0 = i / strips;
++    const a1 = Math.min(1, (i + 1.28) / strips);
++    const u0 = 1 - 2 * a0, u1 = 1 - 2 * a1;
++    const h0 = Math.sqrt(Math.max(0, 1 - u0 * u0)) * R;
++    const h1 = Math.sqrt(Math.max(0, 1 - u1 * u1)) * R;
++    ctx.fillStyle = css(crossColor(look, (a0 + a1) / 2));
++    quad(ctx, pt(u0, 0), pt(u0, h0), pt(u1, h1), pt(u1, 0));
++  }
++}
++
++function paintCut(ctx, swell, look) {
++  const f = frameAt(0.02), w = tubeRadius(0.02, swell);
++  ctx.save();
++  ctx.translate(f.p[0] - f.tx * w * 0.02, f.p[1] - f.ty * w * 0.02);
++  ctx.rotate(Math.atan2(f.ny, f.nx));
++  ctx.fillStyle = css(look.shadow, 0.85);
++  ctx.beginPath();
++  ctx.ellipse(0, w * 0.02, w * 0.16, w * 0.055, 0, 0, Math.PI * 2);
++  ctx.fill();
++  ctx.restore();
++}
++
++// Hemorrhage sits on the lit serosa so it does not melt into the congested shadow.
++const BLEEDS = [
++  { s: 0.18, v: -0.42, rx: 15, ry: 10, col: [122, 48, 56] },
++  { s: 0.32, v: -0.58, rx: 11, ry: 8, col: [142, 58, 62] },
++  { s: 0.44, v: -0.22, rx: 17, ry: 11, col: [168, 64, 78] },
++  { s: 0.56, v: -0.5, rx: 10, ry: 7, col: [154, 62, 72] },
++];
++function paintBleeds(ctx, swell, alpha) {
++  if (alpha <= 0.01) return;
++  const R = rng(6301);
++  ctx.save();
++  BLEEDS.forEach(b => {
++    const f = frameAt(b.s), w = tubeRadius(b.s, swell);
++    const c = [f.p[0] + f.nx * w * b.v, f.p[1] + f.ny * w * b.v];
++    const ang = Math.atan2(f.ty, f.tx);
++    ctx.fillStyle = css([b.col[0] * 0.62, b.col[1] * 0.55, b.col[2] * 0.55], 0.95 * alpha);
++    ctx.beginPath();
++    ctx.ellipse(c[0], c[1], b.rx * 1.18, b.ry * 1.15, ang, 0, Math.PI * 2);
++    ctx.fill();
++    ctx.fillStyle = css(b.col, 0.92 * alpha);
++    ctx.beginPath();
++    const jx = (R() - 0.5) * 3, jy = (R() - 0.5) * 2;
++    ctx.ellipse(c[0] + jx, c[1] + jy, b.rx, b.ry * (0.85 + R() * 0.2), ang, 0, Math.PI * 2);
++    ctx.fill();
+   });
++  ctx.restore();
++}
++
++function paintPit(ctx, swell, alpha) {
++  if (alpha <= 0.02) return;
++  const s = 0.8, f = frameAt(s), w = tubeRadius(s, swell);
++  const c = [f.p[0] + f.nx * w * -0.1, f.p[1] + f.ny * w * -0.1];
++  ctx.save();
++  ctx.translate(c[0], c[1]);
++  ctx.rotate(Math.atan2(f.ty, f.tx));
++  ctx.globalAlpha *= alpha;
++  const g = ctx.createRadialGradient(-3, -2, 1, 1, 1, 16);
++  g.addColorStop(0, '#07060A');
++  g.addColorStop(0.45, '#120E16');
++  g.addColorStop(0.78, '#3A2C44');
++  g.addColorStop(1, 'rgba(18, 12, 22, 0)');
++  ctx.fillStyle = g;
++  ctx.beginPath();
++  ctx.ellipse(0, 0, 15, 10, 0, 0, Math.PI * 2);
++  ctx.fill();
++  ctx.strokeStyle = 'rgba(214, 196, 188, 0.55)';
++  ctx.lineWidth = 1.25;
++  ctx.beginPath();
++  ctx.ellipse(-1, -2, 9, 5, 0, Math.PI * 1.15, Math.PI * 1.9);
++  ctx.stroke();
++  ctx.restore();
++}
++
++function inkStroke(ctx, key, kind, args, o, alpha) {
++  if (alpha <= 0.01) return;
++  // fill:false — rough's toPaths sets fill to the string 'none', which is truthy, so ink.js
++  // would fill the path with whatever fillStyle is current (the paper). An open curve then
++  // closes and paints a paper ribbon across the fat.
++  inkDraw(ctx, shape(key, kind, args, { boil: false, ...o }, true), { alpha, fill: false });
+ }
+ 
+-const SURFACE = {};
+-function surfaceVessels(state, sw) {
+-  if (SURFACE[state]) return SURFACE[state];
+-  const R = rng(41011 + STATES.indexOf(state) * 131);
+-  const trunks = state === 'normal' ? 2 : state === 'black' ? 5 : 7;
+-  const paths = [];
+-  for (let i = 0; i < trunks; i++) {
+-    const s0 = .1 + R() * .58, len = .09 + R() * (state === 'normal' ? .07 : .13);
+-    const side = i % 2 ? 1 : -1, inset0 = .32 + R() * .28;
++const SURFACE = [];
++function surfacePaths() {
++  if (SURFACE.length) return SURFACE;
++  const R = rng(41011);
++  for (let i = 0; i < 7; i++) {
++    const s0 = 0.08 + R() * 0.5;
++    const len = 0.1 + R() * 0.14;
++    const side = i < 5 ? -1 : 1;
++    const inset0 = 0.22 + R() * 0.46;
++    const wob = [];
++    for (let k = 0; k <= 8; k++) wob.push((R() - 0.5) * 0.16);
++    SURFACE.push({ s0, len, side, inset0, wob, w: 0.7 + R() * 0.55 });
++  }
++  return SURFACE;
++}
++function surfaceAt(swell) {
++  return surfacePaths().map(v => {
+     const pts = [];
+-    for (let k = 0; k <= 7; k++) {
+-      const s = Math.min(.92, s0 + len * k / 7), f = frameAt(s), w = halfW(Math.min(s, .9), sw);
+-      const ins = Math.max(.18, Math.min(.82, inset0 + Math.sin(k * .7 + i * 1.3) * .1));
+-      pts.push([f.p[0] + f.nx * w * ins * side, f.p[1] + f.ny * w * ins * side]);
++    for (let k = 0; k <= 8; k++) {
++      const s = Math.min(CAP_S - 0.03, v.s0 + v.len * k / 8);
++      const f = frameAt(s), w = tubeRadius(s, swell);
++      const ins = Math.max(0.1, Math.min(0.88, v.inset0 + Math.sin(k * 0.85) * 0.1 + v.wob[k]));
++      pts.push([f.p[0] + f.nx * w * ins * v.side, f.p[1] + f.ny * w * ins * v.side]);
+     }
+-    paths.push({ pts, w: state === 'normal' ? .65 : 1.15 + R() * .5 });
+-  }
+-  SURFACE[state] = paths;
+-  return paths;
++    return { pts, w: v.w };
++  });
++}
++
++function drawMesoInk(ctx, swell, px) {
++  const edge = mesoFreeEdge(swell);
++  inkStroke(ctx, 'g.mesoE', 'curve', [edge], { strokeWidth: 1.7 * px, roughness: .62, bowing: .35, seed: 61 }, 0.78);
++  const cap = [mesoPt(0, swell, 0), mesoPt(0, swell, mesoHang(0))];
++  inkStroke(ctx, 'g.mesoCap', 'linearPath', [cap], { strokeWidth: 1.8 * px, roughness: .7, bowing: .3, seed: 62 }, 0.72);
++  // Creases only. The artery and vein are already under the lobule caps.
++  const lobes = lobules(swell);
++  lobes.slice(0, -1).forEach((L, i) => {
++    const nxt = lobes[i + 1];
++    if (!nxt || nxt.s - L.s > 0.22) return;
++    const a = mesoPt(L.s + (nxt.s - L.s) * 0.5, swell, mesoHang((L.s + nxt.s) / 2) * 0.55);
++    const f = frameAt((L.s + nxt.s) / 2);
++    const p1 = [a[0] - f.tx * 10 + f.nx * 4, a[1] - f.ty * 10 + f.ny * 4];
++    const p2 = [a[0] + f.tx * 12 + f.nx * 2, a[1] + f.ty * 12 + f.ny * 2];
++    inkStroke(ctx, 'g.crease' + i, 'curve', [[p1, a, p2]], { strokeWidth: 0.8 * px, roughness: .6, bowing: .25, seed: 190 + i }, 0.28);
++  });
+ }
+ 
+-function drawSurfaceVessels(ctx, state, sw, px, alpha) {
+-  if (state === 'normal') alpha *= .4;
+-  const col = state === 'black' ? '#7A3038' : C.red;
+-  surfaceVessels(state, sw).forEach((v, i) => {
+-    if (state === 'black' && v.pts[0] && v.pts[0][0] > 120) return;
+-    inkStroke(ctx, `g.${state}.sv${i}`, 'curve', [v.pts], { stroke: col, strokeWidth: v.w * px, roughness: .58, bowing: .32, seed: 220 + i }, alpha * .72);
++function drawSurface(ctx, swell, px, cong) {
++  const col = css(mix3([176, 132, 126], [214, 69, 58], cong));
++  surfaceAt(swell).forEach((v, i) => {
++    const show = i < 3 ? 0.28 + 0.55 * cong : cong;
++    inkStroke(ctx, 'g.sv' + i, 'curve', [v.pts], { stroke: col, strokeWidth: (v.w * (0.75 + 0.45 * cong)) * px, roughness: .55, bowing: .28, seed: 220 + i }, show * 0.8);
+   });
+ }
+ 
+-function drawHighlights(ctx, state, sw, px, alpha) {
+-  if (state === 'black' || state === 'yellow') return;
+-  const k = state === 'normal' ? 1 : .48;
+-  [[.17, .26, 201], [.39, .47, 202], [.6, .68, 203]].forEach(([a, b, seed], i) => {
++function drawGlossInk(ctx, swell, px, amount) {
++  if (amount <= 0.05) return;
++  [[0.14, 0.24, 201], [0.36, 0.46, 202], [0.56, 0.66, 203]].forEach(([a, b, seed], i) => {
+     const pts = [];
+     for (let j = 0; j <= 5; j++) {
+-      const s = a + (b - a) * (j / 5), f = frameAt(s), w = Math.max(1.6, halfW(s, sw) - 3.6);
+-      pts.push([f.p[0] - f.nx * w, f.p[1] - f.ny * w]);
++      const s = a + (b - a) * (j / 5), f = frameAt(s), w = tubeRadius(s, swell);
++      pts.push([f.p[0] - f.nx * w * 0.62, f.p[1] - f.ny * w * 0.62]);
+     }
+-    inkStroke(ctx, `g.${state}.hi${i}`, 'curve', [pts], { stroke: '#FFFFFF', strokeWidth: 1.5 * px, roughness: .38, bowing: .22, seed }, alpha * .8 * k);
++    inkStroke(ctx, 'g.hi' + i, 'curve', [pts], { stroke: '#FFFaf6', strokeWidth: 1.35 * px, roughness: .4, bowing: .2, seed }, amount);
+   });
+ }
+ 
+-function drawTubeInk(ctx, state, sw, px, alpha) {
+-  const wall = specimenOutline(sw, N_WALL);
+-  inkStroke(ctx, `g.${state}.wall`, 'linearPath', [wall], { strokeWidth: 2.6 * px, roughness: .9, bowing: .8, seed: 81 }, alpha);
+-  inkStroke(ctx, `g.${state}.wall2`, 'linearPath', [wall], { strokeWidth: 1.2 * px, roughness: 1.2, bowing: 1.0, seed: 97 }, alpha * .48);
+-  const cap = baseCap(sw);
+-  inkStroke(ctx, `g.${state}.cap`, 'curve', [cap], { strokeWidth: 2.4 * px, roughness: .85, bowing: .5, seed: 88 }, alpha);
+-  inkStroke(ctx, `g.${state}.cap2`, 'curve', [cap], { strokeWidth: 1.15 * px, roughness: 1.1, bowing: .8, seed: 89 }, alpha * .45);
+-  drawHighlights(ctx, state, sw, px, alpha);
++function drawTubeInk(ctx, swell, px, alpha) {
++  const wall = tubeOutline(swell);
++  const closed = wall.concat([wall[0]]);
++  inkStroke(ctx, 'g.wall', 'linearPath', [closed], { strokeWidth: 2.6 * px, roughness: .9, bowing: .8, seed: 81 }, alpha);
++  inkStroke(ctx, 'g.wall2', 'linearPath', [closed], { strokeWidth: 1.2 * px, roughness: 1.15, bowing: 1.0, seed: 97 }, alpha * 0.5);
+ }
+ 
+ export function drawAppendix(ctx, state, pose, { alpha = 1 } = {}) {
+-  const sw = SWELL[state], px = 1 / pose.sc;
++  const stage = asStage(state);
++  const swell = swellAt(stage);
++  const look = {
++    base: knot(stage, LOOK.map(L => L.base)),
++    shadow: knot(stage, LOOK.map(L => L.shadow)),
++    gloss: knot(stage, LOOK.map(L => L.gloss)),
++  };
++  const cong = ramp(stage, 0, 1);
++  const pusA = ramp(stage, 1, 2);
++  const necA = ramp(stage, 2, 3);
++  const bleedA = ramp(stage, 2.1, 2.85);
++  const glossK = lerp(0.72, 0.28, Math.min(1, stage / 2));
++  const px = 1 / pose.sc;
++
+   ctx.save();
+   ctx.globalAlpha *= alpha;
+   ctx.globalCompositeOperation = 'source-over';
+@@ -304,63 +679,83 @@ export function drawAppendix(ctx, state, pose, { alpha = 1 } = {}) {
+   ctx.rotate(pose.rot);
+   ctx.scale(pose.sc, pose.sc);
+ 
+-  stampMeso(ctx, sw, 1);
++  paintMeso(ctx, swell);
++  const { artery, vein, branches } = vesselGeom(swell);
++  const art = mix3([112, 32, 36], [158, 36, 42], cong);
++  // Vessels under the fat dabs, clipped to the meso, so they run inside the fat.
+   ctx.save();
+-  clipTube(ctx, sw);
+-  const body = state === 'yellow' ? 'g.yellow' : state === 'red' ? 'g.red' : state === 'black' ? 'g.black' : 'g.normal';
+-  drawPinned(ctx, body, 0, 0, 1024, { alpha: 1, blend: 'multiply' });
+-  if (state === 'yellow' || state === 'black') {
+-    drawPinned(ctx, 'g.pusStain', 0, 0, 1024, { alpha: state === 'black' ? .55 : .8, blend: 'multiply' });
+-    drawPinned(ctx, 'g.pus', 0, 0, 1024, { alpha: state === 'black' ? .32 : .48, blend: 'source-over' });
+-  }
+-  if (state === 'black') {
+-    drawPinned(ctx, 'g.necro', 0, 0, 1024, { alpha: 1, blend: 'multiply' });
+-    drawPinned(ctx, 'g.bleed', 0, 0, 1024, { alpha: .9, blend: 'multiply' });
+-  }
++  path(ctx, mesoLoop(swell)); ctx.clip();
++  inkStroke(ctx, 'g.veinB', 'curve', [vein], { stroke: '#5A2830', strokeWidth: (1.7 + 0.35 * cong) * px, roughness: .5, bowing: .2, seed: 142 }, 0.88);
++  inkStroke(ctx, 'g.artB', 'curve', [artery], { stroke: css(art), strokeWidth: (2.5 + 0.7 * cong) * px, roughness: .48, bowing: .22, seed: 141 }, 0.92);
++  branches.forEach((pts, i) => {
++    inkStroke(ctx, 'g.brB' + i, 'curve', [pts], { stroke: css(art), strokeWidth: (1.45 + 0.35 * cong) * px, roughness: .5, bowing: .2, seed: 171 + i }, 0.85);
++  });
+   ctx.restore();
++  paintFatDabs(ctx, swell);
++  paintLobules(ctx, swell, 1);
++  drawMesoInk(ctx, swell, px);
+ 
+-  drawMesoInk(ctx, state, sw, px, 1);
+-  drawSurfaceVessels(ctx, state, sw, px, 1);
+-  drawTubeInk(ctx, state, sw, px, 1);
++  paintCylinder(ctx, swell, look);
++  ctx.save();
++  path(ctx, tubeOutline(swell)); ctx.clip();
++  drawPinned(ctx, 'g.pink', 0, 0, 1024, { alpha: (1 - cong) * 0.28, blend: 'multiply' });
++  drawPinned(ctx, 'g.red', 0, 0, 1024, { alpha: cong * 0.4, blend: 'multiply' });
++  drawGlossInk(ctx, swell, px, glossK * (1 - pusA * 0.8) * 0.4);
++  drawSurface(ctx, swell, px, cong);
++  drawPus(ctx, pusA);
++  paintBleeds(ctx, swell, bleedA);
++  drawPinned(ctx, 'g.necro', 0, 0, 1024, { alpha: necA, blend: 'source-over' });
++  paintPit(ctx, swell, necA);
++  paintCut(ctx, swell, look);
++  ctx.restore();
++
++  drawTubeInk(ctx, swell, px, 1);
+   ctx.restore();
+ }
+ 
+ const NOTES = {
+   normal: [
+-    { s: .44, side: -1, d: 6, label: '浆膜光泽', dir: 'up', shelf: 'right' },
+-    { s: .28, extra: .55, label: '阑尾系膜', dir: 'down', shelf: 'left' },
+-    { s: .08, extra: .88, label: '系膜血管细', dir: 'down', shelf: 'left' },
++    { s: 0.42, side: -1, d: 8, label: '浆膜光泽', dir: 'up', shelf: 'right' },
++    { s: 0.36, extra: 0.62, label: '阑尾系膜', dir: 'down', shelf: 'left' },
++    { s: 0.16, extra: 0.45, label: '系膜血管细', dir: 'down', shelf: 'left' },
+   ],
+   red: [
+-    { s: .24, side: -1, d: 6, label: '朱红充血', dir: 'up', col: C.red, shelf: 'left' },
+-    { s: .72, side: -1, d: 4, label: '表面血管扩张', dir: 'up', shelf: 'right' },
+-    { s: .2, extra: .55, label: '轻度肿胀', dir: 'down', shelf: 'left' },
++    { s: 0.28, side: -1, d: 8, label: '朱红充血', dir: 'up', col: C.red, shelf: 'left' },
++    { s: 0.62, side: -1, d: 8, label: '表面血管扩张', dir: 'up', shelf: 'right' },
++    { s: 0.22, extra: 0.7, label: '轻度肿胀', dir: 'down', shelf: 'left' },
+   ],
+   yellow: [
+-    { s: .56, side: -1, d: 4, label: '灰黄色脓苔', dir: 'up' },
+-    { s: .78, side: -1, d: 6, label: '斑驳、片状', dir: 'up' },
+-    { s: .24, extra: .5, label: '明显肿胀增粗', dir: 'down' },
++    { s: 0.4, side: -1, d: 8, label: '灰黄色脓苔', dir: 'up', shelf: 'left' },
++    { s: 0.64, side: -1, d: 8, label: '斑驳、片状', dir: 'up', shelf: 'right' },
++    { s: 0.24, extra: 0.62, label: '明显肿胀增粗', dir: 'down', shelf: 'left' },
+   ],
+   black: [
+-    { s: .86, side: -1, d: 6, label: '局部坏死发黑', dir: 'up', shelf: 'right' },
+-    { s: .38, side: -1, d: 5, label: '出血斑', dir: 'up', shelf: 'left' },
+-    { s: .16, extra: .55, label: '周围仍有红、黄', dir: 'down', shelf: 'left' },
++    { s: 0.82, side: -1, d: 10, label: '局部坏死发黑', dir: 'up', shelf: 'right' },
++    { s: 0.32, side: -1, d: 8, label: '出血斑', dir: 'up', shelf: 'left' },
++    { s: 0.5, side: -1, d: 8, label: '周围仍有红、黄', dir: 'up', shelf: 'right', lift: 36 },
+   ],
+ };
+ 
++function noteKey(state) {
++  if (typeof state === 'number') return STATES[Math.round(Math.max(0, Math.min(3, state)))];
++  return state;
++}
++
+ export function drawNotes(ctx, state, pose) {
+-  NOTES[state].forEach(n => {
++  const key = noteKey(state);
++  const swell = SWELL[key];
++  NOTES[key].forEach(n => {
+     const f = frameAt(n.s);
+-    const w = halfW(Math.min(n.s, .9), SWELL[state]);
+     const local = n.extra != null
+-      ? mesoPt(n.s, SWELL[state], mesoHang(n.s) * n.extra)
+-      : [f.p[0] + f.nx * (w + (n.d || 0)) * (n.side || 1), f.p[1] + f.ny * (w + (n.d || 0)) * (n.side || 1)];
++      ? mesoPt(n.s, swell, mesoHang(n.s) * n.extra)
++      : [f.p[0] + f.nx * (tubeRadius(n.s, swell) + (n.d || 0)) * (n.side || 1),
++         f.p[1] + f.ny * (tubeRadius(n.s, swell) + (n.d || 0)) * (n.side || 1)];
+     const p = toScreen(pose, local);
+     const up = n.dir === 'up';
+-    const qy = p[1] + (up ? -68 : 72);
+-    const shelf = n.label.length * 15 + 10;
++    const qy = p[1] + (up ? -78 : 86) - (n.lift || 0);
++    const shelf = n.label.length * 15 + 12;
+     const right = n.shelf === 'right' ? true : n.shelf === 'left' ? false : p[0] > 1300;
+-    const qx = right ? p[0] - 40 : p[0] + 40;
++    const qx = right ? p[0] - 36 : p[0] + 36;
+     const rx = right ? qx - shelf : qx + shelf;
+     A.leader(ctx, p, [qx, qy], [rx, qy], { k: 1, elbow: true });
+     A.label(ctx, n.label, right ? rx : qx + 6, qy - 16, { size: 26, w: 700, col: n.col || C.ink, halo: true, align: right ? 'right' : 'left' });
+@@ -368,7 +763,7 @@ export function drawNotes(ctx, state, pose) {
+ }
+ 
+ export function drawTitle(ctx, state, { x = 96, y = 120 } = {}) {
+-  const m = META[state];
++  const m = META[noteKey(state)];
+   ctx.save(); ctx.fillStyle = m.tone; ctx.fillRect(x, y + 8, 64, 5); ctx.restore();
+   A.label(ctx, '大体标本 画风样张', x, y - 36, { size: 22, w: 500, alpha: .55 });
+   A.label(ctx, m.diag, x, y + 52, { size: 48, w: 800, col: m.tone });
+assembly/pipeline/render_endcard.mjs
+assembly/endcard/render.mjs
+render_dpr2.mjs
+assembly/subtitle/render.mjs
+film/chapters/gross_test.js
+film/lib_ext/gross_appendix.js
+render.mjs
+qa/gross/gross_红.png
+qa/gross/render.log
+qa/gross/gross_正常.png
+qa/gross/gross_四态.png
+qa/gross/gross_黑.png
+qa/gross/说明.md
+qa/gross/gross_黄.png
+qa/v6/animatic/render.log
+qa/v6/b07/render.log
+qa/v6/b03/render.log
+qa/v6/c01_s10/render.log
+qa/briefs/g_gross01.md
+qa/briefs/run_g_gross02b.log
+qa/briefs/g_gross02.md
+qa/briefs/run_g_gross02.log
+qa/briefs/g_gross02b.md
+qa/briefs/run_g_gross01.log
+qa/briefs/render_b04_chromium.log
+qa/v6/c01_s10/render_all.mjs
+qa/v6/b09/render.log
+qa/v6/c03_s10/render.log
+qa/v6/b04/render.log
+qa/v6/parity/render.log
+qa/v6/parity/render_99.22.png
+qa/v6/parity/render_89.73.png
+qa/v6/parity_dpr2/render_99.22.png
+qa/v6/c03_s10/render_all.mjs
+qa/v6/parity_dpr2/render_89.73.png
+qa/v6/c02_s10/render.log
+qa/v6/b10/render.log
+qa/v6/c02_s10/render_all.mjs
+qa/v6/b08/render.log
+
+exec
+/bin/bash -lc 'find .. -name AGENTS.md -print; cat qa/gross/说明.md; cat qa/gross/sha256_02.log; cat package.json; cat render.mjs' in /workspace/病理科普视频/v5_gross_dev
+ succeeded in 358ms:
+# 大体阑尾标本画风样张（gross01）
+
+静态样张，无动画。场景 `?scene=gross_test`，时长 5 秒：t=0 正常、t=1 红、t=2 黄、t=3 黑、t=4 场景内 2×2。交付图由 `--still 0,1,2,3` 复制为中文文件名；`gross_四态.png` 是四张单图的 2×2 拼贴（各带标题与引线）。
+
+重建：
+
+```bash
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --q scene=gross_test --still 0,1,2,3,4 --out qa/gross
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --q scene=gross_test --determinism
+```
+
+未改 `engine/lib`。新代码在 `film/lib_ext/gross_appendix.js`、`film/chapters/gross_test.js`，`film/main.js` 只增加场景分发。未碰 v5 主工作区、v4_mix、配音环境。
+
+## 用到的颜色
+
+均来自风格规范 §2 / tokens / 02 章已有色值：
+
+| 用途 | 色值 |
+|---|---|
+| 纸 | `#F4EFE6`（`C.paper`） |
+| 墨 | `#2A2A35`（`C.ink`） |
+| 朱红 / 充血 | `#D6453A`（`C.red`） |
+| 充盈水彩 | `#C9455A` |
+| 深充血 | `#6E1A24` |
+| 灰粉浆膜 | `#D9C0B8` `#E8B9B0` `#C4A39A` `#EBD3CC` |
+| 大体脓苔 | `#CDB98A`（只用这一色） |
+| 系膜脂肪 | `#EFD9A0` `#E4C78A` `#F3E4B8` |
+| 出血斑 | `#A8404E` `#8E3A3E` `#9A3E48` `#7A3038` |
+| 坏死核 | `#2A1014` `#1A0C0E` `#14080A` `#4E1019` `#3A1818` |
+
+## 用到的函数
+
+- `figure.js`：`spine`、`halfW`、`specimenOutline`（管壁轮廓；尖端收束沿用引擎公式）
+- `wash.js`：`bake`（`hd:true, soft:true, grain:.12, bleed:.5`；脓苔 `keepWhite`）、`get`。每张烘焙立刻 `getImageData` 拷到 CPU 画布再画（`drawPinned`），组织 `multiply`，脓苔 `source-over` + 一层 `multiply` 渍。软件 GL 会丢掉未读过的 2048 画布，所以不能等全部烘完再读。
+- `ink.js`：`shape(..., dynamic=true)` + `draw` 双线管壁（2.6 / 1.2 屏幕像素，roughness .9 / 1.2，`boil:false`）、系膜游离缘、动脉/静脉/弓形吻合、浆膜面血管、浆膜高光短弧。动态生成是因为 2×2 与单图 `pose.sc` 不同，缓存 key 不含线宽，后画的会污染先画的。
+- `ann.js`：`label`（字重 500 / 700 / 800）、`leader`（`elbow:true`，halo）
+- `motion.js`：`rng(固定种子)` 生成浆膜血管，禁止 `Math.random`
+
+肿胀量：正常 0.22、红 0.48、黄 1.0、黑 0.96（相对 `halfW` 的 swell）。构图：标本放在右主画面 x=570–1860、y=50–780，姿态约 `(1210, 400, rot=-0.16, sc=1.48)`。
+
+## 还不够好的地方
+
+1. **系膜**仍偏薄、偏空。游离缘有波浪，基部有切断宽度，但脂肪水彩不够厚，读起来仍像血管示意图而不是一块油膜。v4 的盲肠/系膜曾因「平楔形」被拒，这一版避开了尖楔，体积还不够。
+2. **脓苔**斑驳、未整根涂黄，但 `keepWhite` 烘焙留下浅色笔触条纹（化脓性图中云团里的白划），灰黄 `#CDB98A` 有时偏粉白。规范里的 despeckle / dryRim 当前 `wash.js` 没有暴露。
+3. **坏疽**是远端局部暗红–黑褐，没有整根涂黑，近端仍红；黑度更接近陈旧出血而不是炭黑。出血斑和充血底混在一起，引线「出血斑」不够指到独立斑块。
+4. **正常浆膜光泽**只有三条白弧，整体仍偏平。圆柱体感主要靠腹侧略深的水彩，不够。
+5. **尖端**沿 `specimenOutline` 在 s>0.9 收成尖点，盲端圆钝感不足。引擎函数的 `tip` 数组是空的，这一轮没有另造几何。
+6. **表面血管**比第一版少平行排线，仍偏稀、偏直，扩张感不如实物浆膜充血。
+7. 场景内 t=4 的 2×2 把每格画到纸色小画布再贴回（透明底上 `multiply` 会变黑）。交付的 `gross_四态.png` 是四张带标注单图的拼贴，便于对照引线。
+8. `--determinism` 六个时点跨页乱序已通过（见 `determinism.log`）。渲染日志里的 404 是 favicon，不影响出图。
+# g_gross02 开工
+# engine/lib/*.js 与 parity_r4/chapters/04.js 只读
+a1168fc75660bf23424cffff32533dc7289672ffe943537bc6276d6d04742ed6  engine/lib/ann.js
+25ada270e774274d72d5eb0789f9f9c8e5167cd49b28e3b16b55c6bf7c59ee83  engine/lib/camera.js
+87da05d328d75866e3af1110d95aa465292c0c9d2473271b33973fddd7baa1d3  engine/lib/chapter.js
+469a82fb2770029cd58367a5d1129574fd506befd48361519d16451b169feeb0  engine/lib/figure.js
+a2e658fc107c4a43c689607337db996fe8da13ea7e4b730f76d9789442b771bf  engine/lib/he.js
+899d24ba596208caa026512c824025a5eb648b86d6bdfd7bc4920bab143544d0  engine/lib/he_detail.js
+b011bfec410a0546af527e80c1396e8b9e02ad6f36c8280dcdcaf68378f4551c  engine/lib/ink.js
+795da3e2db1faf818a34a2a3f70d4fc720db1f4a0d9202fd57c7a32d0080cb1c  engine/lib/mood.js
+7b4831e12701871770577f581d3fb815b650188e4ea046717a9cf0695000f472  engine/lib/motion.js
+6c6079ad8a12ded36b5c203f9a3416d51d83c46c757a50d06768dda6bac9a0b2  engine/lib/scope.js
+1650f7dea7f02235c47188889dd4456df7c8f15d97f08c2476a13368d8786909  engine/lib/subtitle.js
+2d5b18ef9492c5dfb9d52c7200a253ed2a9e884f059766dc8ed435183538c133  engine/lib/timeline.js
+187410669a6f4ae7adf51131e00862020d861b3e6c13d8a176d50a9154e2a307  engine/lib/tokens.js
+889bacbc5c54cd57b7c6018afa33fb1df6bbcb9e8a3b744efece3539826308b9  engine/lib/wash.js
+4f83add26190441d4c71ed39f2ba83a950fef9933cbdaae95cabda2106542fb4  parity_r4/chapters/04.js
+{
+  "name": "pathology-v6",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@napi-rs/canvas": "0.1.80",
+    "playwright": "1.55.0"
+  }
+}
+import fs from 'node:fs';
+import path from 'node:path';
+import http from 'node:http';
+import {fileURLToPath} from 'node:url';
+import {chromium} from 'playwright';
+const root=path.dirname(fileURLToPath(import.meta.url));
+const parity=process.argv.includes('--parity');
+if(!parity && !process.argv.includes('--samples')) throw Error('Use --parity or --samples');
+if(!parity){
+ const result=JSON.parse(fs.readFileSync(path.join(root,'qa/v6/parity/metrics.json')));
+ if(!result.passed) throw Error('Parity gate failed: S08 is not implemented; see qa/v6/自检.md');
+ throw Error('S08 has not been implemented');
+}
+const out=path.join(root,'qa/v6/parity');fs.mkdirSync(out,{recursive:true});
+const mime={'.html':'text/html','.js':'text/javascript','.woff2':'font/woff2','.json':'application/json','.tsv':'text/plain'};
+const server=http.createServer((req,res)=>{let rel=decodeURIComponent(new URL(req.url,'http://local').pathname);if(rel.endsWith('/'))rel+='index.html';const f=path.resolve(root,'parity_runtime','.'+rel);if(!f.startsWith(path.join(root,'parity_runtime')+path.sep)){res.writeHead(403);res.end();return;}try{res.setHeader('Content-Type',mime[path.extname(f)]||'application/octet-stream');res.end(fs.readFileSync(f));}catch{res.writeHead(404);res.end();}});
+await new Promise(r=>server.listen(0,'127.0.0.1',r));
+let browser;
+try{
+ browser=await chromium.launch({executablePath:process.env.CHROME_PATH||'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--use-angle=swiftshader','--enable-unsafe-swiftshader','--font-render-hinting=none','--force-color-profile=srgb','--hide-scrollbars']});
+ const page=await browser.newPage({viewport:{width:1920,height:1080},deviceScaleFactor:1});const errors=[];page.on('pageerror',e=>errors.push(String(e)));page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
+ await page.goto(`http://127.0.0.1:${server.address().port}/`);
+ await page.waitForFunction(()=>window.READY===true,null,{timeout:240000});
+ for(const t of [89.73,99.22]){
+ await page.evaluate(t=>window.render(t),t);
+ const data=await page.locator('#c').evaluate(c=>c.toDataURL());
+ fs.writeFileSync(path.join(out,`render_${t.toFixed(2)}.png`),Buffer.from(data.split(',')[1],'base64'));
+ }
+ fs.writeFileSync(path.join(out,'browser.json'),JSON.stringify({browser:await browser.version(),backend:'Chromium Canvas2D + SwiftShader WebGL (CPU software rasterizer)',errors},null,2));
+}finally{await browser?.close();server.close();}
+await import('./tools/compare-parity.mjs');
+if(!JSON.parse(fs.readFileSync(path.join(out,'metrics.json'))).passed)process.exitCode=2;
+
+exec
+/bin/bash -lc "cat /workspace/病理科普视频/v4_mix/qa/style/风格规范_v1.md; cat film/lib/ink.js; sed -n '300,465p' film/lib_ext/gross_appendix.js; cat film/chapters/gross_test.js" in /workspace/病理科普视频/v5_gross_dev
+ succeeded in 0ms:
+# 画面风格规范 v1
+
+照 `film_mini_detail` 第 04 章样帧执行（`he.js`、`he_detail.js`、`chapters/04.js`、`wash.js`、`ann.js`；该分支没有 `lib/detail.js`）。数量用代码里的同一套 `rng` 跑出。画布 1920×1080。镜下是局部坐标 ±420，装进目镜 `{x:640, y:480, r:340}`，缩放 `k = 340/420 × fs`（04 的 `fs` 从 1.06 到 1.48）。
+
+## 1. 线条
+
+结构层用 Rough.js（`ink.js`）：默认 `strokeWidth 2.6`、`roughness .9`、`bowing .8`、`seed 3`、圆头，墨色 `#2A2A35`。路径固定种子缓存一次，出现靠虚线揭开。抖动 `BOIL_FPS = 10`、3 变体；04 镜检 `boil: false`、`drift: false`。已有 `roughness`：.5 .55 .6 .7 .8 1；`bowing` 只在疼痛线为 .5。日常线宽 1.4–3；4.5–9 只留给已有的疼痛线、神经高亮、十字和阑尾。排线只给人物：头发角度 −30、间距 4、`fillWeight 2`；裤子 −60、间距 10、`fillWeight 1.1`。镜下不排线。
+
+镜下圆头细线（视野坐标）：上皮 7，血管轮廓 2.2，纤维素粗丝 `2.4×(1−0.85×detail)`（满细节 0.36），细网 0.55，肌/胶原/影细胞 0.65，裂隙纤维素 0.75 与 0.45，核桥 `0.48/缩放`，红细胞边 0.28，外壁 1.45、内壁 0.85。目镜圈 5、外圈 1.5；闪边宽 8，只在镜圈。标注锁在屏幕像素：引线 1.6，阶段轴 2，刻度 2.4，穿孔环 3。
+
+## 2. 配色
+
+病理色不随情绪变。`mood.js` 只动纸和网格：纸从 `#F4EFE6` 做轻微冷中性、压暗或提亮。玻片底固定 `#F6EEF0`。目镜外 `#111114`；深底上墨色由 `setDark` 混向 `#EFE8DC`。
+
+- 墨 `#2A2A35`。朱红 `#D6453A`（活组织、炎症、重点字、镜圈）。字幕里的朱红用 `#F07A63`。
+- H&E 紫 `#6B4C9A`（核、内皮核）。核深 `#3F2A66`，染色质点 `#38234F`，碎屑深 `#2E1F45`，叶填 `#51336F`。
+- 嗜伊红 `#D98BA8`，浅 `#EBC3D0`。胞质 `rgba(226,170,200,.75)`，颗粒 `rgba(167,105,159,.38)`，核桥 `#9273A5`。
+- 出血红褐：盘 `#A8404E`、边 `#7E2A38`、中央淡区 `#C9A8AE`、溶血 `#C9A4AC`。出血斑 `#8E3A3E` `#A8404E` `#9A3E48` `#7A3038`。Zahn 红层 `#8E3A3E`/`#A8404E`，粉层 `#F0D4DC`/`#F3D5DE`。充盈水彩 `#C9455A` 在坏疽期让开。
+- 镜下脓 `#B39459`（`C.pus`）。大体脓苔只用 02 的 `#CDB98A`。坏死晕 `#D7A3B3` `#E3B7C4` `#E7C9D2`。裂隙底 `#E9DDB0`。网格 `rgba(42,42,53,.07)`。
+
+## 3. 细胞与组织
+
+中性粒用 `detailedNeutrophil`。叶数：2 叶 15%、3 叶 45%、4 叶 30%、5 叶 10%。叶半轴 4.0×2.9，内侧收 0.14，叶间留胞质缝，二次曲线核桥相连，每叶 5 个染色质团。胞质椭圆（2→5 叶）7.20×5.65、8.05×7.55、9.25×8.70、10.625×10，内 22 颗颗粒。`chromatin()` 另是 25 个点，盖隐窝核和肌核。`detail=0` 时仍走简笔，03 不被改掉。
+
+全板 **1336** = 腔 186 + 浸润 1150。叶数 222 / 566 / 412 / 136。浸润：黏膜 378、黏膜下层 228、肌层 306、浆膜 84、纤维素带 154。
+
+圆视野（半径 `420/fs`）：
+
+- 早期 `neut=0.2`、`fs=1.06`：游出 166，腔内 71。
+- 全层、`fs=1.15`：**912**（黏膜 298、黏膜下层 204、肌层 262、浆膜 45、纤维素带 48、腔 55）。
+- 坏疽峰值 `fs=1.48`、场偏移 `[145.9, 60]`：圆内 471 个位置，按坏死权重抹掉 403，留 68。裂隙另有 45 个（2–5 叶），不参与这轮剔除。
+
+红细胞 `pushDisc`：`rx=5×(0.72–1.32)`（04 样帧原为 3.1，已按 look 改为 5），`ry=rx×(0.36–0.76)`，淡区 0.46×0.38；`rnd<.25` 为溶血。屏幕上的喷洒盘 **354**，溶血 92，聚在 5 块红褐斑和 6 条血管旁。每条血管有外壁、内壁、内皮核 4–6（本种子 4,4,4,5,5,4）、Zahn 带 3–5 层红粉交替（本种子 3,3,5,4,3,4），最内层填实。影细胞 52 个淡轮廓（`CG()<0.38` 开口）。核碎屑 90 簇 502 粒，核尘 1050。纤维素：60 条粗丝 + 140 条细网。隐窝 13×16 核，肌核 170。穿孔向浆膜加宽，浆膜端脓团 95、核 80。
+
+**比例（look 定）：**红细胞直径约 7.5 μm，中性粒细胞约 10–12 μm，后者约为前者的 1.5 倍。中性粒胞质直径 14–21 时，红细胞 `rx` 应约 5（直径约 10），不再用 3.1。
+
+### 3b. 正常阑尾组织学（01–03 必须有）
+
+- 黏膜下层有成片的淋巴滤泡：深紫色的淋巴细胞团，中间是淡色的生发中心。
+- 肌层分两层：内层是环行肌，横截面上的核是小圆点；外层是纵行肌，核呈梭形。
+- 隐窝画成管状腺，内衬柱状上皮，夹有杯状细胞。
+
+## 4. 水彩
+
+只烘一次。默认 1024；`hd:true` 输出 **2048**，颗粒在成图像素上重铺（3px 与 18px fbm，权重 .65/.35）。04 近景色素：`hd:true, soft:true, grain:.12, edge:.3, bleed:.5`。`edge` 是干边压暗，`bleed` 向外渗。四个坏死斑再 `blur(15px)`。`scaleBrushes` 会连乘（默认 2.4）；多烘之后用四次 `1/2.4` 把笔刷还回去。
+
+`drawWash` 的 `size` 再乘目镜或相机，才是屏幕像素。屏幕像素 / 烘焙边长 **> 1** 就是拉伸，要改 2048 重烘。审计把相对 1024 超过 1.1 标为需要 hd。共享层带 `he.bands` 仍是 1024，峰值约 1.20 倍，这是旧层；新的近景色素不要照它放大。
+
+## 5. 标注
+
+`ann.js`。字号是屏幕像素。字重用 100–900 的整百；片内实际是 **500**（默认、字幕）、**700**（标题）、**800**（诊断名、三型）。镜旁 22–30，站名 40，诊断 52 与 62；章标题 56 / 章号 22。字幕 44，基线 `y=1012`，只由 `subtitle.js` 画。
+
+描边文字：`label({halo:true})`，先描后填，默认线宽 5，纸色或 `rgb(17,17,20)`。字幕光晕线宽 6。斜引线 `leader`：锚点半径 4，线宽 1.6，先到肘点再走水平字托（03 的「黏膜破溃缺损」）。`elbow:true` 时斜段不超过水平距离。04 穿孔用半径 52、线宽 3 的圆环，字放在镜缘外。
+
+构图停在 `y < 900`（`SAFE.fadeTop`）。镜下注释用短标签，冒号前是看法、冒号后是所见，与「时间倒回：发病早期」同一结构，如「镜下：坏死组织结构消失、出血」。03 镜缘已有「HE 染色 · 阑尾壁」「核分 2–5 叶」。04 现片还没有「镜下：」四字；要加就用 `A.label`，可加 halo，放在阶段轨下、`y<900`，只用 `T.frac` / `T.end` 进出。
+
+## 6. 时序与工程
+
+节拍只用 `T.at(i, 偏移)`、`T.end(i, 偏移)`、`T.frac(i, 0–1)`，时间来自 `narration.json`（否则 `sentences.tsv`）。不规则形状在加载时按固定种子写入局部坐标。帧内随机用 `render(t)` 里的 `rng(种子)`。禁止 `Math.random()`、`Date.now()`、`performance.now()`。水彩只在 `bake()` 里生成。交接帧用 `T.end(末句) − 1e-3` 重画上一章末态（`drawExit04`）。每章导出 `EXIT_*`。画面上新的数字要能指回句子、教材或已有常量；04 没有新计数，也没有比例尺。
+
+## 6b. 动态规则
+
+「活的表面」（`lib/alive.js`）只用在大体标本、人体示意图和 05 章的血管示意图上；H&E 镜下视野一律不开，镜下的动态靠镜头推拉和对焦变化（look 定）。
+
+## 7. 自检清单
+
+1. 结构线是否仍是 2.6 / .9 / .8，或沿用已有覆盖；镜下有没有排线。
+2. 1080p 下能否数出 2–5 叶，叶间有胞质缝和核桥。
+3. 镜下细胞密度是否接近第 3 节量级（满层浸润的圆视野约 900 个中性粒，早期约 150–250）；坏死区是否只留无核影细胞和核碎屑，活的中性粒集中在坏死区边缘。（第 3 节的具体计数是 04 的实测值，其他章按同一密度量级做，不要照抄数字。）
+4. 红细胞是否双凹加淡区；中性粒细胞与红细胞大小比约 1.5:1（`rx`≈5）；血管是否有双层壁和 3–5 层红/粉血栓。
+5. 有纤维素渗出的地方，是否同时画了粗丝和细网（04 的比例约 60 : 140）。
+6. 色是否落在第 2 节；纸色是否只走 `mood.js`。
+7. 近景水彩是否 2048，屏幕像素有没有超过烘焙边长。
+8. 字是否都在 `y<900`，字重是否为 500 / 700 / 800，斜引线是否走 `leader`。
+9. 节拍是否全是句子索引；交接帧是否等于上一章末帧减 0.001 秒。
+10. `--determinism` 换序是否一致；新数字有没有出处。
+11. 正常组织（01–03）：黏膜下层有带生发中心的淋巴滤泡，肌层内环（圆点核）外纵（梭形核），隐窝是管状的、有柱状上皮和杯状细胞。
+// Rough.js ink — STRUCTURE layer. Shapes are generated once with a fixed seed and cached as Path2D,
+// so they never shimmer; "drawing on" is done with a dash reveal, not by regenerating.
+const gen = rough.generator();
+const cache = new Map();
+import { C } from './tokens.js';
+const base = o => Object.assign({ stroke: C.ink, strokeWidth: 2.6, roughness: .9, bowing: .8, seed: 3 }, o);
+function polyLen(pts, closed) { let L = 0; for (let i = 1; i < pts.length; i++) L += Math.hypot(pts[i][0] - pts[i-1][0], pts[i][1] - pts[i-1][1]); if (closed) L += Math.hypot(pts[0][0]-pts.at(-1)[0], pts[0][1]-pts.at(-1)[1]); return L; }
+function build(kind, args, o) {
+  const d = gen[kind](...args, o), paths = gen.toPaths(d).map(p => ({ p: new Path2D(p.d), stroke: p.stroke, w: p.strokeWidth, fill: p.fill }));
+  let len = 1000; const pts = kind === 'linearPath' || kind === 'curve' ? args[0] : kind === 'polygon' ? args[0] : null;
+  if (pts) len = polyLen(pts, kind === 'polygon') * 1.15; else if (kind === 'ellipse') len = Math.PI * (args[2] + args[3]) * .6; else if (kind === 'circle') len = Math.PI * args[2] * 1.1;
+  return { paths, len };
+}
+// key: unique stable name. If geometry changes per frame (morph), pass dynamic=true (seed stays fixed so it morphs smoothly).
+// BOIL (hand-drawn life): main.js calls setBoil(floor(t*8)); every cached shape cycles through 3 fixed-seed variants
+// at 8 fps. Deterministic (depends only on t). Opt out per shape with roughOpts.boil = false, or globally with setBoil(null).
+let BOIL = null; export const BOIL_FPS = 10, BOIL_VARIANTS = 3;
+export function setBoil(frame) { BOIL = frame == null ? null : ((frame % BOIL_VARIANTS) + BOIL_VARIANTS) % BOIL_VARIANTS; }
+export function shape(key, kind, args, o = {}, dynamic = false) {
+  const v = (BOIL == null || o.boil === false) ? 0 : BOIL, ck = v ? key + '#' + v : key;
+  if (!dynamic && cache.has(ck)) return cache.get(ck);
+  const oo = base(o); if (v) oo.seed = (oo.seed || 1) * 31 + v * 7919; delete oo.boil;
+  const s = build(kind, args, oo); if (!dynamic) cache.set(ck, s); return s;
+}
+// draw with optional reveal k∈[0,1] (pen draws on) and alpha
+export function draw(ctx, s, { k = 1, alpha = 1, fill = true } = {}) {
+  if (k <= 0 || alpha <= 0) return; ctx.save(); ctx.globalAlpha *= alpha; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  for (const q of s.paths) {
+    if (q.fill && fill && k >= 1) { ctx.fillStyle = q.fill; ctx.fill(q.p); }
+    if (q.stroke && q.stroke !== 'none') { ctx.strokeStyle = q.stroke; ctx.lineWidth = q.w;
+      if (k < 1) { ctx.setLineDash([s.len * k, s.len * 2]); } else ctx.setLineDash([]);
+      if (!(q.fill && !q.stroke)) ctx.stroke(q.p); }
+  }
+  ctx.restore();
+}
+export const ink = (ctx, key, kind, args, o, opt) => draw(ctx, shape(key, kind, args, o), opt);
+export function grid(ctx, x0, y0, x1, y1, step = 40) { ctx.save(); ctx.strokeStyle = C.grid; ctx.lineWidth = 1 / Math.max(1e-3, ctx.getTransform().a);
+  ctx.beginPath(); for (let x = Math.floor(x0 / step) * step; x <= x1; x += step) { ctx.moveTo(x, y0); ctx.lineTo(x, y1); }
+  for (let y = Math.floor(y0 / step) * step; y <= y1; y += step) { ctx.moveTo(x0, y); ctx.lineTo(x1, y); } ctx.stroke(); ctx.restore(); }
+  pin('g.pink');
+  bake('g.red', (b, P) => {
+    along(b, P, C.red, 150, 1.45, 8, .055);
+    along(b, P, '#C9455A', 120, 1.1, 9, .08);
+    along(b, P, '#6E1A24', 100, .72, 10, .1);
+  }, { ...WASH, seed: 22, scale: 1 });
+  pin('g.red');
+  bake('g.pus', (b, P) => {
+    PUS_PATCHES.forEach((spec, j) => {
+      P.fill(b, smearPoly(spec[0], spec[1], spec[2], spec[3], 2400 + j * 17), PUS, 200, .22, [.24, .34]);
+    });
+  }, { ...WASH, seed: 25, scale: 1 });
+  lockPus(pin('g.pus'));
+  bake('g.necro', (b, P) => {
+    NEC_PATCHES.forEach((spec, j) => {
+      P.fill(b, smearPoly(spec[0], spec[1], spec[2], spec[3], 4200 + j * 19), spec[4], 230, .18, [.3, .4]);
+    });
+  }, { ...WASH, seed: 27, scale: 1 });
+  lockNecro(pin('g.necro'));
+  bake('g.meso', (b, P) => {
+    P.fill(b, P.blob(0, 0, 240, 26, .34, 8), '#E2B45A', 150, .4, [.32, .42]);
+    P.fill(b, P.blob(-40, 16, 140, 18, .3, 9), '#C99840', 100, .35, [.28, .38]);
+    P.fill(b, P.blob(36, -12, 110, 16, .32, 10), '#E8C878', 80, .35, [.3, .4]);
+  }, { ...WASH, seed: 29, scale: 1 });
+  pin('g.meso');
+  buildPus();
+}
+
+function paintMeso(ctx, swell) {
+  const loop = mesoLoop(swell);
+  ctx.save();
+  path(ctx, loop); ctx.clip();
+  ctx.fillStyle = '#E2B85A';
+  path(ctx, loop); ctx.fill();
+  const N = 26;
+  for (let i = 0; i < N; i++) {
+    const step = MESO_TIP / N;
+    const s0 = step * i, s1 = Math.min(MESO_TIP, step * (i + 1.25));
+    const h0 = mesoHang(s0), h1 = mesoHang(s1);
+    if (h0 < 4 && h1 < 4) continue;
+    const a = mesoPt(s0, swell, 0), b = mesoPt(s1, swell, 0);
+    const c = mesoPt(s1, swell, h1), d = mesoPt(s0, swell, h0);
+    const g = ctx.createLinearGradient(a[0], a[1], d[0], d[1]);
+    // Whole hang stays yellow fat. The old 0.8 stop (#F6E6BC) turned the lower two-thirds cream.
+    g.addColorStop(0, '#C4923E');
+    g.addColorStop(0.14, '#D4A84E');
+    g.addColorStop(0.48, '#E4BE62');
+    g.addColorStop(0.78, '#E8C56E');
+    g.addColorStop(1, '#D4A84E');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(c[0], c[1]); ctx.lineTo(d[0], d[1]);
+    ctx.closePath(); ctx.fill();
+  }
+  for (let s = 0.04; s < MESO_TIP; s += 0.07) {
+    const h = mesoHang(s);
+    if (h < 20) continue;
+    const p = mesoPt(s, swell, h * 0.62);
+    drawPinned(ctx, 'g.meso', p[0], p[1], h * 0.55 / 240 * 1024, { alpha: 0.22, blend: 'multiply' });
+  }
+  ctx.restore();
+}
+
+function vesselGeom(swell) {
+  const R = rng(12007);
+  const artery = [], vein = [];
+  let s = 0.04, fa = 0.62, fv = 0.4;
+  while (s < 0.74) {
+    const h = mesoHang(s);
+    artery.push(mesoPt(s, swell, Math.max(3, h * fa)));
+    vein.push(mesoPt(s, swell, Math.max(3, h * fv)));
+    s += 0.048;
+    fa = Math.max(0.3, Math.min(0.78, fa + (R() - 0.5) * 0.16));
+    fv = Math.max(0.22, Math.min(0.58, fv + (R() - 0.5) * 0.12));
+  }
+  const branches = [];
+  [0.14, 0.32, 0.5].forEach((s0, i) => {
+    const h = mesoHang(s0);
+    const f = frameAt(s0);
+    const start = mesoPt(s0, swell, h * (0.5 + 0.08 * i));
+    const mid = mesoPt(s0 + 0.03, swell, h * 0.28);
+    const end = mesoPt(s0 + 0.02, swell, h * 0.06);
+    // A small sideways jog so the branch is not a ruler line.
+    mid[0] += f.tx * (i % 2 ? 8 : -8);
+    mid[1] += f.ty * (i % 2 ? 8 : -8);
+    branches.push([start, mid, end]);
+  });
+  return { artery, vein, branches };
+}
+
+function lobules(swell) {
+  const out = [];
+  for (let i = 1; i < 36; i++) {
+    const s0 = MESO_TIP * (i - 1) / 36, s1 = MESO_TIP * i / 36, s2 = MESO_TIP * (i + 1) / 36;
+    const h1 = mesoHang(s1);
+    if (h1 >= mesoHang(s0) && h1 >= mesoHang(s2) && h1 > 56) out.push({ s: s1, h: h1 });
+  }
+  return out;
+}
+
+// Small warm caps on the free-edge bulges. No cream coins and no white centres.
+function paintLobules(ctx, swell, alpha) {
+  if (alpha <= 0) return;
+  ctx.save();
+  path(ctx, mesoLoop(swell)); ctx.clip();
+  lobules(swell).forEach(L => {
+    const f = frameAt(L.s);
+    const ang = Math.atan2(f.ty, f.tx);
+    const belly = mesoPt(L.s, swell, L.h * 0.8);
+    const lit = mesoPt(L.s, swell, L.h * 0.6);
+    ctx.fillStyle = `rgba(168, 112, 40, ${0.62 * alpha})`;
+    ctx.beginPath();
+    ctx.ellipse(belly[0], belly[1], L.h * 0.2, L.h * 0.12, ang, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = `rgba(226, 176, 78, ${0.78 * alpha})`;
+    ctx.beginPath();
+    ctx.ellipse(lit[0], lit[1], L.h * 0.16, L.h * 0.1, ang, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.restore();
+}
+
+// Opaque yellow dabs laid across the artery so it dives through the fat instead of sitting on top.
+function paintFatDabs(ctx, swell) {
+  const R = rng(8801);
+  ctx.save();
+  path(ctx, mesoLoop(swell)); ctx.clip();
+  for (let i = 0; i < 11; i++) {
+    const s = 0.08 + i * 0.058;
+    const h = mesoHang(s);
+    if (h < 22) continue;
+    const c = mesoPt(s, swell, h * (0.4 + R() * 0.28));
+    const f = frameAt(s);
+    const ang = Math.atan2(f.ty, f.tx) + (R() - 0.5) * 0.5;
+    ctx.fillStyle = i % 2 ? 'rgba(232, 196, 108, 0.9)' : 'rgba(210, 162, 62, 0.9)';
+    ctx.beginPath();
+    ctx.ellipse(c[0], c[1], 8 + R() * 12, 5 + R() * 5, ang, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+// t = 0 on the mesenteric (shadow) wall, t = 1 on the lit serosa. Opaque, so overlaps do not darken.
+function crossColor(look, t) {
+  const sh = look.shadow, base = look.base, gl = look.gloss;
+  const u = Math.max(0, Math.min(1, t));
+  const stops = [0, 0.16, 0.34, 0.52, 0.74, 0.9, 1];
+  const cols = [
+    mix3(sh, base, 0.16),
+    mix3(sh, base, 0.42),
+    mix3(sh, base, 0.76),
+    base,
+    mix3(base, gl, 0.32),
+    mix3(base, gl, 0.58),
+    mix3(base, gl, 0.16),
+  ];
+  let i = 0;
+  while (i < stops.length - 2 && u > stops[i + 1]) i++;
+  const span = stops[i + 1] - stops[i] || 1;
+  return mix3(cols[i], cols[i + 1], (u - stops[i]) / span);
+}
+function quad(ctx, a, b, c, d) {
+  ctx.beginPath();
+  ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(c[0], c[1]); ctx.lineTo(d[0], d[1]);
+  ctx.closePath(); ctx.fill();
+}
+// Static style frames for the resected appendix (S01 / S06 / S11 / S13 / S14).
+// t∈[0,1) normal · [1,2) red · [2,3) yellow · [3,4) black · [4,5) 2×2 contact.
+import { C } from '../lib/tokens.js';
+import { grid } from '../lib/ink.js';
+import * as A from '../lib/ann.js';
+import {
+  prepare as bakeGross, drawAppendix, drawNotes, drawTitle,
+  STATES, META,
+} from '../lib_ext/gross_appendix.js';
+
+const POSE = { x: 1210, y: 390, rot: -.16, sc: 1.42 };
+
+function paper(ctx, { ruled = true } = {}) {
+  // Reset clip / composite leftovers from a previous render(t). Assigning width clears the stack.
+  ctx.canvas.width = 1920;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = C.paper;
+  ctx.fillRect(0, 0, 1920, 1080);
+  if (ruled) { ctx.save(); ctx.globalAlpha = .85; grid(ctx, -40, -40, 1960, 1120, 40); ctx.restore(); }
+}
+
+function viewMode() {
+  try { return new URLSearchParams(location.search).get('view') || ''; }
+  catch { return ''; }
+}
+
+function drawOne(ctx, state) {
+  drawAppendix(ctx, state, POSE);
+  drawTitle(ctx, state);
+  drawNotes(ctx, state, POSE);
+}
+
+function cellPose(col, row) {
+  const x0 = 80, y0 = 70, gap = 28;
+  const cw = (1920 - x0 * 2 - gap) / 2, ch = (900 - y0 - gap) / 2;
+  return {
+    box: { x: x0 + col * (cw + gap), y: y0 + row * (ch + gap), w: cw, h: ch },
+    pose: {
+      x: x0 + col * (cw + gap) + cw * .52,
+      y: y0 + row * (ch + gap) + ch * .56,
+      rot: -.12,
+      sc: .82,
+    },
+  };
+}
+
+const cellCv = document.createElement('canvas');
+function blitCell(ctx, state, pose, box) {
+  const w = Math.ceil(box.w), h = Math.ceil(box.h);
+  if (cellCv.width !== w || cellCv.height !== h) { cellCv.width = w; cellCv.height = h; }
+  const c = cellCv.getContext('2d');
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  c.globalAlpha = 1;
+  c.globalCompositeOperation = 'source-over';
+  c.fillStyle = C.paper;
+  c.fillRect(0, 0, w, h);
+  drawAppendix(c, state, { ...pose, x: pose.x - box.x, y: pose.y - box.y });
+  ctx.drawImage(cellCv, box.x, box.y);
+}
+
+function drawGrid(ctx) {
+  const layout = [[0, 0, 'normal'], [1, 0, 'red'], [0, 1, 'yellow'], [1, 1, 'black']];
+  layout.forEach(([col, row, state]) => {
+    const { box, pose } = cellPose(col, row);
+    const m = META[state];
+    blitCell(ctx, state, pose, box);
+    A.label(ctx, m.diag, box.x + 18, box.y + 28, { size: 28, w: 800, col: m.tone, halo: true });
+    A.label(ctx, m.sub, box.x + 18, box.y + 58, { size: 18, w: 500, alpha: .7, halo: true });
+  });
+  A.label(ctx, '大体标本 · 四态', 96, 980, { size: 22, w: 500, alpha: .5 });
+}
+
+export default {
+  prepare() { bakeGross(); },
+  draw(ctx, t) {
+    // view=morph: continuous stage = t (0–3), specimen only, no labels and no digits.
+    if (viewMode() === 'morph') {
+      paper(ctx, { ruled: false });
+      const stage = Math.max(0, Math.min(3, t));
+      drawAppendix(ctx, stage, { x: 960, y: 500, rot: -.16, sc: 1.28 });
+      return;
+    }
+    paper(ctx);
+    const i = Math.min(4, Math.max(0, Math.floor(t + 1e-9)));
+    if (i < 4) drawOne(ctx, STATES[i]);
+    else drawGrid(ctx);
+  },
+};
+
+exec
+/bin/bash -lc "python - <<'PY'
+import hashlib,pathlib
+files=sorted(pathlib.Path('engine/lib').glob('*.js'))+[pathlib.Path('parity_r4/chapters/04.js')]
+s=''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+str(p)+'\\n' for p in files)
+pathlib.Path('/tmp/gross02b_start.sha256').write_text(s)
+with open('qa/gross/sha256_02.log','a') as f:f.write('\\n# g_gross02b 开始\\n'+s)
+PY
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs --help" in /workspace/病理科普视频/v5_gross_dev
+ exited 1 in 2ms:
+/bin/bash: line 1: python: command not found
+missing <project-dir | page.html>
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+import hashlib,pathlib
+files=sorted(pathlib.Path('engine/lib').glob('*.js'))+[pathlib.Path('parity_r4/chapters/04.js')]
+s=''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+str(p)+'\\n' for p in files)
+pathlib.Path('/tmp/gross02b_start.sha256').write_text(s)
+with open('qa/gross/sha256_02.log','a') as f:f.write('\\n# g_gross02b 开始\\n'+s)
+PY
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --q scene=gross_test --still 0,1,2,3,4 --out /tmp/gross02b_preview" in /workspace/病理科普视频/v5_gross_dev
+codex
+已有修改包含圆柱明暗、圆钝盲端、黄色脂肪系膜和连续 stage；墨线的 `fill:false` 修复也已写入。我会保留这些改动。当前四态仍有粗细变化，我会统一外轮廓，让后续“红→黄→黑”过渡时标本边界保持稳定。
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+p='film/lib_ext/gross_appendix.js'
+s=open(p).read().replace('// smoothstep the swell, the serosal palette, and the pus / necrosis / hemorrhage layers.','// smoothstep the serosal palette and the pus / necrosis / hemorrhage layers.').replace('// Same pose and the same outline function for every state. Yellow and black share a swell,\\n// so 黄→黑 does not move the contour. Normal → red → yellow only thickens.\\nconst SWELL_K = [0.64, 0.86, 1, 1];','// Identical contour and pose in all states, including fractional stages.\\n// Congestion and swelling are conveyed by colour and surface lighting.\\nconst SWELL_K = [1, 1, 1, 1];')
+open(p,'w').write(s)
+PY" in /workspace/病理科普视频/v5_gross_dev
+ succeeded in 0ms:
+exec
+/bin/bash -lc "rg -n 'still|determinism|q\\b|out' /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs" in /workspace/病理科普视频/v5_gross_dev
+ succeeded in 0ms:
+7:// discrete copy/cuts on the output frame while motion uses sub-sample time t.
+10://   node render.mjs <project> [--out out/video.mp4] [--size 1920x1080] [--fps 30] [--workers 3]
+12://                   [--audio audio/music.wav] [--grain 0] [--crf 16] [--png] [--q "k=v&k2=v2"]
+14://   node render.mjs <project> --still 0.5,2,7.25 [--out qa/stills] [--sheet]
+15://   node render.mjs <project> --range 0:15:1 [--out qa/stills] [--sheet]
+17://   node render.mjs <project> --poster 14.5 [--out out/poster.png]
+19://   node render.mjs <project> --directions a,b,c --at 14.5,2,0 [--out qa/directions.png] [--dir-param dir]
+22://   node render.mjs <project> --determinism
+25://   node render.mjs <project> --text-check [--every 0.2] [--safe auto|none|T,R,B,L] [--out qa/text]
+37:// Anything that must be undone on failure or interruption (ffmpeg children, temp dirs, output lock).
+42:for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) process.on(sig, () => fail(`interrupted (${sig}); partial output removed`));
+52:const QUERY = typeof opt.q === 'string' ? opt.q : '';
+71:else if (opt.still || opt.range) await stills();
+72:else if (opt.determinism) await determinism();
+90:  const out = path.resolve(typeof opt.out === 'string' ? opt.out.replace(/\.json$/, '') : path.join(target.root, 'qa', 'text'));
+91:  fs.mkdirSync(path.dirname(out), { recursive: true });
+108:      const vis = area(inter(b, frame)) / area(b), q = JSON.stringify(b.text);
+110:        if (b.size >= BLEED) note(`bleed ${b.text}`, 'bleed', `${q} runs off the frame edge (display size: fine if it is a deliberate bleed)`, t, [b]);
+111:        else note(`cut ${b.text}`, 'cut', `${q} is cut by the frame edge`, t, [b]);
+115:        if (zone) note(`safe ${b.text}`, 'safe', `${q} sits in the ${zone} safe zone (platform UI covers it)`, t, [b]);
+117:      if (b.size < TINY) note(`tiny ${b.text}`, 'tiny', `${q} is ${b.size.toFixed(0)}px (${(100 * b.size / H).toFixed(1)}% of the frame height): unreadable on a phone unless it is a deliberate micro-annotation`, t, [b]);
+150:      for (const m of marks) d.insertAdjacentHTML('beforeend', `<div style="position:absolute;left:${m.x0}px;top:${m.y0}px;width:${m.x1 - m.x0}px;height:${m.y1 - m.y0}px;outline:3px solid ${col[m.kind]};outline-offset:2px"></div>`);
+153:    const file = `${out}-t${t.toFixed(2)}.png`;
+158:  fs.writeFileSync(`${out}.json`, JSON.stringify({ size: `${W}x${H}`, every, safe, issues: found.map(({ boxes, ...f }) => f) }, null, 1));
+163:  console.log(`  ${out}.json  (review material: look at each marked frame and decide; deliberate bleeds and micro-annotations are fine)`);
+176:  const out = path.resolve(typeof opt.out === 'string' ? (opt.out.endsWith('.png') ? opt.out : path.join(opt.out, 'poster.png')) : path.join(target.root, 'out', 'poster.png'));
+179:  writePng(out, await shoot(page, t, 'png'));
+189:  const sheet = path.resolve(typeof opt.out === 'string' ? (opt.out.endsWith('.png') ? opt.out : opt.out + '.png') : path.join(target.root, 'qa', 'directions.png'));
+193:    const q = new URLSearchParams(QUERY); q.set(key, name);
+194:    const page = await open(q.toString());                 // a fresh page per direction: no state shared between them
+206:// ───────────────────────────────── stills ─────────────────────────────────
+207:async function stills() {
+209:  if (opt.still) times = String(opt.still).split(',').map(Number);
+215:  if (times.some(Number.isNaN)) die('bad --still / --range values');
+216:  const out = path.resolve(typeof opt.out === 'string' ? opt.out : path.join(target.root, 'qa', 'stills'));
+217:  fs.mkdirSync(out, { recursive: true });
+223:    const file = path.join(out, `t_${t.toFixed(2).padStart(6, '0')}.png`);
+225:    if (!fs.statSync(file).size) fail(`empty still written: ${file}`);
+230:    const file = path.join(out, 'sheet.png');
+252:// ───────────────────────────── determinism ─────────────────────────────
+253:async function determinism() {
+308:  const out = path.resolve(typeof opt.out === 'string' ? opt.out : path.join(target.root, 'out', 'video.mp4'));
+309:  fs.mkdirSync(path.dirname(out), { recursive: true });
+310:  // one writer per output file: a second render to the same --out is refused (stale locks from dead pids are taken over)
+311:  const lock = out + '.lock';
+316:    if (other && other !== process.pid && alive(other)) die(`another render (pid ${other}) is writing ${out}. Use a different --out, or wait for it.`);
+320:  const tmp = fs.mkdtempSync(path.join(path.dirname(out), '.segs-'));
+330:  if (SUB > 1) vf.push(`tmix=frames=${SUB}:weights=${Array(SUB).fill(1).join(' ')}`, `select='eq(mod(n\\,${SUB})\\,${SUB - 1})'`);
+334:  vf.push('scale=out_color_matrix=bt709:out_range=tv', 'format=yuv420p');
+377:  if (!Number.isFinite(got) || Math.abs(got - TOTAL) > 1) fail(`output has ${got} frames, expected ${TOTAL}; not published`);
+378:  fs.renameSync(joined, out);
+380:  console.log(`done ${out}\n  ${TOTAL} frames, ${(TOTAL / FPS).toFixed(2)}s, ${secs.toFixed(1)}s wall (${(secs * 1000 / TOTAL / SUB).toFixed(0)} ms/sample)${audio ? ', audio muxed' : ''}`);
+
+ succeeded in 21121ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/tmp/gross02b_preview/t_000.00.png
+/tmp/gross02b_preview/t_001.00.png
+/tmp/gross02b_preview/t_002.00.png
+/tmp/gross02b_preview/t_003.00.png
+/tmp/gross02b_preview/t_004.00.png
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+p='film/lib_ext/gross_appendix.js'
+s=open(p).read().replace('const n = 10 + (seed % 4);','const n = 36 + (seed % 4);').replace('const jag = 0.42 + R() * 0.9;','const jag = 0.86 + 0.14 * Math.sin(a * 5 + seed) + (R() - 0.5) * 0.25;').replace('const spike = R() > 0.8 ? 1.38 : 1;','const spike = R() > 0.9 ? 1.14 : 1;').replace(\"label: '灰黄色脓苔', dir: 'up', shelf: 'left'\",\"label: '灰黄色脓苔', dir: 'up', shelf: 'left', lift: 48\")
+open(p,'w').write(s)
+PY
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --q scene=gross_test --still 0,1,2,3,4 --out /tmp/gross02b_final > /tmp/gross02b_render.log 2>&1" in /workspace/病理科普视频/v5_gross_dev
+exec
+/bin/bash -lc "node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --q 'scene=gross_test&view=morph' --still 0,0.5,1,1.5,2,2.5,3 --out /tmp/gross02b_morph > /tmp/gross02b_morph.log 2>&1" in /workspace/病理科普视频/v5_gross_dev
+exec
+/bin/bash -lc 'node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --q scene=gross_test --determinism > /tmp/gross02b_det.log 2>&1' in /workspace/病理科普视频/v5_gross_dev
+exec
+/bin/bash -lc "sed -n '253,293p' /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs; git diff --stat; ls /tmp/gross02b_final /tmp/gross02b_morph" in /workspace/病理科普视频/v5_gross_dev
+ succeeded in 0ms:
+async function determinism() {
+  const probe = await open();
+  const start = +(opt.start || 0);
+  const dur = +(opt.duration || ((await probe.evaluate(() => window.DUR)) - start));
+  if (!(dur > 0)) die('window.DUR is missing; pass --duration');
+  const ts = [0.11, 0.37, 0.5, 0.73, 0.93].map(k => +(start + k * dur).toFixed(3)).concat(+(start + Math.max(0, dur - 1 / FPS)).toFixed(3));
+  const a = [];
+  for (const t of ts) a.push(await shoot(probe, t, 'png'));
+  const fresh = await open();
+  const b = new Array(ts.length);
+  for (const i of [...ts.keys()].reverse()) {
+    await fresh.evaluate(t => window.render(t), start + ((ts[i] - start) * 0.61 + 0.17) % dur); // render something unrelated first
+    b[i] = await shoot(fresh, ts[i], 'png');
+  }
+  // GPU canvas rasterisation may differ by a level or two on antialiased edges between pages: tolerate that.
+  const cmp = await browser.newPage();
+  const bad = [];
+  for (let i = 0; i < ts.length; i++) {
+    if (a[i].equals(b[i])) continue;
+    const d = await cmp.evaluate(async ([x, y]) => {
+      const load = s => new Promise(r => { const im = new Image(); im.onload = () => r(im); im.src = 'data:image/png;base64,' + s; });
+      const [A, B] = await Promise.all([load(x), load(y)]), c = document.createElement('canvas');
+      c.width = A.width; c.height = A.height; const g = c.getContext('2d', { willReadFrequently: true });
+      g.drawImage(A, 0, 0); const pa = g.getImageData(0, 0, c.width, c.height).data;
+      g.clearRect(0, 0, c.width, c.height); g.drawImage(B, 0, 0); const pb = g.getImageData(0, 0, c.width, c.height).data;
+      let n = 0; for (let k = 0; k < pa.length; k += 4) if (Math.max(Math.abs(pa[k] - pb[k]), Math.abs(pa[k + 1] - pb[k + 1]), Math.abs(pa[k + 2] - pb[k + 2])) > 24) n++;
+      return n / (pa.length / 4);
+    }, [a[i].toString('base64'), b[i].toString('base64')]);
+    if (d > 0.0005) bad.push(`${ts[i]}s (${(d * 100).toFixed(2)}% pixels differ)`);
+  }
+  if (bad.length) {
+    console.error(`NOT deterministic at ${bad.join(', ')}.\nSomething depends on render order: state carried between frames, Math.random()/Date.now()/performance.now(), CSS transitions/animations, requestAnimationFrame, or async loads finishing late.`);
+    await finish(1);
+  }
+  console.log(`deterministic: ${ts.length} frames match across render orders (${ts.join(', ')} s)`);
+}
+
+// ───────────────────────────────── video ─────────────────────────────────
+async function video() {
+  const probe = await open();
+  await warnSoftwareGL(probe);
+ film/chapters/gross_test.js    |  18 +-
+ film/lib_ext/gross_appendix.js | 869 ++++++++++++++++++++++++++++++-----------
+ 2 files changed, 647 insertions(+), 240 deletions(-)
+/tmp/gross02b_final:
+
+/tmp/gross02b_morph:
+
+codex
+预览中，系膜已恢复黄色脂肪底色，管身有明显的受光面和背光面。脓苔边缘仍偏多边形，我已增加边缘采样，并错开化脓图上方重叠的标注。正在重渲最终图片，同时检查跨页乱序渲染的确定性。
+
+exec
+/bin/bash -lc "node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --q 'scene=gross_test&view=morph' --duration 3 --determinism > /tmp/gross02b_morph_det.log 2>&1" in /workspace/病理科普视频/v5_gross_dev
+exec
+/bin/bash -lc 'cat /tmp/gross02b_render.log /tmp/gross02b_morph.log /tmp/gross02b_det.log' in /workspace/病理科普视频/v5_gross_dev
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+
+ succeeded in 24572ms:
+ succeeded in 23379ms:
+exec
+/bin/bash -lc "cat > qa/gross/assemble_02.mjs <<'EOF'
+// Assemble already-rendered frames; preserve gross01 originals before replacement.
+// node qa/gross/assemble_02.mjs <four-state-render-dir> <morph-render-dir>
+import fs from 'node:fs';
+import path from 'node:path';
+import { createCanvas, loadImage } from '@napi-rs/canvas';
+const [single, morph] = process.argv.slice(2);
+if ("'!single || !morph) throw Error('"'Provide two render directories');
+const out = path.dirname(new URL(import.meta.url).pathname);
+const names = ['正常', '红', '黄', '黑'];
+const frame = (dir, t) => path.join(dir, "'`t_${t.toFixed(2).padStart(6, '"'0')}.png"'`);
+const originals = names.map(n => `gross_${n}.png`).concat('"'gross_四态.png');
+fs.mkdirSync(path.join(out, 'r1'), { recursive: true });
+for (const name of originals) {
+  const old = path.join(out, name), archive = path.join(out, 'r1', name);
+  if (fs.existsSync(old) && "'!fs.existsSync(archive)) fs.renameSync(old, archive);
+}
+for (let i = 0; i < 4; i++) fs.copyFileSync(frame(single, i), path.join(out, originals[i]));
+const grid = createCanvas(3840, 2160), g = grid.getContext('"'2d');
+for (let i = 0; i < 4; i++) g.drawImage(await loadImage(frame(single, i)), (i % 2) * 1920, Math.floor(i / 2) * 1080);
+fs.writeFileSync(path.join(out, 'gross_四态.png'), grid.toBuffer('image/png'));
+// Identical crop, scale and origin for all seven specimens. No visible stage numbers.
+const strip = createCanvas(840 * 7, 520), c = strip.getContext('2d');
+c.fillStyle = '#F4EFE6'; c.fillRect(0, 0, strip.width, strip.height);
+for (let i = 0; i < 7; i++) c.drawImage(await loadImage(frame(morph, i / 2)), 420, 300, 1200, 560, i * 840, 55, 840, 392);
+fs.writeFileSync(path.join(out, '过渡条.png'), strip.toBuffer('image/png'));
+EOF" in /workspace/病理科普视频/v5_gross_dev
+ succeeded in 0ms:
+exec
+/bin/bash -lc 'node qa/gross/assemble_02.mjs /tmp/gross02b_final /tmp/gross02b_morph' in /workspace/病理科普视频/v5_gross_dev
+ exited 1 in 146ms:
+node:internal/modules/package_json_reader:331
+  throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);
+        ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@napi-rs/canvas' imported from /workspace/病理科普视频/v5_gross_dev/qa/gross/assemble_02.mjs
+    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:331:9)
+    at packageResolve (node:internal/modules/esm/resolve:784:25)
+    at moduleResolve (node:internal/modules/esm/resolve:873:18)
+    at defaultResolve (node:internal/modules/esm/resolve:1006:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:705:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:725:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:763:56)
+    at #resolve (node:internal/modules/esm/loader:687:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:607:35)
+    at ModuleJob.syncLink (node:internal/modules/esm/module_job:276:33) {
+  code: 'ERR_MODULE_NOT_FOUND'
+}
+
+Node.js v24.22.1
+
+exec
+/bin/bash -lc "python3 -c 'from PIL import Image; print(\"Pillow ready\")'; ls node_modules; cat /tmp/gross02b_det.log /tmp/gross02b_morph_det.log" in /workspace/病理科普视频/v5_gross_dev
+ succeeded in 66ms:
+Pillow ready
+ls: cannot access 'node_modules': No such file or directory
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+
+ succeeded in 42116ms:
+ succeeded in 35494ms:
+exec
+/bin/bash -lc "rm qa/gross/assemble_02.mjs
+cat > qa/gross/assemble_02.py <<'EOF'
+\"\"\"Assemble rendered frames: python3 qa/gross/assemble_02.py SINGLE MORPH.\"\"\"
+from pathlib import Path
+from PIL import Image
+import sys, shutil
+single, morph = map(Path, sys.argv[1:])
+out = Path(__file__).resolve().parent
+names = [f'gross_{n}.png' for n in ['正常', '红', '黄', '黑']]
+frame = lambda folder, t: folder / f't_{t:06.2f}.png'
+(out / 'r1').mkdir(exist_ok=True)
+for name in names + ['gross_四态.png']:
+    if (out / name).exists() and not (out / 'r1' / name).exists():
+        shutil.move(out / name, out / 'r1' / name)
+grid = Image.new('RGB', (3840, 2160), '#F4EFE6')
+for i, name in enumerate(names):
+    shutil.copyfile(frame(single, i), out / name)
+    grid.paste(Image.open(frame(single, i)), (i % 2 * 1920, i // 2 * 1080))
+grid.save(out / 'gross_四态.png')
+strip = Image.new('RGB', (5880, 520), '#F4EFE6')
+for i in range(7):
+    im = Image.open(frame(morph, i / 2)).crop((420, 300, 1620, 860))
+    strip.paste(im.resize((840, 392), Image.Resampling.LANCZOS), (i * 840, 55))
+strip.save(out / '过渡条.png')
+EOF
+python3 qa/gross/assemble_02.py /tmp/gross02b_final /tmp/gross02b_morph" in /workspace/病理科普视频/v5_gross_dev
+ succeeded in 1314ms:
+exec
+/bin/bash -lc 'cat /tmp/gross02b_det.log /tmp/gross02b_morph_det.log' in /workspace/病理科普视频/v5_gross_dev
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+deterministic: 6 frames match across render orders (0.55, 1.85, 2.5, 3.65, 4.65, 4.967 s)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+deterministic: 6 frames match across render orders (0.33, 1.11, 1.5, 2.19, 2.79, 2.967 s)
+
+codex
+四张单图、四态拼图和七阶段过渡条已生成，旧图已移到 `qa/gross/r1/`。普通场景和连续 stage 场景的确定性检查均通过。目视检查仍能看到盲端轻微色带、脓苔部分边缘偏硬，系膜也还带有示意感；我会如实写进说明，再完成只读文件校验和提交。
+
+exec
+/bin/bash -lc "cp /tmp/gross02b_det.log qa/gross/determinism.log
+cp /tmp/gross02b_morph_det.log qa/gross/determinism_morph.log
+cp /tmp/gross02b_render.log qa/gross/render.log
+cat > qa/gross/说明.md <<'EOF'
+# 大体阑尾四态（gross02b）
+
+接续 gross02 未提交修改完成，未推倒重写。场景 "'`?scene=gross_test`：t=0 正常、1 红、2 黄、3 黑、4 场景内四态。画面无数字。单图均为 1920×1080，交付四态图为四张带标注单图的 3840×2160 拼贴。旧版五张图片已移至 `r1/`。
+
+## 本轮修改
+
+- 管身用沿中心线的横向明暗与水彩叠层表现圆柱，正常为清晰灰粉色，受光侧有浆膜高光。另建半圆盲端，替代原来的尖端。
+- 四态及所有中间态使用相同外轮廓、大小和姿态。为连续过渡锁定 swell=1，肿胀观感由饱满轮廓、充血和表面变化呈现，不做几何增粗。
+- 系膜使用黄色脂肪底、体积渐变、游离缘起伏和脂肪小叶，血管局部被脂肪遮盖。墨线调用明确传 `fill:false`，修复 Rough 路径 `fill:'"'none'"'` 被当作有效填充、开口曲线闭合后用纸色覆盖系膜的问题。未修改引擎。
+- 脓苔关闭 keepWhite，固定 `#CDB98A`，采用固定种子不规则片状蒙版，保留红色间隙，剔除白色笔触和浅白边。
+- 远端局部坏死使用近黑暗紫色，带小凹陷；其余区域仍红黄。独立红紫出血斑与充血底分开。
+- `drawAppendix(ctx, stage, pose)` 接受连续数值 0–3（原字符串状态仍兼容），颜色与病变层用 smoothstep 插值。`?scene=gross_test&view=morph` 将时间直接作为 stage。
+- `过渡条.png` 从左到右为 0、0.5、1、1.5、2、2.5、3；同一裁切与缩放，无可见数字。
+
+纸底 `#F4EFE6`、结构墨线 `#2A2A35`；水彩统一 `hd:true, soft:true, grain:.12, edge:.3, bleed:.5`。2048 烘焙立即读回固定画布；固定随机种子，无帧内非确定性随机。
+
+## 重建与检查
+
+```bash
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --q scene=gross_test --still 0,1,2,3,4 --out /tmp/gross02b_final
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --q '"'scene=gross_test&view=morph' --still 0,0.5,1,1.5,2,2.5,3 --out /tmp/gross02b_morph
+python3 qa/gross/assemble_02.py /tmp/gross02b_final /tmp/gross02b_morph
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --q scene=gross_test --determinism
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --q 'scene=gross_test&view=morph' --duration 3 --determinism
+"'```
+
+两组确定性检查均通过：各六时点、跨新页面逆序并插入无关帧。结果见 `determinism.log`、`determinism_morph.log`。日志中的资源 404 未阻止渲染。开始和结束的只读文件 SHA256 及一致性结果见 `sha256_02.log`。
+
+## 剩余不足
+
+- 系膜已不再被纸色抹掉，但脂肪小叶与血管仍有示意感，尚未达到真实组织的柔软层次。
+- 脓苔部分轮廓仍偏硬，纹理局部较平；虽无白条，水彩自然渗化仍可继续改善。
+- 盲端和管身衔接处有轻微色带，圆柱渐变仍略显规则。
+- 出血斑较规则、近似椭圆；小凹陷只是表面视觉提示。
+- 为严格保持四态外轮廓一致，正常和炎症态没有真实的直径差异。
+EOF
+python3 - <<'"'PY'
+import pathlib,hashlib
+files=sorted(pathlib.Path('engine/lib').glob('*.js'))+[pathlib.Path('parity_r4/chapters/04.js')]
+s=''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+str(p)+'\\n' for p in files)
+assert s==pathlib.Path('/tmp/gross02b_start.sha256').read_text()
+with open('qa/gross/sha256_02.log','a') as f:f.write('\\n# g_gross02b 结束\\n'+s+'# PASS: 开始与结束全部一致\\n')
+PY
+ git diff --check
+ git add film/lib_ext/gross_appendix.js film/chapters/gross_test.js qa/gross
+ git -c user.name=mini -c user.email=mini@local commit -m 'Complete gross02 appendix states and continuous stage previews'
+ git status --short" in /workspace/病理科普视频/v5_gross_dev
+ succeeded in 0ms:
+fatal: Unable to create '/workspace/病理科普视频/v5/.git/worktrees/v5_gross_dev/index.lock': Read-only file system
+fatal: Unable to create '/workspace/病理科普视频/v5/.git/worktrees/v5_gross_dev/index.lock': Read-only file system
+ M film/chapters/gross_test.js
+ M film/lib_ext/gross_appendix.js
+ M qa/gross/determinism.log
+ M qa/gross/gross_四态.png
+ M qa/gross/gross_正常.png
+ M qa/gross/gross_红.png
+ M qa/gross/gross_黄.png
+ M qa/gross/gross_黑.png
+ M qa/gross/render.log
+ M qa/gross/说明.md
+?? qa/briefs/g_gross02.md
+?? qa/briefs/g_gross02b.md
+?? qa/briefs/run_g_gross02.log
+?? qa/briefs/run_g_gross02b.log
+?? qa/gross/assemble_02.py
+?? qa/gross/determinism_morph.log
+?? qa/gross/r1/
+?? qa/gross/sha256_02.log
+?? qa/gross/过渡条.png
+
+codex
+已接续完成现有修改及交付：
+
+- 四张单图、四态拼图、七阶段过渡条已重渲；旧图移至 `qa/gross/r1/`。
+- 两组 `--determinism` 均通过，只读文件首尾 SHA256 一致。
+- `qa/gross/说明.md` 已更新修改内容与剩余不足。
+
+提交未成功：Git 元数据位于只读路径 `/workspace/病理科普视频/v5/.git/worktrees/v5_gross_dev`，无法创建 `index.lock`。修改均保留，需该路径可写后才能完成 commit。
+tokens used
+48,275
+已接续完成现有修改及交付：
+
+- 四张单图、四态拼图、七阶段过渡条已重渲；旧图移至 `qa/gross/r1/`。
+- 两组 `--determinism` 均通过，只读文件首尾 SHA256 一致。
+- `qa/gross/说明.md` 已更新修改内容与剩余不足。
+
+提交未成功：Git 元数据位于只读路径 `/workspace/病理科普视频/v5/.git/worktrees/v5_gross_dev`，无法创建 `index.lock`。修改均保留，需该路径可写后才能完成 commit。

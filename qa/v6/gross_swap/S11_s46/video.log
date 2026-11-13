@@ -1,0 +1,18 @@
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+… still waiting for window.READY = true (20 s). Recent errors:
+  [page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+rendering 160 frames × 1 sample(s) @ 1920x1080 30fps with 1 worker(s)…
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+  16/160 frames  77s
+  32/160 frames  78s
+  48/160 frames  79s
+  64/160 frames  81s
+  80/160 frames  82s
+  96/160 frames  83s
+  112/160 frames  84s
+  128/160 frames  86s
+  144/160 frames  87s
+  160/160 frames  88s
+done /workspace/病理科普视频/v5_gross_dev/qa/v6/gross_swap/S11_s46/S11_s46.mp4
+  160 frames, 5.33s, 88.8s wall (555 ms/sample)

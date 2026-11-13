@@ -1,0 +1,34 @@
+{
+  "videos": [
+    {
+      "file": "S05.mp4",
+      "duration": 11.9,
+      "expected": 11.912083333333342,
+      "duration_error": 0.012083333333341884,
+      "black_intervals": [],
+      "endpoint_mean_luma": [
+        219.14898292824074,
+        215.9476255465535
+      ],
+      "endpoint_nonblack": true,
+      "duration_pass": true
+    },
+    {
+      "file": "S05_\u5e26\u914d\u97f3_720p.mp4",
+      "duration": 11.912,
+      "expected": 11.912083333333342,
+      "duration_error": 8.333333334142878e-05,
+      "black_intervals": [],
+      "endpoint_mean_luma": [
+        219.15540979456017,
+        215.95080584490742
+      ],
+      "endpoint_nonblack": true,
+      "duration_pass": true
+    }
+  ],
+  "before_audio_duration": 11.912,
+  "after_audio_duration": 11.912,
+  "audio_duration_difference": 0.0,
+  "audio_same_duration_pass": true
+}

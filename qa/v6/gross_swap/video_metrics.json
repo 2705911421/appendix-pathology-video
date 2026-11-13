@@ -1,0 +1,164 @@
+{
+  "S01": {
+    "videos": [
+      {
+        "file": "S01.mp4",
+        "duration": 21.766667,
+        "expected": 21.766958333333328,
+        "duration_error": 0.0002913333333260937,
+        "black_intervals": [],
+        "endpoint_mean_luma": [
+          234.33333333333334,
+          222.5331573109568
+        ],
+        "endpoint_nonblack": true,
+        "duration_pass": true
+      },
+      {
+        "file": "S01_\u5e26\u914d\u97f3_720p.mp4",
+        "duration": 21.767,
+        "expected": 21.766958333333328,
+        "duration_error": 4.166666667160257e-05,
+        "black_intervals": [],
+        "endpoint_mean_luma": [
+          234.33333333333334,
+          222.53111906828704
+        ],
+        "endpoint_nonblack": true,
+        "duration_pass": true
+      }
+    ],
+    "before_audio_duration": 21.767,
+    "after_audio_duration": 21.767,
+    "audio_duration_difference": 0.0,
+    "audio_same_duration_pass": true
+  },
+  "S05": {
+    "videos": [
+      {
+        "file": "S05.mp4",
+        "duration": 11.9,
+        "expected": 11.912083333333342,
+        "duration_error": 0.012083333333341884,
+        "black_intervals": [],
+        "endpoint_mean_luma": [
+          219.14898292824074,
+          215.9476255465535
+        ],
+        "endpoint_nonblack": true,
+        "duration_pass": true
+      },
+      {
+        "file": "S05_\u5e26\u914d\u97f3_720p.mp4",
+        "duration": 11.912,
+        "expected": 11.912083333333342,
+        "duration_error": 8.333333334142878e-05,
+        "black_intervals": [],
+        "endpoint_mean_luma": [
+          219.15540979456017,
+          215.95080584490742
+        ],
+        "endpoint_nonblack": true,
+        "duration_pass": true
+      }
+    ],
+    "before_audio_duration": 11.912,
+    "after_audio_duration": 11.912,
+    "audio_duration_difference": 0.0,
+    "audio_same_duration_pass": true
+  },
+  "S06": {
+    "videos": [
+      {
+        "file": "S06.mp4",
+        "duration": 10.6,
+        "expected": 10.585625000000007,
+        "duration_error": 0.014374999999992255,
+        "black_intervals": [],
+        "endpoint_mean_luma": [
+          217.28526202417694,
+          222.56187258873456
+        ],
+        "endpoint_nonblack": true,
+        "duration_pass": true
+      },
+      {
+        "file": "S06_\u5e26\u914d\u97f3_720p.mp4",
+        "duration": 10.6,
+        "expected": 10.585625000000007,
+        "duration_error": 0.014374999999992255,
+        "black_intervals": [],
+        "endpoint_mean_luma": [
+          217.2891040943287,
+          222.56643446180556
+        ],
+        "endpoint_nonblack": true,
+        "duration_pass": true
+      }
+    ],
+    "before_audio_duration": 10.133333,
+    "after_audio_duration": 10.6,
+    "audio_duration_difference": 0.4666669999999993,
+    "audio_same_duration_pass": false
+  },
+  "S11_s46": {
+    "videos": [
+      {
+        "file": "S11_s46.mp4",
+        "duration": 5.333333,
+        "expected": 5.321875000000006,
+        "duration_error": 0.011457999999993973,
+        "black_intervals": [],
+        "endpoint_mean_luma": [
+          50.46033098636831,
+          51.21050829475308
+        ],
+        "endpoint_nonblack": true,
+        "duration_pass": true
+      },
+      {
+        "file": "S11_s46_\u5e26\u914d\u97f3_720p.mp4",
+        "duration": 5.333333,
+        "expected": 5.321875000000006,
+        "duration_error": 0.011457999999993973,
+        "black_intervals": [],
+        "endpoint_mean_luma": [
+          50.46787181712963,
+          51.218783637152775
+        ],
+        "endpoint_nonblack": true,
+        "duration_pass": true
+      }
+    ]
+  },
+  "S18_s66": {
+    "videos": [
+      {
+        "file": "S18_s66.mp4",
+        "duration": 3.1,
+        "expected": 3.113999999999976,
+        "duration_error": 0.01399999999997581,
+        "black_intervals": [],
+        "endpoint_mean_luma": [
+          234.33333333333334,
+          229.01880947788067
+        ],
+        "endpoint_nonblack": true,
+        "duration_pass": true
+      },
+      {
+        "file": "S18_s66_\u5e26\u914d\u97f3_720p.mp4",
+        "duration": 3.114,
+        "expected": 3.113999999999976,
+        "duration_error": 2.398081733190338e-14,
+        "black_intervals": [],
+        "endpoint_mean_luma": [
+          234.33333333333334,
+          229.03745478877315
+        ],
+        "endpoint_nonblack": true,
+        "duration_pass": true
+      }
+    ]
+  }
+}

@@ -1,4 +1,4 @@
-import {prepare, drawAppendix, frameAt, toScreen, sidePt, SWELL} from '../lib_ext/gross_appendix.js';
+import {prepare, drawAppendix, frameAt, toScreen, sidePt, SWELL} from '../lib_ext/gross_swap_canonical.js';
 import {prepare as prepareClin, abdomen} from '../lib_ext/clin_draw.js';
 import {prepareBlooms, smooth, mix, rich, text, tag, bloom, VIO, RED, YEL, BLK} from '../lib_ext/open_intro.js';
 
@@ -42,7 +42,7 @@ function blit(c, spr, x, y, sc, alpha = 1) {
 
 export default {
   prepare() {
-    prepare(); prepareClin(); prepareBlooms();
+    prepare(); brush.scaleBrushes(2.4); prepareClin(); prepareBlooms();
     SPR.normal = bakeSprite('normal', 1.06, -.78);
     SPR.red = bakeSprite('red', .70, -1.2);
     SPR.yellow = bakeSprite('yellow', .70, -1.2);

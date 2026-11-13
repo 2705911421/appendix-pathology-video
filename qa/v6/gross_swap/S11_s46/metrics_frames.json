@@ -1,0 +1,36 @@
+{
+  "frames": [
+    {
+      "sentence": 46,
+      "fraction": 0.48,
+      "time": 45.309416666666564,
+      "outside_mae_255": 0.0,
+      "outside_changed_px": 0,
+      "reference": [
+        {
+          "state": "yellow",
+          "mae_255": 0.03819974181434104,
+          "inner_mae_255": 0.03656712135346393,
+          "region_px": 255630
+        }
+      ]
+    },
+    {
+      "sentence": 46,
+      "fraction": 0.84,
+      "time": 47.225291666666564,
+      "outside_mae_255": 0.0,
+      "outside_changed_px": 0,
+      "reference": [
+        {
+          "state": "yellow",
+          "mae_255": 0.03819974181434104,
+          "inner_mae_255": 0.03656712135346393,
+          "region_px": 255630
+        }
+      ]
+    }
+  ],
+  "outside_mae_max": 0.0,
+  "reference_mae_max": 0.03819974181434104
+}

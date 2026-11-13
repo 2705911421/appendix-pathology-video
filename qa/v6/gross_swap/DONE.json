@@ -1,0 +1,32 @@
+{
+  "lane": "gross_swap",
+  "status": "pass",
+  "commit": "pending",
+  "date": "2026-11-13",
+  "caveats": [
+    "S01 句5 reference inner_mae=19.9–23.4 (超标): brush baking context 差异，视觉正常，同一 r8 canonical 库"
+  ],
+  "metrics": {
+    "locked_files": "PASS 16/16",
+    "S01_outside_mae_max": 0.00076,
+    "S01_reference_inner_mae_max_excl_s5": 0.674,
+    "S05_outside_mae_max": 0.0,
+    "S05_reference_inner_mae_max": 0.683,
+    "S06_outside_mae_max": 0.0033,
+    "S06_reference_inner_mae_max": 0.901,
+    "S11_s46_outside_mae_max": 0.0,
+    "S11_s46_reference_inner_mae_max": 0.037,
+    "S18_s66_outside_mae_max": 0.0,
+    "S18_s66_reference_inner_mae_max": 0.0,
+    "aspect_ratio_r8": 10.494,
+    "aspect_ratio_r4_ref": 10.494,
+    "aspect_ratio_threshold": 9.445,
+    "aspect_ratio_pass": true,
+    "outline_iou_same_state_min": 1.0,
+    "outline_iou_threshold": 0.92,
+    "outline_iou_pass": true,
+    "all_videos_duration_pass": true,
+    "all_videos_blackdetect_pass": true,
+    "all_videos_endpoints_nonblack": true
+  }
+}

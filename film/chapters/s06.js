@@ -1,9 +1,9 @@
-import {prepare,drawAppendix,frameAt,toScreen} from '../lib_ext/gross_appendix.js';
+import {prepare,drawAppendix,frameAt,toScreen} from '../lib_ext/gross_swap_canonical.js';
 import {prepareVascular,drawVascular} from '../lib_ext/vascular_response.js';
 const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
 const mix=(a,b,p)=>a+(b-a)*p;
 function label(c,text,x,y,px,py,a=1){c.save();c.globalAlpha=a;c.font='500 40px MixSans';c.fillStyle='#9276A6';c.fillText(text,x,y);c.strokeStyle='#AC98B7';c.lineWidth=1.6;c.beginPath();c.moveTo(x+8,y+12);c.lineTo(x+65,y+12);c.lineTo(px,py);c.stroke();c.restore();}
-export default {prepare(){prepare();prepareVascular();},draw(c,t,T){
+export default {prepare(){prepare();brush.scaleBrushes(2.4);prepareVascular();},draw(c,t,T){
  c.setTransform(1,0,0,1,0,0);c.fillStyle='#F4EFE6';c.fillRect(0,0,1920,1080);
  c.fillStyle='#D6453A';c.font='700 56px MixSans';c.fillText('第一幕红',85,258);c.fillStyle='#2A2A35';c.font='800 47px MixSans';c.fillText('单纯性阑尾炎',85,337);c.font='400 36px MixSans';c.fillText('充血、轻度肿胀',85,409);
  const red=smooth((t-T.frac(23,.12))/(T.frac(23,.72)-T.frac(23,.12)));
