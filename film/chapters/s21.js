@@ -1,4 +1,5 @@
-import {prepare as prepareClin, person, hospital, pain} from '../lib_ext/clin_draw.js';
+import {prepareHospital, hospital} from '../lib_ext/open_hospital.js';
+import {prepare as prepareClin, person, pain} from '../lib_ext/clin_draw.js';
 import {prepareBlooms, smooth, mix, text, bloom, sectorWash, VIO, RED, YEL, BLK} from '../lib_ext/open_intro.js';
 
 const PAPER = '#F4EFE6';
@@ -35,7 +36,7 @@ function compass(c, cx, cy, r, alpha, needle) {
 }
 
 export default {
-  prepare() { prepareClin(); prepareBlooms(); },
+  prepare() { prepareClin(); prepareBlooms(); prepareHospital(); },
   draw(c, t, T) {
     const F = (id, a) => T.frac(id, a);
     const since = (t0, d = .5) => smooth((t - t0) / d);
@@ -60,9 +61,9 @@ export default {
 
     // Hospital behind the patient. Base sits on the ground line.
     if (hospitalA > .01) {
-      const hy = 671 + 16 * (1 - hospitalA);
+      const hy = 671 - 16 * (1 - hospitalA);
       c.save(); c.globalAlpha = hospitalA;
-      hospital(c, 1548, hy, 2.05);
+      hospital(c, 1548, hy);
       c.restore();
     }
 
