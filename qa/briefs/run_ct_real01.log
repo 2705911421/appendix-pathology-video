@@ -1,0 +1,2048 @@
+OpenAI Codex v0.163.0
+--------
+workdir: /workspace/病理科普视频/v5_ct_dev
+model: gpt-6.1-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, /workspace/病理科普视频, /workspace/garden-skills] (network access enabled)
+reasoning effort: none
+reasoning summaries: none
+session id: 01a1d31f-6a13-7d13-9272-d8a7f1f4cf41
+--------
+user
+# 并行线通用规则（所有并行线必读）
+
+你在一个独立 git worktree 里工作（分支见下），与其他并行线同时进行。主线是 /workspace/病理科普视频/v5 的 v6-fresh 分支（另有线在 v5 和 v5_s19_dev 改 S06/S07/S19，不要碰这些目录）。
+
+**只在你自己的 worktree 里改文件。** 新场景写成 film/chapters/sNN.js；本线专用的绘图库写在 film/lib_ext/<本线名>_*.js。尽量不改共享文件（film/main.js、film/timeline.js、已有 lib_ext）；为了能单独渲染可以改 main.js，但改动要最小、集中，便于我之后合并。
+**锁定文件不许改**，开工和收工各做一次 sha256 校验并写入日志：engine/lib/{he,he_detail,wash,ann,scope,camera}.js、parity_r4/chapters/04.js。
+
+先读这些再动手：
+- 分镜：分镜/分镜_v1.md（本线场景的行、素材库 B–J 说明、"研究卡/文献提示"表）。
+- 配音与时间：配音/全稿_v3/（timeline.json，所有时间按句号对齐，不要写死秒数，后面会重新配音）。
+- 风格：/workspace/病理科普视频/v4_mix/qa/style/风格规范_v1.md；版式参考已做好的 S06（qa/v6/h02_s06/s23_red.png、s24_after.png）：浅米色底、左侧标题/要点文字栏、右侧主画面；手绘水彩质感，不要扁平饱和的矢量风。标签规范：细引线 + 浅紫字、无框；所有内容 y<950。
+- 渲染：/workspace/garden-skills/skills/motion-showreel/scripts/render.mjs（用法参考 qa/briefs/v6_d01_s11.md 和 qa/v6/ 下已有的 build/render 脚本）。
+- brief 格式与交付习惯参考 qa/briefs/v6_d01_s11.md、v6_e01_s19.md。
+
+内容红线：
+- 画面文字只能来自定稿解说词/分镜，**不得编造任何数字、研究或文献**；分镜"研究卡/文献提示"表里列出的数字和引注才能上屏，且原样照抄。
+- 原创自绘，不用网图/照片；不出现姓名、学校。
+- 医学上要准确；拿不准的地方在 自检.md 里列出，不要猜着画。
+
+每个场景交付（qa/v6/<本线名>/<场景>/）：每句 1–2 张关键帧 + 200% 局部、review_sheet.png（关键帧总览）、SNN.mp4 与 SNN_带配音_720p.mp4（配上对应句的真实配音）、自检.md（逐条对照分镜要求和风格规范）。一个场景完成并自检通过就在本分支 commit（`git -c user.name=mini -c user.email=mini@local commit`，信息以本线名开头），然后做下一个场景，全部做完再结束。不要 push，不要合并到 v6-fresh。
+
+
+**机器负载**：现在有 8 条线同时在这台 8 核/15GB 的机器上跑，渲染时只开 1 个渲染进程/1 个浏览器实例，不要并发多路渲染；预览可先用低分辨率，定稿再出全尺寸。
+**提交**：每完成一个场景就在本分支 commit；如果 git 元数据写不进去，把提交打成 qa/v6/<本线名>/<本线名>-dev.bundle 并在日志里说明。
+
+
+# ct_real01（Gisele 已批准：用公开授权真实 CT 替换四场代码绘制的 CT）
+
+分支 ct-dev，工作区 `/workspace/病理科普视频/v5_ct_dev`，本线名 ct。Gisele 已确认 CT 图不再由 AI/代码绘制，并批准了下列真实病例图。本 brief **覆盖**上方通用规则里的「原创自绘，不用网图/照片」——但仅限这四场的 CT 窗；其余画面仍须自绘、不得编造数字、不出现姓名学校。
+
+**不要做** `ct_adv01`。不要碰其他 worktree、不要 push、不要合并到 v6-fresh。不要读取、打印或改写 `/workspace/病理科普视频/配音/.mimo.env` 或任何密钥。
+
+## 已批准的图像（必须用这些，不要另选 Commons / 未批准病例）
+
+全部原图在 `/workspace/病理科普视频/ct_real/`。先把批准文件复制进本 worktree，例如 `film/assets/ct_real/`（保留原文件名与字节；复制后对一下 sha256）。出处与署名见 `/workspace/病理科普视频/ct_real/来源与授权.md`。
+
+| 场景 | 句号 | 批准文件 | 作用 |
+|---|---|---|---|
+| S04 | 14–19（CT 大窗出现于 16–18，句 19 证据图里的 CT 小窗也可复用） | `ct_real/S04/S04_primary_rID197373_axial_s130_appendix-thick-wall_img67748644.jpeg` | 主图：40 岁男性，增强门脉期，管径增粗、壁增厚 |
+| S04 | 同上，可选辅图 | `ct_real/S04/S04_primary_rID197373_axial_s135_appendicoliths_img67748649.jpeg` | 辅图：同病例腔内小结石（不要把“粪石/尺寸”写成新结论） |
+| S09 | 35–36 | `ct_real/S09/S09_primary_rID30389_coronal_s024_key-coronal-mild-stranding_img7922572.jpg` | 主图：官方冠状位，mild stranding |
+| S09 | 35–36 | `ct_real/S09/S09_primary_rID30389_axial_s058_appendix-near-cecum_img7922410.jpg` 或 `..._s060_...img7922413.jpg`（s059 也可） | 轴位对照，盲肠旁增粗阑尾 |
+| S12 | 47–48 | `ct_real/S12/S12_primary_rID197370_axial_s128_dilated-appendix-extensive-stranding_img67747991.jpeg` | 主图：扩张积液阑尾、广泛脂肪条索 |
+| S12 | 47–48 | `ct_real/S12/S12_primary_rID197370_coronal_s065_coronal-extensive-fat-stranding_img67748143.jpeg` | 冠状位，周围渗出更清楚 |
+| S15 | 58–59 | `ct_real/S15/S15_primary_rID242634_axial_s285_wall-enhancement-defect-and-gas-abscess_img75885695.jpg` | **同一张图**先点壁强化中断（58），再点腔外气体/脓肿（59） |
+
+不要使用 Commons 备选（有的带 17.1 mm 测量尺、英文标签或红圈），也不要用 rID 198519 / 198206，除非批准图缺失（它们没有缺失）。
+
+## 像素红线（必须遵守）
+
+- **禁止**重绘、涂改、AI 生成、滤波“美化”、伪彩色、或改动解剖像素。
+- **允许**：裁去 CT 床缘和大块黑边、等比缩放、平移/轻微 Ken Burns、灰阶显示（保持原灰阶关系）、以及叠加上层（箭头、圆圈、细引线、中文短标签、按句高亮）。叠加必须画在独立层，不得写回原图文件。
+- 病例描述里的 10 mm、12 mm、6×3 cm、17.1 mm 等 **一律不上屏**（分镜禁止测量值）。
+- 四场是四位不同患者。必须让观众明白这不是同一根阑尾的连续复查：每场 CT 窗附近用「典型病例」作屏上/字幕提示（这四字可以上屏；不要写“同一患者”或编造病程时间）。
+
+## 实现要求
+
+现有实现：`film/chapters/s04.js`；S09/S12/S15 经 `film/lib_ext/ct_r3_compare.js` 的 `compareScene(35–36,1) / (47–48,2) / (58–59,3)`，CT 来自 `drawCTStatic` / `drawCTChanges`（`ct_r3_schematic.js`）。渲染入口 `film/main.js`（`scene=` 查询，时间用 `forScene` 对齐 全稿_v3 `timeline.json`）。交付脚本参考 `qa/v6/ct/deliver.mjs`，但**本轮输出目录改为 `qa/v6/ct_real/`**，不要覆盖 `qa/v6/ct/` 里已有的自绘稿。
+
+1. 从这四场撤掉代码绘制的 CT 示意渲染；场景里不要再调用 `drawCTStatic` / `drawCTChanges` 来充当 CT 主图。
+2. 组织窗：不得再画一个灰阶、看起来像 CT 的水彩窗。若保留水彩 HE 组织对照，必须明确是组织/镜下对照，且不能挤占真实 CT；真实 CT 看不清时，按分镜改成单窗大特写（优先保证真实 CT 可读）。
+3. 非 CT 部分保持现有实现：S04 与 clin 统一的医生、超声/CT 选择、研究卡（2023、8项研究、1602人、敏感度95%、特异度94%、[1]，用词与时序对照分镜和配音 14–19；配音说「8项研究」不要写「8篇」）、句 19 临床–影像–病理证据关系；S09/S12/S15 左侧文字栏用分镜原句（管径增粗、壁增厚、周围脂肪轻度模糊；壁增厚强化、周围渗出明显；壁强化缺损：警惕坏死；腔外气体、脓肿：警惕穿孔 [3]）。标签规范不变：细引线 + 浅紫字、无框。内容 y<950。纸色/左栏/字幕沿用现稿，不要另起一套风格。
+4. 时间全部按句号对齐 `配音/全稿_v3/timeline.json`，不要写死秒数。句间过渡约 0.7s。
+5. 按句高亮（位置要落在真实解剖上，不要凭空指）：
+   - S04 句 18：在 s130 上标出病变阑尾（「发现病变」）；句 16–17 研究卡逐项揭示。
+   - S09 句 35：框选增粗管径/增厚管壁；句 36：扩到周围轻度模糊的脂肪。
+   - S12 句 47：先壁增厚强化，再周围渗出；句 48：保持连读并框选对应区域。轴位 s128 与冠状 s065 都要用上（可轴冠并列或按句切换，但两张批准图都要出现）。
+   - S15 **同一张** s285：句 58 只点亮局部壁强化中断；句 59 再标腔外气体、脓肿。每次一条对应引线。
+6. 每张在用的真实 CT 图，窗角加小号署名，例如：`Radiopaedia.org rID 197373 · CC BY-NC-SA 3.0`（S09 为 rID 30389，S12 为 rID 197370，S15 为 rID 242634）。不要挡解剖，不要把作者姓名写成病人信息。
+7. 把批准图对应的片尾署名（中英）写入 `qa/v6/ct_real/credits.md`，从 `ct_real/来源与授权.md` 原样抄录已用病例的现成署名句，供总装片尾使用，不要自撰作者或 rID。建议总块只列入实际用到的四个 rID：197373、30389、197370、242634。
+
+## 交付
+
+目录 `qa/v6/ct_real/`：
+
+- `credits.md`
+- 每场 `qa/v6/ct_real/SNN/`：每句 1–2 张关键帧 + 200% 局部、`review_sheet.png`、`SNN.mp4`、`SNN_带配音_720p.mp4`（配 全稿_v3 对应句真实配音）、`自检.md`（对照分镜、像素红线、署名、「典型病例」提示、句 58/59 高亮时序）。
+- 可复用/改写 `qa/v6/ct/deliver.mjs`、`review.py`、`check.py`，但输出必须落到 `qa/v6/ct_real/`。单渲染进程、单浏览器实例；`--workers 1`。机器内存有限，不要并行多路渲染。
+
+锁定文件开工/收工做 sha256，写入本轮日志：`engine/lib/{he,he_detail,wash,ann,scope,camera}.js`、`parity_r4/chapters/04.js`。
+
+每场自检通过后 `git -c user.name=mini -c user.email=mini@local commit`，信息以 `ct real01:` 开头。git 元数据写不进去则把提交打成 `qa/v6/ct_real/ct-dev.bundle` 并在日志说明。不要 push、不要合并。
+
+结束时用简短中文说明：四场各用了哪张图、组织窗如何处理、署名和「典型病例」加在何处。
+
+2026-11-13T04:16:54.509023Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer realm=\"OAuth\", resource_metadata=\"https://mcp.notion.com/.well-known/oauth-protected-resource/mcp\", scope=\"default\"" })
+codex
+我会先核对分镜、授权来源、现有实现和锁定文件校验值，再逐场替换真实 CT、渲染自检并提交。输出统一放在 `qa/v6/ct_real/`。
+
+exec
+/bin/bash -lc "pwd; rg --files -g AGENTS.md -g '*ct*' -g 'deliver.mjs' -g 'review.py' -g 'check.py' -g 'timeline.json' -g '分镜_v1.md' -g 'v6_d01_s11.md' -g 'v6_e01_s19.md' | head -70" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+/workspace/病理科普视频/v5_ct_dev
+分镜/分镜_v1.md
+film/chapters/ct_library.js
+film/lib_ext/ct_clinical.js
+film/lib_ext/ct_r3_schematic.js
+film/lib_ext/ct_compare.js
+film/lib_ext/ct_r3_compare.js
+film/lib_ext/ct_r3_clinical.js
+film/lib_ext/ct_schematic.js
+film/lib_ext/ct_r3_doctor.js
+qa/v6/c01_s10/s37_open_low_200pct.png
+qa/v6/c01_s10/s41_200pct.png
+qa/v6/c01_s10/s37_200pct.png
+qa/v6/animatic/contact_sheet.png
+qa/briefs/v6_d01_s11.md
+qa/briefs/run_ct_fix01.log
+qa/briefs/run_lane_ct_02_cb.log
+qa/briefs/ct_fix01.md
+qa/briefs/v6_e01_s19.md
+qa/briefs/run_lane_ct_02_gkcont_gk.log
+qa/briefs/run_lane_ct_01.log
+qa/briefs/lane_ct_02_gkcont.md
+qa/briefs/ct_real01.md
+qa/briefs/run_ct_real01.log
+qa/briefs/ct_adv01.md
+qa/briefs/lane_ct_02.md
+qa/briefs/lane_ct_01.md
+qa/v6/c01_s10/s38_200pct.png
+qa/v6/c01_s10/s42_200pct.png
+qa/v6/c01_s10/s39_200pct.png
+qa/v6/c01_s10/s40_200pct.png
+qa/v6/c01_s10/low_to_mid_200pct.png
+qa/v6/b10/s08_high_s32_200pct.png
+qa/v6/b10/s08_high_s33_200pct.png
+qa/v6/b10/s08_low_200pct.png
+qa/v6/b10/s08_mid_200pct.png
+qa/v6/b10/s08_high_s30_200pct.png
+qa/v6/b10/s08_high_s31_200pct.png
+qa/v6/b10/s08_high_s34_200pct.png
+qa/v6/c02_s10/s37_open_low_200pct.png
+qa/v6/c02_s10/s41_200pct.png
+qa/v6/c02_s10/s37_200pct.png
+qa/v6/e01_s19/iris_enter_200pct.png
+qa/v6/e01_s19/iris_exit_200pct.png
+qa/v6/c02_s10/s40_200pct.png
+qa/v6/h02_s06/s23_start_200pct.png
+qa/v6/h02_s06/s23_transition_200pct.png
+qa/v6/h02_s06/s24_before_200pct.png
+qa/v6/e01_s19/s69_middle_200pct.png
+qa/v6/h02_s06/s24_after_200pct.png
+qa/v6/e01_s19/s70_lymph_200pct.png
+qa/v6/e01_s19/s69_low_200pct.png
+qa/v6/h02_s06/s24_anchor_200pct.png
+qa/v6/c02_s10/low_to_mid_200pct.png
+qa/v6/c02_s10/s38_200pct.png
+qa/v6/h02_s06/s23_red_200pct.png
+qa/v6/c02_s10/s42_200pct.png
+qa/v6/c02_s10/s39_200pct.png
+qa/v6/e01_s19/s70_plasma_200pct.png
+qa/v6/c03_s10/s37_open_low_200pct.png
+qa/v6/c03_s10/s41_200pct.png
+qa/v6/c03_s10/s37_200pct.png
+qa/v6/c03_s10/s40_200pct.png
+qa/v6/e01_s19/s69_fibrosis_200pct.png
+qa/v6/c03_s10/s39_200pct.png
+qa/v6/e02_s19/iris_enter_200pct.png
+qa/v6/e02_s19/iris_exit_200pct.png
+qa/v6/e02_s19/s69_middle_200pct.png
+qa/v6/e02_s19/s70_lymph_200pct.png
+qa/v6/e02_s19/s69_low_200pct.png
+qa/v6/f03_s14/s45_pus_measure_200pct.png
+
+exec
+/bin/bash -lc 'ls -la; find .. -name AGENTS.md -print; cat film/chapters/s04.js film/lib_ext/ct_r3_compare.js; cat qa/v6/ct/deliver.mjs' in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+total 68
+drwxr-xr-x 13 box box 4096 Nov 13 12:17 .
+drwxr-xr-x 30 box box 4096 Nov 13 12:04 ..
+dr-xr-xr-x  2 box box   40 Nov 13 12:17 .agents
+dr-xr-xr-x  2 box box   40 Nov 13 12:17 .aws
+dr-xr-xr-x  2 box box   40 Nov 13 12:17 .codex
+-rw-r--r--  1 box box   66 Nov 12 22:34 .git
+-rw-r--r--  1 box box   64 Nov 12 22:34 .gitignore
+drwxr-xr-x  6 box box 4096 Nov 12 22:34 assembly
+drwxr-xr-x  7 box box 4096 Nov 12 22:34 engine
+drwxr-xr-x  4 box box 4096 Nov 12 22:34 film
+-rw-r--r--  1 box box 7799 Nov 12 22:34 package-lock.json
+-rw-r--r--  1 box box  153 Nov 12 22:34 package.json
+drwxr-xr-x  5 box box 4096 Nov 12 22:34 parity_r4
+drwxr-xr-x  5 box box 4096 Nov 12 22:34 parity_runtime
+drwxr-xr-x  5 box box 4096 Nov 12 22:34 qa
+-rw-r--r--  1 box box 2594 Nov 12 22:34 render.mjs
+-rw-r--r--  1 box box 2599 Nov 12 22:34 render_dpr2.mjs
+drwxr-xr-x  2 box box 4096 Nov 12 22:34 tools
+drwxr-xr-x  2 box box 4096 Nov 12 22:34 分镜
+import {paper,text,drawCTStatic,drawFocus,labelTo,ramp} from '../lib_ext/ct_r3_schematic.js';
+import {doctor,choice,evidenceBase} from '../lib_ext/ct_r3_clinical.js';
+
+const PUR='#6B4C9A', INK='#2A2A35';
+const CT={x:610,y:92,w:1260,h:838};
+const CT_SMALL={x:1040,y:170,w:470,h:540};
+
+export default {
+  prepare(){
+    this.clinic=document.createElement('canvas');this.clinic.width=1920;this.clinic.height=1080;
+    doctor(this.clinic.getContext('2d'),1010,408,1.55);
+
+    this.ct=document.createElement('canvas');this.ct.width=1920;this.ct.height=1080;
+    this.g=drawCTStatic(this.ct.getContext('2d'),CT.x,CT.y,CT.w,CT.h,{stage:1,lens:true});
+
+    this.evidence=document.createElement('canvas');this.evidence.width=1920;this.evidence.height=1080;
+    const e=this.evidence.getContext('2d');
+    evidenceBase(e);
+    this.gs=drawCTStatic(e,CT_SMALL.x,CT_SMALL.y,CT_SMALL.w,CT_SMALL.h,{stage:1,lens:false,compact:true});
+  },
+  draw(c,t,T){
+    paper(c);
+    const n=[14,15,16,17,18,19].filter(k=>t>=T.at(k)).at(-1)||14;
+    const fade=(id,f=0)=>ramp(t,T.frac(id,f),Math.max(.01,T.frac(id,Math.min(1,f+.15))-T.frac(id,f)));
+    const a15=fade(15);
+    const a16=fade(16);
+    const a18=fade(18);
+    const a19=fade(19);
+    const intro=fade(14);
+
+    if(n<=15){
+      c.save();c.globalAlpha=intro;c.drawImage(this.clinic,0,0);c.restore();
+      c.save();c.globalAlpha=intro;
+      text(c,'CT是辅助工具',70,245,44,PUR,700);
+      if(n>=15)text(c,'并非人人必须',70,325,42,INK,500,a15);
+      labelTo(c,'医生评估',640,792,868,704,{color:PUR,alpha:intro,size:40,weight:700});
+      c.restore();
+      choice(c,a15*intro);
+      return;
+    }
+
+    if(n<=17){
+      if(t<T.frac(16,.15)){
+        c.save();c.globalAlpha=1-a16;c.drawImage(this.clinic,0,0);c.restore();
+      }
+      c.save();c.globalAlpha=a16;c.drawImage(this.ct,0,0);c.restore();
+      c.save();c.globalAlpha=a16;
+      text(c,'增强螺旋CT',70,205,43,PUR,700);
+      text(c,'2023',70,300,40,INK,500);
+      text(c,'8项研究',70,380,40,INK,500,fade(16,.08));
+      text(c,'1602人',70,460,40,INK,500,fade(16,.42));
+      text(c,'敏感度95%',70,555,40,INK,500,fade(17));
+      text(c,'特异度94%',70,630,40,INK,500,fade(17,.40));
+      text(c,'[1]',70,710,30,PUR,500,fade(17,.55));
+      c.restore();
+      return;
+    }
+
+    if(n===18){
+      c.drawImage(this.ct,0,0);
+      c.save();c.globalAlpha=a18;
+      text(c,'发现病变',70,245,44,PUR,700);
+      c.restore();
+      const L=this.g.lens,ar=L.r*.52;
+      drawFocus(c,L.x,L.y,ar*1.08,a18,[8,7],2,'#C9B7DA');
+      const ty=Math.min(this.g.y+this.g.h-28,L.y+L.r+44);
+      labelTo(c,'发现病变',L.x-250,ty,L.x-ar*.15,L.y+ar*.2,{color:'#C9B7DA',alpha:a18,size:28});
+      return;
+    }
+
+    // 19: CT window gives way to the clinical/imaging/pathology evidence relation
+    if(t<T.frac(19,.15)){c.save();c.globalAlpha=1-a19;c.drawImage(this.ct,0,0);c.restore();}
+    c.save();c.globalAlpha=a19;c.drawImage(this.evidence,0,0);c.restore();
+    c.save();c.globalAlpha=a19;
+    text(c,'仍需结合临床',70,240,43,PUR,700);
+    text(c,'判断病情轻重',70,320,40,INK,500);
+    c.restore();
+  }
+};
+import {paper,text,drawCTStatic,drawCTChanges,drawTissueStatic,drawTissueChanges,drawFocus,drawTissueMark,drawConnector,labelTo,ramp,appendixRadii} from './ct_r3_schematic.js';
+
+const CT={x:610,y:92,w:710,h:838};
+const TI={x:1340,y:92,w:530,h:838};
+const LAV='#C9B7DA', PUR='#6B4C9A';
+
+function sidebar(c,stage,alpha,second){
+  const t=(s,y,size,color,weight=500,a=1)=>text(c,s,70,y,size,color,weight,alpha*a);
+  if(stage===1){
+    t('CT与组织变化对应',200,42,PUR,700);
+    t('管径增粗',300,36,'#2A2A35');
+    t('壁增厚',372,36,'#2A2A35');
+    t('周围脂肪轻度模糊',448,36,'#2A2A35',500,second);
+  }else if(stage===2){
+    t('壁增厚强化',210,44,PUR,700);
+    t('周围渗出明显',294,39,'#2A2A35',500,second);
+  }else{
+    t('壁强化缺损：',190,42,PUR,700);
+    t('警惕坏死',260,38,'#2A2A35');
+    t('腔外气体、脓肿：',380,38,PUR,700,second);
+    t('警惕穿孔 [3]',450,38,'#2A2A35',500,second);
+  }
+}
+
+export function compareScene(first,last,stage){
+  let base=null,g=null,tg=null;
+  return {
+    prepare(){
+      base=document.createElement('canvas');base.width=1920;base.height=1080;
+      const b=base.getContext('2d');
+      g=drawCTStatic(b,CT.x,CT.y,CT.w,CT.h,{stage,lens:true});
+      tg=drawTissueStatic(b,TI.x,TI.y,TI.w,TI.h,{stage});
+    },
+    draw(c,t,T){
+      paper(c);
+      const intro=ramp(t,T.at(first),Math.max(.01,T.frac(first,.12)-T.at(first)));
+      const aNext=ramp(t,T.at(last));
+      // Stage 2: wall first, surrounding exudate in the second half of sentence 47, correspondence frame on sentence 48.
+      const aExud=stage===2?ramp(t,T.frac(first,.42)):0;
+      const aFat=stage===1?aNext:0;
+      const aGas=stage===3?aNext:0;
+      const aLink=stage===2?aNext:0;
+
+      c.save();c.globalAlpha=intro;c.drawImage(base,0,0);c.restore();
+
+      c.save();c.globalAlpha=intro;
+      drawCTChanges(c,g,{stage,aFat,aExud,aDefect:stage===3?intro:0,aGas,aAbscess:aGas,aEnh:stage===2?1:0});
+      drawTissueChanges(c,tg,{stage,aExud,aDefect:stage===3?aGas:0});
+      c.restore();
+
+      c.save();c.globalAlpha=intro;sidebar(c,stage,1,stage===2?aExud:aNext);c.restore();
+
+      const ar=g.lens.r*(stage===1?.52:.63);
+      const {outer}=appendixRadii(g,stage);
+      
+      const grow=stage===1?aFat:stage===2?aLink:aGas;
+      const rr=ar*(0.92+0.58*grow);
+      drawFocus(c,g.lens.x,g.lens.y,rr,intro*.95,[8,7],2,LAV);
+      if(stage===2)drawFocus(c,g.lens.x,g.lens.y,ar*.70,intro*aLink*.9,[5,4],1.5,LAV);
+      if(stage===3){
+        const ux=g.lens.x+ar*.18,uy=g.lens.y-ar*.10,da=-.87;
+        drawFocus(c,ux+Math.cos(da)*ar*.44,uy+Math.sin(da)*ar*.44,ar*.30,intro*.85*(1-aGas),[5,5],1.6,'#E2D3EC');
+      }
+
+      const kind=stage===3?'necrosis':stage===2?'wall':'edema';
+      const mark=drawTissueMark(c,TI.x,TI.y,TI.w,TI.h,kind,intro*.95);
+      const fatMark=stage===1?drawTissueMark(c,TI.x,TI.y,TI.w,TI.h,'fat',intro*aFat):null;
+      const serosa=stage===2?drawTissueMark(c,TI.x,TI.y,TI.w,TI.h,'serosa',intro*Math.max(aExud,aLink)):null;
+
+      const lx=g.lens.x,ly=g.lens.y;
+      const wallPt={x:lx+Math.cos(-.35)*ar*.78,y:ly+Math.sin(-.35)*ar*.78};
+      const fatPt={x:lx+Math.cos(-1.05)*ar*1.22,y:ly+Math.sin(-1.05)*ar*1.22};
+      const pin=(pt,a)=>drawFocus(c,pt.x,pt.y,32,a,[6,5],1.6,'#A88DBD');
+      if(mark){pin(mark,intro*.9);drawConnector(c,wallPt.x,wallPt.y,mark.x,mark.y,intro*.62);}
+      if(fatMark){pin(fatMark,intro*aFat*.9);drawConnector(c,fatPt.x,fatPt.y,fatMark.x,fatMark.y,intro*aFat*.7);}
+      if(serosa){pin(serosa,intro*Math.max(aExud,aLink)*.9);drawConnector(c,fatPt.x,fatPt.y,serosa.x,serosa.y,intro*Math.max(aExud,aLink)*.65);}
+
+      if(stage===1){
+        labelTo(c,'壁增厚',650,852,lx-ar*.95,ly-ar*.30,{color:LAV,alpha:intro});
+        labelTo(c,'周围脂肪轻度模糊',650,902,lx-ar*1.55,ly-ar*1.02,{color:LAV,alpha:intro*aFat});
+      }else if(stage===2){
+        labelTo(c,'壁增厚强化',650,852,lx-ar*.95,ly-ar*.30,{color:LAV,alpha:intro});
+        labelTo(c,'周围渗出明显',650,902,lx-ar*1.55,ly-ar*1.02,{color:LAV,alpha:intro*aExud});
+      }else{
+        const ux=lx+ar*.18,uy=ly-ar*.10;
+        labelTo(c,'壁强化缺损',650,852,ux+Math.cos(-.87)*ar*.44,uy+Math.sin(-.87)*ar*.44,{color:LAV,alpha:intro});
+        labelTo(c,'腔外气体、脓肿',650,902,lx-ar*.10,ly+ar*1.02,{color:LAV,alpha:intro*aGas});
+      }
+
+      const tlabel=stage===1?'壁水肿':stage===2?'全层炎症':'壁病变';
+      if(mark)labelTo(c,tlabel,TI.x+24,TI.y+48,mark.x,mark.y,{color:'#8E74A8',alpha:intro,size:28});
+    }
+  };
+}
+import fs from 'node:fs';import {execFileSync as run} from 'node:child_process';
+const scene=process.argv[2],ranges={S09:[35,36],S12:[47,48],S15:[58,59],S04:[14,19]},[first,last]=ranges[scene],P=`qa/v6/ct/${scene}`;
+const rows=JSON.parse(fs.readFileSync('/workspace/病理科普视频/配音/全稿_v3/timeline.json')).lines.filter(s=>s.n>=first&&s.n<=last),origin=rows[0].start,duration=rows.at(-1).end-origin;
+fs.mkdirSync(P,{recursive:true});const picks=rows.flatMap(s=>(scene==='S04'?(s.n===14?[.12,.8]:[16,17].includes(s.n)?[.3,.82]:[.72]):[.3,.82]).map(f=>({name:`s${s.n}_${Math.round(f*100)}`,t:s.start-origin+(s.end-s.start)*f})));
+fs.writeFileSync(`${P}/keyframes.json`,JSON.stringify({origin,duration,picks},null,2));
+const tool='/workspace/garden-skills/skills/motion-showreel/scripts/render.mjs';
+function render(args){run('node',[tool,'film','--q',`scene=${scene.toLowerCase()}`,...args],{stdio:'inherit'});}
+render(['--still',picks.map(p=>p.t.toFixed(6)).join(','),'--out',P+'/stills']);render(['--determinism']);
+run('python3',['qa/v6/ct/review.py',scene],{stdio:'inherit'});
+render(['--out',`${P}/${scene}.mp4`,'--fps','30','--workers','1','--crf','16']);
+run('ffmpeg',['-y','-i',`${P}/${scene}.mp4`,'-ss',String(origin),'-t',String(duration),'-i','/workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav','-map','0:v:0','-map','1:a:0','-vf','scale=1280:720','-c:v','libx264','-crf','16','-c:a','aac','-b:a','192k','-shortest',`${P}/${scene}_带配音_720p.mp4`],{stdio:'inherit'});
+run('python3',['qa/v6/ct/check.py',scene],{stdio:'inherit'});
+
+exec
+/bin/bash -lc "cat /workspace/病理科普视频/ct_real/来源与授权.md; cat film/main.js film/timeline.js; cat qa/v6/ct/review.py qa/v6/ct/check.py; cat /workspace/病理科普视频/v4_mix/qa/style/风格规范_v1.md; cat qa/briefs/v6_d01_s11.md qa/briefs/v6_e01_s19.md; rg -n 'S04|S09|S12|S15|研究卡|素材库|B[–—-]J' 分镜/分镜_v1.md" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+# 真实 CT 图像来源与授权
+
+检索与下载日期：2026-11-13（Asia/Shanghai）。  
+用途：三峡大学非商业病理科普竞赛视频《一根"香肠"的变质日记：阑尾的红→黄→黑》中 S04、S09、S12、S15 的 CT 窗，替换此前由代码绘制的 CT 示意。  
+原则：只使用公开授权的真实病例图；保留 CDN/站点提供的原始像素，不改解剖、不做 AI 生成或重绘。作者名、病例编号、许可证均按页面原文记录，未推拟。
+
+---
+
+## 1. 各场需要表现什么（据分镜与全稿_v3）
+
+| 场景 | 句号 | 分镜/解说要求的 CT 所见 | 上屏注意 |
+|---|---|---|---|
+| S04 | 14–19 | 作为“辅助确诊工具”出现的 CT 大窗；帮助发现病变，但不把 CT 写成三型分型手段。并非人人必须做 CT。 | 选一张典型、易读的阳性阑尾炎 CT 即可。不要测量数字。 |
+| S09 | 35–36 | **单纯性相关**：管径增粗、壁增厚，周围脂肪**轻度**模糊，对应早期炎症/壁水肿。 | 与 S12 要能一眼区分；不显示测量值；不盖章为病理分型。 |
+| S12 | 47–48 | **化脓相关**：壁增厚**强化**、周围**渗出明显**，与管壁内外炎症对应。 | 渗出范围应明显重于 S09。优先有对比剂强化的图像。 |
+| S15 | 58–59 | **坏疽/穿孔相关**：壁强化缺损（警惕坏死）；腔外气体、脓肿（警惕穿孔）。 | 58 先点壁强化中断，59 再标气体/脓肿。不用“CT 确诊三型”。 |
+
+说明：分镜原先希望“同一阑尾位置贯穿各场景”，那是自绘示意库的要求。真实病例无法用同一位患者走完红→黄→黑，三型必须用不同病例。上屏时不要暗示“同一根阑尾的连续 CT”。
+
+本目录**没有**单独的“正常细长阑尾”图。S04–S15 的分镜并未要求正常对照；若日后要做正常对照，需另找公开授权病例。
+
+---
+
+## 2. 许可条件（片尾必须处理）
+
+### 2.1 Radiopaedia（本片主推荐来源）
+
+各病例页均有 `<link rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">`。站点许可页 [radiopaedia.org/licence](https://radiopaedia.org/licence) 写明：病例图像默认 **Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported（CC BY-NC-SA 3.0）**。
+
+条款要点：
+
+- **署名（BY）**：须同时写出贡献者姓名、Radiopaedia.org、以及 rID；在线使用时应对 Radiopaedia 与该病例作可点击链接。站点示例格式：`Case courtesy of [Name], Radiopaedia.org, rID: ######`
+- **非商业（NC）**：本片为非商业竞赛科普视频，与站点“未经许可的在线非商业视频”一类用途相符。不得用于收费课程、付费墙或广告。
+- **相同方式共享（SA）**：若在作品中改编（裁切、加中文标签、嵌入视频等通常视为改编），**整部视频/该派生作品可能需要以兼容的 CC BY-NC-SA 3.0 方式声明**。建议在片尾同时给出许可声明，并在提交材料中写明。
+
+许可证全文：<https://creativecommons.org/licenses/by-nc-sa/3.0/>
+
+### 2.2 Wikimedia Commons（更宽松的备选，无 NC）
+
+下列 Commons 图为 **CC BY-SA 3.0 或 CC BY-SA 4.0**（只有署名 + 相同方式共享，**没有 NonCommercial**）。若希望降低 NC 限制，可考虑用它们替换对应镜头；但 ShareAlike 仍然存在，且其中几张原图已烙有测量尺、英文标注或红圈，不完全适合本片直接上屏（详见各条）。
+
+### 2.3 建议片尾署名总块
+
+中文：
+
+> 部分 CT 图像来自 Radiopaedia.org，采用 CC BY-NC-SA 3.0 许可。  
+> 病例 rID 197373，作者 Michael P. Hartung；rID 30389，作者 Jack Ren；rID 197370，作者 Michael P. Hartung；rID 198519，作者 Lam Van Le；rID 242634，作者 Diana Reyadh Kadhem；rID 198206，作者 Mina Sameh Rizk。  
+> 本片为非商业用途。按相同方式共享许可，详见 https://creativecommons.org/licenses/by-nc-sa/3.0/
+
+English（Radiopaedia 推荐句式）：
+
+> CT images: Case courtesy of Michael P. Hartung, Radiopaedia.org, rID: 197373; Case courtesy of Jack Ren, Radiopaedia.org, rID: 30389; Case courtesy of Michael P. Hartung, Radiopaedia.org, rID: 197370; Case courtesy of Lam Van Le, Radiopaedia.org, rID: 198519; Case courtesy of Diana Reyadh Kadhem, Radiopaedia.org, rID: 242634; Case courtesy of Mina Sameh Rizk, Radiopaedia.org, rID: 198206. Licensed under CC BY-NC-SA 3.0.
+
+实际采用哪几张，按下面“推荐上屏”勾选后再把未用病例从总块中删去。
+
+---
+
+## 3. 推荐上屏组合（先看这些）
+
+| 场景 | 推荐文件 | 理由 |
+|---|---|---|
+| S04 | `S04/S04_primary_rID197373_axial_s130_appendix-thick-wall_img67748644.jpeg`（可辅以 s135 粪石图） | 40 岁男性，增强门脉期，单纯性/非复杂性教学病例：管径增粗、壁增厚，发现病变一目了然，适合“CT 是辅助工具”。 |
+| S09 | `S09/S09_primary_rID30389_coronal_s024_key-coronal-mild-stranding_img7922572.jpg` ＋ 轴位 s058 或 s060 | 45 岁男性。病例文字明确写 **mild stranding**、无游离积液、无积气、无积液灶，最贴近“周围脂肪轻度模糊”。冠状位为该病例官方关键图。 |
+| S12 | `S12/S12_primary_rID197370_axial_s128_dilated-appendix-extensive-stranding_img67747991.jpeg` ＋ 冠状 s065 | 40 岁女性，增强门脉期。扩张积液阑尾、壁增厚强化、**广泛**阑尾周围脂肪条索，比 S09 明显更重，科普观众也能看出“渗出明显”。 |
+| S12（壁强化备选） | `S12/S12_candidate_rID198519_axial_s074_PVP-enhancing-wall-stranding_img68055874.jpeg` | 25 岁男性，手术证实。病例明确写“thickened walls **enhancing after contrast**”，并有周围脂肪模糊与邻近腹膜增厚。 |
+| S15 | `S15/S15_primary_rID242634_axial_s285_wall-enhancement-defect-and-gas-abscess_img75885695.jpg` | 50 岁男性，增强门脉期。**同一张图**同时有壁强化中断、腔外气体及阑尾周围脓肿（约 6×3 cm 含气积液），可先框强化缺损（句 58）、再框气体/脓肿（句 59）。 |
+
+---
+
+## 4. 逐张记录
+
+### 4.1 Radiopaedia rID 197373 — S04 主选（也可作 S09 备选）
+
+- **病例标题**：Acute appendicitis - uncomplicated  
+- **病例页**：<https://radiopaedia.org/cases/acute-appendicitis-uncomplicated-1>　永久链接 <https://radiopaedia.org/cases/197373>  
+- **DOI**：<https://doi.org/10.53347/rID-197373>  
+- **作者（页面 “Case contributed by” / meta author）**：Michael P. Hartung  
+- **官方引用（页面原文）**：Hartung M, Acute appendicitis - uncomplicated. Case study, Radiopaedia.org (Accessed on 13 Nov 2026) https://doi.org/10.53347/rID-197373  
+- **许可**：CC BY-NC-SA 3.0　<https://creativecommons.org/licenses/by-nc-sa/3.0/>  
+- **患者（页面所载）**：40 years, Male  
+- **诊断可信度（页面）**：Diagnosis almost certain  
+- **所见（病例 findings 原文大意）**：Dilated, fluid-filled appendix with thickened wall and periappendiceal stranding. Small appendicoliths which are not obstructing. 序列为 C+ portal venous phase，有轴位 / 冠状 / 矢状。
+
+| 文件 | 层面 | 像素 | sha256 |
+|---|---|---|---|
+| `S04/S04_primary_rID197373_axial_s130_appendix-thick-wall_img67748644.jpeg` | 轴位门脉期，标注“appendix”的切片（stack 第 130 帧，图像 id 67748644） | 512×512 | `cc3eb8523e3d201c7fae753649b0ba3d34bfc3b75a91dde7834f1918da70c41c` |
+| `S04/S04_primary_rID197373_axial_s135_appendicoliths_img67748649.jpeg` | 同序列，标注“appendicoliths”的切片（第 135 帧，id 67748649） | 512×512 | `9fc387915495f7e35ccac689ea50f0435e2a28cd0f6207cc9948f18079df8295` |
+| `S04/S04_overview_rID197373_axial_s103_page-default-axial_img67748617.jpeg` | 站点默认/页面缩略轴位（第 103 帧）。肾脏层面，阑尾不如 s130 清楚，**不推荐上屏**。 | 512×512 | `ece042a46e0502b954aa55ef4d3dc2a16cae166d9719677724ea2226b836a087` |
+| `S04/S04_overview_rID197373_coronal_s086_page-default-coronal_img67748806.jpeg` | 站点默认冠状位（偏后，阑尾显示弱），**不推荐上屏**。S09 目录中有相同副本。 | 512×512 | `036628558ced2e3c129a3a00d8372cc3d1510d5652f2192c7b78edf5bd63f204` |
+
+S09 目录中的 `S09_backup_rID197373_axial_s130_...jpeg` 与 S04 s130 为同一文件（sha256 相同）。该病例的周围脂肪条索不算“轻度”，作 S09 仅备选，避免与 S12 分不清。
+
+片尾单条：
+
+> 图像来源：Radiopaedia.org，病例 rID 197373，作者 Michael P. Hartung，CC BY-NC-SA 3.0  
+> Image: Case courtesy of Michael P. Hartung, Radiopaedia.org, rID: 197373 (CC BY-NC-SA 3.0)
+
+---
+
+### 4.2 Radiopaedia rID 30389 — S09 主选
+
+- **病例标题**：Appendicitis  
+- **病例页**：<https://radiopaedia.org/cases/appendicitis-22>　永久链接 <https://radiopaedia.org/cases/30389>  
+- **DOI**：<https://doi.org/10.53347/rID-30389>  
+- **作者**：Jack Ren  
+- **官方引用**：Ren J, Appendicitis. Case study, Radiopaedia.org (Accessed on 13 Nov 2026) https://doi.org/10.53347/rID-30389  
+- **许可**：CC BY-NC-SA 3.0　<https://creativecommons.org/licenses/by-nc-sa/3.0/>  
+- **患者**：45 years, Male  
+- **诊断可信度**：Diagnosis almost certain  
+- **所见（页面原文）**：The appendix is abnormally distended to 10 mm and demonstrates mural thickening with surrounding stranding… With the exception of the **mild stranding** around the appendix, there is no free intraperitoneal fluid. No pneumoperitoneum. No discrete collection. 序列标注为 renal cortical phase（有对比剂）。
+
+| 文件 | 层面 | 像素 | sha256 |
+|---|---|---|---|
+| `S09/S09_primary_rID30389_coronal_s024_key-coronal-mild-stranding_img7922572.jpg` | 冠状位，病例官方关键图（case_key_image_id 7922572，第 24 帧） | 512×695 | `2a55d6640f55f1c13b7feab3660882997507e4bc6975c2b21c2d9639ab7c732d` |
+| `S09/S09_primary_rID30389_axial_s058_appendix-near-cecum_img7922410.jpg` | 轴位，盲肠旁可见增粗阑尾及轻度周围模糊（自选；该病例无轴位标注） | 512×512 | `6907a2fb8095c495953c9b0a88a0d654ff0bf930f38271353816fe12daed3eda` |
+| `S09/S09_primary_rID30389_axial_s059_appendix-near-cecum_img7922412.jpg` | 同上，相邻层面 | 512×512 | `6a75a9fa376ee54c982f3e725b024c89b53835abf8b0bad16bb3775cc44aa600` |
+| `S09/S09_primary_rID30389_axial_s060_appendix-near-cecum_img7922413.jpg` | 同上，相邻层面 | 512×512 | `2c7357ae88f13d0b9741f5e888c703541858d3fb112cfad6a6bf37b2c9d8d807` |
+
+`S09/未选用_轴向候选/` 下的 s061、s062 为同一段相邻层面，阑尾轮廓稍弱，仅作浏览备份。
+
+注意：病例文本出现过 “10 mm”，那是病例描述，**不要把该数字做到画面上**（分镜禁止测量值）。
+
+片尾单条：
+
+> 图像来源：Radiopaedia.org，病例 rID 30389，作者 Jack Ren，CC BY-NC-SA 3.0  
+> Image: Case courtesy of Jack Ren, Radiopaedia.org, rID: 30389 (CC BY-NC-SA 3.0)
+
+---
+
+### 4.3 Radiopaedia rID 197370 — S12 主选
+
+- **病例标题**：Acute appendicitis - uncomplicated  
+- **病例页**：<https://radiopaedia.org/cases/acute-appendicitis-uncomplicated>　永久链接 <https://radiopaedia.org/cases/197370>  
+- **DOI**：<https://doi.org/10.53347/rID-197370>  
+- **作者**：Michael P. Hartung  
+- **官方引用**：Hartung M, Acute appendicitis - uncomplicated. Case study, Radiopaedia.org (Accessed on 13 Nov 2026) https://doi.org/10.53347/rID-197370  
+- **许可**：CC BY-NC-SA 3.0　<https://creativecommons.org/licenses/by-nc-sa/3.0/>  
+- **患者**：40 years, Female  
+- **诊断可信度**：Diagnosis almost certain  
+- **所见（页面原文）**：Dilated, fluid-filled appendix with appendicolith at the base and **extensive periappendiceal stranding**. 序列为 C+ portal venous phase。冠状位有标注 “periappendiceal fat stranding”。
+
+虽然标题是 “uncomplicated”（无穿孔/脓肿），但“广泛脂肪条索”在视觉上明显重于 rID 30389 的 mild stranding，适合承担 S12“周围渗出明显”。增强期可见管壁强化。
+
+| 文件 | 层面 | 像素 | sha256 |
+|---|---|---|---|
+| `S12/S12_primary_rID197370_axial_s128_dilated-appendix-extensive-stranding_img67747991.jpeg` | 轴位，标注“dilated appendix”；亦为病例关键图 id 67747991 | 512×512 | `94c2146e392dee8164f979095bbd8180705dbb938fe5f595cd88b72e5f50a14a` |
+| `S12/S12_primary_rID197370_axial_s137_appendicolith-base_img67748000.jpeg` | 轴位，基底部粪石（标注 appendicolith，第 137 帧） | 512×512 | `b3a5f0216ecfbeddee7f8d71838be5f66187ed1bbc15a7cbc9643a09ea510eea` |
+| `S12/S12_primary_rID197370_coronal_s065_coronal-extensive-fat-stranding_img67748143.jpeg` | 冠状位，标注“periappendiceal fat stranding”（第 65 帧） | 512×512 | `5151e424d2b69c4a1831920d180ec5c64dcff18b65372294c1f05bb3cdd2bd1d` |
+
+片尾单条：
+
+> 图像来源：Radiopaedia.org，病例 rID 197370，作者 Michael P. Hartung，CC BY-NC-SA 3.0  
+> Image: Case courtesy of Michael P. Hartung, Radiopaedia.org, rID: 197370 (CC BY-NC-SA 3.0)
+
+---
+
+### 4.4 Radiopaedia rID 198519 — S12 壁强化候选
+
+- **病例标题**：Acute appendicitis  
+- **病例页**：<https://radiopaedia.org/cases/acute-appendicitis-133>　永久链接 <https://radiopaedia.org/cases/198519>  
+- **DOI**：<https://doi.org/10.53347/rID-198519>  
+- **作者**：Lam Van Le  
+- **官方引用**：Le L, Acute appendicitis. Case study, Radiopaedia.org (Accessed on 13 Nov 2026) https://doi.org/10.53347/rID-198519  
+- **许可**：CC BY-NC-SA 3.0　<https://creativecommons.org/licenses/by-nc-sa/3.0/>  
+- **患者**：25 years, Male  
+- **诊断可信度**：Diagnosis certain（页面写随后腹腔镜手术证实）  
+- **所见（页面原文）**：远端阑尾约 10 mm，**thickened walls enhancing after contrast administration**，腔内粪石，surrounding fat stranding and thickening of the adjacent peritoneum. 有非增强、动脉期、门脉期轴位（无冠状位）。
+
+| 文件 | 层面 | 像素 | sha256 |
+|---|---|---|---|
+| `S12/S12_candidate_rID198519_axial_s074_PVP-enhancing-wall-stranding_img68055874.jpeg` | 门脉期轴位，与动脉期标注层面同一序号（第 74 帧）。更适合看壁强化。 | 512×512 | `f9c32604a39982c7bf5e31f975e6b28434088e86e569e29df2806a840cb79251` |
+| `S12/S12_candidate_rID198519_axial_s074_arterial-appendix-fat-stranding_img68054865.jpeg` | 动脉期轴位，页面标注 “distal appendix”“fat stranding” 的切片 | 512×512 | `7cd4b091bde3737ca3cad4bd9fa4d49b29a15ac7596fc9116a264c2922f3d89f` |
+
+图下方有 CT 床缘，合成时可裁去黑边和床缘，不要改腹部解剖。
+
+片尾单条：
+
+> 图像来源：Radiopaedia.org，病例 rID 198519，作者 Lam Van Le，CC BY-NC-SA 3.0  
+> Image: Case courtesy of Lam Van Le, Radiopaedia.org, rID: 198519 (CC BY-NC-SA 3.0)
+
+---
+
+### 4.5 Radiopaedia rID 242634 — S15 主选
+
+- **病例标题**：Complicated appendicitis  
+- **病例页**：<https://radiopaedia.org/cases/complicated-appendicitis-8>　永久链接 <https://radiopaedia.org/cases/242634>  
+- **DOI**：<https://doi.org/10.53347/rID-242634>  
+- **作者**：Diana Reyadh Kadhem  
+- **官方引用**：Kadhem D, Complicated appendicitis. Case study, Radiopaedia.org (Accessed on 13 Nov 2026) https://doi.org/10.53347/rID-242634  
+- **许可**：CC BY-NC-SA 3.0　<https://creativecommons.org/licenses/by-nc-sa/3.0/>  
+- **患者**：50 years, Male  
+- **诊断可信度**：Diagnosis almost certain  
+- **机构（页面）**：Baghdad Medical City  
+- **所见（页面原文）**：阑尾约 12 mm，壁增厚，右结肠旁沟明显炎性脂肪条索。**focal discontinuity of the enhancing appendiceal wall, communicating with an adjacent gas collection measuring approximately 6 x 3 cm, in keeping with perforation and periappendiceal abscess formation.** 增强门脉期轴位第 285 帧同时标注了壁强化中断与气体。
+
+| 文件 | 层面 | 像素 | sha256 |
+|---|---|---|---|
+| `S15/S15_primary_rID242634_axial_s285_wall-enhancement-defect-and-gas-abscess_img75885695.jpg` | 轴位门脉期，壁强化缺损 + 含气脓肿（图像 id 75885695） | 512×512 | `87254bec038dde8b74d5c1fbc100fc5a65f1e9a90db6a2e1f783f8241993b025` |
+
+注意：12 mm、6×3 cm 是病例描述，**不要写到画面上**。
+
+片尾单条：
+
+> 图像来源：Radiopaedia.org，病例 rID 242634，作者 Diana Reyadh Kadhem，CC BY-NC-SA 3.0  
+> Image: Case courtesy of Diana Reyadh Kadhem, Radiopaedia.org, rID: 242634 (CC BY-NC-SA 3.0)
+
+---
+
+### 4.6 Radiopaedia rID 198206 — S15 备选（非增强，手术证实穿孔）
+
+- **病例标题**：Perforated appendicitis  
+- **病例页**：<https://radiopaedia.org/cases/perforated-appendicitis-35>　永久链接 <https://radiopaedia.org/cases/198206>  
+- **DOI**：<https://doi.org/10.53347/rID-198206>  
+- **作者**：Mina Sameh Rizk  
+- **官方引用**：Rizk M, Perforated appendicitis. Case study, Radiopaedia.org (Accessed on 13 Nov 2026) https://doi.org/10.53347/rID-198206  
+- **许可**：CC BY-NC-SA 3.0　<https://creativecommons.org/licenses/by-nc-sa/3.0/>  
+- **患者**：60 years, Female  
+- **诊断可信度**：Diagnosis certain（手术证实）  
+- **所见**：增厚管壁、扩张管腔、腔内/壁内气体，以及 **focal wall defect**；少量腹腔积液与 **peritoneal gas foci**。序列为 **non-contrast**，因此不如 rID 242634 适合单独讲“壁强化缺损”，但对“壁缺损 / 腔外气体”仍有用。
+
+| 文件 | 层面 | 像素 | sha256 |
+|---|---|---|---|
+| `S15/S15_backup_rID198206_axial_s224_wall-defect_img67958925.jpg` | 轴位，标注 “wall defect”（第 224 帧） | 512×512 | `a89c635d798f736ce6df16cc8adc7eee4cc8dac348e4109edcea8fc1c215099c` |
+| `S15/S15_backup_rID198206_axial_s237_appendix_img67958938.jpg` | 轴位，标注 “appendix”（第 237 帧） | 512×512 | `3443aac43f6ef1d179987bbd9c78579c963bc3340fd82288d81908a91765f309` |
+| `S15/S15_backup_rID198206_axial_s068_peritoneal-gas-foci_img67958769.jpg` | 轴位较高层面，标注 “peritoneal gas foci”（肝周游离气体；本层不见阑尾） | 512×512 | `b1203954e6f1b720375b440c24d07d81e1e0c7ef9b570968677c34c6acf75036` |
+| `S15/S15_backup_rID198206_coronal_s091_key-coronal_img67959103.jpg` | 冠状位官方关键图（id 67959103） | 512×538 | `d1e80e15ec946676eee7cbac8211ea2f956945909732a7083ae22e32cbf35cfe` |
+
+该病例页另有一张术后大体照片，本次**未下载**（任务只要 CT）。
+
+片尾单条：
+
+> 图像来源：Radiopaedia.org，病例 rID 198206，作者 Mina Sameh Rizk，CC BY-NC-SA 3.0  
+> Image: Case courtesy of Mina Sameh Rizk, Radiopaedia.org, rID: 198206 (CC BY-NC-SA 3.0)
+
+---
+
+### 4.7 Wikimedia Commons 备选（无 NC，但多数不适合直接上屏）
+
+原文件另存于 `commons_备选/`（保留 Commons 原文件名）。场景目录中的副本内容相同。
+
+#### James Heilman, MD — 急性阑尾炎轴位（S04/S12 备选，有测量尺）
+
+- **文件页**：<https://commons.wikimedia.org/wiki/File:CAT_scan_demonstrating_acute_appendicitis.jpg>  
+- **作者（页面）**：James Heilman, MD  
+- **许可**：CC BY-SA 3.0　<https://creativecommons.org/licenses/by-sa/3.0>  
+- **本地**：`S04/S04_commons-alt_Heilman_CAT_scan_demonstrating_acute_appendicitis.jpg`（986×695，sha256 `6cf373f5a33b5107ec73af2b12c207fba9b8ea81713e44293a4e2a51b4e0cf8a`）  
+- **说明**：阑尾扩张清楚，但原图烙有测量框 “A: 17.1mm”。分镜禁止上屏测量值，**不宜直接使用**；若要用，合成时须遮盖测量框，且遮盖属于改编，需按 CC BY-SA 署名。17.1 mm 的管径也偏粗，更接近较重炎症而非 S09 的“轻度”。
+
+> 图像来源：Wikimedia Commons，File:CAT scan demonstrating acute appendicitis.jpg，作者 James Heilman, MD，CC BY-SA 3.0
+
+#### Cerevisae — 急性阑尾炎轴位（S09 备选，有英文标注）
+
+- **文件页**：<https://commons.wikimedia.org/wiki/File:CT_scan_of_the_abdomen_showing_acute_appendicitis.jpg>  
+- **作者**：Cerevisae  
+- **许可**：CC BY-SA 4.0　<https://creativecommons.org/licenses/by-sa/4.0>  
+- **本地**：`S09/S09_commons-alt_Cerevisae_CT_scan_of_the_abdomen_showing_acute_appendicitis.jpg`（512×512，sha256 `ee303acdbc1c409669d6e7235418a04d8c53003cfdd3d29b2ba6d713ced880b4`）  
+- **说明**：可见扩大阑尾与脂肪条索，但原图已有英文标签（Enlarged appendix, caecum, Fat stranding 等）。本片标签须按分镜中文来写，**不宜直接上屏**。
+
+> 图像来源：Wikimedia Commons，File:CT scan of the abdomen showing acute appendicitis.jpg，作者 Cerevisae，CC BY-SA 4.0
+
+#### Hellerhoff — 阑尾周围脓肿（S15 句 59 备选）
+
+- **轴位页**：<https://commons.wikimedia.org/wiki/File:Perityphlitischer_Abszess_in_der_CT_-_ax.jpg>  
+- **冠状位页**：<https://commons.wikimedia.org/wiki/File:Perityphlitischer_Abszess_in_der_CT_-_cor.jpg>  
+- **作者**：Hellerhoff  
+- **许可**：均为 CC BY-SA 3.0　<https://creativecommons.org/licenses/by-sa/3.0>  
+- **本地**：  
+  - `S15/S15_commons-alt_Hellerhoff_Perityphlitischer_Abszess_ax.jpg`（672×476，sha256 `294402344761f7e82b13df4a7bd8961a37129538e8d2f53ac4f999d304a0177e`）— 无额外标注，脓肿强化环清楚，但是分辨率偏低。  
+  - `S15/S15_commons-alt_Hellerhoff_Perityphlitischer_Abszess_cor.jpg`（460×540，sha256 `5b1de7548b100c4d501c84666c7fdb4b2438166073b6d934c41fd139ac143ed7`）— 原图带红圈。  
+- **页面说明（德文）**：Appendizitis mit perityphlitischem Abszess；脓肿有明显边缘强化。
+
+> 图像来源：Wikimedia Commons，File:Perityphlitischer Abszess in der CT - ax.jpg（及冠状位同组），作者 Hellerhoff，CC BY-SA 3.0
+
+#### James Heilman, MD — 穿孔阑尾炎（S15 备选，有红圈）
+
+- **文件页**：<https://commons.wikimedia.org/wiki/File:Perfedappendix.PNG>  
+- **作者**：James Heilman, MD  
+- **许可**：CC BY-SA 3.0　<https://creativecommons.org/licenses/by-sa/3.0>  
+- **本地**：`S15/S15_commons-alt_Heilman_Perfedappendix.PNG`（1037×968，sha256 `c1070f23f7d813a10d1555d401562c14cfce0355c25fc631ffd61eef56378119`）  
+- **说明**：右下腹含气炎性灶很清楚，分辨率高于多数 Radiopaedia JPEG，但原图带红色圆圈。若采用需在署名中注明未改解剖、圈为原图所有，或按许可做改编并声明。
+
+> 图像来源：Wikimedia Commons，File:Perfedappendix.PNG，作者 James Heilman, MD，CC BY-SA 3.0
+
+---
+
+## 5. 缺口与使用注意
+
+1. **没有“正常细长阑尾”对照图**。当前四场分镜不强制需要；若要做正常对照，需另寻公开授权病例（Radiopaedia / Commons / PMC CC BY）。  
+2. **没有在同一患者身上贯穿三型的真实 CT**（也不应伪造）。  
+3. **Radiopaedia 提供的 “original” 静帧多为 512×512 JPEG**（个别冠状位约 512×695）。这是站点托管的最高静帧，不是 DICOM。合成进约 610×620 的 CT 窗时会略微放大，科普用途可用。  
+4. 多张图底部含 **CT 床缘或大块黑边**，合成时可裁边，不要改腹部解剖。  
+5. Commons 备选虽然没有 NC 限制，但 Heilman 急性图有测量尺、Cerevisae 图有英文标签、部分脓肿/穿孔图有红圈，需处理后才能上屏。  
+6. 未采用 PMC 论文附图：Radiopaedia + Commons 已覆盖所需所见。若以后要更宽松的 CC BY（无 SA 或无 NC）图，可再查例如 PMC2766912（Indian J Radiol Imaging，CC BY 2.0，含穿孔伴脓肿图）。本次未下载，以免许可与出处未在本轮逐页核对。  
+7. 查看过但未采用的 Radiopaedia 病例：rID 62880（Yaïr Glick，蜂窝织炎性，但因肾衰竭未给静脉对比剂，不利于“壁强化”）；rID 147199（Husam Hussein Yaseen，坏疽穿孔，非增强且无切片标注，不如 rID 242634 清楚）。
+
+---
+
+## 6. 下载方法（供复核）
+
+Radiopaedia 病例页在带 `Accept: text/html` 或 Googlebot 的请求下可得到含许可证与 study id 的 HTML。完整层面列表来自公开的  
+`/studies/<id>/annotated_viewer_json.json`。  
+静帧地址为：
+
+`https://prod-images-static.radiopaedia.org/images/<image_id>/<original文件名>`
+
+其中 `<original文件名>` 取自该 JSON 的 `encodings.thumbnailed_files[].original`（新病例多为 `<hash>.jpeg`，本批全部 HTTP 200）。只下载了上述选定层面，没有整堆拉取。  
+Wikimedia 原图来自 `upload.wikimedia.org`，许可经 Commons API `extmetadata` 核对。
+
+未改动任何 git 仓库，也未读取或改写 `/workspace/病理科普视频/配音/.mimo.env`。
+
+总览图：`/workspace/病理科普视频/ct_real/contact_sheet.png`
+import {initBaker,bake} from './lib/wash.js';
+import {bakeHE} from './lib/he.js';
+import s08 from './chapters/s08.js';
+import {forScene} from './timeline.js';
+const name=new URLSearchParams(location.search).get('scene')||'s08';
+if(!['s06','s08','s10','s11','s19','s14','s09','s12','s15','s04','ct_library'].includes(name))throw Error('Unknown scene '+name);
+const scene=name==='s08'?s08:(await import(`./chapters/${name}.js`)).default;
+const ctRanges={s09:[35,36],s12:[47,48],s15:[58,59],s04:[14,19],ct_library:[35,36]};
+const clock=ctRanges[name]?forScene(...ctRanges[name],0):name==='s08'?{duration:T.end(34),T}:(name==='s06'?forScene(23,24,0):name==='s14'?forScene(54,57,0):name==='s19'?forScene(69,70,0):forScene(37,name==='s11'?46:42));
+import {T} from './timeline.js';
+const c=document.getElementById('c');c.width=1920;c.height=1080;const ctx=c.getContext('2d');
+await document.fonts.load('500 32px MixSans');if(!ctRanges[name]){await initBaker();bakeHE((k,r,o)=>bake(k,r,{...o,hd:true,soft:true,grain:.12,edge:.3,bleed:.5}));}
+scene.prepare();window.DUR=clock.duration;window.render=t=>scene.draw(ctx,t,clock.T);window.READY=true;
+// Timing snapshot generated from /workspace/病理科普视频/配音/全稿_v3/timeline.json
+// (lines n=29–34, real start/end seconds; no estimated durations).
+// Preserve the approved scene through its legacy clock.
+import scene from './chapters/s08.js';
+import {timing as allTiming} from './timing_snapshot.js';
+const timing=allTiming.filter(s=>s.n>=29&&s.n<=34);
+export const origin = timing[0].start;
+export const sentences = timing.map(s => ({id:s.n,start:s.start-origin,end:s.end-origin}));
+export const duration = sentences.at(-1).end + 0.8;
+export const T = {
+  at: id => sentences[id-29].start,
+  end: id => id===34 ? duration : sentences[id-29].end,
+  frac: (id,f) => sentences[id-29].start + (sentences[id-29].end-sentences[id-29].start)*f,
+};
+const legacy = {at:id=>(id-29)*6,end:id=>(id-28)*6,frac:(id,f)=>(id-29+f)*6};
+export function sceneTime(t) {
+  const s = sentences.find(s=>t<s.end) || sentences.at(-1);
+  if(t>=sentences.at(-1).end) return 33; // retain the approved final state for the tail
+  return (s.id-29)*6 + Math.max(0,(t-s.start)/(s.end-s.start))*6;
+}
+const draw = scene.draw;
+scene.draw = (ctx,t) => draw.call(scene,ctx,sceneTime(t),legacy);
+
+export function forScene(first,last,tail=.8){
+ const rows=allTiming.filter(s=>s.n>=first&&s.n<=last),origin=rows[0].start;
+ const row=id=>{const s=rows.find(s=>s.n===Number(id));if(!s)throw Error('Unknown sentence '+id);return s;};
+ return {origin,duration:rows.at(-1).end-origin+tail,rows,
+ T:{has:id=>rows.some(s=>s.n===id),at:id=>row(id).start-origin,end:id=>row(id).end-origin,frac:(id,f)=>row(id).start-origin+(row(id).end-row(id).start)*f}};
+}
+import sys,json
+from pathlib import Path
+from PIL import Image,ImageDraw
+scene=sys.argv[1];p=Path('qa/v6/ct')/scene
+picks=json.load(open(p/'keyframes.json'))['picks']
+files=sorted((p/'stills').glob('*.png'))
+files=[f for f in files if 'sheet' not in f.name]
+sheet=Image.new('RGB',(960,310*((len(picks)+1)//2)),'#F4EFE6');d=ImageDraw.Draw(sheet)
+
+def crop2(im,box,name):
+    w=box[2]-box[0];h=box[3]-box[1]
+    im.crop(box).resize((w*2,h*2),Image.LANCZOS).save(p/name)
+
+for i,(f,pick) in enumerate(zip(files,picks)):
+    im=Image.open(f).convert('RGB');im.save(p/(pick['name']+'.png'))
+    n=int(pick['name'][1:3])
+    if scene=='S04':
+        if n==14:
+            crop2(im,(760,260,1340,940),pick['name']+'_200.png')
+        elif n==15:
+            crop2(im,(760,240,1760,940),pick['name']+'_200.png')
+        elif n<=18:
+            crop2(im,(1280,430,1780,920),pick['name']+'_200.png')
+        else:
+            crop2(im,(560,220,1880,960),pick['name']+'_200.png')
+        crop2(im,(40,140,540,760),pick['name']+'_sidebar_200.png')
+    else:
+        crop2(im,(865,480,1320,910),pick['name']+'_200.png')
+        crop2(im,(1340,150,1870,920),pick['name']+'_tissue_200.png')
+    sheet.paste(im.resize((480,270),Image.LANCZOS),((i%2)*480,(i//2)*310))
+    d.text(((i%2)*480+12,(i//2)*310+276),pick['name'],fill='#2A2A35')
+sheet.save(p/'review_sheet.png')
+print('review_sheet',scene,len(picks))
+import json,subprocess,sys
+from pathlib import Path
+scene=sys.argv[1];p=Path('qa/v6/ct')/scene
+m=json.load(open(p/'keyframes.json'))
+results={}
+for file in [scene+'.mp4',scene+'_带配音_720p.mp4']:
+ data=json.loads(subprocess.check_output(['ffprobe','-v','quiet','-show_streams','-show_format','-of','json',str(p/file)]))
+ results[file]={'duration':float(data['format']['duration']),'streams':[{k:s.get(k) for k in ['codec_type','codec_name','width','height']} for s in data['streams']]}
+ assert abs(results[file]['duration']-m['duration'])<.15
+ assert any(s['codec_type']=='video' for s in data['streams'])
+ if '720p' in file: assert any(s['codec_type']=='audio' for s in data['streams'])
+(p/'media_check.json').write_text(json.dumps(results,indent=2,ensure_ascii=False))
+print(results)
+# 画面风格规范 v1
+
+照 `film_mini_detail` 第 04 章样帧执行（`he.js`、`he_detail.js`、`chapters/04.js`、`wash.js`、`ann.js`；该分支没有 `lib/detail.js`）。数量用代码里的同一套 `rng` 跑出。画布 1920×1080。镜下是局部坐标 ±420，装进目镜 `{x:640, y:480, r:340}`，缩放 `k = 340/420 × fs`（04 的 `fs` 从 1.06 到 1.48）。
+
+## 1. 线条
+
+结构层用 Rough.js（`ink.js`）：默认 `strokeWidth 2.6`、`roughness .9`、`bowing .8`、`seed 3`、圆头，墨色 `#2A2A35`。路径固定种子缓存一次，出现靠虚线揭开。抖动 `BOIL_FPS = 10`、3 变体；04 镜检 `boil: false`、`drift: false`。已有 `roughness`：.5 .55 .6 .7 .8 1；`bowing` 只在疼痛线为 .5。日常线宽 1.4–3；4.5–9 只留给已有的疼痛线、神经高亮、十字和阑尾。排线只给人物：头发角度 −30、间距 4、`fillWeight 2`；裤子 −60、间距 10、`fillWeight 1.1`。镜下不排线。
+
+镜下圆头细线（视野坐标）：上皮 7，血管轮廓 2.2，纤维素粗丝 `2.4×(1−0.85×detail)`（满细节 0.36），细网 0.55，肌/胶原/影细胞 0.65，裂隙纤维素 0.75 与 0.45，核桥 `0.48/缩放`，红细胞边 0.28，外壁 1.45、内壁 0.85。目镜圈 5、外圈 1.5；闪边宽 8，只在镜圈。标注锁在屏幕像素：引线 1.6，阶段轴 2，刻度 2.4，穿孔环 3。
+
+## 2. 配色
+
+病理色不随情绪变。`mood.js` 只动纸和网格：纸从 `#F4EFE6` 做轻微冷中性、压暗或提亮。玻片底固定 `#F6EEF0`。目镜外 `#111114`；深底上墨色由 `setDark` 混向 `#EFE8DC`。
+
+- 墨 `#2A2A35`。朱红 `#D6453A`（活组织、炎症、重点字、镜圈）。字幕里的朱红用 `#F07A63`。
+- H&E 紫 `#6B4C9A`（核、内皮核）。核深 `#3F2A66`，染色质点 `#38234F`，碎屑深 `#2E1F45`，叶填 `#51336F`。
+- 嗜伊红 `#D98BA8`，浅 `#EBC3D0`。胞质 `rgba(226,170,200,.75)`，颗粒 `rgba(167,105,159,.38)`，核桥 `#9273A5`。
+- 出血红褐：盘 `#A8404E`、边 `#7E2A38`、中央淡区 `#C9A8AE`、溶血 `#C9A4AC`。出血斑 `#8E3A3E` `#A8404E` `#9A3E48` `#7A3038`。Zahn 红层 `#8E3A3E`/`#A8404E`，粉层 `#F0D4DC`/`#F3D5DE`。充盈水彩 `#C9455A` 在坏疽期让开。
+- 镜下脓 `#B39459`（`C.pus`）。大体脓苔只用 02 的 `#CDB98A`。坏死晕 `#D7A3B3` `#E3B7C4` `#E7C9D2`。裂隙底 `#E9DDB0`。网格 `rgba(42,42,53,.07)`。
+
+## 3. 细胞与组织
+
+中性粒用 `detailedNeutrophil`。叶数：2 叶 15%、3 叶 45%、4 叶 30%、5 叶 10%。叶半轴 4.0×2.9，内侧收 0.14，叶间留胞质缝，二次曲线核桥相连，每叶 5 个染色质团。胞质椭圆（2→5 叶）7.20×5.65、8.05×7.55、9.25×8.70、10.625×10，内 22 颗颗粒。`chromatin()` 另是 25 个点，盖隐窝核和肌核。`detail=0` 时仍走简笔，03 不被改掉。
+
+全板 **1336** = 腔 186 + 浸润 1150。叶数 222 / 566 / 412 / 136。浸润：黏膜 378、黏膜下层 228、肌层 306、浆膜 84、纤维素带 154。
+
+圆视野（半径 `420/fs`）：
+
+- 早期 `neut=0.2`、`fs=1.06`：游出 166，腔内 71。
+- 全层、`fs=1.15`：**912**（黏膜 298、黏膜下层 204、肌层 262、浆膜 45、纤维素带 48、腔 55）。
+- 坏疽峰值 `fs=1.48`、场偏移 `[145.9, 60]`：圆内 471 个位置，按坏死权重抹掉 403，留 68。裂隙另有 45 个（2–5 叶），不参与这轮剔除。
+
+红细胞 `pushDisc`：`rx=5×(0.72–1.32)`（04 样帧原为 3.1，已按 look 改为 5），`ry=rx×(0.36–0.76)`，淡区 0.46×0.38；`rnd<.25` 为溶血。屏幕上的喷洒盘 **354**，溶血 92，聚在 5 块红褐斑和 6 条血管旁。每条血管有外壁、内壁、内皮核 4–6（本种子 4,4,4,5,5,4）、Zahn 带 3–5 层红粉交替（本种子 3,3,5,4,3,4），最内层填实。影细胞 52 个淡轮廓（`CG()<0.38` 开口）。核碎屑 90 簇 502 粒，核尘 1050。纤维素：60 条粗丝 + 140 条细网。隐窝 13×16 核，肌核 170。穿孔向浆膜加宽，浆膜端脓团 95、核 80。
+
+**比例（look 定）：**红细胞直径约 7.5 μm，中性粒细胞约 10–12 μm，后者约为前者的 1.5 倍。中性粒胞质直径 14–21 时，红细胞 `rx` 应约 5（直径约 10），不再用 3.1。
+
+### 3b. 正常阑尾组织学（01–03 必须有）
+
+- 黏膜下层有成片的淋巴滤泡：深紫色的淋巴细胞团，中间是淡色的生发中心。
+- 肌层分两层：内层是环行肌，横截面上的核是小圆点；外层是纵行肌，核呈梭形。
+- 隐窝画成管状腺，内衬柱状上皮，夹有杯状细胞。
+
+## 4. 水彩
+
+只烘一次。默认 1024；`hd:true` 输出 **2048**，颗粒在成图像素上重铺（3px 与 18px fbm，权重 .65/.35）。04 近景色素：`hd:true, soft:true, grain:.12, edge:.3, bleed:.5`。`edge` 是干边压暗，`bleed` 向外渗。四个坏死斑再 `blur(15px)`。`scaleBrushes` 会连乘（默认 2.4）；多烘之后用四次 `1/2.4` 把笔刷还回去。
+
+`drawWash` 的 `size` 再乘目镜或相机，才是屏幕像素。屏幕像素 / 烘焙边长 **> 1** 就是拉伸，要改 2048 重烘。审计把相对 1024 超过 1.1 标为需要 hd。共享层带 `he.bands` 仍是 1024，峰值约 1.20 倍，这是旧层；新的近景色素不要照它放大。
+
+## 5. 标注
+
+`ann.js`。字号是屏幕像素。字重用 100–900 的整百；片内实际是 **500**（默认、字幕）、**700**（标题）、**800**（诊断名、三型）。镜旁 22–30，站名 40，诊断 52 与 62；章标题 56 / 章号 22。字幕 44，基线 `y=1012`，只由 `subtitle.js` 画。
+
+描边文字：`label({halo:true})`，先描后填，默认线宽 5，纸色或 `rgb(17,17,20)`。字幕光晕线宽 6。斜引线 `leader`：锚点半径 4，线宽 1.6，先到肘点再走水平字托（03 的「黏膜破溃缺损」）。`elbow:true` 时斜段不超过水平距离。04 穿孔用半径 52、线宽 3 的圆环，字放在镜缘外。
+
+构图停在 `y < 900`（`SAFE.fadeTop`）。镜下注释用短标签，冒号前是看法、冒号后是所见，与「时间倒回：发病早期」同一结构，如「镜下：坏死组织结构消失、出血」。03 镜缘已有「HE 染色 · 阑尾壁」「核分 2–5 叶」。04 现片还没有「镜下：」四字；要加就用 `A.label`，可加 halo，放在阶段轨下、`y<900`，只用 `T.frac` / `T.end` 进出。
+
+## 6. 时序与工程
+
+节拍只用 `T.at(i, 偏移)`、`T.end(i, 偏移)`、`T.frac(i, 0–1)`，时间来自 `narration.json`（否则 `sentences.tsv`）。不规则形状在加载时按固定种子写入局部坐标。帧内随机用 `render(t)` 里的 `rng(种子)`。禁止 `Math.random()`、`Date.now()`、`performance.now()`。水彩只在 `bake()` 里生成。交接帧用 `T.end(末句) − 1e-3` 重画上一章末态（`drawExit04`）。每章导出 `EXIT_*`。画面上新的数字要能指回句子、教材或已有常量；04 没有新计数，也没有比例尺。
+
+## 6b. 动态规则
+
+「活的表面」（`lib/alive.js`）只用在大体标本、人体示意图和 05 章的血管示意图上；H&E 镜下视野一律不开，镜下的动态靠镜头推拉和对焦变化（look 定）。
+
+## 7. 自检清单
+
+1. 结构线是否仍是 2.6 / .9 / .8，或沿用已有覆盖；镜下有没有排线。
+2. 1080p 下能否数出 2–5 叶，叶间有胞质缝和核桥。
+3. 镜下细胞密度是否接近第 3 节量级（满层浸润的圆视野约 900 个中性粒，早期约 150–250）；坏死区是否只留无核影细胞和核碎屑，活的中性粒集中在坏死区边缘。（第 3 节的具体计数是 04 的实测值，其他章按同一密度量级做，不要照抄数字。）
+4. 红细胞是否双凹加淡区；中性粒细胞与红细胞大小比约 1.5:1（`rx`≈5）；血管是否有双层壁和 3–5 层红/粉血栓。
+5. 有纤维素渗出的地方，是否同时画了粗丝和细网（04 的比例约 60 : 140）。
+6. 色是否落在第 2 节；纸色是否只走 `mood.js`。
+7. 近景水彩是否 2048，屏幕像素有没有超过烘焙边长。
+8. 字是否都在 `y<900`，字重是否为 500 / 700 / 800，斜引线是否走 `leader`。
+9. 节拍是否全是句子索引；交接帧是否等于上一章末帧减 0.001 秒。
+10. `--determinism` 换序是否一致；新数字有没有出处。
+11. 正常组织（01–03）：黏膜下层有带生发中心的淋巴滤泡，肌层内环（圆点核）外纵（梭形核），隐窝是管状的、有柱状上皮和杯状细胞。
+# v6 d01（Codex）：S11 纤维素网与纤维脓性渗出（句 43–46）镜下段
+
+工作目录 /workspace/病理科普视频/v5，分支 v6-fresh，基于 HEAD（981bda2，tag v6-s10-final）。不许 git commit。
+
+硬约束、画风标准、镜头规则都和 qa/briefs/v6_c01_s10.md 一样，开工前先读一遍。另外：
+
+- S08 七帧 MAE 必须为 0。
+- S10 句 37–42 各关键帧和 qa/v6/c03_s10/ 的 MAE 必须为 0。
+- determinism、sha256 都要通过。
+
+## 衔接
+
+S10 和 S11 在口播上是连着的，所以句 37–46 要合成一整段深色镜下段：
+
+- 去掉 S10 末尾（句 42 后）的切出过渡和 S11 开头的切入过渡。
+- 只在句 46 结束后做一次切出。
+- 句 42 → 43 之间不回纸色，镜头连续运动：从脓细胞特写平移或拉到渗出物区域。
+- 字幕在 37–46 期间保持 dark 样式。
+
+## 逐句画面
+
+**43「渗出的纤维蛋白原凝成纤维素网。」**
+- 高倍，背景是淡染的渗出液。
+- 伊红色的细丝从散在的细小颗粒开始，逐渐连接、交织成网（纤维蛋白原→纤维素网）。这里用教学状态切换或生长动画，按句内进度推进。
+- 网是淡粉到伊红色、粗细不一、不规则的丝和小团，不能是规整的几何网格。可以参考或复用 he_detail.js 里的 fibrinMesh。
+- 左栏："纤维蛋白原 → 纤维素网"。写成"纤维蛋白原凝成纤维素网"也可以，不要用箭头符号。
+
+**44「网与脓细胞等交织，形成纤维脓性渗出物。」**
+- 纤维素网中嵌入大量脓细胞和中性粒细胞，以及组织碎屑，画法复用 S10 句 40 的脓液。
+- 左栏："纤维脓性渗出物"。
+
+**45「黄色并非只来自纤维素，更来自大量脓细胞。」**
+- 成分分别高亮：先轻提纤维素网，网变亮，其他成分减淡；再突出脓细胞，脓细胞保持饱和，网淡化。表达的意思是：脓细胞的贡献更大。
+- 只能用透明度和亮度的教学切换来做，绝不能把 HE 染成黄色。
+- 左栏两行："纤维素：部分""脓细胞：主要"。不加任何数字或百分比。
+
+**46「浆膜面可见纤维素性脓性渗出（含脓细胞）。」**
+- 镜头连续拉回中倍或低倍，移到阑尾壁的最外层：浆膜和外纵肌可辨，浆膜外表面覆盖一层不规则、厚薄不一的纤维脓性渗出物（纤维素丝 + 脓细胞），附着在浆膜上并向外蓬松。
+- 用短引线标"浆膜""纤维素性脓性渗出"。
+- 左栏原样写定稿的措辞："浆膜面：纤维素性脓性渗出（含脓细胞）"，可以分两行。
+- 说明：分镜原本想在这一句接一个大体标本的脓苔特写，但大体资产还没做，这一版先用镜下的浆膜面。大体特写以后再补，不在这一轮做。
+
+## 输出
+
+1. 渲染 S10+S11 合并段，重新合成粗剪 v6：qa/v6/animatic/粗剪_v6.mp4 和 720p 版本，CRF16。
+2. 交付到 qa/v6/d01_s11/：
+   - 句 43（起、中、末三帧，展示成网过程）、44、45（两个高亮状态各一帧）、46 的关键帧，以及句 42→43 衔接的中间帧，每张都附 200% 局部。
+   - review_sheet.png。
+   - 自检.md，内容包括：每句画面的病理对应、S08 和 S10 的 parity、determinism、sha256，以及你认为还不够好的地方。
+# v6 e01（Codex）：S19 慢性阑尾炎镜下段（句 69–70）
+
+工作目录 /workspace/病理科普视频/v5，分支 v6-fresh，基于当前 HEAD（含 d01 的 S10+S11 合并段）。不许 git commit。
+
+硬约束、画风标准、镜头规则都和 qa/briefs/v6_c01_s10.md 一样，开工前先读一遍：
+- 锁定文件 sha256 开工和收工各校验一次。
+- S08 七帧、S10 和 S11 已交付关键帧（qa/v6/c03_s10/、qa/v6/d01_s11/）的 MAE 必须为 0。
+- 必须通过 determinism 检查。
+- 深色镜下底 #111114，圆形视野（圆心 (1110,475)，r 425）。前后各一次 0.7 s 虹膜过渡，按句 id 卡点。字幕在本段用 dark 样式。
+- 低倍是斜切、被视野裁掉的椭圆。低→中→高连续推进，高倍时随句子平移。注释用完就退场，倍数标签只写低倍、中倍、高倍。所有内容放在 y<950。
+- 时间一律从 film/timeline.js 按句 id 取，不写死秒数。
+- 画面不出现任何数字，不标"全壁""大量"。
+
+## 病理内容（慢性阑尾炎）
+- 这是新的组织状态，不能复用急性的脓细胞和纤维素。阑尾壁结构仍可辨认，但黏膜下层和肌层内有成束的纤维组织增生，即纤维化：粉红色胶原束、梭形的纤维细胞核，局部可见肌层被纤维组织分隔。
+- 慢性炎细胞散在或成簇浸润：
+  - 淋巴细胞：小圆形，核深紫、圆、几乎占满细胞，胞质极少。
+  - 浆细胞：卵圆形，核偏在一侧，染色质呈车辐状或钟面状，核旁有淡染区（核周晕），胞质略嗜碱、偏紫粉。
+- 不要画成中性粒细胞（分叶核）或脓细胞。不要把正常淋巴滤泡当成慢性浸润，可以有少量滤泡，但浸润主要在壁内间质。
+
+## 逐句画面
+**69「阑尾壁纤维组织增生、纤维化」**（以全稿_v3 原文为准）
+- 低倍斜切定位到阑尾壁，推到中倍，在黏膜下层和肌层看到纤维化区。用短引线标"纤维组织增生"。
+- 左栏：先写"阑尾壁：纤维组织增生、纤维化"。
+
+**70「慢性炎细胞：淋巴细胞、浆细胞」**
+- 推到高倍，进入纤维化间质里的炎细胞浸润区。先平移到淋巴细胞为主的小区，标"淋巴细胞"；再平移到浆细胞，标"浆细胞"，可以局部再放大一档，让偏位核和核周晕看得清。保留母图定位，不要跳成孤立的细胞贴图。
+- 左栏：再加"慢性炎细胞：淋巴细胞、浆细胞"。
+- 句末切出，回到纸色。
+
+## 输出
+1. 新代码放在 film/chapters/s19.js 和 lib_ext/（如 he_chronic.js），接入多场景入口。把 S19 合成进粗剪，生成 qa/v6/animatic/粗剪_v7.mp4 和 720p 版本，CRF16。
+2. 交付到 qa/v6/e01_s19/：
+   - 句 69 低倍、中倍、纤维化标注三帧，句 70 淋巴细胞、浆细胞两帧，以及切入和切出的中间帧，每张都附 200% 局部。
+   - review_sheet.png。
+   - 自检.md，内容包括：每句的病理对应、parity、determinism、sha256，以及你认为还不够好的地方。
+38:| S04／14—19 | 左：先“CT是辅助工具／并非人人必须”，再研究卡“增强螺旋CT”；右：医生评估后才出现超声与 CT 选择图，随后自绘 CT 大窗，最后临床、影像与病理的证据关系图。 | 16—17 研究卡逐项揭示，数据用原值直接出现，不滚动计数；18 只突出检出线索；19 聚合临床证据。病理图作证据概念，不在此提前宣称完成术后分型。 | `ann.js: label, line, arrow`；`ink.js: ink`；`wash.js: drawWash`。旧库无 CT 成品能力。 | `ct_schematic.js` 自绘横断腹部与阑尾；`research_card.js`；`clinical.js` 检查选择图。 |
+43:| S09／35—36 | 左：“CT与组织变化对应”，分项“管径增粗、壁增厚、周围脂肪轻度模糊”；右：CT 表现示意与壁水肿两个大窗。 | 35 两窗同步框选阑尾壁；36 扩到周围脂肪。只有视觉对应，不显示测量数值，不将 CT 直接盖章为病理分型。 | `ann.js: ring, leader, label`；`he.js: drawLens`；`wash.js: drawWash`。 | `ct_schematic.js` 单纯性相关表现预设；`compare_view.js` 对照布局与同步定位。 |
+46:| S12／47—48 | 左：“壁增厚强化／周围渗出明显”；右：化脓相关 CT 表现示意与全层炎症双大窗。 | 47 依次描出壁和周围组织；48 保持画面连读并框选内外对应区域，不另起一套分型结论。 | `ann.js: leader, ring`；`he.js: drawLens`。 | `ct_schematic.js` 化脓相关表现预设；`compare_view.js`。 |
+49:| S15／58—59 | 左：“壁强化缺损：警惕坏死”“腔外气体、脓肿：警惕穿孔”；右：坏疽/穿孔相关 CT 表现示意与对应壁病变两大窗。 | 58 只点亮局部强化中断；59 再显示腔外气体、脓肿。每次一条对应引线；不使用“CT确诊三型”字样。 | `ann.js: leader, ring, label`；`he.js: drawLens`。 | `ct_schematic.js` 壁强化缺损、腔外气体及脓肿预设；`compare_view.js`。 |
+63:| S04 研究卡 | 2023、8篇、1602人、敏感度95%、特异度94% | 16 的画面建议及 17 正文。标题写“增强螺旋CT”，标引文 [1]；不改为 MDCT 专属结果，不作为三型分型准确度。 |
+67:研究卡下方在左栏分卡提示“并非三型分型准确度／仍需结合临床”；正文数据读完后再切边界提示，不将全部说明挤在同屏。63 相关卡保留定稿证据边界：[5] 为条件性推荐，具体时机结合临床评估；老师原话与指南口径不混作同一句指南引文。教材版次、年份及页码尚待核实，不补造。本分析不新增医学结论，故不另引外部数据改变定稿。
+159:- 内容类型：章节色卡、典型路径及分支、病理层次索引、定义卡、CT 所见要点、研究卡、治疗时机卡、来源卡。时间语义只使用稿件已有“缓解期／急性发作期”等文字，不加钟表/日历或时间数值。
+171:| B／三型相关 CT 自绘示意库 | 高：腹部断面、同一阑尾定位、壁强化及周围组织灰阶关系要清晰；容易被误解成真实临床影像或精准分型。 | S04、S09、S12、S15、S16 | **可先做**三类表现预设、CT表现示意标记、对应病理锚点及清晰大窗。不要加 HU、尺寸、测量刻度。 | 逐句高亮、与病理双窗同步、并发症复现顺序。 |
+176:| G／临床人物、症状对照、送检及手术图形 | 中：新增医生与患者互动；症状非典型不能靠编造新临床事实填充。 | S02—S04、S16—S17、S20—S21 | **可先做**人物姿态、典型/非典型无数值版、无数值化验单、送检和简洁切除图。 | 连读镜头衔接、疼痛迁移与就医动作时间。 |
+178:| I／路径分支、手术时机、研究与来源卡 | 中低：图形简单但措辞和证据边界要求严格。 | S04—S05、S17—S18、S20 | **可先做**按定稿静态卡、数字来源映射、条件说明与非固定路径布局。 | 多卡依次显现及停留长度。 |
+
+exec
+/bin/bash -lc "mkdir -p qa/v6/ct_real; sha256sum engine/lib/{he,he_detail,wash,ann,scope,camera}.js parity_r4/chapters/04.js > qa/v6/ct_real/locked_start.sha256; cat film/main.js film/timeline.js qa/v6/ct/review.py; cat film/chapters/s09.js film/chapters/s12.js film/chapters/s15.js; sed -n '1,100p' film/lib_ext/ct_r3_clinical.js; sed -n '1,180p' /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs; git status --short" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+import {initBaker,bake} from './lib/wash.js';
+import {bakeHE} from './lib/he.js';
+import s08 from './chapters/s08.js';
+import {forScene} from './timeline.js';
+const name=new URLSearchParams(location.search).get('scene')||'s08';
+if(!['s06','s08','s10','s11','s19','s14','s09','s12','s15','s04','ct_library'].includes(name))throw Error('Unknown scene '+name);
+const scene=name==='s08'?s08:(await import(`./chapters/${name}.js`)).default;
+const ctRanges={s09:[35,36],s12:[47,48],s15:[58,59],s04:[14,19],ct_library:[35,36]};
+const clock=ctRanges[name]?forScene(...ctRanges[name],0):name==='s08'?{duration:T.end(34),T}:(name==='s06'?forScene(23,24,0):name==='s14'?forScene(54,57,0):name==='s19'?forScene(69,70,0):forScene(37,name==='s11'?46:42));
+import {T} from './timeline.js';
+const c=document.getElementById('c');c.width=1920;c.height=1080;const ctx=c.getContext('2d');
+await document.fonts.load('500 32px MixSans');if(!ctRanges[name]){await initBaker();bakeHE((k,r,o)=>bake(k,r,{...o,hd:true,soft:true,grain:.12,edge:.3,bleed:.5}));}
+scene.prepare();window.DUR=clock.duration;window.render=t=>scene.draw(ctx,t,clock.T);window.READY=true;
+// Timing snapshot generated from /workspace/病理科普视频/配音/全稿_v3/timeline.json
+// (lines n=29–34, real start/end seconds; no estimated durations).
+// Preserve the approved scene through its legacy clock.
+import scene from './chapters/s08.js';
+import {timing as allTiming} from './timing_snapshot.js';
+const timing=allTiming.filter(s=>s.n>=29&&s.n<=34);
+export const origin = timing[0].start;
+export const sentences = timing.map(s => ({id:s.n,start:s.start-origin,end:s.end-origin}));
+export const duration = sentences.at(-1).end + 0.8;
+export const T = {
+  at: id => sentences[id-29].start,
+  end: id => id===34 ? duration : sentences[id-29].end,
+  frac: (id,f) => sentences[id-29].start + (sentences[id-29].end-sentences[id-29].start)*f,
+};
+const legacy = {at:id=>(id-29)*6,end:id=>(id-28)*6,frac:(id,f)=>(id-29+f)*6};
+export function sceneTime(t) {
+  const s = sentences.find(s=>t<s.end) || sentences.at(-1);
+  if(t>=sentences.at(-1).end) return 33; // retain the approved final state for the tail
+  return (s.id-29)*6 + Math.max(0,(t-s.start)/(s.end-s.start))*6;
+}
+const draw = scene.draw;
+scene.draw = (ctx,t) => draw.call(scene,ctx,sceneTime(t),legacy);
+
+export function forScene(first,last,tail=.8){
+ const rows=allTiming.filter(s=>s.n>=first&&s.n<=last),origin=rows[0].start;
+ const row=id=>{const s=rows.find(s=>s.n===Number(id));if(!s)throw Error('Unknown sentence '+id);return s;};
+ return {origin,duration:rows.at(-1).end-origin+tail,rows,
+ T:{has:id=>rows.some(s=>s.n===id),at:id=>row(id).start-origin,end:id=>row(id).end-origin,frac:(id,f)=>row(id).start-origin+(row(id).end-row(id).start)*f}};
+}
+import sys,json
+from pathlib import Path
+from PIL import Image,ImageDraw
+scene=sys.argv[1];p=Path('qa/v6/ct')/scene
+picks=json.load(open(p/'keyframes.json'))['picks']
+files=sorted((p/'stills').glob('*.png'))
+files=[f for f in files if 'sheet' not in f.name]
+sheet=Image.new('RGB',(960,310*((len(picks)+1)//2)),'#F4EFE6');d=ImageDraw.Draw(sheet)
+
+def crop2(im,box,name):
+    w=box[2]-box[0];h=box[3]-box[1]
+    im.crop(box).resize((w*2,h*2),Image.LANCZOS).save(p/name)
+
+for i,(f,pick) in enumerate(zip(files,picks)):
+    im=Image.open(f).convert('RGB');im.save(p/(pick['name']+'.png'))
+    n=int(pick['name'][1:3])
+    if scene=='S04':
+        if n==14:
+            crop2(im,(760,260,1340,940),pick['name']+'_200.png')
+        elif n==15:
+            crop2(im,(760,240,1760,940),pick['name']+'_200.png')
+        elif n<=18:
+            crop2(im,(1280,430,1780,920),pick['name']+'_200.png')
+        else:
+            crop2(im,(560,220,1880,960),pick['name']+'_200.png')
+        crop2(im,(40,140,540,760),pick['name']+'_sidebar_200.png')
+    else:
+        crop2(im,(865,480,1320,910),pick['name']+'_200.png')
+        crop2(im,(1340,150,1870,920),pick['name']+'_tissue_200.png')
+    sheet.paste(im.resize((480,270),Image.LANCZOS),((i%2)*480,(i//2)*310))
+    d.text(((i%2)*480+12,(i//2)*310+276),pick['name'],fill='#2A2A35')
+sheet.save(p/'review_sheet.png')
+print('review_sheet',scene,len(picks))
+import {compareScene} from '../lib_ext/ct_r3_compare.js';
+export default compareScene(35,36,1);
+import {compareScene} from '../lib_ext/ct_r3_compare.js';
+export default compareScene(47,48,2);
+import {compareScene} from '../lib_ext/ct_r3_compare.js';
+export default compareScene(58,59,3);
+import {prepare,person} from './ct_r3_doctor.js';
+import {text} from './ct_r3_schematic.js';
+const ink='#5C5364';
+function line(c,points){c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.strokeStyle=ink;c.lineWidth=2.6;c.lineJoin='round';c.stroke();}
+// Same front-facing doctor as clin S02: hair, glasses, coat and stethoscope.
+export function doctor(c,x,y,scale=1){prepare();person(c,{x,y:y-200*scale,scale:scale*.70,doctor:true});}
+
+export function choice(c,alpha=1){
+ if(alpha<=0)return;c.save();c.globalAlpha=alpha;
+ // arrows from the clinician's assessment
+ c.strokeStyle='#A38AB5';c.lineWidth=1.7;c.lineCap='round';
+ c.beginPath();c.moveTo(1210,520);c.quadraticCurveTo(1325,455,1430,402);c.stroke();
+ c.beginPath();c.moveTo(1210,520);c.quadraticCurveTo(1330,610,1440,642);c.stroke();
+ text(c,'超声',1488,292,42,'#6B4C9A',700);
+ c.strokeStyle='#827985';c.lineWidth=3;
+ c.beginPath();c.roundRect(1445,315,220,152,14);c.stroke();
+ // simplified ultrasound fan, no numbers
+ c.strokeStyle='rgba(130,121,133,.55)';c.lineWidth=1.6;
+ for(let i=0;i<3;i++){c.beginPath();c.arc(1555,470,26+i*20,-2.35,-.8);c.stroke();}
+ text(c,'CT',1548,788,46,'#6B4C9A',700);
+ c.strokeStyle='#827985';c.lineWidth=3;
+ c.beginPath();c.arc(1580,645,86,0,Math.PI*2);c.stroke();
+ c.beginPath();c.arc(1580,645,58,0,Math.PI*2);c.stroke();
+ c.strokeStyle='rgba(130,121,133,.45)';c.lineWidth=1.2;
+ c.beginPath();c.arc(1580,645,40,0,Math.PI*2);c.stroke();
+ c.restore();
+}
+
+export function slide(c,x,y,w=220,h=300){
+ c.save();c.translate(x,y);c.rotate(-.10);
+ c.fillStyle='#F3E7EC';c.fillRect(-w/2,-h/2,w,h);
+ c.strokeStyle='#AE8CA9';c.lineWidth=2;c.strokeRect(-w/2,-h/2,w,h);
+ c.fillStyle='rgba(216,165,188,.85)';c.beginPath();c.ellipse(0,4,w*.33,h*.29,.18,0,Math.PI*2);c.fill();
+ c.strokeStyle='rgba(150,105,160,.55)';c.lineWidth=1.2;c.stroke();
+ for(let i=0;i<38;i++){c.fillStyle='rgba(149,116,164,.65)';c.beginPath();c.ellipse(Math.sin(i*4.1)*w*.27,4+Math.cos(i*2.3)*h*.24,2.6,1.8,0,0,Math.PI*2);c.fill();}
+ c.restore();
+}
+
+export function evidenceBase(c){
+ doctor(c,760,455,1.12);
+ slide(c,1660,500,206,268);
+ const y=868;
+ text(c,'临床',722,y+40,38,'#6B4C9A',700);
+ text(c,'影像',1238,y+40,38,'#6B4C9A',700);
+ text(c,'病理',1622,y+40,38,'#6B4C9A',700);
+ c.strokeStyle='#A38AB5';c.lineWidth=1.6;
+ c.beginPath();c.moveTo(740,y);c.lineTo(1660,y);c.stroke();
+ // stems start below each symbol so the line does not cut the coat, the CT window, or the slide
+ for(const [x,top] of [[760,768],[1276,718],[1660,648]]){
+   c.beginPath();c.moveTo(x,top);c.lineTo(x,y);c.stroke();
+ }
+ for(const x of [760,1276,1660]){c.fillStyle='#A38AB5';c.beginPath();c.arc(x,y,4,0,Math.PI*2);c.fill();}
+}
+#!/usr/bin/env node
+// Frame-accurate renderer for pages that expose the render(t) contract:
+//   window.DUR = 15;              // seconds (optional if --duration is given)
+//   window.render = (t) => {...}; // draw the frame at t seconds; deterministic; may return a Promise
+//   window.READY = true;          // set once fonts / images / models are loaded
+// Optional: window.RENDER_CONTEXT = true lets render(t, { frameTime, fps }) keep
+// discrete copy/cuts on the output frame while motion uses sub-sample time t.
+//
+// Video
+//   node render.mjs <project> [--out out/video.mp4] [--size 1920x1080] [--fps 30] [--workers 3]
+//                   [--start 0] [--duration D] [--subframes 1] [--shutter 0.5] [--dpr 1]
+//                   [--audio audio/music.wav] [--grain 0] [--crf 16] [--png] [--q "k=v&k2=v2"]
+// Stills (review frames, PNG) and contact sheet
+//   node render.mjs <project> --still 0.5,2,7.25 [--out qa/stills] [--sheet]
+//   node render.mjs <project> --range 0:15:1 [--out qa/stills] [--sheet]
+// Poster frame (step 7)
+//   node render.mjs <project> --poster 14.5 [--out out/poster.png]
+// Style-frame directions (step 3): one key frame per ?dir=<name>, side by side with labels
+//   node render.mjs <project> --directions a,b,c --at 14.5,2,0 [--out qa/directions.png] [--dir-param dir]
+//   (--at: one time per direction, or one time for all; singles go next to the sheet in qa/directions/)
+// Determinism check (same t rendered in different orders must be pixel-identical)
+//   node render.mjs <project> --determinism
+// Text framing (review material, never pass/fail): text cut by the frame edge, two different strings on top of each
+// other, text in the platform safe zone, text too small for a phone. Canvas 2D and DOM/SVG text; issues that last ≥ 0.3 s.
+//   node render.mjs <project> --text-check [--every 0.2] [--safe auto|none|T,R,B,L] [--out qa/text]
+//   (--safe: fractions of the frame (0.12) or pixels; auto = 12 % top and bottom on vertical frames, none on landscape)
+//
+// --subframes N blends N samples per frame (motion blur; render time × N). --shutter 0.5 = 180°.
+// --dpr 2 supersamples (renders 2× and downsizes with lanczos): crisper hairlines / 3D edges, ~3× slower.
+// --grain N adds temporal film grain in ffmpeg (keeps page frames compressible). 0 = none.
+import fs from 'node:fs';
+import path from 'node:path';
+import { spawn, execFileSync } from 'node:child_process';
+import { loadChromium, launch, serve, resolveTarget, openPage, warnSoftwareGL, parseSize, args, die } from './lib/browser.mjs';
+import { textHook } from './lib/text-hook.mjs';
+
+// Anything that must be undone on failure or interruption (ffmpeg children, temp dirs, output lock).
+const cleanups = [];
+const runCleanups = () => { while (cleanups.length) { try { cleanups.pop()(); } catch {} } };
+const fail = msg => { console.error(msg); runCleanups(); process.exit(1); };
+process.on('exit', runCleanups);
+for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) process.on(sig, () => fail(`interrupted (${sig}); partial output removed`));
+process.on('unhandledRejection', e => fail(`render failed: ${String(e?.message || e).split('\n')[0]}`));
+
+const { pos, opt } = args(process.argv.slice(2));
+const target = resolveTarget(pos[0]);
+const { w: W, h: H } = parseSize(opt.size);
+const FPS = +(opt.fps || 30);
+const DPR = +(opt.dpr || 1);
+if (!(FPS > 0 && FPS <= 240)) die(`bad --fps ${opt.fps}`);
+if (!(DPR >= 1 && DPR <= 4)) die(`bad --dpr ${opt.dpr} (1–4)`);
+const QUERY = typeof opt.q === 'string' ? opt.q : '';
+const fmt = opt.png ? 'png' : 'jpeg';
+
+const chromium = await loadChromium(target.root);
+const { server, port } = await serve(target.root);
+const browser = await launch(chromium);
+const open = (query = QUERY, init = null) => openPage(browser, { port, rel: target.rel, w: W, h: H, dpr: DPR, query, init });
+const finish = async code => { await browser.close().catch(() => {}); server.close(); process.exit(code); };
+cleanups.push(() => server.close());
+
+async function shoot(page, t, type = fmt, frameTime = t) {
+  await page.evaluate(({ t, frameTime, fps }) => window.RENDER_CONTEXT === true
+    ? window.render(t, { frameTime, fps })
+    : window.render(t), { t, frameTime, fps: FPS });
+  return await page.screenshot({ type, ...(type === 'jpeg' ? { quality: 95 } : {}), clip: { x: 0, y: 0, width: W, height: H } });
+}
+
+if (opt.poster !== undefined) await poster();
+else if (opt.directions !== undefined) await directions();
+else if (opt.still || opt.range) await stills();
+else if (opt.determinism) await determinism();
+else if (opt['text-check']) await textCheck();
+else await video();
+await finish(0);
+
+// ───────────────────────────── text framing ─────────────────────────────
+function safeZone() {
+  const v = opt.safe === undefined || opt.safe === true ? 'auto' : String(opt.safe);
+  if (v === 'none') return null;
+  if (v === 'auto') return H > W ? { t: 0.12 * H, r: 0, b: 0.12 * H, l: 0 } : null;
+  const n = v.split(',').map(Number);
+  if (n.length !== 4 || n.some(x => !(x >= 0))) die(`bad --safe ${v}: auto | none | top,right,bottom,left (fractions like 0.12, or pixels)`);
+  const px = (x, d) => (x < 1 ? x * d : x);
+  return { t: px(n[0], H), r: px(n[1], W), b: px(n[2], H), l: px(n[3], W) };
+}
+async function textCheck() {
+  const every = +(opt.every || 0.2);
+  if (!(every > 0)) die(`bad --every ${opt.every}`);
+  const out = path.resolve(typeof opt.out === 'string' ? opt.out.replace(/\.json$/, '') : path.join(target.root, 'qa', 'text'));
+  fs.mkdirSync(path.dirname(out), { recursive: true });
+  const page = await open(QUERY, textHook);
+  if (!(await page.evaluate(() => !!window.__msrText))) die('the text hook did not load in the page');
+  const dur = +(opt.duration || await page.evaluate(() => window.DUR));
+  if (!(dur > 0)) die('window.DUR is missing; pass --duration');
+  const safe = safeZone(), BLEED = 0.12 * H, TINY = 0.016 * H;
+  const area = b => Math.max(0, b.x1 - b.x0) * Math.max(0, b.y1 - b.y0);
+  const inter = (a, b) => ({ x0: Math.max(a.x0, b.x0), y0: Math.max(a.y0, b.y0), x1: Math.min(a.x1, b.x1), y1: Math.min(a.y1, b.y1) });
+  const frame = { x0: 0, y0: 0, x1: W, y1: H };
+  const same = (a, b) => a.text.replace(/\s+/g, '') === b.text.replace(/\s+/g, '');
+  const issues = new Map();                       // key → { kind, what, times: [], boxes: { t: [box] } }
+  const note = (key, kind, what, t, bxs) => { let e = issues.get(key); if (!e) issues.set(key, (e = { kind, what, times: [], boxes: {} })); e.times.push(t); e.boxes[t] = bxs; };
+  const times = []; for (let t = 0; t < dur - 1e-6; t += every) times.push(+t.toFixed(4));
+  for (const t of times) {
+    const boxes = await page.evaluate(t => { window.__msrText.reset(); return Promise.resolve(window.render(t)).then(() => window.__msrText.collect()); }, t);
+    const seen = boxes.filter(b => area(b) > 1 && area(inter(b, frame)) > 0 && b.alpha >= 0.15);
+    for (const b of seen) {
+      const vis = area(inter(b, frame)) / area(b), q = JSON.stringify(b.text);
+      if (vis < 0.98 && Math.max(-b.x0, -b.y0, b.x1 - W, b.y1 - H) > 2) {
+        if (b.size >= BLEED) note(`bleed ${b.text}`, 'bleed', `${q} runs off the frame edge (display size: fine if it is a deliberate bleed)`, t, [b]);
+        else note(`cut ${b.text}`, 'cut', `${q} is cut by the frame edge`, t, [b]);
+      }
+      if (safe && b.size < BLEED) {
+        const zone = safe.t && b.y0 < safe.t ? 'top' : safe.b && b.y1 > H - safe.b ? 'bottom' : safe.l && b.x0 < safe.l ? 'left' : safe.r && b.x1 > W - safe.r ? 'right' : null;
+        if (zone) note(`safe ${b.text}`, 'safe', `${q} sits in the ${zone} safe zone (platform UI covers it)`, t, [b]);
+      }
+      if (b.size < TINY) note(`tiny ${b.text}`, 'tiny', `${q} is ${b.size.toFixed(0)}px (${(100 * b.size / H).toFixed(1)}% of the frame height): unreadable on a phone unless it is a deliberate micro-annotation`, t, [b]);
+    }
+    const solid = seen.filter(b => !b.clip && b.alpha >= 0.3);
+    for (let i = 0; i < solid.length; i++) for (let j = i + 1; j < solid.length; j++) {
+      const a = solid[i], c = solid[j];
+      if (same(a, c)) continue;
+      if (area(inter(a, c)) >= 0.3 * Math.min(area(a), area(c))) {
+        const [p, s] = [a.text, c.text].sort();
+        note(`overlap ${p}|${s}`, 'overlap', `${JSON.stringify(p)} and ${JSON.stringify(s)} are drawn on top of each other`, t, [a, c]);
+      }
+    }
+  }
+  // keep what lasts: consecutive samples, ≥ 0.3 s (a single sample counts when samples are that far apart)
+  const minRun = every >= 0.3 ? 1 : Math.ceil(0.3 / every) + 1;
+  const found = [];
+  for (const e of issues.values()) {
+    let run = [e.times[0]];
+    const flush = () => { if (run.length >= minRun) found.push({ kind: e.kind, what: e.what, t0: run[0], t1: +(run.at(-1) + every).toFixed(3), boxes: e.boxes[run[0]] }); };
+    for (const t of e.times.slice(1)) { if (t - run.at(-1) <= every * 1.5) run.push(t); else { flush(); run = [t]; } }
+    flush();
+  }
+  found.sort((a, b) => a.t0 - b.t0);
+  // one picture per moment, with the boxes drawn in
+  const shots = [...new Set(found.map(f => f.t0))].slice(0, 12);
+  const files = [];
+  for (const t of shots) {
+    const marks = found.filter(f => f.t0 === t).flatMap(f => f.boxes.map(b => ({ ...b, kind: f.kind })));
+    await page.evaluate(async ([t, marks, safe, W, H]) => {
+      window.__msrText.reset(); await window.render(t);
+      const d = document.createElement('div'); d.id = '__msr_marks';
+      d.style.cssText = `position:fixed;left:0;top:0;width:${W}px;height:${H}px;pointer-events:none;z-index:2147483647`;
+      const col = { cut: '#ff2d2d', overlap: '#ff2df0', safe: '#ffb000', tiny: '#2dd4ff', bleed: '#9aa0a6' };
+      if (safe) for (const [y, h] of [[0, safe.t], [H - safe.b, safe.b]]) if (h) d.insertAdjacentHTML('beforeend', `<div style="position:absolute;left:0;top:${y}px;width:${W}px;height:${h}px;background:rgba(255,176,0,.18)"></div>`);
+      for (const m of marks) d.insertAdjacentHTML('beforeend', `<div style="position:absolute;left:${m.x0}px;top:${m.y0}px;width:${m.x1 - m.x0}px;height:${m.y1 - m.y0}px;outline:3px solid ${col[m.kind]};outline-offset:2px"></div>`);
+      document.body.appendChild(d);
+    }, [t, marks, safe, W, H]);
+    const file = `${out}-t${t.toFixed(2)}.png`;
+    await page.screenshot({ path: file, clip: { x: 0, y: 0, width: W, height: H } });
+    await page.evaluate(() => document.getElementById('__msr_marks')?.remove());
+    files.push(file);
+  }
+  fs.writeFileSync(`${out}.json`, JSON.stringify({ size: `${W}x${H}`, every, safe, issues: found.map(({ boxes, ...f }) => f) }, null, 1));
+  console.log(`text framing · ${times.length} frames every ${every}s · safe zone: ${safe ? `top ${safe.t.toFixed(0)} / bottom ${safe.b.toFixed(0)} / left ${safe.l.toFixed(0)} / right ${safe.r.toFixed(0)} px` : 'not checked'}`);
+  if (!found.length) console.log('  no lasting text-framing problems found (WebGL / image text is not seen: look at those frames yourself)');
+  for (const f of found) console.log(`  [${f.t0.toFixed(2)}–${f.t1.toFixed(2)}s] ${f.kind.toUpperCase().padEnd(7)} ${f.what}`);
+  if (files.length) console.log(`  marked frames: ${files.join(', ')}${shots.length < new Set(found.map(f => f.t0)).size ? ' (first 12)' : ''}`);
+  console.log(`  ${out}.json  (review material: look at each marked frame and decide; deliberate bleeds and micro-annotations are fine)`);
+}
+
+// ───────────────────────────── poster / directions ─────────────────────────────
+function writePng(file, buf) {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, buf);
+  if (!fs.statSync(file).size) fail(`empty image written: ${file}`);
+  console.log(file);
+}
+async function poster() {
+  const t = +opt.poster;
+  if (opt.poster === true || !Number.isFinite(t) || t < 0) die('--poster needs a time in seconds, e.g. --poster 14.5');
+  const out = path.resolve(typeof opt.out === 'string' ? (opt.out.endsWith('.png') ? opt.out : path.join(opt.out, 'poster.png')) : path.join(target.root, 'out', 'poster.png'));
+  const page = await open();
+  await warnSoftwareGL(page);
+  writePng(out, await shoot(page, t, 'png'));
+}
+?? qa/briefs/ct_real01.md
+?? qa/briefs/run_ct_real01.log
+?? qa/v6/ct/bundle.sha256
+?? qa/v6/ct/bundle_verify.log
+?? qa/v6/ct/ct-dev.bundle
+?? qa/v6/ct/r3/bundle_verify.log
+?? qa/v6/ct/r3/commits.log
+?? qa/v6/ct/r3/output_check.log
+?? qa/v6/ct_real/
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+from PIL import Image,ImageDraw
+import shutil,hashlib
+root=Path('/workspace/病理科普视频/ct_real');dst=Path('film/assets/ct_real');dst.mkdir(parents=True,exist_ok=True)
+patterns=['S04/*s130*','S09/*coronal_s024*','S09/*axial_s058*','S12/*axial_s128*','S12/*coronal_s065*','S15/*s285*']
+files=[next(root.glob(p)) for p in patterns];sheet=Image.new('RGB',(1536,1120));d=ImageDraw.Draw(sheet)
+for i,p in enumerate(files):
+ shutil.copyfile(p,dst/p.name);assert hashlib.sha256(p.read_bytes()).digest()==hashlib.sha256((dst/p.name).read_bytes()).digest()
+ im=Image.open(p);im.thumbnail((512,512));x=i%3*512;y=i//3*560;sheet.paste(im,(x,y));d.text((x,y+520),p.name[:44])
+sheet.save('/tmp/ct_sources.png')
+source=(root/'来源与授权.md').read_text();lines=[l[2:] for l in source.splitlines() if l.startswith('> ') and any('rID '+n+'，' in l or 'rID: '+n+' (' in l for n in ['197373','30389','197370','242634']) and ('图像来源：' in l or 'Image:' in l)]
+Path('qa/v6/ct_real/credits.md').write_text('# 实际使用病例片尾署名\\n\\n'+'\\n\\n'.join(lines)+'\\n\\nhttps://creativecommons.org/licenses/by-nc-sa/3.0/\\n')
+PY" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 147ms:
+codex
+批准的六张原图已复制并逐字节校验。为保证真实 CT 可读，S09/S12/S15 将撤掉组织窗，改用单个大窗，按句切换批准的轴位、冠状位；S15 始终使用同一张图，只切换独立标注层。每个 CT 窗都会保留「典型病例」和来源署名。
+
+exec
+/bin/bash -lc "cat > /tmp/implement_ct.py <<'PY'
+from pathlib import Path
+import json
+assets=list(Path('film/assets/ct_real').iterdir())
+keys=['s130','coronal_s024','axial_s058','axial_s128','coronal_s065','s285']
+files=[next(p.name for p in assets if k in p.name) for k in keys]
+code=\"\"\"import {text,labelTo,drawFocus} from './ct_r3_schematic.js';
+export const files=FILES;
+export async function loadCT(i){const im=new Image();im.src=new URL('../assets/ct_real/'+files[i],import.meta.url);await im.decode();return im;}
+// Source rectangles only remove empty margins / table; anatomical pixels are untouched.
+export const crops=[[20,155,472,280],[0,0,512,695],[0,75,512,390],[20,90,472,310],[0,0,512,512],[0,70,512,350]];
+export function realCT(c,im,i,box,rid){
+ const [sx,sy,sw,sh]=crops[i],k=Math.min(box.w/sw,(box.h-78)/sh),w=sw*k,h=sh*k;
+ const x=box.x+(box.w-w)/2,y=box.y+38+(box.h-78-h)/2;
+ c.drawImage(im,sx,sy,sw,sh,x,y,w,h);
+ text(c,'典型病例',box.x+14,box.y+27,26,'#6B4C9A',500);
+ text(c,"'`Radiopaedia.org rID ${rid} · CC BY-NC-SA 3.0`,box.x+14,box.y+box.h-9,20,'"'#6B4C9A',500);
+ return {point:(px,py)=>({x:x+(px-sx)*k,y:y+(py-sy)*k}),k};
+}
+export function mark(c,g,p,r,label,alpha=1){const q=g.point(...p);drawFocus(c,q.x,q.y,r*g.k,alpha,[7,6],1.6,'#C9B7DA');labelTo(c,label,650,898,q.x,q.y,{color:'#C9B7DA',alpha,size:28});}
+\"\"\".replace('FILES',json.dumps(files))
+Path('film/lib_ext/ct_real_images.js').write_text(code)
+p=Path('film/main.js');s=p.read_text().replace('scene.prepare();','await scene.prepare();');p.write_text(s)
+p=Path('film/chapters/s04.js');s=p.read_text().replace('drawCTStatic,','').replace('drawFocus,','')
+s=\"import {loadCT,realCT,mark} from '../lib_ext/ct_real_images.js';\\n\"+s
+s=s.replace('prepare(){','async prepare(){').replace(\"this.g=drawCTStatic(this.ct.getContext('2d'),CT.x,CT.y,CT.w,CT.h,{stage:1,lens:true});\",\"this.image=await loadCT(0);this.g=realCT(this.ct.getContext('2d'),this.image,0,CT,'197373');\")
+s=s.replace('this.gs=drawCTStatic(e,CT_SMALL.x,CT_SMALL.y,CT_SMALL.w,CT_SMALL.h,{stage:1,lens:false,compact:true});',\"realCT(e,this.image,0,CT_SMALL,'197373');\")
+a=s.index('      const L=this.g.lens');b=s.index('      return;',a)
+s=s[:a]+\"      mark(c,this.g,[184,265],20,'发现病变',a18);\\n\"+s[b:]
+p.write_text(s)
+# Retain original sidebars verbatim, replace CT/tissue renderer with a single readable real-image window.
+old=Path('film/lib_ext/ct_r3_compare.js').read_text();sidebar=old[old.index('function sidebar'):old.index('export function compareScene')]
+new=\"\"\"import {paper,text,ramp} from './ct_r3_schematic.js';
+import {loadCT,realCT,mark} from './ct_real_images.js';
+const PUR='#6B4C9A';
+\"\"\"+sidebar+\"\"\"
+export function compareScene(first,last,stage){
+ let images;
+ return {async prepare(){images=await Promise.all((stage===1?[1,2]:stage===2?[3,4]:[5]).map(loadCT));},
+ draw(c,t,T){paper(c);
+ const next=ramp(t,T.at(last),.7),intro=ramp(t,T.at(first),.7);
+ const ex=stage===2?ramp(t,T.frac(first,.42),.7):next;
+ sidebar(c,stage,intro,stage===2?ex:next);
+ const index=stage===1?(t>=T.at(last)?2:1):stage===2?(t>=T.at(last)?4:3):5;
+ c.save();c.globalAlpha=intro;
+ const im=images[stage===3?0:index===(stage===1?1:3)?0:1];
+ const g=realCT(c,im,index,{x:610,y:92,w:1260,h:770},stage===1?'30389':stage===2?'197370':'242634');
+ // Coordinates refer directly to the approved source pixels, before crop and scale.
+ if(stage===1){if(index===1)mark(c,g,[153,350],23,'壁增厚',intro);else mark(c,g,[151,249],42,'周围脂肪轻度模糊',next);}
+ if(stage===2){if(index===3){if(ex<.5)mark(c,g,[163,239],20,'壁增厚强化',1-ex);else mark(c,g,[160,242],48,'周围渗出明显',ex);}else mark(c,g,[185,246],57,'周围渗出明显',next);}
+ if(stage===3){if(t<T.at(last))mark(c,g,[145,263],13,'壁强化缺损',intro);else mark(c,g,[118,253],35,'腔外气体、脓肿',next);}
+ c.restore();}};
+}
+\"\"\"
+Path('film/lib_ext/ct_real_compare.js').write_text(new)
+for n in ['09','12','15']:
+ p=Path(f'film/chapters/s{n}.js');p.write_text(p.read_text().replace('ct_r3_compare.js','ct_real_compare.js'))
+for name in ['deliver.mjs','review.py','check.py']:
+ s=Path('qa/v6/ct',name).read_text().replace('qa/v6/ct','qa/v6/ct_real')
+ if name=='review.py':
+  s=s.replace('(1280,430,1780,920)','(850,250,1510,800)').replace('(865,480,1320,910)','(850,230,1530,810)').replace(\"        crop2(im,(1340,150,1870,920),pick['name']+'_tissue_200.png')\",'')
+ Path('qa/v6/ct_real',name).write_text(s)
+PY
+python3 /tmp/implement_ct.py
+node qa/v6/ct_real/deliver.mjs S04 > qa/v6/ct_real/S04_render.log 2>&1" in /workspace/病理科普视频/v5_ct_dev
+exec
+/bin/bash -lc "cat qa/v6/ct_real/S04_render.log; cat film/index.html; sed -n '70,175p' 分镜/分镜_v1.md; head -25 /workspace/病理科普视频/配音/全稿_v3/timeline.json" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real/S04/stills/t_000.31.png
+/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real/S04/stills/t_002.08.png
+/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real/S04/stills/t_004.77.png
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>疼会“搬家”的7厘米盲管</title>
+<style>
+@font-face{font-family:"MixSans";src:url(fonts/MixSans-Regular.woff2) format("woff2");font-weight:400 500}
+@font-face{font-family:"MixSans";src:url(fonts/MixSans-Bold.woff2) format("woff2");font-weight:600 900}
+html,body{margin:0;background:#F4EFE6;overflow:hidden}canvas{display:block}#bake{display:none}
+</style></head><body>
+<canvas id="c"></canvas><div id="bake"></div>
+<script src="vendor/p5.min.js"></script><script src="vendor/p5.brush.js"></script><script src="vendor/rough.js"></script>
+<script type="module" src="./main.js"></script>
+</body></html>
+
+建议直接以 `/workspace/病理科普视频/v5/` 为新项目根目录，后续实施时创建；本次未创建。结构建议：
+
+```text
+v5/
+  index.html
+  main.js                     # 新场景调度与纯时间渲染入口
+  data/
+    script.json               # 原句号、中文、英文卡、画面提示、引用标记
+    scene-manifest.json       # S01—S21 与句号范围
+    timeline.preview.json     # 预览估时，明确标识非成片时间轴
+    evidence.json             # 上屏数字与定稿位置的逐项映射
+  audio/
+    narration.json            # 新音轨句号时间边界；不得沿用旧数据
+    narration.*               # 新项目音轨
+  scenes/
+    index.js                  # 新 manifest 注册
+    s01_intro.js ... s21_closing.js
+  lib/
+    tokens.js, ink.js, wash.js, motion.js, ann.js
+    layout.js, sidebar.js, subtitle_bilingual.js, timeline.js
+    camera.js, he.js, he_detail.js, he_guide.js, figure.js, icons.js
+    alive.js                  # 可选，仅大体/人物/血管
+    gross_appendix.js, vascular_response.js, he_acute.js
+    ct_schematic.js, compare_view.js, pus_exudate.js, ischemia.js
+    perforation.js, clinical.js, symptom_compare.js, research_card.js
+    specimen_pathology.js, surgery_timing.js, path_branch.js
+    chronic_transition.js, he_chronic.js, chronic_cells.js
+    closing.js, reference_entry.js
+  assets/
+    wash/                     # 可复用配方生成的新烘焙资产
+    fonts/                    # 核对字形覆盖后的字体
+    references/               # 定稿所链接、已核对的原有文献资料
+  vendor/                     # Rough.js、p5 与 p5.brush 依赖
+  tools/                      # 截帧、确定性与安全区检查
+  qa/                         # 样帧、联系表、手机预览、核对记录
+```
+
+每场景独立文件，不与旧七章建立对应关系。建议文件及覆盖范围如下；可由场景表直接生成 manifest：
+
+| 新 scenes 文件 | 句号 | 新 scenes 文件 | 句号 | 新 scenes 文件 | 句号 |
+|---|---|---|---|---|---|
+| s01_intro.js | 01—05 | s08_red_histology.js | 31—34 | s15_black_ct.js | 58—59 |
+| s02_signals.js | 06—10 | s09_red_ct.js | 35—36 | s16_assessment.js | 60—62 |
+| s03_clinical.js | 11—13 | s10_yellow_wall.js | 37—42 | s17_acute_treatment.js | 63—65 |
+| s04_ct_evidence.js | 14—19 | s11_yellow_surface.js | 43—46 | s18_chronic_transition.js | 66—68 |
+| s05_pathway.js | 20—22 | s12_yellow_ct.js | 47—48 | s19_chronic_histology.js | 69—70 |
+| s06_red_gross.js | 23—24 | s13_black_ischemia.js | 49—53 | s20_chronic_timing.js | 71—74 |
+| s07_exudation.js | 25—30 | s14_black_necrosis.js | 54—57 | s21_closing.js | 75—77 |
+
+### 渲染器需要重新建立的约定
+
+1. 保留 `window.render(t)`、`window.READY`、`window.DUR` 这类可离线抽帧契约；入口重写场景调度，不复用旧 `chapterAt` 或章号推断。场景建议导出 `bake()`、`renderMain()`、`renderAnnotations()`、`sidebarState()`、`exitState()`；名称为拟定接口。
+2. 新时间轴以稳定句号 `01`—`77` 为键。旧 `T.at/end/frac` 数组是零基索引，不能直接传入本文句号；新适配层建议提供 `T.atId/endId/fracId`，内部统一映射。校验缺句、重句、倒序、负时长及文本不符；发现错误应显式报错，不能因句数相等而静默套用旧音轨。
+3. 新音轨未就绪时可用明确标为 preview 的估时开发单场景；不输出伪精确秒表。最终每个动作、续卡和转场绑定新句号时间。20—22、67—68、73—74 按连续口播处理，不在组内插章标题停顿。英语续卡先按语义绑定句内进度，再按实际音轨和阅读量核定。
+4. 绘制顺序：纸/网格→右区裁切后的主画面→屏幕坐标短标注→固定左栏→独立字幕。相机仅影响右区，字幕及左栏不继承漂移、缩放或震动。标注位置经主画面坐标转换后检查包围盒。
+5. 右区相机、暗底与 HE 视野参数独立于旧章号。镜下 `boil:false`、`drift:false`，旧 HE 内部微动也要审查关闭；动态由教学状态及推拉/对焦承担。大体可选 `alive`，不对 CT 使用表面起伏。
+6. 不规则形状加载时用固定种子生成；水彩只在 bake 生成，画面随机保持确定性。新场景交接用显式出口状态或在新时间轴末句边界重画上一场末态，不能跨 import 依赖旧 `EXIT_04` 等常量。
+7. 成片时长从新音轨及明确片尾策略推导，不继承旧入口固定片尾时长。READY 应等待字体、烘焙、数据与全部场景资源就绪。
+
+### 旧库迁移清单与必须修改处
+
+| 旧模块／能力 | 迁移建议与改动 |
+|---|---|
+| `tokens.js: C, FONT, W, H, SAFE` | 迁移色板、画布及字体约定；重设 contentBottom、字幕区上沿与中英基线，删除旧 fadeTop=900 的布局假设。字号和两栏尺寸集中定义。 |
+| `motion.js: rng, hash, noise2, fbm, tween, ease, seg` | 优先迁移纯函数；使用固定种子；不依赖上一帧。不把内部种子或细胞计数显示到画面。 |
+| `ink.js: shape, draw, ink, grid, setBoil` | 迁移 Rough.js 风格与缓存；按场景命名缓存键，保留圆头和标准线宽。镜下关闭 boil，网格裁在内容区。 |
+| `wash.js: initBaker, bake, drawWash, get` | 迁移烘焙和高分辨率选项及 vendor 依赖；新建配方/键。近景优先 hd，依据最终屏幕像素检查是否放大超出纹理分辨率；旧 he.bands 不直接拉大使用。检查 scaleBrushes 连乘及初始化隔离。 |
+| `ann.js: label, leader, ring, arrow, line, brace, setDark` | 迁移屏幕字号、光晕和折线能力；外层增加两栏测量/换行/安全区约束。`label` 本身不会自动排长卡；`counter`、`scalebar` 本片无必要，不为装饰加数字。暗色状态每场恢复，避免污染下一场。 |
+| `he.js: drawHE, drawLens, fieldToScreen, drawNeutrophil, bakeHE` | 保留视野与细胞 API 思路，拆出旧固定 CELLS、ULCER、VESSELS 等场景几何；三型和慢性各用新几何与分布。明确 detail 与 style:'ch04' 的调用路径，不能混用默认简笔结果冒充细节版。 |
+| `he_detail.js: detailedNeutrophil, chromatin, fibrinMesh, tissueTexture, prepareGangrene, gangrene, fadeSeams` | 作为目标 HE 画法基础；坏疽准备与绘制需按新视野解耦全局缓存/固定坐标。`pushDisc`、`drawBlood`、`drawZahn` 为文件内部函数，不能当现成导出调用；如要血管机制复用，应新封装公开接口。 |
+| `he_guide.js: detailedNeutrophil, drawVessels, tissueTexture` | 保留组织结构及血管画法参考；与 he_detail 统一一个细胞风格入口，避免同名函数被误选。正常背景保留淋巴滤泡、生发中心、双层肌与管状隐窝；正常淋巴滤泡不能直接当慢性浸润证据。 |
+| `figure.js: drawFigure, drawArmR, drawInsitu, painPt, specimenOutline` | 迁移人物和标本轮廓能力；将 FIG、INSITU、HAND_R 等旧绝对坐标改成局部几何/锚点参数。痛点轨迹重新适配新人体，不能整体平移后任其越过 y=810。新标本另建独立模块。 |
+| `icons.js: iconHospital, iconThermo` | 按新比例迁移必要图标；不使用 iconClock 构造病情时间表；不搬与新稿无关的图标和医学情节。 |
+| `camera.js: camAt, apply, toScreen, toWorld` | 改为以右侧 viewport 中心为相机基准；旧 apply 以全画布中心计算，不能原封不动套两栏。 |
+| `alive.js: aliveXform, drawAliveWash` | 可选迁移，限 gross/figure/vessel；扩大安全区检查到最大形变，禁止用于 HE 和 CT。 |
+| `detail.js: weighted, hatch, shadeSide` | 可选，只在新人物需要线条粗细/排线时迁移；镜下禁排线。该文件在当前 film 存在，不将其误说为风格参考分支的既有要求。 |
+| `timeline.js: loadTimeline` | 重写加载与验证；不得继续自动读取旧 audio/narration.json 或旧 TSV 作后备，不再由旧章号切场景。保留句内 frac 思路。 |
+| `subtitle.js: split, linesFor, draw, safeFade` | 仅参考字形/光晕方式；新写双语字幕。旧 18 字切行、删句末标点、单语 44px、单基线和旧安全区逻辑都不适用定稿。 |
+| `mood.js: moodAt`、`scope.js: scopeAt, drawSurround, drawPointer`、`chapter.js: titleBlock` | 不整模块搬用旧调度。纸色/暗底/标题样式可提炼；按新 scene 状态重写，去除旧句号、全屏镜位与章节节奏。 |
+
+迁移配套须包含 Rough.js、p5、p5.brush 及必要字体；新字幕增加英文和新中文，字体子集应重新核对字形。既有章节生成脚本若假定旧章号，也须新写，不能直接生成覆盖新 scenes。
+
+## 左侧说明栏：统一放入 lib
+
+建议 `lib/sidebar.js` 负责组合，`lib/layout.js` 负责测量、换行、边界检查；各场景只传语义状态，不重复写绝对坐标。
+
+- 宽度 460，内边距 24，正文可用宽度 412；栏顶起于 y=60、底部不超过 770。标题 48—56px、诊断名 44—52px、正文 36—40px、引文及边界文字 30—32px；研究百分比可用 56px。所有字号为屏幕像素，字重沿用 500/700/800。长词优先断行或续卡，不压缩至难读。
+- 顶部固定颜色/主题导航，中部只放当前一张主卡，底部按需放来源或证据边界。卡片高度由实测字形与行距计算；溢出时切换整张卡，不裁掉语义、不叠卡、不向字幕区延伸。
+- 内容类型：章节色卡、典型路径及分支、病理层次索引、定义卡、CT 所见要点、研究卡、治疗时机卡、来源卡。时间语义只使用稿件已有“缓解期／急性发作期”等文字，不加钟表/日历或时间数值。
+- 拟定接口：`drawSidebar(ctx, {theme, heading, card, source, progress}, layout)`；card 按 type 区分 definition/path/research/compare/timing/source。progress 只指当前叙事高亮，不画患者病程完成比例。研究数据须带 evidenceKey 才能渲染，且直接呈现最终值。
+- 所有卡片先测量再画；卡片出现只用淡入/短距离揭示，左栏位置固定。长病名如“化脓性（蜂窝织炎性）阑尾炎”分语义行，保持同义名关系。
+- 右侧若需解释多个标签，左栏设对应短词行，右区用引线和结构短标签；不能把右侧主画面变成第二个说明栏。
+
+## 新资产清单：按预计工作量由高到低
+
+工作量为相对制作复杂度判断，不作虚构工时报价。“可先做”指不依赖正式新时间轴即可制作与审图；最终动态节奏、字幕续卡和转场仍需新音轨。
+
+| 排序／资产 | 工作量与主要风险 | 覆盖场景 | 不依赖新时间轴可先做的部分 | 待新时间轴完成的部分 |
+|---|---|---|---|---|
+| A／新急性 HE 组织状态库 | 最高：正常组织基底、单纯性层次分布、全层化脓、坏疽出血及局灶穿孔须互相一致；旧细胞板不能直接代表三型。 | S08、S10、S14 及 CT 配对 | **可先做**四类静态样板与局部细胞放大，确定分布、细胞大小和坏死边缘形态。 | 场景内推拉、对焦、状态揭示和出口状态。 |
+| B／三型相关 CT 自绘示意库 | 高：腹部断面、同一阑尾定位、壁强化及周围组织灰阶关系要清晰；容易被误解成真实临床影像或精准分型。 | S04、S09、S12、S15、S16 | **可先做**三类表现预设、CT表现示意标记、对应病理锚点及清晰大窗。不要加 HU、尺寸、测量刻度。 | 逐句高亮、与病理双窗同步、并发症复现顺序。 |
+| C／慢性 HE 与慢性炎细胞库 | 高：新增纤维化组织、淋巴细胞与浆细胞形态，避免把正常滤泡或急性脓细胞误作慢性浸润。 | S18—S19 | **可先做**慢性全景、纤维束及两类细胞样板，母图到特写定位。 | 69—70 的揭示顺序与切换。 |
+| D／新大体阑尾及局部特写库 | 高：正常、轻肿充血、灰黄混合脓苔、局部暗红黑斑、可选穿孔需统一形体与水彩质感。 | S01、S05—S06、S11、S13—S14、S21 | **可先做**新轮廓、断面及高分辨率烘焙；红黄黑并列样帧。 | 定位放大、形态切换及镜头交接。 |
+| E／血管反应与缺血机制库 | 中高：液体/蛋白质/白细胞路径、腔压、受压/血栓与损伤关联需逐项讲清。 | S06—S07、S13 | **可先做**局部几何、成分符号、独立动作的标准化进度演示。 | 对应每句的动作起止与镜头保持。 |
+| F／纤维脓性渗出物库 | 中高：脓细胞退变、组织碎屑、液体、粗细纤维素网及浆膜覆盖为一套混合资产。 | S10—S11 | **可先做**成分样板、混合物与浆膜大特写。 | 成网→混合→黄色来源高亮节奏。 |
+{
+ "duration": 327.8315,
+ "ffmpeg": {
+  "lufs": -16.3,
+  "true_peak_dbtp_summary": -1.6,
+  "true_peak_linear": 0.832,
+  "true_peak_dbtp": -1.5975334741855216
+ },
+ "pyloudnorm": -16.376012768376494,
+ "rail": 0,
+ "lines": [
+  {
+   "n": 1,
+   "seg": "01",
+   "chapter": "开场",
+   "start": 0.0,
+   "end": 4.120916666666667,
+   "dur": 4.120916666666667,
+   "text": "这根形似小香肠的盲管，就是阑尾。",
+   "en": "This small sausage-shaped tube is the | appendix."
+  },
+  {
+   "n": 2,
+   "seg": "01",
+   "chapter": "开场",
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from PIL import Image
+from pathlib import Path
+for key in ['s130','s285','axial_s128','coronal_s024','axial_s058','coronal_s065']:
+ p=next(Path('film/assets/ct_real').glob('*'+key+'*'));im=Image.open(p);im.resize((1024,im.height*2)).save('/tmp/'+key+'.png')
+PY" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 504ms:
+exec
+/bin/bash -lc "tail -6 qa/v6/ct_real/S04_render.log; ps -eo pid,args | rg 'render.mjs|deliver.mjs'" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real/S04/stills/t_017.92.png
+/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real/S04/stills/t_022.12.png
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+deterministic: 6 frames match across render orders (2.555, 8.593, 11.612, 16.953, 21.598, 23.191 s)
+review_sheet S04 9
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+      1 codex-linux-sandbox --sandbox-policy-cwd /workspace/病理科普视频/v5_ct_dev --command-cwd /workspace/病理科普视频/v5_ct_dev --permission-profile {"type":"managed","file_system":{"type":"restricted","entries":[{"path":{"type":"special","value":{"kind":"root"}},"access":"read"},{"path":{"type":"path","path":"/workspace/病理科普视频/v5_ct_dev"},"access":"write"},{"path":{"type":"path","path":"/workspace/病理科普视频"},"access":"write"},{"path":{"type":"path","path":"/workspace/garden-skills"},"access":"write"},{"path":{"type":"special","value":{"kind":"slash_tmp"}},"access":"write"},{"path":{"type":"special","value":{"kind":"tmpdir"}},"access":"write"},{"path":{"type":"path","path":"/workspace/病理科普视频/v5_ct_dev/.git"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/病理科普视频/.git"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/garden-skills/.git"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/病理科普视频/v5_ct_dev/.agents"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/病理科普视频/.agents"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/garden-skills/.agents"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/病理科普视频/v5_ct_dev/.codex"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/病理科普视频/.codex"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/garden-skills/.codex"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/病理科普视频/v5_ct_dev/.aws"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/病理科普视频/.aws"},"access":"read","missing_path_behavior":"skip"},{"path":{"type":"path","path":"/workspace/garden-skills/.aws"},"access":"read","missing_path_behavior":"skip"}]},"network":"enabled"} --apply-seccomp-then-exec -- /bin/bash -c __CODEX_SNAPSHOT_OVERRIDE_SET_0="${CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS+x}" __CODEX_SNAPSHOT_OVERRIDE_0="${CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS-}" __CODEX_SNAPSHOT_OVERRIDE_SET_1="${CODEX_PERMISSION_PROFILE+x}" __CODEX_SNAPSHOT_OVERRIDE_1="${CODEX_PERMISSION_PROFILE-}" __CODEX_SNAPSHOT_OVERRIDE_SET_2="${CODEX_PLUGIN_METRICS_OUTPUT+x}" __CODEX_SNAPSHOT_OVERRIDE_2="${CODEX_PLUGIN_METRICS_OUTPUT-}" __CODEX_SNAPSHOT_OVERRIDE_SET_3="${CODEX_SESSION_ID+x}" __CODEX_SNAPSHOT_OVERRIDE_3="${CODEX_SESSION_ID-}" __CODEX_SNAPSHOT_OVERRIDE_SET_4="${CODEX_THREAD_ID+x}" __CODEX_SNAPSHOT_OVERRIDE_4="${CODEX_THREAD_ID-}" __CODEX_SNAPSHOT_OVERRIDE_SET_5="${CODEX_TOOL_CALL_ID+x}" __CODEX_SNAPSHOT_OVERRIDE_5="${CODEX_TOOL_CALL_ID-}" __CODEX_SNAPSHOT_OVERRIDE_SET_6="${CODEX_VERSION+x}" __CODEX_SNAPSHOT_OVERRIDE_6="${CODEX_VERSION-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_0="${ALL_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_0="${ALL_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_1="${BUNDLE_HTTPS_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_1="${BUNDLE_HTTPS_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_2="${BUNDLE_HTTP_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_2="${BUNDLE_HTTP_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_3="${BUNDLE_NO_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_3="${BUNDLE_NO_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_4="${BUNDLE_SSL_CA_CERT+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_4="${BUNDLE_SSL_CA_CERT-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_5="${CARGO_HTTP_CAINFO+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_5="${CARGO_HTTP_CAINFO-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_6="${CODEX_CA_CERTIFICATE+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_6="${CODEX_CA_CERTIFICATE-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_7="${CODEX_NETWORK_ALLOW_LOCAL_BINDING+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_7="${CODEX_NETWORK_ALLOW_LOCAL_BINDING-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_8="${CODEX_NETWORK_PROXY_ACTIVE+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_8="${CODEX_NETWORK_PROXY_ACTIVE-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_9="${CODEX_NETWORK_PROXY_ATTRIBUTION+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_9="${CODEX_NETWORK_PROXY_ATTRIBUTION-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_10="${CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_10="${CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_11="${CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_11="${CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_12="${CURL_CA_BUNDLE+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_12="${CURL_CA_BUNDLE-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_13="${DOCKER_HTTPS_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_13="${DOCKER_HTTPS_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_14="${DOCKER_HTTP_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_14="${DOCKER_HTTP_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_15="${ELECTRON_GET_USE_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_15="${ELECTRON_GET_USE_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_16="${FTP_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_16="${FTP_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_17="${GIT_SSL_CAINFO+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_17="${GIT_SSL_CAINFO-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_18="${HTTPS_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_18="${HTTPS_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_19="${HTTP_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_19="${HTTP_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_20="${NODE_EXTRA_CA_CERTS+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_20="${NODE_EXTRA_CA_CERTS-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_21="${NODE_USE_ENV_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_21="${NODE_USE_ENV_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_22="${NO_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_22="${NO_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_23="${NPM_CONFIG_CAFILE+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_23="${NPM_CONFIG_CAFILE-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_24="${NPM_CONFIG_HTTPS_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_24="${NPM_CONFIG_HTTPS_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_25="${NPM_CONFIG_HTTP_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_25="${NPM_CONFIG_HTTP_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_26="${NPM_CONFIG_NOPROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_26="${NPM_CONFIG_NOPROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_27="${NPM_CONFIG_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_27="${NPM_CONFIG_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_28="${PIP_CERT+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_28="${PIP_CERT-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_29="${PIP_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_29="${PIP_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_30="${REQUESTS_CA_BUNDLE+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_30="${REQUESTS_CA_BUNDLE-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_31="${SSL_CERT_FILE+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_31="${SSL_CERT_FILE-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_32="${WSS_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_32="${WSS_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_33="${WS_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_33="${WS_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_34="${YARN_HTTPS_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_34="${YARN_HTTPS_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_35="${YARN_HTTP_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_35="${YARN_HTTP_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_36="${YARN_NO_PROXY+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_36="${YARN_NO_PROXY-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_37="${all_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_37="${all_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_38="${ftp_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_38="${ftp_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_39="${http_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_39="${http_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_40="${https_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_40="${https_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_41="${no_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_41="${no_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_42="${npm_config_cafile+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_42="${npm_config_cafile-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_43="${npm_config_http_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_43="${npm_config_http_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_44="${npm_config_https_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_44="${npm_config_https_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_45="${npm_config_noproxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_45="${npm_config_noproxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_46="${npm_config_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_46="${npm_config_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_47="${ws_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_47="${ws_proxy-}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_48="${wss_proxy+x}" __CODEX_SNAPSHOT_PROXY_OVERRIDE_48="${wss_proxy-}" __CODEX_SNAPSHOT_PROXY_ENV_SET="${CODEX_NETWORK_PROXY_ACTIVE+x}"  if . '/home/box/.codex/shell_snapshots/01a1d31f-6a13-7d13-9272-d8a7f1f4cf41.1794543413960959973.sh' >/dev/null 2>&1; then :; fi  if [ -n "${__CODEX_SNAPSHOT_OVERRIDE_SET_0}" ]; then   if [ -z "${CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS+x}" ] || [ "${CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS-}" != "${__CODEX_SNAPSHOT_OVERRIDE_0}" ]; then export CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS="${__CODEX_SNAPSHOT_OVERRIDE_0}"; else export CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS; fi else builtin unset CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS 2>/dev/null || command unset CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS; fi builtin unset __CODEX_SNAPSHOT_OVERRIDE_SET_0 __CODEX_SNAPSHOT_OVERRIDE_0 2>/dev/null || command unset __CODEX_SNAPSHOT_OVERRIDE_SET_0 __CODEX_SNAPSHOT_OVERRIDE_0 if [ -n "${__CODEX_SNAPSHOT_OVERRIDE_SET_1}" ]; then   if [ -z "${CODEX_PERMISSION_PROFILE+x}" ] || [ "${CODEX_PERMISSION_PROFILE-}" != "${__CODEX_SNAPSHOT_OVERRIDE_1}" ]; then export CODEX_PERMISSION_PROFILE="${__CODEX_SNAPSHOT_OVERRIDE_1}"; else export CODEX_PERMISSION_PROFILE; fi else builtin unset CODEX_PERMISSION_PROFILE 2>/dev/null || command unset CODEX_PERMISSION_PROFILE; fi builtin unset __CODEX_SNAPSHOT_OVERRIDE_SET_1 __CODEX_SNAPSHOT_OVERRIDE_1 2>/dev/null || command unset __CODEX_SNAPSHOT_OVERRIDE_SET_1 __CODEX_SNAPSHOT_OVERRIDE_1 if [ -n "${__CODEX_SNAPSHOT_OVERRIDE_SET_2}" ]; then   if [ -z "${CODEX_PLUGIN_METRICS_OUTPUT+x}" ] || [ "${CODEX_PLUGIN_METRICS_OUTPUT-}" != "${__CODEX_SNAPSHOT_OVERRIDE_2}" ]; then export CODEX_PLUGIN_METRICS_OUTPUT="${__CODEX_SNAPSHOT_OVERRIDE_2}"; else export CODEX_PLUGIN_METRICS_OUTPUT; fi else builtin unset CODEX_PLUGIN_METRICS_OUTPUT 2>/dev/null || command unset CODEX_PLUGIN_METRICS_OUTPUT; fi builtin unset __CODEX_SNAPSHOT_OVERRIDE_SET_2 __CODEX_SNAPSHOT_OVERRIDE_2 2>/dev/null || command unset __CODEX_SNAPSHOT_OVERRIDE_SET_2 __CODEX_SNAPSHOT_OVERRIDE_2 if [ -n "${__CODEX_SNAPSHOT_OVERRIDE_SET_3}" ]; then   if [ -z "${CODEX_SESSION_ID+x}" ] || [ "${CODEX_SESSION_ID-}" != "${__CODEX_SNAPSHOT_OVERRIDE_3}" ]; then export CODEX_SESSION_ID="${__CODEX_SNAPSHOT_OVERRIDE_3}"; else export CODEX_SESSION_ID; fi else builtin unset CODEX_SESSION_ID 2>/dev/null || command unset CODEX_SESSION_ID; fi builtin unset __CODEX_SNAPSHOT_OVERRIDE_SET_3 __CODEX_SNAPSHOT_OVERRIDE_3 2>/dev/null || command unset __CODEX_SNAPSHOT_OVERRIDE_SET_3 __CODEX_SNAPSHOT_OVERRIDE_3 if [ -n "${__CODEX_SNAPSHOT_OVERRIDE_SET_4}" ]; then   if [ -z "${CODEX_THREAD_ID+x}" ] || [ "${CODEX_THREAD_ID-}" != "${__CODEX_SNAPSHOT_OVERRIDE_4}" ]; then export CODEX_THREAD_ID="${__CODEX_SNAPSHOT_OVERRIDE_4}"; else export CODEX_THREAD_ID; fi else builtin unset CODEX_THREAD_ID 2>/dev/null || command unset CODEX_THREAD_ID; fi builtin unset __CODEX_SNAPSHOT_OVERRIDE_SET_4 __CODEX_SNAPSHOT_OVERRIDE_4 2>/dev/null || command unset __CODEX_SNAPSHOT_OVERRIDE_SET_4 __CODEX_SNAPSHOT_OVERRIDE_4 if [ -n "${__CODEX_SNAPSHOT_OVERRIDE_SET_5}" ]; then   if [ -z "${CODEX_TOOL_CALL_ID+x}" ] || [ "${CODEX_TOOL_CALL_ID-}" != "${__CODEX_SNAPSHOT_OVERRIDE_5}" ]; then export CODEX_TOOL_CALL_ID="${__CODEX_SNAPSHOT_OVERRIDE_5}"; else export CODEX_TOOL_CALL_ID; fi else builtin unset CODEX_TOOL_CALL_ID 2>/dev/null || command unset CODEX_TOOL_CALL_ID; fi builtin unset __CODEX_SNAPSHOT_OVERRIDE_SET_5 __CODEX_SNAPSHOT_OVERRIDE_5 2>/dev/null || command unset __CODEX_SNAPSHOT_OVERRIDE_SET_5 __CODEX_SNAPSHOT_OVERRIDE_5 if [ -n "${__CODEX_SNAPSHOT_OVERRIDE_SET_6}" ]; then   if [ -z "${CODEX_VERSION+x}" ] || [ "${CODEX_VERSION-}" != "${__CODEX_SNAPSHOT_OVERRIDE_6}" ]; then export CODEX_VERSION="${__CODEX_SNAPSHOT_OVERRIDE_6}"; else export CODEX_VERSION; fi else builtin unset CODEX_VERSION 2>/dev/null || command unset CODEX_VERSION; fi builtin unset __CODEX_SNAPSHOT_OVERRIDE_SET_6 __CODEX_SNAPSHOT_OVERRIDE_6 2>/dev/null || command unset __CODEX_SNAPSHOT_OVERRIDE_SET_6 __CODEX_SNAPSHOT_OVERRIDE_6 if [ -n "$__CODEX_SNAPSHOT_PROXY_ENV_SET" ] || [ -n "${CODEX_NETWORK_PROXY_ACTIVE+x}" ]; then if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_0}" ]; then   if [ -z "${ALL_PROXY+x}" ] || [ "${ALL_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_0}" ]; then export ALL_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_0}"; else export ALL_PROXY; fi else builtin unset ALL_PROXY 2>/dev/null || command unset ALL_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_0 __CODEX_SNAPSHOT_PROXY_OVERRIDE_0 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_0 __CODEX_SNAPSHOT_PROXY_OVERRIDE_0 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_1}" ]; then   if [ -z "${BUNDLE_HTTPS_PROXY+x}" ] || [ "${BUNDLE_HTTPS_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_1}" ]; then export BUNDLE_HTTPS_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_1}"; else export BUNDLE_HTTPS_PROXY; fi else builtin unset BUNDLE_HTTPS_PROXY 2>/dev/null || command unset BUNDLE_HTTPS_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_1 __CODEX_SNAPSHOT_PROXY_OVERRIDE_1 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_1 __CODEX_SNAPSHOT_PROXY_OVERRIDE_1 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_2}" ]; then   if [ -z "${BUNDLE_HTTP_PROXY+x}" ] || [ "${BUNDLE_HTTP_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_2}" ]; then export BUNDLE_HTTP_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_2}"; else export BUNDLE_HTTP_PROXY; fi else builtin unset BUNDLE_HTTP_PROXY 2>/dev/null || command unset BUNDLE_HTTP_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_2 __CODEX_SNAPSHOT_PROXY_OVERRIDE_2 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_2 __CODEX_SNAPSHOT_PROXY_OVERRIDE_2 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_3}" ]; then   if [ -z "${BUNDLE_NO_PROXY+x}" ] || [ "${BUNDLE_NO_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_3}" ]; then export BUNDLE_NO_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_3}"; else export BUNDLE_NO_PROXY; fi else builtin unset BUNDLE_NO_PROXY 2>/dev/null || command unset BUNDLE_NO_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_3 __CODEX_SNAPSHOT_PROXY_OVERRIDE_3 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_3 __CODEX_SNAPSHOT_PROXY_OVERRIDE_3 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_4}" ]; then   if [ -z "${BUNDLE_SSL_CA_CERT+x}" ] || [ "${BUNDLE_SSL_CA_CERT-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_4}" ]; then export BUNDLE_SSL_CA_CERT="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_4}"; else export BUNDLE_SSL_CA_CERT; fi else builtin unset BUNDLE_SSL_CA_CERT 2>/dev/null || command unset BUNDLE_SSL_CA_CERT; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_4 __CODEX_SNAPSHOT_PROXY_OVERRIDE_4 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_4 __CODEX_SNAPSHOT_PROXY_OVERRIDE_4 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_5}" ]; then   if [ -z "${CARGO_HTTP_CAINFO+x}" ] || [ "${CARGO_HTTP_CAINFO-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_5}" ]; then export CARGO_HTTP_CAINFO="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_5}"; else export CARGO_HTTP_CAINFO; fi else builtin unset CARGO_HTTP_CAINFO 2>/dev/null || command unset CARGO_HTTP_CAINFO; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_5 __CODEX_SNAPSHOT_PROXY_OVERRIDE_5 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_5 __CODEX_SNAPSHOT_PROXY_OVERRIDE_5 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_6}" ]; then   if [ -z "${CODEX_CA_CERTIFICATE+x}" ] || [ "${CODEX_CA_CERTIFICATE-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_6}" ]; then export CODEX_CA_CERTIFICATE="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_6}"; else export CODEX_CA_CERTIFICATE; fi else builtin unset CODEX_CA_CERTIFICATE 2>/dev/null || command unset CODEX_CA_CERTIFICATE; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_6 __CODEX_SNAPSHOT_PROXY_OVERRIDE_6 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_6 __CODEX_SNAPSHOT_PROXY_OVERRIDE_6 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_7}" ]; then   if [ -z "${CODEX_NETWORK_ALLOW_LOCAL_BINDING+x}" ] || [ "${CODEX_NETWORK_ALLOW_LOCAL_BINDING-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_7}" ]; then export CODEX_NETWORK_ALLOW_LOCAL_BINDING="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_7}"; else export CODEX_NETWORK_ALLOW_LOCAL_BINDING; fi else builtin unset CODEX_NETWORK_ALLOW_LOCAL_BINDING 2>/dev/null || command unset CODEX_NETWORK_ALLOW_LOCAL_BINDING; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_7 __CODEX_SNAPSHOT_PROXY_OVERRIDE_7 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_7 __CODEX_SNAPSHOT_PROXY_OVERRIDE_7 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_8}" ]; then   if [ -z "${CODEX_NETWORK_PROXY_ACTIVE+x}" ] || [ "${CODEX_NETWORK_PROXY_ACTIVE-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_8}" ]; then export CODEX_NETWORK_PROXY_ACTIVE="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_8}"; else export CODEX_NETWORK_PROXY_ACTIVE; fi else builtin unset CODEX_NETWORK_PROXY_ACTIVE 2>/dev/null || command unset CODEX_NETWORK_PROXY_ACTIVE; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_8 __CODEX_SNAPSHOT_PROXY_OVERRIDE_8 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_8 __CODEX_SNAPSHOT_PROXY_OVERRIDE_8 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_9}" ]; then   if [ -z "${CODEX_NETWORK_PROXY_ATTRIBUTION+x}" ] || [ "${CODEX_NETWORK_PROXY_ATTRIBUTION-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_9}" ]; then export CODEX_NETWORK_PROXY_ATTRIBUTION="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_9}"; else export CODEX_NETWORK_PROXY_ATTRIBUTION; fi else builtin unset CODEX_NETWORK_PROXY_ATTRIBUTION 2>/dev/null || command unset CODEX_NETWORK_PROXY_ATTRIBUTION; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_9 __CODEX_SNAPSHOT_PROXY_OVERRIDE_9 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_9 __CODEX_SNAPSHOT_PROXY_OVERRIDE_9 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_10}" ]; then   if [ -z "${CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS+x}" ] || [ "${CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_10}" ]; then export CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_10}"; else export CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS; fi else builtin unset CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS 2>/dev/null || command unset CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_10 __CODEX_SNAPSHOT_PROXY_OVERRIDE_10 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_10 __CODEX_SNAPSHOT_PROXY_OVERRIDE_10 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_11}" ]; then   if [ -z "${CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE+x}" ] || [ "${CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_11}" ]; then export CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_11}"; else export CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE; fi else builtin unset CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE 2>/dev/null || command unset CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_11 __CODEX_SNAPSHOT_PROXY_OVERRIDE_11 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_11 __CODEX_SNAPSHOT_PROXY_OVERRIDE_11 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_12}" ]; then   if [ -z "${CURL_CA_BUNDLE+x}" ] || [ "${CURL_CA_BUNDLE-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_12}" ]; then export CURL_CA_BUNDLE="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_12}"; else export CURL_CA_BUNDLE; fi else builtin unset CURL_CA_BUNDLE 2>/dev/null || command unset CURL_CA_BUNDLE; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_12 __CODEX_SNAPSHOT_PROXY_OVERRIDE_12 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_12 __CODEX_SNAPSHOT_PROXY_OVERRIDE_12 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_13}" ]; then   if [ -z "${DOCKER_HTTPS_PROXY+x}" ] || [ "${DOCKER_HTTPS_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_13}" ]; then export DOCKER_HTTPS_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_13}"; else export DOCKER_HTTPS_PROXY; fi else builtin unset DOCKER_HTTPS_PROXY 2>/dev/null || command unset DOCKER_HTTPS_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_13 __CODEX_SNAPSHOT_PROXY_OVERRIDE_13 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_13 __CODEX_SNAPSHOT_PROXY_OVERRIDE_13 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_14}" ]; then   if [ -z "${DOCKER_HTTP_PROXY+x}" ] || [ "${DOCKER_HTTP_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_14}" ]; then export DOCKER_HTTP_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_14}"; else export DOCKER_HTTP_PROXY; fi else builtin unset DOCKER_HTTP_PROXY 2>/dev/null || command unset DOCKER_HTTP_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_14 __CODEX_SNAPSHOT_PROXY_OVERRIDE_14 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_14 __CODEX_SNAPSHOT_PROXY_OVERRIDE_14 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_15}" ]; then   if [ -z "${ELECTRON_GET_USE_PROXY+x}" ] || [ "${ELECTRON_GET_USE_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_15}" ]; then export ELECTRON_GET_USE_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_15}"; else export ELECTRON_GET_USE_PROXY; fi else builtin unset ELECTRON_GET_USE_PROXY 2>/dev/null || command unset ELECTRON_GET_USE_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_15 __CODEX_SNAPSHOT_PROXY_OVERRIDE_15 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_15 __CODEX_SNAPSHOT_PROXY_OVERRIDE_15 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_16}" ]; then   if [ -z "${FTP_PROXY+x}" ] || [ "${FTP_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_16}" ]; then export FTP_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_16}"; else export FTP_PROXY; fi else builtin unset FTP_PROXY 2>/dev/null || command unset FTP_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_16 __CODEX_SNAPSHOT_PROXY_OVERRIDE_16 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_16 __CODEX_SNAPSHOT_PROXY_OVERRIDE_16 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_17}" ]; then   if [ -z "${GIT_SSL_CAINFO+x}" ] || [ "${GIT_SSL_CAINFO-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_17}" ]; then export GIT_SSL_CAINFO="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_17}"; else export GIT_SSL_CAINFO; fi else builtin unset GIT_SSL_CAINFO 2>/dev/null || command unset GIT_SSL_CAINFO; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_17 __CODEX_SNAPSHOT_PROXY_OVERRIDE_17 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_17 __CODEX_SNAPSHOT_PROXY_OVERRIDE_17 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_18}" ]; then   if [ -z "${HTTPS_PROXY+x}" ] || [ "${HTTPS_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_18}" ]; then export HTTPS_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_18}"; else export HTTPS_PROXY; fi else builtin unset HTTPS_PROXY 2>/dev/null || command unset HTTPS_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_18 __CODEX_SNAPSHOT_PROXY_OVERRIDE_18 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_18 __CODEX_SNAPSHOT_PROXY_OVERRIDE_18 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_19}" ]; then   if [ -z "${HTTP_PROXY+x}" ] || [ "${HTTP_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_19}" ]; then export HTTP_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_19}"; else export HTTP_PROXY; fi else builtin unset HTTP_PROXY 2>/dev/null || command unset HTTP_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_19 __CODEX_SNAPSHOT_PROXY_OVERRIDE_19 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_19 __CODEX_SNAPSHOT_PROXY_OVERRIDE_19 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_20}" ]; then   if [ -z "${NODE_EXTRA_CA_CERTS+x}" ] || [ "${NODE_EXTRA_CA_CERTS-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_20}" ]; then export NODE_EXTRA_CA_CERTS="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_20}"; else export NODE_EXTRA_CA_CERTS; fi else builtin unset NODE_EXTRA_CA_CERTS 2>/dev/null || command unset NODE_EXTRA_CA_CERTS; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_20 __CODEX_SNAPSHOT_PROXY_OVERRIDE_20 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_20 __CODEX_SNAPSHOT_PROXY_OVERRIDE_20 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_21}" ]; then   if [ -z "${NODE_USE_ENV_PROXY+x}" ] || [ "${NODE_USE_ENV_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_21}" ]; then export NODE_USE_ENV_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_21}"; else export NODE_USE_ENV_PROXY; fi else builtin unset NODE_USE_ENV_PROXY 2>/dev/null || command unset NODE_USE_ENV_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_21 __CODEX_SNAPSHOT_PROXY_OVERRIDE_21 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_21 __CODEX_SNAPSHOT_PROXY_OVERRIDE_21 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_22}" ]; then   if [ -z "${NO_PROXY+x}" ] || [ "${NO_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_22}" ]; then export NO_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_22}"; else export NO_PROXY; fi else builtin unset NO_PROXY 2>/dev/null || command unset NO_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_22 __CODEX_SNAPSHOT_PROXY_OVERRIDE_22 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_22 __CODEX_SNAPSHOT_PROXY_OVERRIDE_22 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_23}" ]; then   if [ -z "${NPM_CONFIG_CAFILE+x}" ] || [ "${NPM_CONFIG_CAFILE-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_23}" ]; then export NPM_CONFIG_CAFILE="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_23}"; else export NPM_CONFIG_CAFILE; fi else builtin unset NPM_CONFIG_CAFILE 2>/dev/null || command unset NPM_CONFIG_CAFILE; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_23 __CODEX_SNAPSHOT_PROXY_OVERRIDE_23 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_23 __CODEX_SNAPSHOT_PROXY_OVERRIDE_23 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_24}" ]; then   if [ -z "${NPM_CONFIG_HTTPS_PROXY+x}" ] || [ "${NPM_CONFIG_HTTPS_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_24}" ]; then export NPM_CONFIG_HTTPS_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_24}"; else export NPM_CONFIG_HTTPS_PROXY; fi else builtin unset NPM_CONFIG_HTTPS_PROXY 2>/dev/null || command unset NPM_CONFIG_HTTPS_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_24 __CODEX_SNAPSHOT_PROXY_OVERRIDE_24 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_24 __CODEX_SNAPSHOT_PROXY_OVERRIDE_24 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_25}" ]; then   if [ -z "${NPM_CONFIG_HTTP_PROXY+x}" ] || [ "${NPM_CONFIG_HTTP_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_25}" ]; then export NPM_CONFIG_HTTP_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_25}"; else export NPM_CONFIG_HTTP_PROXY; fi else builtin unset NPM_CONFIG_HTTP_PROXY 2>/dev/null || command unset NPM_CONFIG_HTTP_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_25 __CODEX_SNAPSHOT_PROXY_OVERRIDE_25 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_25 __CODEX_SNAPSHOT_PROXY_OVERRIDE_25 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_26}" ]; then   if [ -z "${NPM_CONFIG_NOPROXY+x}" ] || [ "${NPM_CONFIG_NOPROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_26}" ]; then export NPM_CONFIG_NOPROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_26}"; else export NPM_CONFIG_NOPROXY; fi else builtin unset NPM_CONFIG_NOPROXY 2>/dev/null || command unset NPM_CONFIG_NOPROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_26 __CODEX_SNAPSHOT_PROXY_OVERRIDE_26 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_26 __CODEX_SNAPSHOT_PROXY_OVERRIDE_26 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_27}" ]; then   if [ -z "${NPM_CONFIG_PROXY+x}" ] || [ "${NPM_CONFIG_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_27}" ]; then export NPM_CONFIG_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_27}"; else export NPM_CONFIG_PROXY; fi else builtin unset NPM_CONFIG_PROXY 2>/dev/null || command unset NPM_CONFIG_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_27 __CODEX_SNAPSHOT_PROXY_OVERRIDE_27 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_27 __CODEX_SNAPSHOT_PROXY_OVERRIDE_27 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_28}" ]; then   if [ -z "${PIP_CERT+x}" ] || [ "${PIP_CERT-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_28}" ]; then export PIP_CERT="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_28}"; else export PIP_CERT; fi else builtin unset PIP_CERT 2>/dev/null || command unset PIP_CERT; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_28 __CODEX_SNAPSHOT_PROXY_OVERRIDE_28 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_28 __CODEX_SNAPSHOT_PROXY_OVERRIDE_28 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_29}" ]; then   if [ -z "${PIP_PROXY+x}" ] || [ "${PIP_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_29}" ]; then export PIP_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_29}"; else export PIP_PROXY; fi else builtin unset PIP_PROXY 2>/dev/null || command unset PIP_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_29 __CODEX_SNAPSHOT_PROXY_OVERRIDE_29 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_29 __CODEX_SNAPSHOT_PROXY_OVERRIDE_29 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_30}" ]; then   if [ -z "${REQUESTS_CA_BUNDLE+x}" ] || [ "${REQUESTS_CA_BUNDLE-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_30}" ]; then export REQUESTS_CA_BUNDLE="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_30}"; else export REQUESTS_CA_BUNDLE; fi else builtin unset REQUESTS_CA_BUNDLE 2>/dev/null || command unset REQUESTS_CA_BUNDLE; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_30 __CODEX_SNAPSHOT_PROXY_OVERRIDE_30 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_30 __CODEX_SNAPSHOT_PROXY_OVERRIDE_30 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_31}" ]; then   if [ -z "${SSL_CERT_FILE+x}" ] || [ "${SSL_CERT_FILE-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_31}" ]; then export SSL_CERT_FILE="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_31}"; else export SSL_CERT_FILE; fi else builtin unset SSL_CERT_FILE 2>/dev/null || command unset SSL_CERT_FILE; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_31 __CODEX_SNAPSHOT_PROXY_OVERRIDE_31 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_31 __CODEX_SNAPSHOT_PROXY_OVERRIDE_31 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_32}" ]; then   if [ -z "${WSS_PROXY+x}" ] || [ "${WSS_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_32}" ]; then export WSS_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_32}"; else export WSS_PROXY; fi else builtin unset WSS_PROXY 2>/dev/null || command unset WSS_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_32 __CODEX_SNAPSHOT_PROXY_OVERRIDE_32 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_32 __CODEX_SNAPSHOT_PROXY_OVERRIDE_32 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_33}" ]; then   if [ -z "${WS_PROXY+x}" ] || [ "${WS_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_33}" ]; then export WS_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_33}"; else export WS_PROXY; fi else builtin unset WS_PROXY 2>/dev/null || command unset WS_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_33 __CODEX_SNAPSHOT_PROXY_OVERRIDE_33 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_33 __CODEX_SNAPSHOT_PROXY_OVERRIDE_33 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_34}" ]; then   if [ -z "${YARN_HTTPS_PROXY+x}" ] || [ "${YARN_HTTPS_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_34}" ]; then export YARN_HTTPS_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_34}"; else export YARN_HTTPS_PROXY; fi else builtin unset YARN_HTTPS_PROXY 2>/dev/null || command unset YARN_HTTPS_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_34 __CODEX_SNAPSHOT_PROXY_OVERRIDE_34 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_34 __CODEX_SNAPSHOT_PROXY_OVERRIDE_34 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_35}" ]; then   if [ -z "${YARN_HTTP_PROXY+x}" ] || [ "${YARN_HTTP_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_35}" ]; then export YARN_HTTP_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_35}"; else export YARN_HTTP_PROXY; fi else builtin unset YARN_HTTP_PROXY 2>/dev/null || command unset YARN_HTTP_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_35 __CODEX_SNAPSHOT_PROXY_OVERRIDE_35 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_35 __CODEX_SNAPSHOT_PROXY_OVERRIDE_35 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_36}" ]; then   if [ -z "${YARN_NO_PROXY+x}" ] || [ "${YARN_NO_PROXY-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_36}" ]; then export YARN_NO_PROXY="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_36}"; else export YARN_NO_PROXY; fi else builtin unset YARN_NO_PROXY 2>/dev/null || command unset YARN_NO_PROXY; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_36 __CODEX_SNAPSHOT_PROXY_OVERRIDE_36 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_36 __CODEX_SNAPSHOT_PROXY_OVERRIDE_36 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_37}" ]; then   if [ -z "${all_proxy+x}" ] || [ "${all_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_37}" ]; then export all_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_37}"; else export all_proxy; fi else builtin unset all_proxy 2>/dev/null || command unset all_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_37 __CODEX_SNAPSHOT_PROXY_OVERRIDE_37 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_37 __CODEX_SNAPSHOT_PROXY_OVERRIDE_37 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_38}" ]; then   if [ -z "${ftp_proxy+x}" ] || [ "${ftp_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_38}" ]; then export ftp_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_38}"; else export ftp_proxy; fi else builtin unset ftp_proxy 2>/dev/null || command unset ftp_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_38 __CODEX_SNAPSHOT_PROXY_OVERRIDE_38 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_38 __CODEX_SNAPSHOT_PROXY_OVERRIDE_38 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_39}" ]; then   if [ -z "${http_proxy+x}" ] || [ "${http_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_39}" ]; then export http_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_39}"; else export http_proxy; fi else builtin unset http_proxy 2>/dev/null || command unset http_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_39 __CODEX_SNAPSHOT_PROXY_OVERRIDE_39 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_39 __CODEX_SNAPSHOT_PROXY_OVERRIDE_39 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_40}" ]; then   if [ -z "${https_proxy+x}" ] || [ "${https_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_40}" ]; then export https_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_40}"; else export https_proxy; fi else builtin unset https_proxy 2>/dev/null || command unset https_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_40 __CODEX_SNAPSHOT_PROXY_OVERRIDE_40 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_40 __CODEX_SNAPSHOT_PROXY_OVERRIDE_40 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_41}" ]; then   if [ -z "${no_proxy+x}" ] || [ "${no_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_41}" ]; then export no_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_41}"; else export no_proxy; fi else builtin unset no_proxy 2>/dev/null || command unset no_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_41 __CODEX_SNAPSHOT_PROXY_OVERRIDE_41 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_41 __CODEX_SNAPSHOT_PROXY_OVERRIDE_41 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_42}" ]; then   if [ -z "${npm_config_cafile+x}" ] || [ "${npm_config_cafile-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_42}" ]; then export npm_config_cafile="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_42}"; else export npm_config_cafile; fi else builtin unset npm_config_cafile 2>/dev/null || command unset npm_config_cafile; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_42 __CODEX_SNAPSHOT_PROXY_OVERRIDE_42 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_42 __CODEX_SNAPSHOT_PROXY_OVERRIDE_42 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_43}" ]; then   if [ -z "${npm_config_http_proxy+x}" ] || [ "${npm_config_http_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_43}" ]; then export npm_config_http_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_43}"; else export npm_config_http_proxy; fi else builtin unset npm_config_http_proxy 2>/dev/null || command unset npm_config_http_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_43 __CODEX_SNAPSHOT_PROXY_OVERRIDE_43 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_43 __CODEX_SNAPSHOT_PROXY_OVERRIDE_43 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_44}" ]; then   if [ -z "${npm_config_https_proxy+x}" ] || [ "${npm_config_https_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_44}" ]; then export npm_config_https_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_44}"; else export npm_config_https_proxy; fi else builtin unset npm_config_https_proxy 2>/dev/null || command unset npm_config_https_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_44 __CODEX_SNAPSHOT_PROXY_OVERRIDE_44 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_44 __CODEX_SNAPSHOT_PROXY_OVERRIDE_44 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_45}" ]; then   if [ -z "${npm_config_noproxy+x}" ] || [ "${npm_config_noproxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_45}" ]; then export npm_config_noproxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_45}"; else export npm_config_noproxy; fi else builtin unset npm_config_noproxy 2>/dev/null || command unset npm_config_noproxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_45 __CODEX_SNAPSHOT_PROXY_OVERRIDE_45 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_45 __CODEX_SNAPSHOT_PROXY_OVERRIDE_45 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_46}" ]; then   if [ -z "${npm_config_proxy+x}" ] || [ "${npm_config_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_46}" ]; then export npm_config_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_46}"; else export npm_config_proxy; fi else builtin unset npm_config_proxy 2>/dev/null || command unset npm_config_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_46 __CODEX_SNAPSHOT_PROXY_OVERRIDE_46 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_46 __CODEX_SNAPSHOT_PROXY_OVERRIDE_46 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_47}" ]; then   if [ -z "${ws_proxy+x}" ] || [ "${ws_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_47}" ]; then export ws_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_47}"; else export ws_proxy; fi else builtin unset ws_proxy 2>/dev/null || command unset ws_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_47 __CODEX_SNAPSHOT_PROXY_OVERRIDE_47 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_47 __CODEX_SNAPSHOT_PROXY_OVERRIDE_47 if [ -n "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_48}" ]; then   if [ -z "${wss_proxy+x}" ] || [ "${wss_proxy-}" != "${__CODEX_SNAPSHOT_PROXY_OVERRIDE_48}" ]; then export wss_proxy="${__CODEX_SNAPSHOT_PROXY_OVERRIDE_48}"; else export wss_proxy; fi else builtin unset wss_proxy 2>/dev/null || command unset wss_proxy; fi builtin unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_48 __CODEX_SNAPSHOT_PROXY_OVERRIDE_48 2>/dev/null || command unset __CODEX_SNAPSHOT_PROXY_OVERRIDE_SET_48 __CODEX_SNAPSHOT_PROXY_OVERRIDE_48 fi if [ -n "${PATH:-}" ]; then export PATH='/home/box/.local/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/codex-path':"$PATH"; else export PATH='/home/box/.local/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/codex-path'; fi  exec '/bin/bash' -c 'tail -6 qa/v6/ct_real/S04_render.log; ps -eo pid,args | rg '"'"'render.mjs|deliver.mjs'"'"''
+      2 /bin/bash -c tail -6 qa/v6/ct_real/S04_render.log; ps -eo pid,args | rg 'render.mjs|deliver.mjs'
+      5 rg render.mjs|deliver.mjs
+
+exec
+/bin/bash -lc 'tail -3 qa/v6/ct_real/S04_render.log' in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+rendering 697 frames × 1 sample(s) @ 1920x1080 30fps with 1 worker(s)…
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('film/chapters/s04.js');p.write_text(p.read_text().replace('[184,265],20','[168,240],20'))
+p=Path('film/lib_ext/ct_real_compare.js');s=p.read_text().replace('[153,350],23','[153,423],26').replace('[151,249],42','[137,252],29').replace('[163,239],20','[160,210],24').replace('[160,242],48','[165,214],48').replace('[185,246],57','[172,295],49').replace('[145,263],13','[128,233],10').replace('[118,253],35','[109,229],28');p.write_text(s)
+PY" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+exec
+/bin/bash -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+s=json.loads(Path('film/timing_snapshot.js').read_text().split('=',1)[1].strip().rstrip(';')) if False else None
+print(Path('film/timing_snapshot.js').read_text()[:100])
+a=json.load(open('/workspace/病理科普视频/配音/全稿_v3/timeline.json'))['lines'];print([(r['n'],r['text']) for r in a if r['n'] in list(range(14,20))+[35,36,47,48,58,59]])
+PY
+cat .gitignore; git log -3 --oneline; tail -2 qa/v6/ct_real/S04_render.log" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+// Generated by generate_timeline.mjs; regenerate after narration replacement.
+export const timing =
+[(14, 'CT是重要的辅助确诊工具，'), (15, '但并非人人都必须做CT。'), (16, '汇总8项研究的荟萃分析显示，'), (17, '增强螺旋CT敏感度95%、特异度94%。[1]'), (18, '这束影像之光，能帮助发现病变，'), (19, '却仍需结合临床，判断病情轻重。'), (35, 'CT可见管径增粗、壁增厚，'), (36, '周围脂肪轻度模糊，呼应早期的炎症。'), (47, 'CT常见壁增厚强化、周围渗出明显，'), (48, '与管壁内外的炎症相互映照。'), (58, 'CT若见壁强化缺损，要警惕坏死；'), (59, '若见腔外气体、脓肿，更要警惕穿孔。[3]')]
+node_modules/
+qa/v6/animatic/**/*.mp4
+qa/v6/animatic/**/frames/
+591a86a ct: adv01 brief (pending Codex slot)
+83f14cd ct: fix01 brief/log
+38a37a5 ct r3: S04 审核修订与逐句交付（Codex）
+  210/697 frames  14s
+  280/697 frames  17s
+
+codex
+已按原图坐标调整标注位置，圈和引线均在独立层绘制。S04 的研究卡与临床证据关系保留；S09/S12 使用各自病例的轴冠两张图；S15 分别标注强化中断处与邻近含气积液区，不添加测量值或分型结论。
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+import json,re
+from pathlib import Path
+s=Path('film/timing_snapshot.js').read_text();a=json.loads(s[s.index('['):].strip().rstrip(';'));b=json.load(open('/workspace/病理科普视频/配音/全稿_v3/timeline.json'))['lines'];assert all(next(x for x in a if x['n']==r['n'])['start']==r['start'] and next(x for x in a if x['n']==r['n'])['end']==r['end'] for r in b)
+Path('qa/v6/ct_real/日志.md').write_text('# ct real01 工作日志\\n\\n开工：2026-11-13。仅在 v5_ct_dev 工作；未读密钥，未执行 ct_adv01。\\n\\n锁定文件开工值：locked_start.sha256。批准六张图复制后 SHA256 与源文件逐一相同；仅 Canvas drawImage 裁黑边、等比缩放，未写回图像。\\n\\nfilm/timing_snapshot.js 的全部句号起止与全稿_v3/timeline.json 一致。入口仅将 prepare 改为 await，等待原图 decode。渲染与真实配音截取均从句号时间推导，单 worker、串行渲染。\\n')
+PY
+sleep 15
+tail -3 qa/v6/ct_real/S04_render.log" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 64407ms:
+ succeeded in 14905ms:
+[libx264 @ 0x565124877180] kb/s:241.77
+[aac @ 0x5651250c8600] Qavg: 52179.230
+{'S04.mp4': {'duration': 23.233333, 'streams': [{'codec_type': 'video', 'codec_name': 'h264', 'width': 1920, 'height': 1080}]}, 'S04_带配音_720p.mp4': {'duration': 23.224, 'streams': [{'codec_type': 'video', 'codec_name': 'h264', 'width': 1280, 'height': 720}, {'codec_type': 'audio', 'codec_name': 'aac', 'width': None, 'height': None}]}}
+
+exec
+/bin/bash -lc "tail -3 qa/v6/ct_real/S04_render.log; du -sh qa/v6/ct_real; sed -n '168,185p' 分镜/分镜_v1.md; cat qa/v6/ct_real/credits.md" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+[libx264 @ 0x565124877180] kb/s:241.77
+[aac @ 0x5651250c8600] Qavg: 52179.230
+{'S04.mp4': {'duration': 23.233333, 'streams': [{'codec_type': 'video', 'codec_name': 'h264', 'width': 1920, 'height': 1080}]}, 'S04_带配音_720p.mp4': {'duration': 23.224, 'streams': [{'codec_type': 'video', 'codec_name': 'h264', 'width': 1280, 'height': 720}, {'codec_type': 'audio', 'codec_name': 'aac', 'width': None, 'height': None}]}}
+15M	qa/v6/ct_real
+| 排序／资产 | 工作量与主要风险 | 覆盖场景 | 不依赖新时间轴可先做的部分 | 待新时间轴完成的部分 |
+|---|---|---|---|---|
+| A／新急性 HE 组织状态库 | 最高：正常组织基底、单纯性层次分布、全层化脓、坏疽出血及局灶穿孔须互相一致；旧细胞板不能直接代表三型。 | S08、S10、S14 及 CT 配对 | **可先做**四类静态样板与局部细胞放大，确定分布、细胞大小和坏死边缘形态。 | 场景内推拉、对焦、状态揭示和出口状态。 |
+| B／三型相关 CT 自绘示意库 | 高：腹部断面、同一阑尾定位、壁强化及周围组织灰阶关系要清晰；容易被误解成真实临床影像或精准分型。 | S04、S09、S12、S15、S16 | **可先做**三类表现预设、CT表现示意标记、对应病理锚点及清晰大窗。不要加 HU、尺寸、测量刻度。 | 逐句高亮、与病理双窗同步、并发症复现顺序。 |
+| C／慢性 HE 与慢性炎细胞库 | 高：新增纤维化组织、淋巴细胞与浆细胞形态，避免把正常滤泡或急性脓细胞误作慢性浸润。 | S18—S19 | **可先做**慢性全景、纤维束及两类细胞样板，母图到特写定位。 | 69—70 的揭示顺序与切换。 |
+| D／新大体阑尾及局部特写库 | 高：正常、轻肿充血、灰黄混合脓苔、局部暗红黑斑、可选穿孔需统一形体与水彩质感。 | S01、S05—S06、S11、S13—S14、S21 | **可先做**新轮廓、断面及高分辨率烘焙；红黄黑并列样帧。 | 定位放大、形态切换及镜头交接。 |
+| E／血管反应与缺血机制库 | 中高：液体/蛋白质/白细胞路径、腔压、受压/血栓与损伤关联需逐项讲清。 | S06—S07、S13 | **可先做**局部几何、成分符号、独立动作的标准化进度演示。 | 对应每句的动作起止与镜头保持。 |
+| F／纤维脓性渗出物库 | 中高：脓细胞退变、组织碎屑、液体、粗细纤维素网及浆膜覆盖为一套混合资产。 | S10—S11 | **可先做**成分样板、混合物与浆膜大特写。 | 成网→混合→黄色来源高亮节奏。 |
+| G／临床人物、症状对照、送检及手术图形 | 中：新增医生与患者互动；症状非典型不能靠编造新临床事实填充。 | S02—S04、S16—S17、S20—S21 | **可先做**人物姿态、典型/非典型无数值版、无数值化验单、送检和简洁切除图。 | 连读镜头衔接、疼痛迁移与就医动作时间。 |
+| H／两栏布局、双窗、左栏与双语字幕组件 | 中：全片共用，需尽早完成；主要风险是长病名和英文挤压图像及安全区。 | 全片 | **可先做**所有卡型、长文本压力样帧、字幕字体与区域模板。 | 正式字幕时码、英文续卡切换及连续原话跨句显示。 |
+| I／路径分支、手术时机、研究与来源卡 | 中低：图形简单但措辞和证据边界要求严格。 | S04—S05、S17—S18、S20 | **可先做**按定稿静态卡、数字来源映射、条件说明与非固定路径布局。 | 多卡依次显现及停留长度。 |
+| J／片名、三色罗盘、片尾入口 | 较低：维持颜色主线并落在及时就医，不引入时钟暗示。 | S01、S21 | **可先做**片名分行、无刻度罗盘和就医末态样帧；参考书目须先核对定稿链接原文件。 | 入片/收束节奏及片尾持续时间。 |
+
+优先实施顺序可先 H 的布局样板，再并行制作 A—G 的静态资产，最后接正式时间轴。上表按工作量排序，实施顺序按共用依赖调整；不要求先生成整条音轨才能开展资产工作。
+
+## 后续制作验收点
+
+- 句号映射严格覆盖 01—77；场景边界来自本表，不借旧 TSV 的句序或秒数。对 20—22、67—68、73—74 检查连续朗读与原文完整性。
+# 实际使用病例片尾署名
+
+图像来源：Radiopaedia.org，病例 rID 197373，作者 Michael P. Hartung，CC BY-NC-SA 3.0  
+
+Image: Case courtesy of Michael P. Hartung, Radiopaedia.org, rID: 197373 (CC BY-NC-SA 3.0)
+
+图像来源：Radiopaedia.org，病例 rID 30389，作者 Jack Ren，CC BY-NC-SA 3.0  
+
+Image: Case courtesy of Jack Ren, Radiopaedia.org, rID: 30389 (CC BY-NC-SA 3.0)
+
+图像来源：Radiopaedia.org，病例 rID 197370，作者 Michael P. Hartung，CC BY-NC-SA 3.0  
+
+Image: Case courtesy of Michael P. Hartung, Radiopaedia.org, rID: 197370 (CC BY-NC-SA 3.0)
+
+图像来源：Radiopaedia.org，病例 rID 242634，作者 Diana Reyadh Kadhem，CC BY-NC-SA 3.0  
+
+Image: Case courtesy of Diana Reyadh Kadhem, Radiopaedia.org, rID: 242634 (CC BY-NC-SA 3.0)
+
+https://creativecommons.org/licenses/by-nc-sa/3.0/
+
+exec
+/bin/bash -lc 'node qa/v6/ct_real/deliver.mjs S04 > qa/v6/ct_real/S04_render.log 2>&1' in /workspace/病理科普视频/v5_ct_dev
+codex
+原 worktree 的 Git 元数据只读，`git add` 无法创建 `index.lock`。我会按 brief 的备用方式，在临时 Git 仓库中逐场记录提交，最终交付 `qa/v6/ct_real/ct-dev.bundle`，并在日志注明。
+
+exec
+/bin/bash -lc "git clone --bare --shared . /tmp/ct-real01.git > qa/v6/ct_real/git_setup.log 2>&1
+git --git-dir=/tmp/ct-real01.git --work-tree=/workspace/病理科普视频/v5_ct_dev read-tree HEAD
+python3 - <<'PY'
+from pathlib import Path
+p=Path('qa/v6/ct_real/日志.md');p.write_text(p.read_text()+'\\nGit 原元数据只读：git add 无法创建 /workspace/病理科普视频/v5/.git/worktrees/v5_ct_dev/index.lock。使用 /tmp/ct-real01.git（bare shared clone）和本 worktree 配对记录逐场提交，最终生成自包含 ct-dev.bundle；不修改原分支元数据。\\n')
+PY" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('film/lib_ext/ct_real_compare.js');s=p.read_text();s=s.replace(\"const g=realCT(c,im,index,{x:610,y:92,w:1260,h:770},stage===1?'30389':stage===2?'197370':'242634');\", \"const box={x:610,y:92,w:1260,h:770},rid=stage===1?'30389':stage===2?'197370':'242634';\\n if(stage"'!==3&&t>=T.at(last)&&next<1){c.globalAlpha=intro*(1-next);realCT(c,images[0],stage===1?1:3,box,rid);}'"\\n c.globalAlpha=intro*(stage"'!==3&&t>=T.at(last)?next:1);'"\\n const g=realCT(c,im,index,box,rid);c.globalAlpha=intro;\")
+p.write_text(s)
+PY
+tail -3 qa/v6/ct_real/S04_render.log" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+rendering 697 frames × 1 sample(s) @ 1920x1080 30fps with 1 worker(s)…
+
+exec
+/bin/bash -lc "cat > qa/v6/ct_real/selfcheck.py <<'PY'
+import hashlib,json,sys
+from pathlib import Path
+scene=sys.argv[1];p=Path('qa/v6/ct_real')/scene
+names={'S04':['s130'],'S09':['coronal_s024','axial_s058'],'S12':['axial_s128','coronal_s065'],'S15':['s285']}[scene]
+checks=[]
+for key in names:
+ f=next(Path('film/assets/ct_real').glob('*'+key+'*'));source=next(Path('/workspace/病理科普视频/ct_real',scene).glob(f.name));h=hashlib.sha256(f.read_bytes()).hexdigest();assert h==hashlib.sha256(source.read_bytes()).hexdigest();checks.append(f'- "'`{f.name}`：`{h}`（与批准原图一致）。'"')
+body={'S04':'14 医生评估，15 才显示超声/CT选择；16 按序揭示2023、8项研究、1602人，17 揭示敏感度95%、特异度94%、[1]；18 在 s130 病变处加独立圈和引线「发现病变」；19 复用同图连接临床—影像—病理证据。保留统一医生和病理概念玻片。', 'S09':'35 冠状 s024 圈选右下腹增粗阑尾及管壁；36 切轴位 s058，将圈选扩到盲肠旁阑尾周围脂肪。左栏原词：管径增粗、壁增厚、周围脂肪轻度模糊。两幅均为 rID30389，未将 CT 盖章为病理分型。', 'S12':'47 轴位 s128 先圈壁增厚强化，再按句内进度转周围渗出；48 冠状 s065 圈选阑尾旁脂肪条索区保持连读。批准两图均实际出现，左栏保留壁增厚强化、周围渗出明显。', 'S15':'58 仅使用 s285，局部圈选阑尾壁与邻近积液交界的强化不连续处，引线「壁强化缺损」；59 使用完全同一张图，撤下上一引线，扩大到含气积液区，引线「腔外气体、脓肿」。每时刻仅一条引线；左栏59才揭示警惕穿孔 [3]。'}[scene]
+text=f'''# {scene} 自检
+
+{body}
+
+## 像素与来源
+
+'''+ '\\n'.join(checks)+'''
+
+- 原始图像未滤波、未重绘、未伪彩、未写回；Canvas 仅裁除边缘空白/床缘并等比缩放。高亮圈与引线为独立矢量叠加层，源坐标记录在 ct_real_images.js / ct_real_compare.js。
+- 每个实际出现的 CT 窗上角均显示「典型病例」，下角显示对应 Radiopaedia.org rID 与 CC BY-NC-SA 3.0。S04 句19小窗同样保留。
+- 中英片尾署名按来源与授权.md逐条原样抄录到 ../credits.md，只包含实际用到的四个病例。
+- 不上屏测量值、病例年龄、姓名、学校；未使用 Commons 或未批准病例。
+
+## 版式与时间
+
+- 沿用纸色、左侧文字、细引线及浅紫色无框标签；所有新增内容 y<950。原有字幕区域未改动。
+- '''+('S04保留病理概念玻片，不把它画成灰阶CT。' if scene=='S04' else '撤去原水彩组织窗，按批准brief优先使用真实CT单窗大特写；不再出现灰阶组织窗或模拟CT。')+'''
+- 时间按全稿_v3句号取 at/frac；已核对 timing_snapshot 全部起止与 timeline.json 相同。比较场句间图像淡入淡出0.7s，配音取对应真实旁白时间段。
+- 每句关键帧及200%局部、review_sheet、1080p无声片和720p真实配音片齐备。media_check.json记录时长及音视频流；determinism结果见对应render.log。
+
+## 医学边界与局限
+
+- 典型病例用于呈现所见，四场为四位不同患者，不表现连续复查，不依据CT直接判定病理三型。
+- 标注由批准切片上的可见结构定位，未新增诊断。单张切片不能替代完整序列阅片；S15微小壁强化中断的精确边缘仍建议影像科终审，本版不据此补画缺口或新增坏死范围。
+- 单窗方案不提供同步HE组织层次配对，优先真实CT可读性；组织对应关系由原解说及前后病理场景承担。
+'''
+(p/'自检.md').write_text(text)
+assert len(list(p.glob('s*_200.png'))) == len(json.load(open(p/'keyframes.json'))['picks'])
+print('asset identity and delivery checks passed',scene)
+PY" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+ succeeded in 56236ms:
+exec
+/bin/bash -lc 'tail -3 qa/v6/ct_real/S04_render.log; du -sh qa/v6/ct_real/S04' in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+[libx264 @ 0x55c28b644180] kb/s:241.82
+[aac @ 0x55c28be95600] Qavg: 52179.230
+{'S04.mp4': {'duration': 23.233333, 'streams': [{'codec_type': 'video', 'codec_name': 'h264', 'width': 1920, 'height': 1080}]}, 'S04_带配音_720p.mp4': {'duration': 23.224, 'streams': [{'codec_type': 'video', 'codec_name': 'h264', 'width': 1280, 'height': 720}, {'codec_type': 'audio', 'codec_name': 'aac', 'width': None, 'height': None}]}}
+15M	qa/v6/ct_real/S04
+
+exec
+/bin/bash -lc "python3 qa/v6/ct_real/selfcheck.py S04
+git --git-dir=/tmp/ct-real01.git --work-tree=/workspace/病理科普视频/v5_ct_dev add film/main.js film/chapters/s04.js film/lib_ext/ct_real_images.js film/assets/ct_real qa/v6/ct_real/locked_start.sha256 qa/v6/ct_real/credits.md qa/v6/ct_real/deliver.mjs qa/v6/ct_real/review.py qa/v6/ct_real/check.py qa/v6/ct_real/selfcheck.py qa/v6/ct_real/日志.md qa/v6/ct_real/git_setup.log qa/v6/ct_real/S04 qa/v6/ct_real/S04_render.log
+git --git-dir=/tmp/ct-real01.git --work-tree=/workspace/病理科普视频/v5_ct_dev -c user.name=mini -c user.email=mini@local commit -m 'ct real01: S04 真实病例CT替换与逐句交付'
+node qa/v6/ct_real/deliver.mjs S09 > qa/v6/ct_real/S09_render.log 2>&1" in /workspace/病理科普视频/v5_ct_dev
+exec
+/bin/bash -lc "git --git-dir=/tmp/ct-real01.git log -2 --oneline; tail -4 qa/v6/ct_real/S09_render.log; python3 - <<'PY'
+from pathlib import Path
+p=Path('qa/v6/ct_real/selfcheck.py');p.write_text(p.read_text().replace(\"len(list(p.glob('s*_200.png')))\",\"len([f for f in p.glob('s*_200.png') if 'sidebar' not in f.name])\"))
+PY
+python3 qa/v6/ct_real/selfcheck.py S04" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+591a86a ct: adv01 brief (pending Codex slot)
+83f14cd ct: fix01 brief/log
+tail: cannot open 'qa/v6/ct_real/S09_render.log' for reading: No such file or directory
+asset identity and delivery checks passed S04
+
+codex
+S04 已完成关键帧审阅、确定性检查和音视频校验，并已记录提交。句18圈选病变阑尾，句19小窗也保留了「典型病例」及署名。现在正以单进程渲染 S09。
+
+exec
+/bin/bash -lc 'git --git-dir=/tmp/ct-real01.git --work-tree=/workspace/病理科普视频/v5_ct_dev add qa/v6/ct_real/selfcheck.py
+git --git-dir=/tmp/ct-real01.git --work-tree=/workspace/病理科普视频/v5_ct_dev -c user.name=mini -c user.email=mini@local commit --amend --no-edit > qa/v6/ct_real/S04_commit.log
+tail -4 qa/v6/ct_real/S09_render.log' in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+rendering 218 frames × 1 sample(s) @ 1920x1080 30fps with 1 worker(s)…
+  22/218 frames  2s
+  44/218 frames  2s
+  66/218 frames  4s
+
+exec
+/bin/bash -lc 'cat qa/v6/ct_real/S09/keyframes.json; cat qa/v6/ct_real/S04_commit.log | head -2; sha256sum -c qa/v6/ct_real/locked_start.sha256' in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+{
+  "origin": 142.26645833333333,
+  "duration": 7.276333333333298,
+  "picks": [
+    {
+      "name": "s35_30",
+      "t": 0.824524999999997
+    },
+    {
+      "name": "s35_82",
+      "t": 2.2537016666666583
+    },
+    {
+      "name": "s36_30",
+      "t": 4.421791666666641
+    },
+    {
+      "name": "s36_82",
+      "t": 6.542308333333301
+    }
+  ]
+}[ct-dev 264ceef] ct real01: S04 真实病例CT替换与逐句交付
+ Date: Fri Nov 13 12:20:40 2026 +0800
+engine/lib/he.js: OK
+engine/lib/he_detail.js: OK
+engine/lib/wash.js: OK
+engine/lib/ann.js: OK
+engine/lib/scope.js: OK
+engine/lib/camera.js: OK
+parity_r4/chapters/04.js: OK
+
+ succeeded in 29945ms:
+Traceback (most recent call last):
+  File "/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real/selfcheck.py", line 36, in <module>
+    assert len(list(p.glob('s*_200.png'))) == len(json.load(open(p/'keyframes.json'))['picks'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+[ct-dev adf31ab] ct real01: S04 真实病例CT替换与逐句交付
+ 60 files changed, 354 insertions(+), 9 deletions(-)
+ create mode 100644 film/assets/ct_real/S04_primary_rID197373_axial_s130_appendix-thick-wall_img67748644.jpeg
+ create mode 100644 film/assets/ct_real/S09_primary_rID30389_axial_s058_appendix-near-cecum_img7922410.jpg
+ create mode 100644 film/assets/ct_real/S09_primary_rID30389_coronal_s024_key-coronal-mild-stranding_img7922572.jpg
+ create mode 100644 film/assets/ct_real/S12_primary_rID197370_axial_s128_dilated-appendix-extensive-stranding_img67747991.jpeg
+ create mode 100644 film/assets/ct_real/S12_primary_rID197370_coronal_s065_coronal-extensive-fat-stranding_img67748143.jpeg
+ create mode 100644 film/assets/ct_real/S15_primary_rID242634_axial_s285_wall-enhancement-defect-and-gas-abscess_img75885695.jpg
+ create mode 100644 film/lib_ext/ct_real_images.js
+ create mode 100644 qa/v6/ct_real/S04/S04.mp4
+ create mode 100644 qa/v6/ct_real/S04/S04_带配音_720p.mp4
+ create mode 100644 qa/v6/ct_real/S04/keyframes.json
+ create mode 100644 qa/v6/ct_real/S04/media_check.json
+ create mode 100644 qa/v6/ct_real/S04/review_sheet.png
+ create mode 100644 qa/v6/ct_real/S04/s14_12.png
+ create mode 100644 qa/v6/ct_real/S04/s14_12_200.png
+ create mode 100644 qa/v6/ct_real/S04/s14_12_sidebar_200.png
+ create mode 100644 qa/v6/ct_real/S04/s14_80.png
+ create mode 100644 qa/v6/ct_real/S04/s14_80_200.png
+ create mode 100644 qa/v6/ct_real/S04/s14_80_sidebar_200.png
+ create mode 100644 qa/v6/ct_real/S04/s15_72.png
+ create mode 100644 qa/v6/ct_real/S04/s15_72_200.png
+ create mode 100644 qa/v6/ct_real/S04/s15_72_sidebar_200.png
+ create mode 100644 qa/v6/ct_real/S04/s16_30.png
+ create mode 100644 qa/v6/ct_real/S04/s16_30_200.png
+ create mode 100644 qa/v6/ct_real/S04/s16_30_sidebar_200.png
+ create mode 100644 qa/v6/ct_real/S04/s16_82.png
+ create mode 100644 qa/v6/ct_real/S04/s16_82_200.png
+ create mode 100644 qa/v6/ct_real/S04/s16_82_sidebar_200.png
+ create mode 100644 qa/v6/ct_real/S04/s17_30.png
+ create mode 100644 qa/v6/ct_real/S04/s17_30_200.png
+ create mode 100644 qa/v6/ct_real/S04/s17_30_sidebar_200.png
+ create mode 100644 qa/v6/ct_real/S04/s17_82.png
+ create mode 100644 qa/v6/ct_real/S04/s17_82_200.png
+ create mode 100644 qa/v6/ct_real/S04/s17_82_sidebar_200.png
+ create mode 100644 qa/v6/ct_real/S04/s18_72.png
+ create mode 100644 qa/v6/ct_real/S04/s18_72_200.png
+ create mode 100644 qa/v6/ct_real/S04/s18_72_sidebar_200.png
+ create mode 100644 qa/v6/ct_real/S04/s19_72.png
+ create mode 100644 qa/v6/ct_real/S04/s19_72_200.png
+ create mode 100644 qa/v6/ct_real/S04/s19_72_sidebar_200.png
+ create mode 100644 qa/v6/ct_real/S04/stills/t_000.31.png
+ create mode 100644 qa/v6/ct_real/S04/stills/t_002.08.png
+ create mode 100644 qa/v6/ct_real/S04/stills/t_004.77.png
+ create mode 100644 qa/v6/ct_real/S04/stills/t_006.69.png
+ create mode 100644 qa/v6/ct_real/S04/stills/t_008.09.png
+ create mode 100644 qa/v6/ct_real/S04/stills/t_010.85.png
+ create mode 100644 qa/v6/ct_real/S04/stills/t_014.01.png
+ create mode 100644 qa/v6/ct_real/S04/stills/t_017.92.png
+ create mode 100644 qa/v6/ct_real/S04/stills/t_022.12.png
+ create mode 100644 qa/v6/ct_real/S04/自检.md
+ create mode 100644 qa/v6/ct_real/S04_render.log
+ create mode 100644 qa/v6/ct_real/check.py
+ create mode 100644 qa/v6/ct_real/credits.md
+ create mode 100644 qa/v6/ct_real/deliver.mjs
+ create mode 100644 qa/v6/ct_real/git_setup.log
+ create mode 100644 qa/v6/ct_real/locked_start.sha256
+ create mode 100644 qa/v6/ct_real/review.py
+ create mode 100644 qa/v6/ct_real/selfcheck.py
+ create mode 100644 qa/v6/ct_real/日志.md
+
+exec
+/bin/bash -lc 'tail -3 qa/v6/ct_real/S09_render.log' in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+[libx264 @ 0x55f656a62180] kb/s:419.64
+[aac @ 0x55f6572ac540] Qavg: 50847.547
+{'S09.mp4': {'duration': 7.266667, 'streams': [{'codec_type': 'video', 'codec_name': 'h264', 'width': 1920, 'height': 1080}]}, 'S09_带配音_720p.mp4': {'duration': 7.266667, 'streams': [{'codec_type': 'video', 'codec_name': 'h264', 'width': 1280, 'height': 720}, {'codec_type': 'audio', 'codec_name': 'aac', 'width': None, 'height': None}]}}
+
+exec
+/bin/bash -lc "set -e
+python3 qa/v6/ct_real/selfcheck.py S09
+git --git-dir=/tmp/ct-real01.git --work-tree=/workspace/病理科普视频/v5_ct_dev add film/chapters/s09.js film/lib_ext/ct_real_compare.js qa/v6/ct_real/S09 qa/v6/ct_real/S09_render.log
+git --git-dir=/tmp/ct-real01.git --work-tree=/workspace/病理科普视频/v5_ct_dev -c user.name=mini -c user.email=mini@local commit -m 'ct real01: S09 真实轴冠CT与轻度脂肪模糊高亮' > qa/v6/ct_real/S09_commit.log
+node qa/v6/ct_real/deliver.mjs S12 > qa/v6/ct_real/S12_render.log 2>&1" in /workspace/病理科普视频/v5_ct_dev
+codex
+S09 已完成自检和提交，冠状位与轴位都已出现，圈选从管壁转到周围脂肪。S12 正在串行渲染，将在句47依次突出壁和周围渗出，句48切到批准的冠状位，保持解说连读。
+
+exec
+/bin/bash -lc 'tail -4 qa/v6/ct_real/S12_render.log; git --git-dir=/tmp/ct-real01.git count-objects -v; du -sh qa/v6/ct/*bundle; cat qa/v6/ct_real/S09_commit.log | head -2' in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+[note] WebGL runs in software (ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL 4.5)): shader/3D renders will be slow.
+rendering 223 frames × 1 sample(s) @ 1920x1080 30fps with 1 worker(s)…
+  22/223 frames  2s
+warning: garbage found: /workspace/病理科普视频/v5/.git/objects/pack/tmp_pack_rh9WeT
+count: 86
+size: 16292
+in-pack: 0
+packs: 0
+size-pack: 0
+prune-packable: 0
+garbage: 1
+size-garbage: 931200
+alternate: /workspace/病理科普视频/v5/.git/objects
+49M	qa/v6/ct/ct-dev.bundle
+[ct-dev e21a7dd] ct real01: S09 真实轴冠CT与轻度脂肪模糊高亮
+ 21 files changed, 220 insertions(+), 1 deletion(-)
+
+exec
+/bin/bash -lc 'git diff --stat; git --git-dir=/tmp/ct-real01.git --work-tree=/workspace/病理科普视频/v5_ct_dev diff --stat; tail -3 qa/v6/ct_real/S12_render.log' in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+ film/chapters/s04.js | 14 ++++++--------
+ film/chapters/s09.js |  2 +-
+ film/chapters/s12.js |  2 +-
+ film/chapters/s15.js |  2 +-
+ film/main.js         |  2 +-
+ 5 files changed, 10 insertions(+), 12 deletions(-)
+ film/chapters/s12.js | 2 +-
+ film/chapters/s15.js | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+  88/223 frames  6s
+  110/223 frames  7s
+  132/223 frames  8s
+
+ succeeded in 22256ms:
+asset identity and delivery checks passed S09
+
+exec
+/bin/bash -lc 'tail -3 qa/v6/ct_real/S12_render.log' in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+[libx264 @ 0x561b57cfc180] kb/s:498.90
+[aac @ 0x561b585478c0] Qavg: 50834.453
+{'S12.mp4': {'duration': 7.433333, 'streams': [{'codec_type': 'video', 'codec_name': 'h264', 'width': 1920, 'height': 1080}]}, 'S12_带配音_720p.mp4': {'duration': 7.433333, 'streams': [{'codec_type': 'video', 'codec_name': 'h264', 'width': 1280, 'height': 720}, {'codec_type': 'audio', 'codec_name': 'aac', 'width': None, 'height': None}]}}
+
+exec
+/bin/bash -lc "set -e
+python3 qa/v6/ct_real/selfcheck.py S12
+git --git-dir=/tmp/ct-real01.git --work-tree=/workspace/病理科普视频/v5_ct_dev add film/chapters/s12.js qa/v6/ct_real/S12 qa/v6/ct_real/S12_render.log
+git --git-dir=/tmp/ct-real01.git --work-tree=/workspace/病理科普视频/v5_ct_dev -c user.name=mini -c user.email=mini@local commit -m 'ct real01: S12 真实轴冠CT与壁强化周围渗出时序' > qa/v6/ct_real/S12_commit.log
+node qa/v6/ct_real/deliver.mjs S15 > qa/v6/ct_real/S15_render.log 2>&1" in /workspace/病理科普视频/v5_ct_dev
+exec
+/bin/bash -lc 'tail -5 qa/v6/ct_real/S15_render.log; git --git-dir=/tmp/ct-real01.git log -3 --oneline; cat qa/v6/ct_real/S12/media_check.json' in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real/S15/stills/t_003.54.png
+/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real/S15/stills/t_006.11.png
+/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real/S15/stills/t_008.43.png
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+deterministic: 6 frames match across render orders (1.016, 3.416, 4.616, 6.74, 8.586, 9.199 s)
+d8e891b ct real01: S12 真实轴冠CT与壁强化周围渗出时序
+e21a7dd ct real01: S09 真实轴冠CT与轻度脂肪模糊高亮
+264ceef ct real01: S04 真实病例CT替换与逐句交付
+{
+  "S12.mp4": {
+    "duration": 7.433333,
+    "streams": [
+      {
+        "codec_type": "video",
+        "codec_name": "h264",
+        "width": 1920,
+        "height": 1080
+      }
+    ]
+  },
+  "S12_带配音_720p.mp4": {
+    "duration": 7.433333,
+    "streams": [
+      {
+        "codec_type": "video",
+        "codec_name": "h264",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "codec_type": "audio",
+        "codec_name": "aac",
+        "width": null,
+        "height": null
+      }
+    ]
+  }
+}
+codex
+S12 已完成自检和提交。S15 正在渲染；两句使用同一张 s285，句58只标局部强化中断，句59撤下该引线后再标含气积液区。自检中会注明：微小缺损的精确边缘建议影像科终审，画面不补画缺口。
+
+exec
+/bin/bash -lc 'tail -3 qa/v6/ct_real/S15_render.log' in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+  196/277 frames  11s
+  224/277 frames  12s
+  252/277 frames  13s
+
+ succeeded in 24986ms:
+asset identity and delivery checks passed S12
+
+exec
+/bin/bash -lc "sha256sum engine/lib/{he,he_detail,wash,ann,scope,camera}.js parity_r4/chapters/04.js > qa/v6/ct_real/locked_end.sha256
+sha256sum -c qa/v6/ct_real/locked_start.sha256 > qa/v6/ct_real/locked_verify.log
+cmp qa/v6/ct_real/locked_start.sha256 qa/v6/ct_real/locked_end.sha256
+python3 - <<'PY'
+from pathlib import Path
+p=Path('qa/v6/ct_real/日志.md');s=p.read_text().replace('自包含 ct-dev.bundle','增量 ct-dev.bundle');s+='''
+收工：四场均已逐句审阅关键帧与200%局部；每场 determinism 换序六帧一致，音视频流/分辨率/时长检查通过。S04修正病变锚点后完整重渲染，未沿用旧视频。原图六张字节未变，锁定七文件开工/收工SHA256一致，详见 locked_verify.log。
+
+S09/S12/S15取消水彩组织窗，改真实CT单窗；S04保留临床医生、检查选择与概念病理玻片。窗上角为「典型病例」，下角为rID与许可；S04句19小窗也包含两项提示。S15 58/59同图、每刻一条引线。微小强化中断精确边缘列为影像科终审事项，未猜绘任何解剖。
+
+提交采用 /tmp/ct-real01.git 的 ct-dev 分支，每场一条 ct real01: 提交。原 worktree 的HEAD不改变。交付增量包 qa/v6/ct_real/ct-dev.bundle，前置基线591a86a；bundle_verify.log和bundle.sha256随包提供。无push、无合并，未改其他worktree文件。
+''';p.write_text(s)
+PY" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+exec
+/bin/bash -lc "set -e
+python3 qa/v6/ct_real/selfcheck.py S15
+python3 qa/v6/ct_real/check.py S15 > qa/v6/ct_real/S15_final_check.log
+git --git-dir=/tmp/ct-real01.git --work-tree=/workspace/病理科普视频/v5_ct_dev add film/chapters/s15.js qa/v6/ct_real/S15 qa/v6/ct_real/S15_render.log qa/v6/ct_real/S15_final_check.log qa/v6/ct_real/locked_end.sha256 qa/v6/ct_real/locked_verify.log qa/v6/ct_real/日志.md qa/v6/ct_real/S04_commit.log qa/v6/ct_real/S09_commit.log qa/v6/ct_real/S12_commit.log
+git --git-dir=/tmp/ct-real01.git --work-tree=/workspace/病理科普视频/v5_ct_dev -c user.name=mini -c user.email=mini@local commit -m 'ct real01: S15 同张真实CT分句高亮与全线验收' > qa/v6/ct_real/S15_commit.log
+git --git-dir=/tmp/ct-real01.git bundle create qa/v6/ct_real/ct-dev.bundle 591a86a..ct-dev
+git --git-dir=/tmp/ct-real01.git bundle verify qa/v6/ct_real/ct-dev.bundle > qa/v6/ct_real/bundle_verify.log 2>&1
+sha256sum qa/v6/ct_real/ct-dev.bundle > qa/v6/ct_real/bundle.sha256
+git --git-dir=/tmp/ct-real01.git log -4 --oneline > qa/v6/ct_real/commits.log" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 1301ms:
+asset identity and delivery checks passed S15
+
+codex
+四场渲染、自检和逐场提交均已完成，锁定七文件的开工、收工 SHA256 一致。正在打包并验证增量 bundle；交付目录已包含关键帧、200%局部、总览、两种视频和中英片尾署名。
+
+exec
+/bin/bash -lc "cat qa/v6/ct_real/bundle_verify.log qa/v6/ct_real/commits.log; git --git-dir=/tmp/ct-real01.git --work-tree=/workspace/病理科普视频/v5_ct_dev diff --stat; du -h qa/v6/ct_real/ct-dev.bundle; rg 'deterministic:' qa/v6/ct_real/S*_render.log" in /workspace/病理科普视频/v5_ct_dev
+ succeeded in 0ms:
+qa/v6/ct_real/ct-dev.bundle is okay
+The bundle contains this ref:
+b6744ec57a998c65835f3e85d809e6772868cb55 refs/heads/ct-dev
+The bundle requires this ref:
+591a86a24b6c57485ee3e70c30fb0385da4cebd9 
+The bundle uses this hash algorithm: sha1
+b6744ec ct real01: S15 同张真实CT分句高亮与全线验收
+d8e891b ct real01: S12 真实轴冠CT与壁强化周围渗出时序
+e21a7dd ct real01: S09 真实轴冠CT与轻度脂肪模糊高亮
+264ceef ct real01: S04 真实病例CT替换与逐句交付
+27M	qa/v6/ct_real/ct-dev.bundle
+qa/v6/ct_real/S09_render.log:deterministic: 6 frames match across render orders (0.8, 2.692, 3.638, 5.312, 6.767, 7.243 s)
+qa/v6/ct_real/S04_render.log:deterministic: 6 frames match across render orders (2.555, 8.593, 11.612, 16.953, 21.598, 23.191 s)
+qa/v6/ct_real/S12_render.log:deterministic: 6 frames match across render orders (0.819, 2.754, 3.722, 5.434, 6.923, 7.411 s)
+qa/v6/ct_real/S15_render.log:deterministic: 6 frames match across render orders (1.016, 3.416, 4.616, 6.74, 8.586, 9.199 s)
+
+codex
+四场已完成，交付在 [ct_real](/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real)。
+
+- S04：rID197373 轴位 s130。
+- S09：rID30389 冠状 s024＋轴位 s058。
+- S12：rID197370 轴位 s128＋冠状 s065。
+- S15：rID242634 同张 s285，按58／59切换标注。
+
+S09/S12/S15撤去组织窗，采用真实CT大窗；S04保留病理概念玻片。各CT窗上角加「典型病例」、下角加来源许可，中英片尾署名见 [credits.md](/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real/credits.md)。
+
+关键帧、视频、确定性及锁定文件校验齐备。S15微小缺损边缘的终审事项已记入自检。
+
+Git元数据只读，四次提交已打入并验证 [ct-dev.bundle](/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real/ct-dev.bundle)，基线为 `591a86a`。未push、未合并。
+tokens used
+154,946
+四场已完成，交付在 [ct_real](/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real)。
+
+- S04：rID197373 轴位 s130。
+- S09：rID30389 冠状 s024＋轴位 s058。
+- S12：rID197370 轴位 s128＋冠状 s065。
+- S15：rID242634 同张 s285，按58／59切换标注。
+
+S09/S12/S15撤去组织窗，采用真实CT大窗；S04保留病理概念玻片。各CT窗上角加「典型病例」、下角加来源许可，中英片尾署名见 [credits.md](/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real/credits.md)。
+
+关键帧、视频、确定性及锁定文件校验齐备。S15微小缺损边缘的终审事项已记入自检。
+
+Git元数据只读，四次提交已打入并验证 [ct-dev.bundle](/workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real/ct-dev.bundle)，基线为 `591a86a`。未push、未合并。

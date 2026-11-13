@@ -1,0 +1,27 @@
+[ct-dev b6744ec] ct real01: S15 同张真实CT分句高亮与全线验收
+ 27 files changed, 303 insertions(+), 2 deletions(-)
+ create mode 100644 qa/v6/ct_real/S04_commit.log
+ create mode 100644 qa/v6/ct_real/S09_commit.log
+ create mode 100644 qa/v6/ct_real/S12_commit.log
+ create mode 100644 qa/v6/ct_real/S15/S15.mp4
+ create mode 100644 qa/v6/ct_real/S15/S15_带配音_720p.mp4
+ create mode 100644 qa/v6/ct_real/S15/keyframes.json
+ create mode 100644 qa/v6/ct_real/S15/media_check.json
+ create mode 100644 qa/v6/ct_real/S15/review_sheet.png
+ create mode 100644 qa/v6/ct_real/S15/s58_30.png
+ create mode 100644 qa/v6/ct_real/S15/s58_30_200.png
+ create mode 100644 qa/v6/ct_real/S15/s58_82.png
+ create mode 100644 qa/v6/ct_real/S15/s58_82_200.png
+ create mode 100644 qa/v6/ct_real/S15/s59_30.png
+ create mode 100644 qa/v6/ct_real/S15/s59_30_200.png
+ create mode 100644 qa/v6/ct_real/S15/s59_82.png
+ create mode 100644 qa/v6/ct_real/S15/s59_82_200.png
+ create mode 100644 qa/v6/ct_real/S15/stills/t_001.30.png
+ create mode 100644 qa/v6/ct_real/S15/stills/t_003.54.png
+ create mode 100644 qa/v6/ct_real/S15/stills/t_006.11.png
+ create mode 100644 qa/v6/ct_real/S15/stills/t_008.43.png
+ create mode 100644 qa/v6/ct_real/S15/自检.md
+ create mode 100644 qa/v6/ct_real/S15_final_check.log
+ create mode 100644 qa/v6/ct_real/S15_render.log
+ create mode 100644 qa/v6/ct_real/locked_end.sha256
+ create mode 100644 qa/v6/ct_real/locked_verify.log

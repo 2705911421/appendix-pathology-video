@@ -1,0 +1,22 @@
+[ct-dev e21a7dd] ct real01: S09 真实轴冠CT与轻度脂肪模糊高亮
+ 21 files changed, 220 insertions(+), 1 deletion(-)
+ create mode 100644 film/lib_ext/ct_real_compare.js
+ create mode 100644 qa/v6/ct_real/S09/S09.mp4
+ create mode 100644 qa/v6/ct_real/S09/S09_带配音_720p.mp4
+ create mode 100644 qa/v6/ct_real/S09/keyframes.json
+ create mode 100644 qa/v6/ct_real/S09/media_check.json
+ create mode 100644 qa/v6/ct_real/S09/review_sheet.png
+ create mode 100644 qa/v6/ct_real/S09/s35_30.png
+ create mode 100644 qa/v6/ct_real/S09/s35_30_200.png
+ create mode 100644 qa/v6/ct_real/S09/s35_82.png
+ create mode 100644 qa/v6/ct_real/S09/s35_82_200.png
+ create mode 100644 qa/v6/ct_real/S09/s36_30.png
+ create mode 100644 qa/v6/ct_real/S09/s36_30_200.png
+ create mode 100644 qa/v6/ct_real/S09/s36_82.png
+ create mode 100644 qa/v6/ct_real/S09/s36_82_200.png
+ create mode 100644 qa/v6/ct_real/S09/stills/t_000.82.png
+ create mode 100644 qa/v6/ct_real/S09/stills/t_002.25.png
+ create mode 100644 qa/v6/ct_real/S09/stills/t_004.42.png
+ create mode 100644 qa/v6/ct_real/S09/stills/t_006.54.png
+ create mode 100644 qa/v6/ct_real/S09/自检.md
+ create mode 100644 qa/v6/ct_real/S09_render.log
