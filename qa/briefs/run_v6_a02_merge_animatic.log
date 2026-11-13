@@ -1,0 +1,2623 @@
+OpenAI Codex v0.163.0
+--------
+workdir: /workspace/病理科普视频/v5
+model: gpt-6.1-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, /workspace/病理科普视频, /workspace/garden-skills] (network access enabled)
+reasoning effort: none
+reasoning summaries: none
+session id: 01a1d339-3918-76a3-8a44-4abf5c93d8ce
+--------
+user
+# 并行线通用规则（所有并行线必读）
+
+你在一个独立 git worktree 里工作（分支见下），与其他并行线同时进行。主线是 /workspace/病理科普视频/v5 的 v6-fresh 分支（另有线在 v5 和 v5_s19_dev 改 S06/S07/S19，不要碰这些目录）。
+
+**只在你自己的 worktree 里改文件。** 新场景写成 film/chapters/sNN.js；本线专用的绘图库写在 film/lib_ext/<本线名>_*.js。尽量不改共享文件（film/main.js、film/timeline.js、已有 lib_ext）；为了能单独渲染可以改 main.js，但改动要最小、集中，便于我之后合并。
+**锁定文件不许改**，开工和收工各做一次 sha256 校验并写入日志：engine/lib/{he,he_detail,wash,ann,scope,camera}.js、parity_r4/chapters/04.js。
+
+先读这些再动手：
+- 分镜：分镜/分镜_v1.md（本线场景的行、素材库 B–J 说明、"研究卡/文献提示"表）。
+- 配音与时间：配音/全稿_v3/（timeline.json，所有时间按句号对齐，不要写死秒数，后面会重新配音）。
+- 风格：/workspace/病理科普视频/v4_mix/qa/style/风格规范_v1.md；版式参考已做好的 S06（qa/v6/h02_s06/s23_red.png、s24_after.png）：浅米色底、左侧标题/要点文字栏、右侧主画面；手绘水彩质感，不要扁平饱和的矢量风。标签规范：细引线 + 浅紫字、无框；所有内容 y<950。
+- 渲染：/workspace/garden-skills/skills/motion-showreel/scripts/render.mjs（用法参考 qa/briefs/v6_d01_s11.md 和 qa/v6/ 下已有的 build/render 脚本）。
+- brief 格式与交付习惯参考 qa/briefs/v6_d01_s11.md、v6_e01_s19.md。
+
+内容红线：
+- 画面文字只能来自定稿解说词/分镜，**不得编造任何数字、研究或文献**；分镜"研究卡/文献提示"表里列出的数字和引注才能上屏，且原样照抄。
+- 原创自绘，不用网图/照片；不出现姓名、学校。
+- 医学上要准确；拿不准的地方在 自检.md 里列出，不要猜着画。
+
+每个场景交付（qa/v6/<本线名>/<场景>/）：每句 1–2 张关键帧 + 200% 局部、review_sheet.png（关键帧总览）、SNN.mp4 与 SNN_带配音_720p.mp4（配上对应句的真实配音）、自检.md（逐条对照分镜要求和风格规范）。一个场景完成并自检通过就在本分支 commit（`git -c user.name=mini -c user.email=mini@local commit`，信息以本线名开头），然后做下一个场景，全部做完再结束。不要 push，不要合并到 v6-fresh。
+
+
+**机器负载**：现在有 8 条线同时在这台 8 核/15GB 的机器上跑，渲染时只开 1 个渲染进程/1 个浏览器实例，不要并发多路渲染；预览可先用低分辨率，定稿再出全尺寸。
+**提交**：每完成一个场景就在本分支 commit；如果 git 元数据写不进去，把提交打成 qa/v6/<本线名>/<本线名>-dev.bundle 并在日志里说明。
+
+# v6_a02（Codex）：并线验收 + 整片粗剪 v16
+
+工作目录 /workspace/病理科普视频/v5（分支 v6-fresh，HEAD 7a48943）。mini 刚把 ct-dev（S04/S09/S12/S15 真实 CT）、mech-dev（S13）、clin-dev（S02/S03/S16）并入 v6-fresh，film/main.js 合成了统一场景表。不改任何场景画法；只修并线造成的问题。
+
+任务：
+1. 对每个已注册场景（s02 s03 s04 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15 s16 s19）在 v6-fresh 上渲染关键帧，与各自线的定稿关键帧逐像素对比（MAE<0.5）：ct 用 /workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real_adv01/S*/，mech 用 /workspace/病理科普视频/v5_mech_dev/qa/v6/mech/s13_adv01/，clin 用 /workspace/病理科普视频/v5_clin_dev/qa/v6/clin/S*/，其余用 v6-fresh 现有 qa/v6 定稿帧。如有不一致，找出并线原因（main.js 时钟/洗色开关、共享库冲突、资产路径），最小改动修复，写明原因。
+2. 按现有 animatic 流程（参考 qa/briefs/v6_a01_animatic.md 与最近一版 粗剪_v14/h06_adv 的 v15 做法）出 粗剪_v16（1080p + 720p）到 qa/v6/animatic/：所有已完成场景用成片画面替换占位，其余仍占位；真实配音全稿_v3；字幕真实时间轴。单进程渲染、workers=1。
+3. 自检写入 qa/v6/animatic/自检_v16.md：总时长、各场覆盖区间表、仍是占位的句号区间、逐场 MAE 结果、相接处是否有空帧、锁定文件 sha256 首尾一致。另做 contact_sheet_v16.png（每 15 s 一帧）。
+4. 提交带 "(Codex)"（能 commit 就 commit；git 只读则打 bundle 到 qa/v6/a02/a02.bundle 并验证）。不 push、不改其他 worktree。
+
+2026-11-13T04:45:05.857670Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer realm=\"OAuth\", resource_metadata=\"https://mcp.notion.com/.well-known/oauth-protected-resource/mcp\", scope=\"default\"" })
+codex
+我会先核对锁定文件、合成入口和现有渲染流程，再逐场验收并生成 v16；只修并线问题，不改场景画法。
+exec
+/bin/bash -lc "pwd; git status --short; git branch --show-current; rg --files -g AGENTS.md -g '*animatic*' -g '*v15*' -g '*h06*' -g '*render*' qa film | head -100" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+/workspace/病理科普视频/v5
+?? qa/briefs/run_v6_a02_merge_animatic.log
+?? qa/briefs/v6_a02_merge_animatic.md
+?? qa/v6/h03_s07/splice/
+?? qa/v6/h03_s07/splice_720p/
+?? qa/v6/h04_s06/.segs-SfaVtP/
+?? qa/v6/h04_s06/S06.mp4.lock
+?? qa/v6/h04_s06/splice/
+?? qa/v6/h04_s06/splice_720p/
+?? qa/v6/h05/__pycache__/
+?? qa/v6/h05/bundle_verify.log
+?? qa/v6/h05/main_fix01-dev.bundle
+?? qa/v6/h05/splice/
+?? qa/v6/h05/splice_720p/
+?? qa/v6/h06_adv/bundle_verify.log
+?? qa/v6/h06_adv/main_adv01-dev.bundle
+?? qa/v6/h06_adv/outputs.sha256
+?? qa/v6/h06_adv/s07_commit.log
+?? qa/v6/h06_adv/splice/
+?? qa/v6/h06_adv/splice_720p/
+?? qa/v6/h06_adv/交付提交.txt
+v6-fresh
+qa/v6/animatic/render.log
+qa/v6/b10/render.log
+qa/v6/c02_s10/render.log
+qa/v6/e06_s19/render_s19.mjs
+qa/v6/e04_s19/render.log
+qa/v6/e04_s19/resume_render.mjs
+qa/v6/e06_s19/parity_render.log
+qa/v6/e04_s19/renderer/render.mjs
+qa/v6/e04_s19/render_all.mjs
+qa/v6/e06_s19/render_all.mjs
+qa/v6/e06_s19/render_s19_final.log
+qa/v6/c02_s10/render_all.mjs
+qa/v6/b07/render.log
+qa/v6/e01_s19/render.log
+qa/v6/e01_s19/rerender_parity.mjs
+qa/v6/e08_s19/render_video_retry.log
+qa/v6/e08_s19/render.log
+qa/v6/e08_s19/render_s19.mjs
+qa/v6/e11_s19/render.log
+qa/v6/e11_s19/render_s19.mjs
+qa/v6/e12_s19/render.log
+qa/v6/e12_s19/render_s19.mjs
+qa/v6/h03_s07/render.log
+qa/v6/e01_s19/render_all.mjs
+qa/v6/b03/render.log
+qa/v6/f03_s14/render.log
+qa/v6/h03_s07/video_render.log
+qa/v6/h03_s07/render_all.mjs
+qa/v6/h03_s07/render_optimized.log
+qa/v6/h03_s07/video_render_attempt1.log
+qa/v6/c01_s10/render.log
+qa/v6/e03_s19/render.log
+qa/v6/h04_s06/render.log
+qa/v6/f03_s14/render_all.mjs
+qa/v6/e03_s19/render_all.mjs
+qa/v6/c01_s10/render_all.mjs
+qa/v6/e05_s19/render.log
+qa/v6/e05_s19/render_s19.mjs
+qa/v6/b04/render.log
+qa/v6/e05_s19/s11_render.log
+qa/v6/c03_s10/render.log
+qa/v6/h04_s06/render_all.mjs
+qa/v6/e07_s19/render_s19.mjs
+qa/v6/e07_s19/parity_render.log
+qa/v6/e07_s19/render_parity.mjs
+qa/v6/e05_s19/render_all.mjs
+qa/v6/e05_s19/render_final.log
+qa/v6/e09_s19/render.log
+qa/v6/e09_s19/render_s19.mjs
+qa/v6/e07_s19/render_all.mjs
+qa/v6/e07_s19/render_s19_final.log
+qa/v6/parity/render_89.73.png
+qa/v6/parity/render.log
+qa/v6/parity/render_99.22.png
+qa/v6/b09/render.log
+qa/v6/c03_s10/render_all.mjs
+qa/v6/e02_s19/render.log
+qa/v6/h06_adv/render.log
+qa/v6/h06_adv/render.mjs
+qa/v6/b08/render.log
+qa/v6/h02_s06/video_render.log
+qa/v6/h06_adv/粗剪_v15.mp4
+qa/v6/ct_real_adv01/S12_render.log
+qa/v6/h02_s06/render.log
+qa/v6/h06_adv/build_v15.py
+qa/v6/mech/s13_adv01/render.log
+qa/v6/h02_s06/render_all.mjs
+qa/v6/h05/s06_render.log
+qa/v6/mech/s13_adv01/render_all.mjs
+qa/v6/mech/s13_adv01/render_patient.mjs
+qa/v6/ct_real_adv01/S04_render.log
+qa/v6/ct_real_adv01/S09_render.log
+qa/v6/ct_real_adv01/S15_render.log
+qa/v6/clin/assets_render.log
+qa/v6/mech/s13/render_all.mjs
+qa/v6/mech/s13/render_final.log
+qa/v6/e02_s19/render_all.mjs
+qa/v6/parity_dpr2/render_99.22.png
+qa/v6/parity_dpr2/render_89.73.png
+qa/v6/h06_adv/build_v15.log
+qa/v6/mech/s13_fix01/render.log
+qa/v6/mech/s13_fix01/render_all.mjs
+qa/v6/mech/s13_fix01/render_patient.mjs
+qa/v6/h01_s06/render.log
+qa/v6/h06_adv/粗剪_v15_720p.mp4
+qa/v6/d01_s11/video_render.log
+qa/v6/e10_s19/render.log
+qa/v6/e10_s19/render_s19.mjs
+qa/v6/d01_s11/render.log
+qa/v6/h01_s06/render_all.mjs
+qa/v6/h01_s06/video_render.log
+qa/briefs/run_v6_a02_merge_animatic.log
+qa/briefs/v6_a02_merge_animatic.md
+qa/briefs/v6_a01_animatic.md
+qa/briefs/run_v6_a01_animatic.log
+qa/briefs/render_b04_chromium.log
+qa/v6/d01_s11/render_all.mjs
+qa/v6/f01_s14/video_render.log
+qa/v6/f01_s14/render.log
+qa/v6/ct_real/S15_render.log
+
+exec
+/bin/bash -lc 'cat qa/briefs/v6_a01_animatic.md; cat qa/briefs/v6_d01_s11.md; cat /workspace/病理科普视频/v4_mix/qa/style/风格规范_v1.md' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+# v6 a01（Codex）：整片粗剪 v1（真实配音 + 双语字幕 + S08 成片画面 + 其余占位）
+
+工作目录 /workspace/病理科普视频/v5，分支 v6-fresh，基于提交 66ff9d4（S08 定稿，tag v6-s08-final）。不许 git commit。
+
+硬约束：
+- 锁定文件（engine/lib/he.js、he_detail.js、wash.js、ann.js、scope.js、camera.js、parity_r4/chapters/04.js）开工和结束都做 sha256 校验，不得改动；也不改 v4_mix/。
+- S08 的画面内容不得改变：在同一画面状态下，新渲染的帧与 qa/v6/b10/ 七帧必须逐像素一致（MAE<0.5）。只允许改时间轴（film/timeline.js），也就是"什么时刻到达哪个画面状态"。
+- 不得打印或改动 /workspace/病理科普视频/配音/.mimo.env。不新增任何数字上屏。
+
+任务：
+1. 时间绑定：真实时间轴在 /workspace/病理科普视频/配音/全稿_v3/timeline.json（lines[n].start/end，单位秒，n=句号）。现在 film/timeline.js 的句 29–34 是每句 6 s 的占位。改成读取真实时长：S08 片段从句 29 开始，到句 34 结束后保留约 0.8 s，片段内的时间以句 29 的起点为 0。低倍→中倍的推进仍放在 s30 之前，各句画面状态（s30–s34）与对应句同步。如果某句太短，推进动作放不下，写进报告，不要擅自删掉画面状态。
+2. 把 S08 片段渲染成 1920×1080、30 fps 的视频，使用 /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs（先查看它支持的视频或帧序列输出方式；不支持视频就输出 PNG 序列，再用 ffmpeg 编码）。
+3. 整片画面底板：长度等于 timeline.json 的 duration（约 327.8 s），底色 #F4EFE6。S08 视频放在句 29 起点对应的真实时刻。其余时段是占位：每个场景（按 分镜/分镜_v1.md 的 S01–S21 句号范围）在左上角用小号灰字写"草稿占位 S0x ／句 aa–bb"，只在粗剪里出现，并且必须在 y<950 之内。
+4. 合成：用 assembly/pipeline/assemble.sh（先读 assembly/pipeline/README.md），--scene-video 用上一步的底板，配音用 /workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav，字幕的时间来自真实时间轴（确认 loadCues 用的是 timeline.json 或 lines.json 的真实 start/end，不是估算公式；如果需要，就把真实时间轴生成一个 cues 快照传给 --cues）。不配音乐。保留片尾。--out-dir 用 /workspace/病理科普视频/v5/qa/v6/animatic，--out-name 用 粗剪_v1。同时导出一份 720p 预览。
+5. 自检，写入 qa/v6/animatic/自检.md：
+   - 总时长。
+   - 字幕与配音的对齐抽查：句 01、31、34、50、77 的字幕出现时刻与 timeline.json 的差值。
+   - S08 各画面状态与 b10 七帧的 MAE。
+   - 渲染命令。
+   - sha256 校验结果。
+   另做一张 contact_sheet.png：从整片每 20 s 取一帧，并加上 S08 段内的 6 帧。
+# v6 d01（Codex）：S11 纤维素网与纤维脓性渗出（句 43–46）镜下段
+
+工作目录 /workspace/病理科普视频/v5，分支 v6-fresh，基于 HEAD（981bda2，tag v6-s10-final）。不许 git commit。
+
+硬约束、画风标准、镜头规则都和 qa/briefs/v6_c01_s10.md 一样，开工前先读一遍。另外：
+
+- S08 七帧 MAE 必须为 0。
+- S10 句 37–42 各关键帧和 qa/v6/c03_s10/ 的 MAE 必须为 0。
+- determinism、sha256 都要通过。
+
+## 衔接
+
+S10 和 S11 在口播上是连着的，所以句 37–46 要合成一整段深色镜下段：
+
+- 去掉 S10 末尾（句 42 后）的切出过渡和 S11 开头的切入过渡。
+- 只在句 46 结束后做一次切出。
+- 句 42 → 43 之间不回纸色，镜头连续运动：从脓细胞特写平移或拉到渗出物区域。
+- 字幕在 37–46 期间保持 dark 样式。
+
+## 逐句画面
+
+**43「渗出的纤维蛋白原凝成纤维素网。」**
+- 高倍，背景是淡染的渗出液。
+- 伊红色的细丝从散在的细小颗粒开始，逐渐连接、交织成网（纤维蛋白原→纤维素网）。这里用教学状态切换或生长动画，按句内进度推进。
+- 网是淡粉到伊红色、粗细不一、不规则的丝和小团，不能是规整的几何网格。可以参考或复用 he_detail.js 里的 fibrinMesh。
+- 左栏："纤维蛋白原 → 纤维素网"。写成"纤维蛋白原凝成纤维素网"也可以，不要用箭头符号。
+
+**44「网与脓细胞等交织，形成纤维脓性渗出物。」**
+- 纤维素网中嵌入大量脓细胞和中性粒细胞，以及组织碎屑，画法复用 S10 句 40 的脓液。
+- 左栏："纤维脓性渗出物"。
+
+**45「黄色并非只来自纤维素，更来自大量脓细胞。」**
+- 成分分别高亮：先轻提纤维素网，网变亮，其他成分减淡；再突出脓细胞，脓细胞保持饱和，网淡化。表达的意思是：脓细胞的贡献更大。
+- 只能用透明度和亮度的教学切换来做，绝不能把 HE 染成黄色。
+- 左栏两行："纤维素：部分""脓细胞：主要"。不加任何数字或百分比。
+
+**46「浆膜面可见纤维素性脓性渗出（含脓细胞）。」**
+- 镜头连续拉回中倍或低倍，移到阑尾壁的最外层：浆膜和外纵肌可辨，浆膜外表面覆盖一层不规则、厚薄不一的纤维脓性渗出物（纤维素丝 + 脓细胞），附着在浆膜上并向外蓬松。
+- 用短引线标"浆膜""纤维素性脓性渗出"。
+- 左栏原样写定稿的措辞："浆膜面：纤维素性脓性渗出（含脓细胞）"，可以分两行。
+- 说明：分镜原本想在这一句接一个大体标本的脓苔特写，但大体资产还没做，这一版先用镜下的浆膜面。大体特写以后再补，不在这一轮做。
+
+## 输出
+
+1. 渲染 S10+S11 合并段，重新合成粗剪 v6：qa/v6/animatic/粗剪_v6.mp4 和 720p 版本，CRF16。
+2. 交付到 qa/v6/d01_s11/：
+   - 句 43（起、中、末三帧，展示成网过程）、44、45（两个高亮状态各一帧）、46 的关键帧，以及句 42→43 衔接的中间帧，每张都附 200% 局部。
+   - review_sheet.png。
+   - 自检.md，内容包括：每句画面的病理对应、S08 和 S10 的 parity、determinism、sha256，以及你认为还不够好的地方。
+# 画面风格规范 v1
+
+照 `film_mini_detail` 第 04 章样帧执行（`he.js`、`he_detail.js`、`chapters/04.js`、`wash.js`、`ann.js`；该分支没有 `lib/detail.js`）。数量用代码里的同一套 `rng` 跑出。画布 1920×1080。镜下是局部坐标 ±420，装进目镜 `{x:640, y:480, r:340}`，缩放 `k = 340/420 × fs`（04 的 `fs` 从 1.06 到 1.48）。
+
+## 1. 线条
+
+结构层用 Rough.js（`ink.js`）：默认 `strokeWidth 2.6`、`roughness .9`、`bowing .8`、`seed 3`、圆头，墨色 `#2A2A35`。路径固定种子缓存一次，出现靠虚线揭开。抖动 `BOIL_FPS = 10`、3 变体；04 镜检 `boil: false`、`drift: false`。已有 `roughness`：.5 .55 .6 .7 .8 1；`bowing` 只在疼痛线为 .5。日常线宽 1.4–3；4.5–9 只留给已有的疼痛线、神经高亮、十字和阑尾。排线只给人物：头发角度 −30、间距 4、`fillWeight 2`；裤子 −60、间距 10、`fillWeight 1.1`。镜下不排线。
+
+镜下圆头细线（视野坐标）：上皮 7，血管轮廓 2.2，纤维素粗丝 `2.4×(1−0.85×detail)`（满细节 0.36），细网 0.55，肌/胶原/影细胞 0.65，裂隙纤维素 0.75 与 0.45，核桥 `0.48/缩放`，红细胞边 0.28，外壁 1.45、内壁 0.85。目镜圈 5、外圈 1.5；闪边宽 8，只在镜圈。标注锁在屏幕像素：引线 1.6，阶段轴 2，刻度 2.4，穿孔环 3。
+
+## 2. 配色
+
+病理色不随情绪变。`mood.js` 只动纸和网格：纸从 `#F4EFE6` 做轻微冷中性、压暗或提亮。玻片底固定 `#F6EEF0`。目镜外 `#111114`；深底上墨色由 `setDark` 混向 `#EFE8DC`。
+
+- 墨 `#2A2A35`。朱红 `#D6453A`（活组织、炎症、重点字、镜圈）。字幕里的朱红用 `#F07A63`。
+- H&E 紫 `#6B4C9A`（核、内皮核）。核深 `#3F2A66`，染色质点 `#38234F`，碎屑深 `#2E1F45`，叶填 `#51336F`。
+- 嗜伊红 `#D98BA8`，浅 `#EBC3D0`。胞质 `rgba(226,170,200,.75)`，颗粒 `rgba(167,105,159,.38)`，核桥 `#9273A5`。
+- 出血红褐：盘 `#A8404E`、边 `#7E2A38`、中央淡区 `#C9A8AE`、溶血 `#C9A4AC`。出血斑 `#8E3A3E` `#A8404E` `#9A3E48` `#7A3038`。Zahn 红层 `#8E3A3E`/`#A8404E`，粉层 `#F0D4DC`/`#F3D5DE`。充盈水彩 `#C9455A` 在坏疽期让开。
+- 镜下脓 `#B39459`（`C.pus`）。大体脓苔只用 02 的 `#CDB98A`。坏死晕 `#D7A3B3` `#E3B7C4` `#E7C9D2`。裂隙底 `#E9DDB0`。网格 `rgba(42,42,53,.07)`。
+
+## 3. 细胞与组织
+
+中性粒用 `detailedNeutrophil`。叶数：2 叶 15%、3 叶 45%、4 叶 30%、5 叶 10%。叶半轴 4.0×2.9，内侧收 0.14，叶间留胞质缝，二次曲线核桥相连，每叶 5 个染色质团。胞质椭圆（2→5 叶）7.20×5.65、8.05×7.55、9.25×8.70、10.625×10，内 22 颗颗粒。`chromatin()` 另是 25 个点，盖隐窝核和肌核。`detail=0` 时仍走简笔，03 不被改掉。
+
+全板 **1336** = 腔 186 + 浸润 1150。叶数 222 / 566 / 412 / 136。浸润：黏膜 378、黏膜下层 228、肌层 306、浆膜 84、纤维素带 154。
+
+圆视野（半径 `420/fs`）：
+
+- 早期 `neut=0.2`、`fs=1.06`：游出 166，腔内 71。
+- 全层、`fs=1.15`：**912**（黏膜 298、黏膜下层 204、肌层 262、浆膜 45、纤维素带 48、腔 55）。
+- 坏疽峰值 `fs=1.48`、场偏移 `[145.9, 60]`：圆内 471 个位置，按坏死权重抹掉 403，留 68。裂隙另有 45 个（2–5 叶），不参与这轮剔除。
+
+红细胞 `pushDisc`：`rx=5×(0.72–1.32)`（04 样帧原为 3.1，已按 look 改为 5），`ry=rx×(0.36–0.76)`，淡区 0.46×0.38；`rnd<.25` 为溶血。屏幕上的喷洒盘 **354**，溶血 92，聚在 5 块红褐斑和 6 条血管旁。每条血管有外壁、内壁、内皮核 4–6（本种子 4,4,4,5,5,4）、Zahn 带 3–5 层红粉交替（本种子 3,3,5,4,3,4），最内层填实。影细胞 52 个淡轮廓（`CG()<0.38` 开口）。核碎屑 90 簇 502 粒，核尘 1050。纤维素：60 条粗丝 + 140 条细网。隐窝 13×16 核，肌核 170。穿孔向浆膜加宽，浆膜端脓团 95、核 80。
+
+**比例（look 定）：**红细胞直径约 7.5 μm，中性粒细胞约 10–12 μm，后者约为前者的 1.5 倍。中性粒胞质直径 14–21 时，红细胞 `rx` 应约 5（直径约 10），不再用 3.1。
+
+### 3b. 正常阑尾组织学（01–03 必须有）
+
+- 黏膜下层有成片的淋巴滤泡：深紫色的淋巴细胞团，中间是淡色的生发中心。
+- 肌层分两层：内层是环行肌，横截面上的核是小圆点；外层是纵行肌，核呈梭形。
+- 隐窝画成管状腺，内衬柱状上皮，夹有杯状细胞。
+
+## 4. 水彩
+
+只烘一次。默认 1024；`hd:true` 输出 **2048**，颗粒在成图像素上重铺（3px 与 18px fbm，权重 .65/.35）。04 近景色素：`hd:true, soft:true, grain:.12, edge:.3, bleed:.5`。`edge` 是干边压暗，`bleed` 向外渗。四个坏死斑再 `blur(15px)`。`scaleBrushes` 会连乘（默认 2.4）；多烘之后用四次 `1/2.4` 把笔刷还回去。
+
+`drawWash` 的 `size` 再乘目镜或相机，才是屏幕像素。屏幕像素 / 烘焙边长 **> 1** 就是拉伸，要改 2048 重烘。审计把相对 1024 超过 1.1 标为需要 hd。共享层带 `he.bands` 仍是 1024，峰值约 1.20 倍，这是旧层；新的近景色素不要照它放大。
+
+## 5. 标注
+
+`ann.js`。字号是屏幕像素。字重用 100–900 的整百；片内实际是 **500**（默认、字幕）、**700**（标题）、**800**（诊断名、三型）。镜旁 22–30，站名 40，诊断 52 与 62；章标题 56 / 章号 22。字幕 44，基线 `y=1012`，只由 `subtitle.js` 画。
+
+描边文字：`label({halo:true})`，先描后填，默认线宽 5，纸色或 `rgb(17,17,20)`。字幕光晕线宽 6。斜引线 `leader`：锚点半径 4，线宽 1.6，先到肘点再走水平字托（03 的「黏膜破溃缺损」）。`elbow:true` 时斜段不超过水平距离。04 穿孔用半径 52、线宽 3 的圆环，字放在镜缘外。
+
+构图停在 `y < 900`（`SAFE.fadeTop`）。镜下注释用短标签，冒号前是看法、冒号后是所见，与「时间倒回：发病早期」同一结构，如「镜下：坏死组织结构消失、出血」。03 镜缘已有「HE 染色 · 阑尾壁」「核分 2–5 叶」。04 现片还没有「镜下：」四字；要加就用 `A.label`，可加 halo，放在阶段轨下、`y<900`，只用 `T.frac` / `T.end` 进出。
+
+## 6. 时序与工程
+
+节拍只用 `T.at(i, 偏移)`、`T.end(i, 偏移)`、`T.frac(i, 0–1)`，时间来自 `narration.json`（否则 `sentences.tsv`）。不规则形状在加载时按固定种子写入局部坐标。帧内随机用 `render(t)` 里的 `rng(种子)`。禁止 `Math.random()`、`Date.now()`、`performance.now()`。水彩只在 `bake()` 里生成。交接帧用 `T.end(末句) − 1e-3` 重画上一章末态（`drawExit04`）。每章导出 `EXIT_*`。画面上新的数字要能指回句子、教材或已有常量；04 没有新计数，也没有比例尺。
+
+## 6b. 动态规则
+
+「活的表面」（`lib/alive.js`）只用在大体标本、人体示意图和 05 章的血管示意图上；H&E 镜下视野一律不开，镜下的动态靠镜头推拉和对焦变化（look 定）。
+
+## 7. 自检清单
+
+1. 结构线是否仍是 2.6 / .9 / .8，或沿用已有覆盖；镜下有没有排线。
+2. 1080p 下能否数出 2–5 叶，叶间有胞质缝和核桥。
+3. 镜下细胞密度是否接近第 3 节量级（满层浸润的圆视野约 900 个中性粒，早期约 150–250）；坏死区是否只留无核影细胞和核碎屑，活的中性粒集中在坏死区边缘。（第 3 节的具体计数是 04 的实测值，其他章按同一密度量级做，不要照抄数字。）
+4. 红细胞是否双凹加淡区；中性粒细胞与红细胞大小比约 1.5:1（`rx`≈5）；血管是否有双层壁和 3–5 层红/粉血栓。
+5. 有纤维素渗出的地方，是否同时画了粗丝和细网（04 的比例约 60 : 140）。
+6. 色是否落在第 2 节；纸色是否只走 `mood.js`。
+7. 近景水彩是否 2048，屏幕像素有没有超过烘焙边长。
+8. 字是否都在 `y<900`，字重是否为 500 / 700 / 800，斜引线是否走 `leader`。
+9. 节拍是否全是句子索引；交接帧是否等于上一章末帧减 0.001 秒。
+10. `--determinism` 换序是否一致；新数字有没有出处。
+11. 正常组织（01–03）：黏膜下层有带生发中心的淋巴滤泡，肌层内环（圆点核）外纵（梭形核），隐窝是管状的、有柱状上皮和杯状细胞。
+
+exec
+/bin/bash -lc 'cat film/main.js; cat qa/v6/h06_adv/build_v15.py; cat qa/v6/h06_adv/render.mjs; cat qa/briefs/v6_a02_merge_animatic.md; rg --files /workspace -g AGENTS.md; ls qa/v6/animatic' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+import {initBaker,bake} from './lib/wash.js';
+import {bakeHE} from './lib/he.js';
+import s08 from './chapters/s08.js';
+import {forScene} from './timeline.js';
+import {timing as allTiming} from './timing_snapshot.js';
+const params=new URLSearchParams(location.search);
+const name=params.get('scene')||'s08';
+// Merged scene registry (mini, 2026-11-13): main line + ct-dev (S04/S09/S12/S15 real CT) + mech-dev (S13) + clin-dev (S02/S03/S16).
+const ranges={s07:[25,30],s14:[54,57],s19:[69,70],s13:[49,53],s02:[6,10],s03:[11,13],s16:[60,62],s04:[14,19],s09:[35,36],s12:[47,48],s15:[58,59],ct_library:[35,36]};
+const noWash=['s02','s03','s16','s04','s09','s12','s15','ct_library'];
+if(!['s06','s07','s08','s10','s11','s19','s14','s13','s02','s03','s16','s04','s09','s12','s15','ct_library'].includes(name))throw Error('Unknown scene '+name);
+const scene=name==='s08'?s08:(await import(`./chapters/${name}.js`)).default;
+// S06 owns the silence between sentences 24 and 25, so the animatic has no
+// uncovered frames at the S06→S07 handoff (previously 13 placeholder frames).
+const gapAfter=id=>{const i=allTiming.findIndex(s=>s.n===id);return i+1<allTiming.length?Math.max(0,allTiming[i+1].start-allTiming[i].end):.8;};
+const clock=name==='s08'?{duration:T.end(34),T}:name==='s06'?forScene(23,24,gapAfter(24)):ranges[name]?forScene(...ranges[name],0):forScene(37,name==='s11'?46:42);
+import {T} from './timeline.js';
+const c=document.getElementById('c');c.width=1920;c.height=1080;const ctx=c.getContext('2d');
+await document.fonts.load('500 32px MixSans');if(!noWash.includes(name)&&params.get('nowash')!=='1'){await initBaker();bakeHE((k,r,o)=>bake(k,r,{...o,hd:true,soft:true,grain:.12,edge:.3,bleed:.5}));}
+await scene.prepare();window.DUR=clock.duration;window.render=t=>scene.draw(ctx,t,clock.T);window.READY=true;
+from pathlib import Path
+import json,math,subprocess
+P=Path(__file__).resolve().parent;A=P.parent/'animatic'
+def run(a):subprocess.run(list(map(str,a)),check=True)
+fps=30
+for suffix,w,h,safe in [('',1920,1080,950),('_720p',1280,720,634)]:
+ old=A/('粗剪_v14'+suffix+'.mp4');work=P/('splice'+suffix);work.mkdir(exist_ok=True)
+ k6=json.loads((P/'s06_keyframes.json').read_text());k7=json.loads((P/'s07_keyframes.json').read_text())
+ sf=math.ceil(k6['origin']*fps);join=math.ceil(k7['origin']*fps);ef=math.ceil((k7['origin']+k7['duration'])*fps)
+ keys=subprocess.check_output(['ffprobe','-v','error','-select_streams','v:0','-skip_frame','nokey','-show_entries','frame=pts_time','-of','csv=p=0',str(old)]).decode();keys=[round(float(s.strip().strip(','))*fps) for s in keys.splitlines() if s.strip().strip(',')];bs=max(i for i in keys if i<=sf);be=min(i for i in keys if i>=ef)
+ patches=[]
+ for lane,scene in [('s06','S06'),('s07','S07')]:
+  patch=P/lane/(scene+'.mp4')
+  if suffix:
+   dest=work/(scene+'.mp4');run(['ffmpeg','-v','error','-y','-threads','1','-i',patch,'-vf',f'scale={w}:{h}','-an','-c:v','libx264','-crf','16','-preset','veryfast','-threads','1',dest]);patch=dest
+  patches.append(patch)
+ f=f"[1:v]tpad=stop_mode=clone:stop_duration=1,crop={w}:{safe}:0:0,setpts=PTS-STARTPTS+{(sf-bs)/fps}/TB[p6];[2:v]crop={w}:{safe}:0:0,setpts=PTS-STARTPTS+{(join-bs)/fps}/TB[p7];[0:v][p6]overlay=0:0:eof_action=pass:enable='gte(t,{(sf-bs)/fps})*lt(t,{(join-bs)/fps})'[v6];[v6][p7]overlay=0:0:eof_action=pass:enable='gte(t,{(join-bs)/fps})*lt(t,{(ef-bs)/fps})',trim=end_frame={be-bs},setpts=PTS-STARTPTS[v]"
+ run(['ffmpeg','-v','error','-y','-threads','1','-ss',bs/fps,'-i',old,'-i',patches[0],'-i',patches[1],'-filter_complex_threads','1','-filter_complex',f,'-map','[v]','-frames:v',be-bs,'-an','-c:v','libx264','-crf','16','-preset','veryfast','-pix_fmt','yuv420p','-profile:v','high','-level','4.0','-bf','0','-g','30','-x264-params','repeat-headers=1','-threads','1',work/'middle.mp4'])
+ run(['ffmpeg','-v','error','-y','-i',old,'-frames:v',bs,'-map','0:v:0','-an','-c:v','copy',work/'before.mp4']);run(['ffmpeg','-v','error','-y','-ss',be/fps,'-i',old,'-map','0:v:0','-an','-c:v','copy',work/'after.mp4'])
+ (work/'concat.txt').write_text(''.join("file '"+str((work/(n+'.mp4')).resolve())+"'\n"+(f'duration {d}\n' if d else '') for n,d in [('before',bs/fps),('middle',(be-bs)/fps),('after',None)]))
+ dest=P/('粗剪_v15'+suffix+'.mp4');run(['ffmpeg','-v','error','-y','-f','concat','-safe','0','-i',work/'concat.txt','-i',old,'-map','0:v:0','-map','1:a:0','-c','copy','-movflags','+faststart',dest])
+ (work/'window.json').write_text(json.dumps(dict(start_frame=sf,join_frame=join,end_frame=ef,gop_start=bs,gop_end=be)))
+ if suffix:
+  for lane,scene,k in [('s06','S06',k6),('s07','S07',k7)]:
+   run(['ffmpeg','-v','error','-y','-ss',k['origin'],'-i',dest,'-t',k['duration'],'-c:v','libx264','-crf','16','-preset','veryfast','-threads','1','-c:a','aac','-b:a','192k',P/lane/(scene+'_带配音_720p.mp4')])
+import fs from 'node:fs';import {spawn} from 'node:child_process';import {once} from 'node:events';
+import {loadChromium,launch,serve,resolveTarget,openPage} from '/workspace/garden-skills/skills/motion-showreel/scripts/lib/browser.mjs';
+const P='qa/v6/h06_adv',target=resolveTarget('film');const chromium=await loadChromium(target.root),{server,port}=await serve(target.root),browser=await launch(chromium);
+try{for(const scene of (process.argv[2]?[process.argv[2]]:['s06','s07'])){
+ const dir=P+'/'+scene;fs.mkdirSync(dir,{recursive:true});const page=await openPage(browser,{port,rel:target.rel,w:1920,h:1080,dpr:1,query:'scene='+scene});const k=JSON.parse(fs.readFileSync(P+'/'+scene+'_keyframes.json'));
+ const shot=async t=>Buffer.from(await page.evaluate(t=>{window.render(t);return document.getElementById('c').toDataURL('image/png').split(',')[1]},t),'base64');
+ for(const p of k.picks)fs.writeFileSync(dir+'/'+p.name+'.png',await shot(p.t));
+ const det=[];for(const p of [...k.picks].reverse()){const b=await shot(p.t);const equal=b.equals(fs.readFileSync(dir+'/'+p.name+'.png'));det.push({name:p.name,equal});fs.writeFileSync(dir+'/'+p.name+'_reverse.png',b);}fs.writeFileSync(dir+'/determinism.json',JSON.stringify(det,null,2));
+ const dur=await page.evaluate(()=>window.DUR),n=Math.round(dur*30);const ff=spawn('ffmpeg',['-v','error','-y','-f','image2pipe','-vcodec','png','-r','30','-i','-','-an','-c:v','libx264','-crf','16','-preset','veryfast','-pix_fmt','yuv420p','-threads','1',dir+'/'+scene.toUpperCase()+'.mp4'],{stdio:['pipe','inherit','inherit']});const done=once(ff,'exit');
+ for(let i=0;i<n;i++){if(!ff.stdin.write(await shot(i/30)))await once(ff.stdin,'drain');if(i%15===0)console.log(scene+' '+i+'/'+n);}ff.stdin.end();const [code]=await done;if(code)throw Error('ffmpeg '+code);await page.close();
+}}finally{await browser.close();server.close();}
+# 并行线通用规则（所有并行线必读）
+
+你在一个独立 git worktree 里工作（分支见下），与其他并行线同时进行。主线是 /workspace/病理科普视频/v5 的 v6-fresh 分支（另有线在 v5 和 v5_s19_dev 改 S06/S07/S19，不要碰这些目录）。
+
+**只在你自己的 worktree 里改文件。** 新场景写成 film/chapters/sNN.js；本线专用的绘图库写在 film/lib_ext/<本线名>_*.js。尽量不改共享文件（film/main.js、film/timeline.js、已有 lib_ext）；为了能单独渲染可以改 main.js，但改动要最小、集中，便于我之后合并。
+**锁定文件不许改**，开工和收工各做一次 sha256 校验并写入日志：engine/lib/{he,he_detail,wash,ann,scope,camera}.js、parity_r4/chapters/04.js。
+
+先读这些再动手：
+- 分镜：分镜/分镜_v1.md（本线场景的行、素材库 B–J 说明、"研究卡/文献提示"表）。
+- 配音与时间：配音/全稿_v3/（timeline.json，所有时间按句号对齐，不要写死秒数，后面会重新配音）。
+- 风格：/workspace/病理科普视频/v4_mix/qa/style/风格规范_v1.md；版式参考已做好的 S06（qa/v6/h02_s06/s23_red.png、s24_after.png）：浅米色底、左侧标题/要点文字栏、右侧主画面；手绘水彩质感，不要扁平饱和的矢量风。标签规范：细引线 + 浅紫字、无框；所有内容 y<950。
+- 渲染：/workspace/garden-skills/skills/motion-showreel/scripts/render.mjs（用法参考 qa/briefs/v6_d01_s11.md 和 qa/v6/ 下已有的 build/render 脚本）。
+- brief 格式与交付习惯参考 qa/briefs/v6_d01_s11.md、v6_e01_s19.md。
+
+内容红线：
+- 画面文字只能来自定稿解说词/分镜，**不得编造任何数字、研究或文献**；分镜"研究卡/文献提示"表里列出的数字和引注才能上屏，且原样照抄。
+- 原创自绘，不用网图/照片；不出现姓名、学校。
+- 医学上要准确；拿不准的地方在 自检.md 里列出，不要猜着画。
+
+每个场景交付（qa/v6/<本线名>/<场景>/）：每句 1–2 张关键帧 + 200% 局部、review_sheet.png（关键帧总览）、SNN.mp4 与 SNN_带配音_720p.mp4（配上对应句的真实配音）、自检.md（逐条对照分镜要求和风格规范）。一个场景完成并自检通过就在本分支 commit（`git -c user.name=mini -c user.email=mini@local commit`，信息以本线名开头），然后做下一个场景，全部做完再结束。不要 push，不要合并到 v6-fresh。
+
+
+**机器负载**：现在有 8 条线同时在这台 8 核/15GB 的机器上跑，渲染时只开 1 个渲染进程/1 个浏览器实例，不要并发多路渲染；预览可先用低分辨率，定稿再出全尺寸。
+**提交**：每完成一个场景就在本分支 commit；如果 git 元数据写不进去，把提交打成 qa/v6/<本线名>/<本线名>-dev.bundle 并在日志里说明。
+
+# v6_a02（Codex）：并线验收 + 整片粗剪 v16
+
+工作目录 /workspace/病理科普视频/v5（分支 v6-fresh，HEAD 7a48943）。mini 刚把 ct-dev（S04/S09/S12/S15 真实 CT）、mech-dev（S13）、clin-dev（S02/S03/S16）并入 v6-fresh，film/main.js 合成了统一场景表。不改任何场景画法；只修并线造成的问题。
+
+任务：
+1. 对每个已注册场景（s02 s03 s04 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15 s16 s19）在 v6-fresh 上渲染关键帧，与各自线的定稿关键帧逐像素对比（MAE<0.5）：ct 用 /workspace/病理科普视频/v5_ct_dev/qa/v6/ct_real_adv01/S*/，mech 用 /workspace/病理科普视频/v5_mech_dev/qa/v6/mech/s13_adv01/，clin 用 /workspace/病理科普视频/v5_clin_dev/qa/v6/clin/S*/，其余用 v6-fresh 现有 qa/v6 定稿帧。如有不一致，找出并线原因（main.js 时钟/洗色开关、共享库冲突、资产路径），最小改动修复，写明原因。
+2. 按现有 animatic 流程（参考 qa/briefs/v6_a01_animatic.md 与最近一版 粗剪_v14/h06_adv 的 v15 做法）出 粗剪_v16（1080p + 720p）到 qa/v6/animatic/：所有已完成场景用成片画面替换占位，其余仍占位；真实配音全稿_v3；字幕真实时间轴。单进程渲染、workers=1。
+3. 自检写入 qa/v6/animatic/自检_v16.md：总时长、各场覆盖区间表、仍是占位的句号区间、逐场 MAE 结果、相接处是否有空帧、锁定文件 sha256 首尾一致。另做 contact_sheet_v16.png（每 15 s 一帧）。
+4. 提交带 "(Codex)"（能 commit 就 commit；git 只读则打 bundle 到 qa/v6/a02/a02.bundle 并验证）。不 push、不改其他 worktree。
+/workspace/nf/AGENTS.md
+S08.mp4
+alignment.json
+alignment_frames
+alignment_frames.log
+assembly.log
+build_plate.py
+check_alignment.mjs
+check_encoded_alignment.py
+contact_frames
+contact_sheet.png
+cues_dryrun.json
+cues_loaded.json
+cues_real.json
+dryrun_report.md
+english_measure.json
+final_check.log
+final_check.py
+frames
+mae.json
+plate.log
+plate_command.json
+render.log
+s08_states
+scene_plate.mp4
+sha256_开工.txt
+sha256_校验.log
+sha256_结束.txt
+stills.log
+timing.json
+v2
+粗剪_v1.mp4
+粗剪_v10.mp4
+粗剪_v10_720p.mp4
+粗剪_v11.mp4
+粗剪_v11_720p.mp4
+粗剪_v12.mp4
+粗剪_v12_720p.mp4
+粗剪_v12_h04.mp4
+粗剪_v12_h04_720p.mp4
+粗剪_v13.mp4
+粗剪_v13_720p.mp4
+粗剪_v14.mp4
+粗剪_v14_720p.mp4
+粗剪_v1_720p.mp4
+粗剪_v1_report.json
+粗剪_v2.mp4
+粗剪_v2_720p.mp4
+粗剪_v3.mp4
+粗剪_v3_720p.mp4
+粗剪_v4.mp4
+粗剪_v4_720p.mp4
+粗剪_v5.mp4
+粗剪_v5_720p.mp4
+粗剪_v6.mp4
+粗剪_v6_720p.mp4
+粗剪_v7.mp4
+粗剪_v7_720p.mp4
+粗剪_v8.mp4
+粗剪_v8_720p.mp4
+粗剪_v9.mp4
+粗剪_v9_720p.mp4
+自检.md
+
+exec
+/bin/bash -lc 'mkdir -p qa/v6/a02; sha256sum engine/lib/{he,he_detail,wash,ann,scope,camera}.js parity_r4/chapters/04.js > qa/v6/a02/sha256_start.txt; cat qa/v6/ct_real_adv01/render_all.mjs; cat qa/v6/clin/render_all.mjs; cat qa/v6/mech/s13_adv01/render_all.mjs; cat qa/v6/e12_s19/render_s19.mjs; cat qa/v6/f03_s14/render_all.mjs; cat qa/v6/h06_adv/s06_keyframes.json; ls qa/v6/clin; cat film/timeline.js' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+cat: qa/v6/ct_real_adv01/render_all.mjs: No such file or directory
+cat: qa/v6/clin/render_all.mjs: No such file or directory
+import fs from 'node:fs';
+import { execFileSync as run } from 'node:child_process';
+import { timing } from '../../../../film/timing_snapshot.js';
+
+const rows = timing.filter(s => s.n >= 49 && s.n <= 53);
+const origin = rows[0].start;
+const row = id => rows.find(s => s.n === id);
+const T = {
+  at: id => row(id).start - origin,
+  end: id => row(id).end - origin,
+  frac: (id, f) => row(id).start - origin + (row(id).end - row(id).start) * f,
+};
+const clock = { origin, duration: rows.at(-1).end - origin, T };
+const P = 'qa/v6/mech/s13_adv01';
+const tool = '/workspace/garden-skills/skills/motion-showreel/scripts/render.mjs';
+
+const picks = [
+  ['s49_start', T.frac(49, .04)],
+  ['s49_pressure', T.frac(49, .86)],
+  ['s50_squeeze', T.frac(50, .55)],
+  ['s50_thrombus', T.frac(50, .95)],
+  ['s51_necrosis', T.frac(51, .55)],
+  ['s51_bleed', T.frac(51, .95)],
+  ['s52_pigment', T.frac(52, .95)],
+  ['s53_gross', T.frac(53, .55)],
+  ['s53_end', T.end(53) - .04],
+].map(([name, t]) => ({ name, t }));
+
+fs.writeFileSync(P + '/keyframes.json', JSON.stringify({ origin: clock.origin, duration: clock.duration, picks }, null, 2));
+
+function render(args) { run('node', [tool, 'film', ...args], { stdio: 'inherit' }); }
+render(['--q', 'scene=s13', '--still', picks.map(p => p.t.toFixed(6)).join(','), '--out', P + '/stills', '--workers', '1']);
+import fs from 'node:fs';import {execFileSync as run} from 'node:child_process';import {timing} from '../../../film/timing_snapshot.js';
+const P='qa/v6/e12_s19',tool='qa/v6/e04_s19/renderer/render.mjs',origin=timing.find(s=>s.n===69).start;
+const at=(n,f)=>{const s=timing.find(s=>s.n===n);return s.start-origin+(s.end-s.start)*f;};
+const picks=[{name:'s69_low',t:at(69,.1)},{name:'s69_middle',t:at(69,.65)},{name:'s69_fibrosis',t:at(69,.84)},{name:'transition_1',t:at(69,.98)},{name:'transition_2',t:at(70,.10)},{name:'transition_3',t:at(70,.23)},{name:'s70_lymph',t:at(70,.4)},{name:'s70_plasma',t:at(70,.9)}];fs.writeFileSync(P+'/keyframes.json',JSON.stringify({origin,duration:at(70,1),picks},null,2));
+function render(args){run('node',[tool,'film','--workers','1',...args],{stdio:'inherit'});}
+render(['--q','scene=s19','--still',picks.map(p=>p.t.toFixed(6)).join(','),'--out',P+'/stills']);{const r=run('node',[tool,'film','--q','scene=s19','--determinism'],{encoding:'utf8'});fs.writeFileSync(P+'/determinism.log',r);process.stdout.write(r);}
+render(['--q','scene=s19','--out',P+'/S19_scene.mp4','--crf','16','--fps','30','--workers','1']);
+import fs from 'node:fs';import {execFileSync as run} from 'node:child_process';import {timing} from '../../../film/timing_snapshot.js';
+const P='qa/v6/f03_s14',tool='/workspace/garden-skills/skills/motion-showreel/scripts/render.mjs',origin=timing.find(s=>s.n===54).start;
+const at=(n,f)=>{const s=timing.find(s=>s.n===n);return s.start-origin+(s.end-s.start)*f;};
+const picks=[{name:'s54_low',t:at(54,.12)},{name:'s54_middle',t:at(54,.82)},{name:'s55',t:at(55,.7)},{name:'s56',t:at(56,.7)},{name:'s57',t:at(57,.84)}];fs.writeFileSync(P+'/keyframes.json',JSON.stringify({origin,duration:at(57,1),picks},null,2));
+function render(args){for(let attempt=0;;attempt++){try{run('node',[tool,'film',...args],{stdio:'inherit'});return;}catch(e){if(attempt>=2)throw e;console.log('Retrying renderer after transient failure',attempt+1);}}}
+if(!process.argv.includes('--resume-checks'))render(['--q','scene=s14','--still',picks.map(p=>p.t.toFixed(6)).join(','),'--out',P+'/stills']);if(!process.argv.includes('--resume-checks'))render(['--q','scene=s14','--determinism']);
+for(const [scene,source] of [['s08','c03_s10'],['s10','c03_s10'],['s11','d01_s11'],['s19','e02_s19']]){const times=scene==='s08'?JSON.parse(fs.readFileSync('qa/v6/c03_s10/s08_times.json')):JSON.parse(fs.readFileSync(`qa/v6/${source}/keyframes.json`)).picks.map(p=>p.t);render(['--q','scene='+scene,'--still',times.map(t=>t.toFixed(scene==='s08'?9:6)).join(','),'--out',P+'/'+scene+'_parity']);}
+render(['--q','scene=s14','--out',P+'/S14.mp4','--crf','16','--fps','30','--workers','3']);
+{
+  "origin": 90.63675000000003,
+  "duration": 10.585625000000007,
+  "picks": [
+    {
+      "name": "s23_start",
+      "t": 0.16606750000000003
+    },
+    {
+      "name": "s23_transition",
+      "t": 2.3249450000000005
+    },
+    {
+      "name": "s23_red",
+      "t": 4.871313333333335
+    },
+    {
+      "name": "s24_anchor",
+      "t": 7.023093750000005
+    },
+    {
+      "name": "s24_before",
+      "t": 7.313596666666671
+    },
+    {
+      "name": "s24_after",
+      "t": 9.637620000000005
+    }
+  ]
+}S02
+S02_audit.log
+S02_build.log
+S03
+S03_build.log
+S16
+S16_build.log
+assets_render.log
+audio_audit.py
+audio_verification.json
+build.mjs
+bundle_base.txt
+delivery_verification.json
+git_delivery.log
+locked_S02.sha256
+locked_S03.sha256
+locked_S16.sha256
+locked_check_fix01.log
+locked_codex_end.sha256
+locked_codex_start.sha256
+locked_end_fix01.sha256
+locked_start.sha256
+verify_delivery.py
+人物设定.png
+审核意见.md
+素材库G.md
+续跑日志.md
+// Timing snapshot generated from /workspace/病理科普视频/配音/全稿_v3/timeline.json
+// (lines n=29–34, real start/end seconds; no estimated durations).
+// Preserve the approved scene through its legacy clock.
+import scene from './chapters/s08.js';
+import {timing as allTiming} from './timing_snapshot.js';
+const timing=allTiming.filter(s=>s.n>=29&&s.n<=34);
+export const origin = timing[0].start;
+export const sentences = timing.map(s => ({id:s.n,start:s.start-origin,end:s.end-origin}));
+export const duration = sentences.at(-1).end + 0.8;
+export const T = {
+  at: id => sentences[id-29].start,
+  end: id => id===34 ? duration : sentences[id-29].end,
+  frac: (id,f) => sentences[id-29].start + (sentences[id-29].end-sentences[id-29].start)*f,
+};
+const legacy = {at:id=>(id-29)*6,end:id=>(id-28)*6,frac:(id,f)=>(id-29+f)*6};
+export function sceneTime(t) {
+  const s = sentences.find(s=>t<s.end) || sentences.at(-1);
+  if(t>=sentences.at(-1).end) return 33; // retain the approved final state for the tail
+  return (s.id-29)*6 + Math.max(0,(t-s.start)/(s.end-s.start))*6;
+}
+const draw = scene.draw;
+scene.draw = (ctx,t) => draw.call(scene,ctx,sceneTime(t),legacy);
+
+export function forScene(first,last,tail=.8){
+ const rows=allTiming.filter(s=>s.n>=first&&s.n<=last),origin=rows[0].start;
+ const row=id=>{const s=rows.find(s=>s.n===Number(id));if(!s)throw Error('Unknown sentence '+id);return s;};
+ return {origin,duration:rows.at(-1).end-origin+tail,rows,
+ T:{has:id=>rows.some(s=>s.n===id),at:id=>row(id).start-origin,end:id=>row(id).end-origin,frac:(id,f)=>row(id).start-origin+(row(id).end-row(id).start)*f}};
+}
+
+exec
+/bin/bash -lc "cat qa/v6/clin/build.mjs; rg --files qa/v6/ct_real_adv01 qa/v6/{b10,c03_s10,d01_s11,h06_adv,e12_s19,f03_s14} | head -100; rg --files qa | rg 'build.*(14|13)|ct.*mjs'; cat qa/v6/animatic/build_plate.py; cat assembly/pipeline/README.md" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+import fs from 'node:fs';import {execFileSync as run} from 'node:child_process';import {createCanvas,loadImage,GlobalFonts,Path2D} from '@napi-rs/canvas';
+globalThis.Path2D=Path2D;globalThis.document={createElement:()=>createCanvas(1,1)};
+const scene=process.argv[2]||'s02';const ranges={s02:[6,10],s03:[11,13],s16:[60,62]};
+const {forScene}=await import('../../../film/timeline.js');const clock=forScene(...ranges[scene],0),T=clock.T;
+const P=`qa/v6/clin/${scene.toUpperCase()}`;fs.mkdirSync(P,{recursive:true});
+const picks=clock.rows.flatMap(r=>[.22,.86].map(f=>({name:`s${String(r.n).padStart(2,'0')}_${f===.22?'early':'late'}`,t:T.frac(r.n,f)})));
+
+picks.sort((a,b)=>a.t-b.t);
+fs.writeFileSync(P+'/keyframes.json',JSON.stringify({source:'/workspace/病理科普视频/配音/全稿_v3/timeline.json',origin:clock.origin,duration:clock.duration,rows:clock.rows,picks},null,2));
+const tool='/workspace/garden-skills/skills/motion-showreel/scripts/render.mjs';
+function render(args){if(process.env.REUSE==='1')return;run('node',[tool,'film','--q',`scene=${scene}`,...args],{stdio:'inherit'});}
+render(['--still',picks.map(p=>p.t.toFixed(6)).join(','),'--out',P+'/stills']);
+const files=fs.readdirSync(P+'/stills').filter(s=>s.endsWith('.png')).sort();
+const sheet=createCanvas(960,Math.ceil(picks.length/2)*300),sc=sheet.getContext('2d');sc.fillStyle='#F4EFE6';sc.fillRect(0,0,sheet.width,sheet.height);
+for(let i=0;i<files.length;i++){const img=await loadImage(P+'/stills/'+files[i]);const path=P+'/'+picks[i].name+'.png';fs.copyFileSync(P+'/stills/'+files[i],path);const crop=createCanvas(1200,1000),cc=crop.getContext('2d');const id=Number(picks[i].name.slice(1,3));const cropX=scene==='s02'?(id===8?1290:id===9?1220:1150):scene==='s03'?(id===11?760:1200):(id===62?760:1100);cc.drawImage(img,cropX,190,600,500,0,0,1200,1000);fs.writeFileSync(P+'/'+picks[i].name+'_200pct.png',crop.toBuffer('image/png'));if(scene==='s02'&&id===6){const hand=createCanvas(1200,1000),hc=hand.getContext('2d');hc.drawImage(img,760,190,600,500,0,0,1200,1000);fs.writeFileSync(P+'/'+picks[i].name+'_hand_200pct.png',hand.toBuffer('image/png'));}sc.drawImage(img,(i%2)*480,Math.floor(i/2)*300,480,270);sc.fillStyle='#2A2A35';sc.font='20px sans-serif';sc.fillText(picks[i].name,(i%2)*480+15,Math.floor(i/2)*300+292);}
+fs.writeFileSync(P+'/review_sheet.png',sheet.toBuffer('image/png'));
+render(['--determinism']);
+if(process.env.STILLS_ONLY!=='1'){
+render(['--out',P+'/'+scene.toUpperCase()+'.mp4','--crf','16','--fps','30','--workers','1']);
+if(process.env.REUSE!=='1')run('ffmpeg',['-y','-i',P+'/'+scene.toUpperCase()+'.mp4','-ss',String(clock.origin),'-i','/workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav','-map','0:v:0','-map','1:a:0','-t',String(clock.duration),'-vf','scale=1280:720','-c:v','libx264','-crf','16','-preset','fast','-c:a','aac','-b:a','192k','-movflags','+faststart',P+'/'+scene.toUpperCase()+'_带配音_720p.mp4'],{stdio:'inherit'});
+}
+
+const audit={scene,range:ranges[scene],origin:clock.origin,duration:clock.duration,blankBelow810:true};
+for(const pick of picks){const im=await loadImage(P+'/'+pick.name+'.png');const ca=createCanvas(1920,1080),cx=ca.getContext('2d');cx.drawImage(im,0,0);const data=cx.getImageData(0,810,1920,270).data;for(let j=0;j<data.length;j+=4)if(data[j]!==244||data[j+1]!==239||data[j+2]!==230){audit.blankBelow810=false;break;}}
+const px=async name=>{const im=await loadImage(P+'/'+name+'.png');const cv=createCanvas(1920,1080),g=cv.getContext('2d');g.drawImage(im,0,0);return g.getImageData(0,0,1920,1080).data;};
+const cropOf=id=>scene==='s02'?(id===8?1290:id===9?1220:1150):scene==='s03'?(id===11?760:1200):(id===62?760:1100);
+audit.earlyLateMeanDiff={};audit.earlyLateCropDiff={};
+for(const r of clock.rows){const n=String(r.n).padStart(2,'0'),A=await px('s'+n+'_early'),B=await px('s'+n+'_late');let s=0,cnt=0;for(let k=0;k<A.length;k+=4){s+=Math.abs(A[k]-B[k])+Math.abs(A[k+1]-B[k+1])+Math.abs(A[k+2]-B[k+2]);cnt+=3;}audit.earlyLateMeanDiff['s'+n]=+(s/cnt).toFixed(2);
+ const cx=cropOf(r.n);let cs=0,cc=0;for(let y=190;y<690;y++)for(let x=cx;x<cx+600;x++){const k=(y*1920+x)*4;cs+=Math.abs(A[k]-B[k])+Math.abs(A[k+1]-B[k+1])+Math.abs(A[k+2]-B[k+2]);cc+=3;}audit.earlyLateCropDiff['s'+n]=+(cs/cc).toFixed(2);}
+if(process.env.STILLS_ONLY!=='1'){audit.video=JSON.parse(run('ffprobe',['-v','quiet','-show_streams','-show_format','-of','json',P+'/'+scene.toUpperCase()+'_带配音_720p.mp4'],{encoding:'utf8'}));}
+fs.writeFileSync(P+'/verification.json',JSON.stringify(audit,null,2));if(!audit.blankBelow810)throw Error('Content below y810');
+const mustMove={s02:[6,8,10],s03:[11]}[scene]||[];
+for(const n of mustMove){const key='s'+String(n).padStart(2,'0'),v=audit.earlyLateMeanDiff[key],cv=audit.earlyLateCropDiff[key];if(!(v>2))throw Error(`${key} early/late mean diff ${v} (crop ${cv}) <= 2/255`);}
+console.log('meanDiff',JSON.stringify(audit.earlyLateMeanDiff),'cropDiff',JSON.stringify(audit.earlyLateCropDiff));
+qa/v6/ct_real_adv01/S04_commit.log
+qa/v6/d01_s11/probe_720p.json
+qa/v6/d01_s11/s43_start.png
+qa/v6/d01_s11/parity_s08.log
+qa/v6/d01_s11/render.log
+qa/v6/d01_s11/review_sheet.png
+qa/v6/d01_s11/s42_to_43.png
+qa/v6/d01_s11/final_pipeline.log
+qa/v6/d01_s11/s43_middle_200pct.png
+qa/v6/c03_s10/probe_720p.json
+qa/v6/ct_real_adv01/S04/s17_30.png
+qa/v6/c03_s10/s37_open_low_200pct.png
+qa/v6/ct_real_adv01/S04/s14_80_video720.png
+qa/v6/c03_s10/render.log
+qa/v6/ct_real_adv01/S04/s19_72_200.png
+qa/v6/c03_s10/review_sheet.png
+qa/v6/ct_real_adv01/S04/review_sheet.png
+qa/v6/c03_s10/s37_open_low.png
+qa/v6/ct_real_adv01/S04/s15_72_200.png
+qa/v6/c03_s10/annotate.py
+qa/v6/ct_real_adv01/S04/s18_72_200.png
+qa/v6/c03_s10/S10.mp4
+qa/v6/ct_real_adv01/S04/media_check.json
+qa/v6/c03_s10/s08_parity.json
+qa/v6/ct_real_adv01/S04/s14_80_200.png
+qa/v6/c03_s10/s41.png
+qa/v6/c03_s10/sha256_基准.txt
+qa/v6/ct_real_adv01/S04/s17_82_video720.png
+qa/v6/ct_real_adv01/S04/keyframes.json
+qa/v6/ct_real_adv01/S04/s16_82_200.png
+qa/v6/ct_real_adv01/S04/s18_72_video720.png
+qa/v6/ct_real_adv01/S04/s19_72_sidebar_200.png
+qa/v6/ct_real_adv01/S04/s15_72_sidebar_200.png
+qa/v6/ct_real_adv01/S04/S04.mp4
+qa/v6/ct_real_adv01/S04/review_video720.png
+qa/v6/ct_real_adv01/S04/s16_82_sidebar_200.png
+qa/v6/ct_real_adv01/S04/s14_12_sidebar_200.png
+qa/v6/ct_real_adv01/S04/s14_12.png
+qa/v6/ct_real_adv01/S04/s17_30_sidebar_200.png
+qa/v6/ct_real_adv01/S04/s16_30.png
+qa/v6/ct_real_adv01/S04/s16_30_video720.png
+qa/v6/ct_real_adv01/S04/s15_72_video720.png
+qa/v6/ct_real_adv01/S04/s14_12_video720.png
+qa/v6/ct_real_adv01/S04/自检.md
+qa/v6/ct_real_adv01/S04/s16_30_sidebar_200.png
+qa/v6/ct_real_adv01/S04/s14_80_sidebar_200.png
+qa/v6/h06_adv/subtitle_verify.py
+qa/v6/h06_adv/audio_verification.json
+qa/v6/h06_adv/render.log
+qa/v6/h06_adv/review_sheet.png
+qa/v6/h06_adv/boundary_metrics_720p.json
+qa/v6/h06_adv/boundary_review.png
+qa/v6/h06_adv/render.mjs
+qa/v6/h06_adv/subtitle_verification.json
+qa/v6/h06_adv/boundary.log
+qa/v6/b10/t_003.80.png
+qa/v6/b10/s08_high_s34.png
+qa/v6/b10/render.log
+qa/v6/b10/review_sheet.png
+qa/v6/b10/s08_high_s32_200pct.png
+qa/v6/b10/s08_high_s33_200pct.png
+qa/v6/b10/sha256_开工.txt
+qa/v6/d01_s11/splice_720p/window.json
+qa/v6/e12_s19/finalize.log
+qa/v6/e12_s19/sha256_差异.log
+qa/v6/e12_s19/video_frame_parity.json
+qa/v6/e12_s19/间质色阶直方图.png
+qa/v6/e12_s19/transition_review.py
+qa/v6/e12_s19/render.log
+qa/v6/b10/sha256_校验.log
+qa/v6/e12_s19/review_sheet.png
+qa/v6/b10/低倍_b09_vs_b10.png
+qa/v6/e12_s19/decode_check.log
+qa/v6/e12_s19/iris_video.py
+qa/v6/b10/s08_high_s30.png
+qa/v6/e12_s19/iris_enter_200pct.png
+qa/v6/b10/mucosa_ROI.png
+qa/v6/e12_s19/transition_2_200pct.png
+qa/v6/b10/s08_low_200pct.png
+qa/v6/b10/determinism.log
+qa/v6/e12_s19/s69_fibrosis.png
+qa/v6/b10/s08_mid_200pct.png
+qa/v6/e12_s19/iris_enter.png
+qa/v6/b10/verify.py
+qa/v6/e12_s19/render_s19.mjs
+qa/v6/b10/s08_low.png
+qa/v6/e12_s19/iris_exit_200pct.png
+qa/v6/b10/s08_high_s30_200pct.png
+qa/v6/e12_s19/transition_2.png
+qa/v6/b10/t_021.00.png
+qa/v6/e12_s19/s69_middle_200pct.png
+qa/v6/e12_s19/sha256_开工.txt
+qa/v6/e12_s19/s70_lymph.png
+qa/v6/e12_s19/s69_middle.png
+qa/v6/e12_s19/audio_alignment.json
+qa/v6/e12_s19/make_bundle.py
+qa/v6/e12_s19/measure.py
+qa/v6/e12_s19/plasma_parity.json
+qa/v6/e12_s19/keyframes.json
+qa/v6/e12_s19/sha256_校验.log
+qa/v6/h05/build_v14.log
+qa/v6/h05/__pycache__/build_v14.cpython-313.pyc
+qa/v6/h05/build_v14.py
+qa/v6/f03_s14/__pycache__/build_v10.cpython-313.pyc
+qa/v6/ct_real_adv01/deliver.mjs
+qa/v6/ct/deliver.mjs
+qa/v6/h03_s07/build_v13.py
+qa/v6/f02_s14/__pycache__/build_v9.cpython-313.pyc
+qa/v6/f01_s14/__pycache__/build_v8.cpython-313.pyc
+qa/v6/ct_real/deliver.mjs
+qa/v6/h01_s06/__pycache__/build_v11.cpython-313.pyc
+import json,re,subprocess,pathlib
+p=pathlib.Path(__file__).resolve().parent
+root=p.parents[2]
+d=json.load(open('/workspace/病理科普视频/配音/全稿_v3/timeline.json')); timing=json.load(open(p/'timing.json'))
+filters=[]
+for scene,a,b in re.findall(r'^\| (S\d{2})／(\d+)—(\d+) ',(root/'分镜/分镜_v1.md').read_text(),re.M):
+ a,b=int(a),int(b)
+ if scene=='S08':continue
+ start=0 if a==1 else d['lines'][a-1]['start']
+ end=d['lines'][b]['start'] if b<77 else d['duration']
+ text=f'草稿占位 {scene} ／句 {a:02}–{b:02}'
+ filters.append(f"drawtext=fontfile=/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc:text='{text}':x=65:y=65:fontsize=28:fontcolor=0x8A8680:enable='gte(t,{start})*lt(t,{end})'")
+# S08 overrides the storyboard's S07 sentences 29–30, as explicitly requested.
+origin=timing['origin'];end=origin+timing['duration']
+f='[0:v]'+','.join(filters)+'[base];[1:v]setpts=PTS-STARTPTS+'+str(origin)+'/TB[s];[base][s]overlay=eof_action=pass:enable=\'gte(t,'+str(origin)+')*lt(t,'+str(end)+')\'[v]'
+cmd=['ffmpeg','-y','-v','error','-f','lavfi','-i',f"color=c=0xF4EFE6:s=1920x1080:r=30:d={d['duration']}",'-i',str(p/'S08.mp4'),'-filter_complex',f,'-map','[v]','-t',str(d['duration']),'-r','30','-c:v','libx264','-preset','veryfast','-crf','16','-pix_fmt','yuv420p','-an',str(p/'scene_plate.mp4')]
+(p/'plate_command.json').write_text(json.dumps(cmd,ensure_ascii=False,indent=2));subprocess.run(cmd,check=True)
+# v5 final assembly
+
+Builds a 1920×1080 H.264 film: scene plate, bilingual subtitle band, 12 s endcard, stereo 48 kHz AAC. The endcard directory is only read. Old-film music from `v4_mix` is not used.
+
+```
+./pipeline/assemble.sh \
+  --scene-video <path> \          # optional; else a #F4EFE6 plate
+  --cues <snapshot.json> \        # optional; else loadCues()
+  --voice <wav> \                 # optional; else 配音/全稿_v3/旁白_v3.wav if it exists, else silence
+  --music <wav> \                 # optional; else silence
+  --endcard-dir ../endcard \      # default: assembly/endcard
+  --fps 30 \
+  --out-dir qa \
+  --out-name dryrun_测试 \
+  --content-duration 18 \         # optional; pad or trim the picture to this many seconds
+  --max-cues 5 \                  # optional; keep the first N cues
+  --blind                         # also write <out-name>_盲审.mp4 (default on)
+```
+
+`--xfade` turns on hard-cut subtitle switches. `--no-blind` skips the stripped copy. `--keep-tmp` leaves `qa/tmp/`.
+
+## Steps
+
+1. Load cues (`subtitle/loadCues.js`). Content length is the last cue's end, or `--content-duration`. The endcard is always 12 s after that.
+2. Scene. A missing plate becomes a 1920×1080 30 fps `#F4EFE6` video. A provided plate is trimmed or padded with paper frames and scaled or cropped only when it is not already 1920×1080.
+3. Subtitles. Headless Chrome (MixSans loaded before any `measureText`) paints a transparent PNG sequence. Picture content may extend to y < 950 (`BAND.safeTop` in `subtitle/config.js`). From that line the frame is a soft paper scrim — it peaks just above the Chinese halo and fades out by the bottom of the frame, not a solid slab — plus one Chinese line (52 px) and one English card (30 px). `ffmpeg overlay=0:0` puts that band on the scene. Identical frames are hard-linked. `xfade` defaults off.
+4. Endcard. `pipeline/render_endcard.mjs` opens `endcard/index.html` at `http://endcard.local/`, waits for `window.READY`, and calls `window.render(t)` for `t` in `[0, 12)` at 30 fps. The page fills the paper itself. The clip is concatenated after the content.
+5. Audio. Voice starts at t=0 and is trimmed or padded so it never plays over the endcard. Music may cover content + endcard and fades out over the last 0.8 s. Music is ducked under the voice with `sidechaincompress=threshold=0.05:ratio=8:attack=50:release=300`, then `amix`. Missing inputs are silent tracks of the right length. The mix targets −14 LUFS and true peak ≤ −1 dBTP (two-pass `loudnorm`). If both inputs are silence, loudnorm is skipped. Output is stereo 48 kHz AAC, `+faststart`, `yuv420p`.
+6. Writes `<out-name>.mp4`, `<out-name>_720p.mp4` (1280×720), and a JSON report next to the markdown dry-run report.
+
+## Blind review
+
+`pipeline/blind_review.sh INPUT OUTPUT PROBE STRINGS [files...]` re-encodes with `-map_metadata -1`, bitexact flags, and a filter that drops SEI type 6, then clears the `avc1` compressor-name field (ffmpeg 7 still writes `Lavc libx264` there). `qa/blind_ffprobe.txt` is `ffprobe -hide_banner -show_format -show_streams` with structural `DISPOSITION:` rows removed, plus `RESULT: PASS` or `FAIL`.
+
+`qa/blind_strings.txt` scans `endcard.json` (read only), the cue snapshot, and other emitted JSON for `三峡`, `Sharpton`, `Gisele`, `导师`, `指导`. `【待填】` is not a failure.
+
+## Intermediates
+
+Frames are written under `qa/tmp/sub/` and `qa/tmp/endcard/` and deleted after the mp4s exist. Pass `--keep-tmp` to inspect them. The three sample PNGs in `qa/frames/` are kept.
+
+## Dry run
+
+```
+./pipeline/assemble.sh --content-duration 18 --max-cues 5 --out-dir qa --out-name dryrun_测试
+```
+
+That keeps sentences 01–05 (estimate end 17.40 s), holds paper until 18.00 s, then appends the 12 s endcard (30 s total).
+
+## Microscope iris transitions
+
+Resolve `subtitle/sceneTheme.js::resolveRanges` with the current cue snapshot to a
+JSON file (never store absolute edit times as configuration). Then:
+
+```
+python3 assembly/pipeline/iris_plate.py --ranges resolved_ranges.json --scene S08 \
+  --scene-video S08.mp4 --base scene_plate.mp4 --out transitioned_plate.mp4 \
+  --work qa/iris_S08 --tail 0.8 --cx 1110 --cy 475
+```
+
+The scene input's first frame is held during entry; its final held state is used
+for exit. The paper dims while a feathered circular mask expands about the
+specified eyepiece centre; exit reverses it. Tail must match the scene hold in
+the base plate. For S10/S11/S14/S19 add a cue range, supply that scene's local clip,
+and invoke again using the previous transitioned plate as `--base` (distinct
+output). Regenerate resolved ranges and the plate whenever narration changes.
+
+exec
+/bin/bash -lc 'cat qa/v6/ct_real_adv01/deliver.mjs | head -65; cat qa/v6/h05/build_v14.py; cat qa/v6/b10/verify.py | head -65; cat qa/v6/c03_s10/s08_times.json; cat qa/v6/d01_s11/keyframes.json; cat qa/v6/animatic/自检.md | tail -30; cat qa/v6/e12_s19/自检.md | tail -25; cat 分镜/分镜_v1.md > /tmp/a02_storyboard.txt; head -20 /workspace/病理科普视频/配音/全稿_v3/timeline.json' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+import fs from 'node:fs';import {execFileSync as run} from 'node:child_process';
+const scene=process.argv[2],ranges={S09:[35,36],S12:[47,48],S15:[58,59],S04:[14,19]},[first,last]=ranges[scene],P=`qa/v6/ct_real_adv01/${scene}`;
+const rows=JSON.parse(fs.readFileSync('/workspace/病理科普视频/配音/全稿_v3/timeline.json')).lines.filter(s=>s.n>=first&&s.n<=last),origin=rows[0].start,duration=rows.at(-1).end-origin;
+fs.mkdirSync(P,{recursive:true});const picks=rows.flatMap(s=>(scene==='S04'?(s.n===14?[.12,.8]:[16,17].includes(s.n)?[.3,.82]:[.72]):[.3,.82]).map(f=>({name:`s${s.n}_${Math.round(f*100)}`,t:s.start-origin+(s.end-s.start)*f})));
+fs.writeFileSync(`${P}/keyframes.json`,JSON.stringify({origin,duration,picks},null,2));
+const tool='/workspace/garden-skills/skills/motion-showreel/scripts/render.mjs';
+function render(args){run('node',[tool,'film','--q',`scene=${scene.toLowerCase()}`,...args],{stdio:'inherit'});}
+render(['--still',picks.map(p=>p.t.toFixed(6)).join(','),'--out',P+'/stills']);render(['--determinism']);
+run('python3',['qa/v6/ct_real_adv01/review.py',scene],{stdio:'inherit'});
+render(['--out',`${P}/${scene}.mp4`,'--fps','30','--workers','1','--crf','16']);
+run('ffmpeg',['-y','-i',`${P}/${scene}.mp4`,'-ss',String(origin),'-t',String(duration),'-i','/workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav','-map','0:v:0','-map','1:a:0','-vf','scale=1280:720','-c:v','libx264','-crf','16','-c:a','aac','-b:a','192k','-shortest',`${P}/${scene}_带配音_720p.mp4`],{stdio:'inherit'});
+run('python3',['qa/v6/ct_real_adv01/check.py',scene],{stdio:'inherit'});
+from pathlib import Path
+import json,math,subprocess
+P=Path(__file__).resolve().parent;A=P.parent/'animatic'
+def run(a):subprocess.run(list(map(str,a)),check=True)
+fps=30
+for suffix,w,h,safe in [('',1920,1080,950),('_720p',1280,720,634)]:
+ old=A/('粗剪_v13'+suffix+'.mp4');work=P/('splice'+suffix);work.mkdir(exist_ok=True)
+ k6=json.loads((P.parent/'h04_s06/keyframes.json').read_text());k7=json.loads((P.parent/'h03_s07/keyframes.json').read_text())
+ sf=math.ceil(k6['origin']*fps);join=math.ceil(k7['origin']*fps);ef=math.ceil((k7['origin']+k7['duration'])*fps)
+ keys=subprocess.check_output(['ffprobe','-v','error','-select_streams','v:0','-skip_frame','nokey','-show_entries','frame=pts_time','-of','csv=p=0',str(old)]).decode();keys=[round(float(s.strip().strip(','))*fps) for s in keys.splitlines() if s.strip().strip(',')];bs=max(i for i in keys if i<=sf);be=min(i for i in keys if i>=ef)
+ patches=[]
+ for lane,scene in [('h04_s06','S06'),('h03_s07','S07')]:
+  patch=P.parent/lane/(scene+'.mp4')
+  if suffix:
+   dest=work/(scene+'.mp4');run(['ffmpeg','-v','error','-y','-threads','1','-i',patch,'-vf',f'scale={w}:{h}','-an','-c:v','libx264','-crf','16','-preset','veryfast','-threads','1',dest]);patch=dest
+  patches.append(patch)
+ f=f"[1:v]tpad=stop_mode=clone:stop_duration=1,crop={w}:{safe}:0:0,setpts=PTS-STARTPTS+{(sf-bs)/fps}/TB[p6];[2:v]crop={w}:{safe}:0:0,setpts=PTS-STARTPTS+{(join-bs)/fps}/TB[p7];[0:v][p6]overlay=0:0:eof_action=pass:enable='gte(t,{(sf-bs)/fps})*lt(t,{(join-bs)/fps})'[v6];[v6][p7]overlay=0:0:eof_action=pass:enable='gte(t,{(join-bs)/fps})*lt(t,{(ef-bs)/fps})',trim=end_frame={be-bs},setpts=PTS-STARTPTS[v]"
+ run(['ffmpeg','-v','error','-y','-threads','1','-ss',bs/fps,'-i',old,'-i',patches[0],'-i',patches[1],'-filter_complex_threads','1','-filter_complex',f,'-map','[v]','-frames:v',be-bs,'-an','-c:v','libx264','-crf','16','-preset','veryfast','-pix_fmt','yuv420p','-profile:v','high','-level','4.0','-bf','0','-g','30','-x264-params','repeat-headers=1','-threads','1',work/'middle.mp4'])
+ run(['ffmpeg','-v','error','-y','-i',old,'-frames:v',bs,'-map','0:v:0','-an','-c:v','copy',work/'before.mp4']);run(['ffmpeg','-v','error','-y','-ss',be/fps,'-i',old,'-map','0:v:0','-an','-c:v','copy',work/'after.mp4'])
+ (work/'concat.txt').write_text(''.join("file '"+str((work/(n+'.mp4')).resolve())+"'\n"+(f'duration {d}\n' if d else '') for n,d in [('before',bs/fps),('middle',(be-bs)/fps),('after',None)]))
+ dest=A/('粗剪_v14'+suffix+'.mp4');run(['ffmpeg','-v','error','-y','-f','concat','-safe','0','-i',work/'concat.txt','-i',old,'-map','0:v:0','-map','1:a:0','-c','copy','-movflags','+faststart',dest])
+ (work/'window.json').write_text(json.dumps(dict(start_frame=sf,join_frame=join,end_frame=ef,gop_start=bs,gop_end=be)))
+ if suffix:
+  for lane,scene,k in [('h04_s06','S06',k6),('h03_s07','S07',k7)]:
+   run(['ffmpeg','-v','error','-y','-ss',k['origin'],'-i',dest,'-t',k['duration'],'-c:v','libx264','-crf','16','-preset','veryfast','-threads','1','-c:a','aac','-b:a','192k',P.parent/lane/(scene+'_带配音_720p.mp4')])
+from pathlib import Path
+from PIL import Image,ImageDraw,ImageFont
+import numpy as np,json,hashlib,math
+out=Path(__file__).resolve().parent;root=out.parents[2];base=out.parent/'b09'
+font=ImageFont.truetype('/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',24)
+times=[1,3.8,9,15,21,27,33];names=['low','mid','high_s30','high_s31','high_s32','high_s33','high_s34']
+rows=[]
+for t,name in zip(times,names):
+ im=Image.open(out/f't_{t:06.2f}.png').convert('RGB');im.save(out/f's08_{name}.png')
+ if t in times:
+  a=np.array(Image.open(base/f't_{t:06.2f}.png').convert('RGB')).astype(float);b=np.array(im).astype(float);rows.append({'t':t,'MAE':float(np.abs(a-b).mean()),'pass':bool(np.abs(a-b).mean()<.5) if t!=33 else None})
+# Same annular ROI for every version; CIE L* D65 from linear sRGB.
+mask=Image.new('1',(1920,1080));d=ImageDraw.Draw(mask)
+for y,fill in [(-150,1),(-290,0)]:
+ pts=[]
+ for i in range(720):
+  a=i/720*math.tau;r=(390 if y==-150 else 170)+12*math.sin(a*3)+9*math.sin(a*5)+22*math.sin(a*4+.7);u=1.6*math.cos(a)*r;v=math.sin(a)*r;rot=math.pi/6
+  pts.append((1110+.576*(u*math.cos(rot)-v*math.sin(rot)),475+.576*(u*math.sin(rot)+v*math.cos(rot))))
+ d.polygon(pts,fill=fill)
+roi=np.array(mask).astype(bool);mask.save(out/'mucosa_ROI.png');Ls={}
+for label,folder in [('b09',base),('b10',out)]:
+ a=np.array(Image.open(folder/'t_001.00.png').convert('RGB')).astype(float)/255;s=np.where(a<=.04045,a/12.92,((a+.055)/1.055)**2.4);Y=s@np.array([.2126729,.7151522,.072175]);L=116*np.where(Y>.008856,np.cbrt(Y),7.787*Y+16/116)-16;Ls[label]=float(L[roi].mean())
+for title,t,crop in [('低倍_b09_vs_b10',1,(820,230,1190,430)),('s34_b09_vs_b10',33,(870,440,1320,870))]:
+ sheet=Image.new('RGB',(1920,540+70+(crop[3]-crop[1])*2),'#111114');d=ImageDraw.Draw(sheet)
+ for i,folder in enumerate([base,out]):
+  im=Image.open(folder/f't_{t:06.2f}.png').convert('RGB');sheet.paste(im.resize((960,540)),(i*960,35));detail=im.crop(crop).resize(((crop[2]-crop[0])*2,(crop[3]-crop[1])*2));sheet.paste(detail,(i*960+30,610));d.text((i*960+25,3),['b09','b10'][i]+' / 下方 200% 局部',font=font,fill='white')
+ sheet.save(out/(title+'.png'))
+review=Image.new('RGB',(1920,1592),'#111114');d=ImageDraw.Draw(review)
+for i,(t,name) in enumerate(zip(times,names)):
+ x=i%2*960;y=i//2*398;review.paste(Image.open(out/f't_{t:06.2f}.png').resize((640,360)),(x+160,y+34));d.text((x+24,y+3),f'{name} · {t}s',font=font,fill='white')
+review.save(out/'review_sheet.png')
+(out/'metrics.json').write_text(json.dumps({'MAE':rows,'mucosa_CIE_L_star':Ls},indent=2))
+assert all(r['pass'] for r in rows if r['t']!=33)
+print(json.dumps({'MAE':rows,'L':Ls},indent=2))
+
+# Sample a 15px corridor along the mapped original epithelial path; omit 5 local
+# units at each end, where the intentionally retained torn stumps are located.
+pts=json.loads((out/'gap_path.json').read_text());sample=Image.new('1',(1920,1080));ImageDraw.Draw(sample).line([tuple(p) for p in pts],fill=1,width=15);sm=np.array(sample).astype(bool);ratios={}
+for label,folder in [('b09',base),('b10',out)]:
+ a=np.array(Image.open(folder/'t_033.00.png').convert('RGB')).astype(float)
+ purple=(a[:,:,0]<165)&(a[:,:,1]<135)&(a[:,:,2]>a[:,:,1]*1.08)
+ ratios[label]=float(purple[sm].mean()*100)
+sample.save(out/'gap_sampling_mask.png')
+metrics=json.loads((out/'metrics.json').read_text());metrics['gap_purple_percent']=ratios;metrics['gap_sampling_pixels']=int(sm.sum());(out/'metrics.json').write_text(json.dumps(metrics,indent=2));assert ratios['b10']<5
+# Every frame also has a separate literal 200% detail. Review sheet includes all.
+crops=[(820,230,1190,430),(920,320,1220,480),(980,360,1230,520),(980,360,1230,520),(980,360,1230,520),(980,360,1230,520),(870,440,1320,870)]
+review=Image.new('RGB',(1920,7*620),'#111114');d=ImageDraw.Draw(review)
+for i,(t,name,crop) in enumerate(zip(times,names,crops)):
+ im=Image.open(out/f't_{t:06.2f}.png').convert('RGB');detail=im.crop(crop).resize(((crop[2]-crop[0])*2,(crop[3]-crop[1])*2),Image.Resampling.NEAREST);detail.save(out/f's08_{name}_200pct.png');y=i*620;review.paste(im.resize((960,540)),(0,y+40));review.paste(detail,(1000,y+70));d.text((20,y+3),f'{name} / {t}s',font=font,fill='white');d.text((1000,y+3),'200% 局部',font=font,fill='white')
+review.save(out/'review_sheet.png')
+print('gap purple %',ratios)
+
+# Literal screen-pixel extent of newly added material, measured against b09.
+a=np.array(Image.open(base/'t_033.00.png').convert('RGB')).astype(int)
+b=np.array(Image.open(out/'t_033.00.png').convert('RGB')).astype(int)
+diff=np.abs(a-b).max(2);metrics=json.loads((out/'metrics.json').read_text());metrics['escape_bounds']={}
+for threshold in [0,2,8]:
+ y,x=np.where(diff>threshold)
+ metrics['escape_bounds'][str(threshold)]={'xyxy':[int(x.min()),int(y.min()),int(x.max()+1),int(y.max()+1)],'width':int(x.max()-x.min()+1),'height':int(y.max()-y.min()+1)}
+(out/'metrics.json').write_text(json.dumps(metrics,indent=2))
+[0.6829374999999989,2.595162499999996,6.745020833333328,11.436145833333327,16.12570833333332,20.22895833333331,23.66914583333329]{
+  "origin": 150.34279166666664,
+  "duration": 48.87679166666656,
+  "picks": [
+    {
+      "name": "s42_to_43",
+      "t": 28.0026541666666
+    },
+    {
+      "name": "s43_start",
+      "t": 28.6591979166666
+    },
+    {
+      "name": "s43_middle",
+      "t": 30.191133333333266
+    },
+    {
+      "name": "s43_end",
+      "t": 31.723068749999932
+    },
+    {
+      "name": "s44",
+      "t": 35.664829166666586
+    },
+    {
+      "name": "s45_fibrin",
+      "t": 39.11693666666657
+    },
+    {
+      "name": "s45_pus",
+      "t": 41.19797916666657
+    },
+    {
+      "name": "s46",
+      "t": 47.27851041666656
+    }
+  ]
+}七帧全部逐像素一致，MAE=0<0.5。contact_sheet.png含整片每20秒17帧（0–320秒）及S08中倍、s30–s34共6帧。
+
+## 命令
+
+```bash
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --duration 26.00191666666662 --out qa/v6/animatic/S08.mp4 --size 1920x1080 --fps 30 --workers 3 --png
+node /workspace/garden-skills/skills/motion-showreel/scripts/render.mjs film --still 0.6829375,2.5951625,6.74502083333333,11.43614583333333,16.125708333333314,20.228958333333317,23.669145833333292 --out qa/v6/animatic/s08_states --size 1920x1080
+python3 qa/v6/animatic/build_plate.py
+assembly/pipeline/assemble.sh --scene-video /workspace/病理科普视频/v5/qa/v6/animatic/scene_plate.mp4 --cues /workspace/病理科普视频/v5/qa/v6/animatic/cues_real.json --voice /workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav --content-duration 327.8315 --fps 30 --out-dir /workspace/病理科普视频/v5/qa/v6/animatic --out-name 粗剪_v1 --no-blind
+node qa/v6/animatic/check_alignment.mjs
+python3 qa/v6/animatic/final_check.py
+```
+
+底板完整ffmpeg参数见plate_command.json，渲染/合成日志见render.log、assembly.log。assemble脚本已修正固定29–31秒的试片时长检查，改为核对实际预期时长。
+
+## SHA-256
+
+PASS：七个锁定文件开工=结束；记录见sha256_开工.txt、sha256_结束.txt、sha256_校验.log。
+
+```text
+a2e658fc107c4a43c689607337db996fe8da13ea7e4b730f76d9789442b771bf  engine/lib/he.js
+899d24ba596208caa026512c824025a5eb648b86d6bdfd7bc4920bab143544d0  engine/lib/he_detail.js
+889bacbc5c54cd57b7c6018afa33fb1df6bbcb9e8a3b744efece3539826308b9  engine/lib/wash.js
+a1168fc75660bf23424cffff32533dc7289672ffe943537bc6276d6d04742ed6  engine/lib/ann.js
+6c6079ad8a12ded36b5c203f9a3416d51d83c46c757a50d06768dda6bac9a0b2  engine/lib/scope.js
+25ada270e774274d72d5eb0789f9f9c8e5167cd49b28e3b16b55c6bf7c59ee83  engine/lib/camera.js
+4f83add26190441d4c71ed39f2ba83a950fef9933cbdaae95cabda2106542fb4  parity_r4/chapters/04.js
+```
+
+合成脚本检查结果：[]。片尾保持本次开工前状态，合成期间未修改。
+4. **淋巴密度**：最终 300×300 同面积、同阈值、填核内浅区、剔除边缘/小轮廓/梭形轮廓后，e11 为 148，e12 为 202，约增加 36%。接近本次约三成增密目标；初轮分辨率方案计数为194，不作为最终交付计数。详见 nuclear_diameter.json、measure.py 与标记图。样张急性分叶核会分离成多个核叶轮廓，420 不等于420个淋巴细胞，不以该数字作生物学计数或追求机械相等。
+5. **保持项**：浆细胞的偏位核、车辐状染色质、核旁淡染区、胞质、位置、旋转和随机键未改；以焦点周围32世界坐标为保护范围保留 e11 细胞。浆细胞特写中央300×300 MAE约0.00021，整帧约0.00005，差异为远端绘制/栅格取样。柔和胶原、水彩玫红色池的绘制代码保留。
+
+## 分镜与风格
+
+- 句69：低倍定位阑尾壁，连续推至纤维组织增生、纤维化区；句70：连续进入慢性炎细胞区，先淋巴细胞，后浆细胞。三张跨句过渡抽帧及总览可逐张复核。
+- 左栏、深色圆形镜下背景、浅紫无框细引线沿用已确认 S19。通用浅米色布局与 S19 旧 brief 的深色镜下要求不同，本次按定点修订范围保留 S19 已有镜框和排版。全部内容 y<950；不改变既有字幕包装。
+- 全为原创 Canvas 自绘。样张仅在 QA 三列对比中出现，未进入成片；不新增画面数字、研究、引文、姓名或学校。
+- 镜下没有漂浮、呼吸或排线；动态仅由原镜头推拉和平移产生。时间继续使用 T.at/end/frac 的句号索引；配音裁切从真实全稿_v3 timeline 取句69–70边界。
+- 未修改 main.js、timeline.js、S06/S07 或其它场景；只新增本线库并切换 S19 一行 import。
+
+## 验证与局限
+
+- determinism.log：六帧跨渲染顺序完全一致。
+- 锁定七文件开工和结束 SHA256 一致，详见对应记录；git diff --check 通过。
+- 病理上使用单个圆/略椭圆的淋巴细胞核，不将样张的急性分叶核搬入慢性浸润。这里是教学自绘，不是诊断玻片；核轮廓算法受栅格分辨率、阈值、紧邻核分离影响，不是显微标尺或临床计数。
+- 主观的最终染色、簇间疏密和细梭形核视觉平衡仍需 mini 复审，不以自动计数替代人工病理审核。
+- 最终视频规格、配音对齐与完整解码以 ffprobe、audio_alignment.json、validation.log、decode日志为准。200%局部、三列对比、review_sheet 和过渡总览齐备。
+- 原 Git 元数据只读，git add 的 index.lock 写入失败已记 commit.log；按授权使用临时独立 Git 元数据，以 mini 身份提交并保存 e12_s19-dev.bundle。提交说明以 s19_fix12 开头且带 (Codex)。未合并、未 push。
+
+## 最终产物验证
+
+- S19.mp4：1920×1080、30fps、9.333333秒；真实配音版：1280×720、30fps、48kHz音频、9.333333秒。
+- 两版完整解码日志为空；五个静止关键帧编码后 MAE 2.32–2.59，小于4。三帧运动过渡按相邻帧运动包络验证通过，详见 video_frame_parity.json；不宣称编码视频和静态PNG逐像素相等。
+- 锁定文件最终 SHA256 完全一致；差异日志为空；最终单进程渲染正常退出。
+{
+ "duration": 327.8315,
+ "ffmpeg": {
+  "lufs": -16.3,
+  "true_peak_dbtp_summary": -1.6,
+  "true_peak_linear": 0.832,
+  "true_peak_dbtp": -1.5975334741855216
+ },
+ "pyloudnorm": -16.376012768376494,
+ "rail": 0,
+ "lines": [
+  {
+   "n": 1,
+   "seg": "01",
+   "chapter": "开场",
+   "start": 0.0,
+   "end": 4.120916666666667,
+   "dur": 4.120916666666667,
+   "text": "这根形似小香肠的盲管，就是阑尾。",
+   "en": "This small sausage-shaped tube is the | appendix."
+
+exec
+/bin/bash -lc "ls qa/v6/mech/s13_adv01; ls qa/v6/h06_adv/s07; cat qa/v6/c03_s10/keyframes.json; cat qa/v6/h06_adv/s07_keyframes.json; ls qa/v6/b10/t*; sed -n '1,100p' /workspace/garden-skills/skills/motion-showreel/scripts/lib/browser.mjs; df -h ." in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+S13.mp4
+S13_带配音_720p.mp4
+commit_bundle.py
+finish.log
+finish.py
+keyframes.json
+locked_end.sha256
+locked_start.sha256
+make_sheet.py
+probe.json
+render.log
+render_all.mjs
+render_patient.mjs
+review_sheet.png
+s49_pressure.png
+s49_pressure_200pct.png
+s49_start.png
+s49_start_200pct.png
+s50_squeeze.png
+s50_squeeze_200pct.png
+s50_thrombus.png
+s50_thrombus_200pct.png
+s51_bleed.png
+s51_bleed_200pct.png
+s51_necrosis.png
+s51_necrosis_200pct.png
+s52_pigment.png
+s52_pigment_200pct.png
+s53_end.png
+s53_end_200pct.png
+s53_gross.png
+s53_gross_200pct.png
+stills
+verify.log
+verify.py
+video_audit.png
+video_final_audit.png
+审核意见.md
+提交日志.txt
+自检.md
+S07.mp4
+S07_带配音_720p.mp4
+determinism.json
+determinism_metrics.json
+handoff_mid.png
+handoff_mid_200pct.png
+handoff_mid_final_video.png
+handoff_mid_reverse.png
+handoff_start.png
+handoff_start_200pct.png
+handoff_start_final_video.png
+handoff_start_reverse.png
+review_sheet.png
+s25_fluid.png
+s25_fluid_200pct.png
+s25_fluid_final_video.png
+s25_fluid_reverse.png
+s26_protein.png
+s26_protein_200pct.png
+s26_protein_final_video.png
+s26_protein_reverse.png
+s27_adhesion.png
+s27_adhesion_200pct.png
+s27_adhesion_final_video.png
+s27_adhesion_reverse.png
+s27_crossing.png
+s27_crossing_200pct.png
+s27_crossing_final_video.png
+s27_crossing_reverse.png
+s27_exited.png
+s27_exited_200pct.png
+s27_exited_final_video.png
+s27_exited_reverse.png
+s28_defense.png
+s28_defense_200pct.png
+s28_defense_final_video.png
+s28_defense_reverse.png
+s29_injury.png
+s29_injury_200pct.png
+s29_injury_final_video.png
+s29_injury_reverse.png
+s30_exudation.png
+s30_exudation_200pct.png
+s30_exudation_final_video.png
+s30_exudation_reverse.png
+修正前后对比.png
+自检.md
+{
+  "origin": 150.34279166666664,
+  "duration": 27.914958333333278,
+  "picks": [
+    {
+      "name": "s37_open_low",
+      "t": 0.35
+    },
+    {
+      "name": "low_to_mid",
+      "t": 4.737516249999982
+    },
+    {
+      "name": "s37",
+      "t": 2.3027708333333408
+    },
+    {
+      "name": "s38",
+      "t": 7.19056249999997
+    },
+    {
+      "name": "s39",
+      "t": 11.418958333333308
+    },
+    {
+      "name": "s40",
+      "t": 15.496854166666623
+    },
+    {
+      "name": "s41",
+      "t": 20.151479166666604
+    },
+    {
+      "name": "s42",
+      "t": 24.968270833333293
+    }
+  ]
+}{
+  "origin": 101.22237500000004,
+  "duration": 24.33458333333334,
+  "rows": [
+    {
+      "n": 25,
+      "seg": "04",
+      "chapter": "红·单纯性",
+      "start": 101.22237500000004,
+      "end": 103.65625000000004,
+      "dur": 2.433875,
+      "text": "血管里的液体和蛋白质渗出，",
+      "en": "Fluid and proteins leak out of blood | vessels,"
+    },
+    {
+      "n": 26,
+      "seg": "04",
+      "chapter": "红·单纯性",
+      "start": 104.10625000000005,
+      "end": 107.33079166666671,
+      "dur": 3.2245416666666666,
+      "text": "积在组织间隙，形成水肿。",
+      "en": "causing tissue edema and swelling."
+    },
+    {
+      "n": 27,
+      "seg": "04",
+      "chapter": "红·单纯性",
+      "start": 107.78079166666672,
+      "end": 111.99695833333338,
+      "dur": 4.216166666666667,
+      "text": "巡逻的白细胞游出血管，挺进受损组织。",
+      "en": "Patrolling white blood cells leave vessels | and advance into injured tissue."
+    },
+    {
+      "n": 28,
+      "seg": "04",
+      "chapter": "红·单纯性",
+      "start": 112.44695833333338,
+      "end": 116.16454166666672,
+      "dur": 3.7175833333333332,
+      "text": "这是身体为抵御损伤，调动的防御。",
+      "en": "Inflammation is the body's protective | response to injury."
+    },
+    {
+      "n": 29,
+      "seg": "04",
+      "chapter": "红·单纯性",
+      "start": 116.61454166666672,
+      "end": 120.71216666666672,
+      "dur": 4.097625,
+      "text": "然而战况一旦失控，也可能伤及自身组织。",
+      "en": "An excessive response can also damage the | body's own tissue."
+    },
+    {
+      "n": 30,
+      "seg": "04",
+      "chapter": "红·单纯性",
+      "start": 121.16216666666672,
+      "end": 125.55695833333338,
+      "dur": 4.394791666666666,
+      "text": "液体、蛋白质和白细胞外出，叫渗出。",
+      "en": "These changes are called exudation."
+    }
+  ],
+  "picks": [
+    {
+      "name": "handoff_start",
+      "t": 0
+    },
+    {
+      "name": "handoff_mid",
+      "t": 0.30423437500000006
+    },
+    {
+      "name": "s25_fluid",
+      "t": 1.9471000000000005
+    },
+    {
+      "name": "s26_protein",
+      "t": 5.463508333333337
+    },
+    {
+      "name": "s27_adhesion",
+      "t": 7.654620000000007
+    },
+    {
+      "name": "s27_crossing",
+      "t": 9.045955000000006
+    },
+    {
+      "name": "s27_exited",
+      "t": 10.521613333333338
+    },
+    {
+      "name": "s28_defense",
+      "t": 14.496056666666679
+    },
+    {
+      "name": "s29_injury",
+      "t": 18.875147916666677
+    },
+    {
+      "name": "s30_exudation",
+      "t": 23.807208333333342
+    }
+  ]
+}qa/v6/b10/t_001.00.png
+qa/v6/b10/t_003.80.png
+qa/v6/b10/t_009.00.png
+qa/v6/b10/t_015.00.png
+qa/v6/b10/t_021.00.png
+qa/v6/b10/t_027.00.png
+qa/v6/b10/t_033.00.png
+// Shared browser plumbing: resolve Playwright, serve the project over HTTP, open a page that
+// exposes the render(t) contract and wait until it is READY.
+import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
+import { createRequire } from 'node:module';
+import { pathToFileURL, fileURLToPath } from 'node:url';
+
+const SCRIPTS_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+// Playwright can live next to this skill (scripts/node_modules), in the project, or globally.
+export async function loadChromium(projectDir) {
+  const pick = m => m.chromium || m.default?.chromium;
+  const bases = [SCRIPTS_DIR, projectDir, process.cwd()].filter(Boolean);
+  for (const base of bases) {
+    const req = createRequire(path.join(path.resolve(base), 'package.json'));
+    for (const name of ['playwright', 'playwright-core']) {
+      try { const c = pick(await import(pathToFileURL(req.resolve(name)).href)); if (c) return c; } catch {}
+    }
+  }
+  for (const name of ['playwright', 'playwright-core']) {
+    try { const c = pick(await import(name)); if (c) return c; } catch {}
+  }
+  die('Playwright is not installed. Run:  sh <skill>/scripts/setup.sh   (or: npm i -D playwright && npx playwright install chromium)');
+}
+
+// macOS: force Metal, otherwise new headless shells may fall back to SwiftShader (≈6× slower WebGL).
+const angle = process.env.SHOWREEL_ANGLE || (process.platform === 'darwin' ? 'metal' : '');
+export const ARGS = [
+  ...(angle && angle !== 'default' ? [`--use-angle=${angle}`] : []),
+  '--enable-gpu', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader',
+  '--font-render-hinting=none', '--force-color-profile=srgb', '--hide-scrollbars',
+  '--autoplay-policy=no-user-gesture-required',
+];
+
+export async function launch(chromium) {
+  const tries = process.env.CHROME_PATH ? [{ executablePath: process.env.CHROME_PATH }] : [{}, { channel: 'chrome' }, { channel: 'msedge' }];
+  const errors = [];
+  for (const opt of tries) {
+    try { return await chromium.launch({ headless: true, args: ARGS, ...opt }); }
+    catch (e) { errors.push(`${opt.channel || opt.executablePath || 'bundled chromium'}: ${String(e.message).split('\n')[0]}`); }
+  }
+  die('No usable headless browser.\n  ' + errors.join('\n  ') + '\nFix: npx playwright install chromium   (or install Google Chrome, or set CHROME_PATH)');
+}
+
+const MIME = {
+  '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png',
+  '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.avif': 'image/avif',
+  '.woff': 'font/woff', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.otf': 'font/otf',
+  '.wav': 'audio/wav', '.mp3': 'audio/mpeg', '.m4a': 'audio/mp4', '.ogg': 'audio/ogg',
+  '.mp4': 'video/mp4', '.webm': 'video/webm', '.glb': 'model/gltf-binary', '.gltf': 'model/gltf+json',
+  '.bin': 'application/octet-stream', '.hdr': 'application/octet-stream', '.exr': 'application/octet-stream',
+  '.wasm': 'application/wasm', '.txt': 'text/plain; charset=utf-8',
+};
+
+// mounts: { '/__msr/': '/abs/dir' } serve extra folders (tool assets, shared samples) next to the project root
+export function serve(root, mounts = {}) {
+  root = path.resolve(root);
+  return new Promise(resolve => {
+    const server = http.createServer((req, res) => {
+      let p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+      if (p.endsWith('/')) p += 'index.html';
+      let base = root, rel = p;
+      for (const [prefix, dir] of Object.entries(mounts)) if (p.startsWith(prefix)) { base = path.resolve(dir); rel = '/' + p.slice(prefix.length); break; }
+      const file = path.resolve(base, '.' + rel);
+      if (!file.startsWith(base) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); res.end('not found'); return; }
+      res.writeHead(200, { 'Content-Type': MIME[path.extname(file).toLowerCase()] || 'application/octet-stream', 'Cache-Control': 'no-store', 'Access-Control-Allow-Origin': '*' });
+      fs.createReadStream(file).pipe(res);
+    });
+    server.listen(0, '127.0.0.1', () => resolve({ server, port: server.address().port }));
+  });
+}
+
+// target = project folder (with index.html) or an .html file inside it
+export function resolveTarget(target) {
+  if (!target) die('missing <project-dir | page.html>');
+  const abs = path.resolve(target);
+  if (!fs.existsSync(abs)) die(`not found: ${target}`);
+  const isDir = fs.statSync(abs).isDirectory();
+  const page = isDir ? path.join(abs, 'index.html') : abs;
+  if (!fs.existsSync(page)) die(`no index.html in ${target}`);
+  return { root: isDir ? abs : path.dirname(abs), page, rel: path.basename(page) };
+}
+
+// init: a self-contained function run in the page before any of its scripts (e.g. the text-framing hook)
+export async function openPage(browser, { port, rel, w, h, dpr = 1, query = '', init = null }) {
+  const page = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: dpr });
+  if (init) await page.addInitScript(init);
+  const recent = [];
+  page.on('console', m => { if (m.type() === 'error') { const s = '[page] ' + m.text().slice(0, 300); recent.push(s); if (recent.length > 6) recent.shift(); console.error(s); } });
+  page.on('pageerror', e => die(`[pageerror] ${e.message}\n(render(t) threw or a module failed; fix the page and retry)`));
+  page.on('response', r => {
+    if (r.status() >= 400 && !r.url().endsWith('favicon.ico')) {
+      const type = r.request().resourceType();
+      const msg = `[page] ${r.status()} ${new URL(r.url()).pathname} (${type})`;
+      if (type === 'script' || type === 'document') die(msg + ' — a required script/page is missing; paths are relative to the project folder');
+      console.error(msg);
+    }
+  });
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vdb        128G  105G   24G  82% /workspace/病理科普视频/v5
+
+codex
+已确认统一入口分别处理 CT/临床场景的洗色开关，以及 S08 的旧时钟映射。接下来会用各线关键帧记录的同一时刻逐像素验收；粗剪沿用 v15 的真实配音和字幕，只替换场景画面区域。
+exec
+/bin/bash -lc "cat > qa/v6/a02/parity.mjs <<'EOF'
+import fs from 'node:fs';
+import {loadChromium,launch,serve,resolveTarget,openPage} from '/workspace/garden-skills/skills/motion-showreel/scripts/lib/browser.mjs';
+const base='/workspace/病理科普视频/';const configs=[];
+for(const n of ['02','03','04','06','07','08','09','10','11','12','13','14','15','16','19']){
+ const scene='s'+n;let dir,key;
+ if(['04','09','12','15'].includes(n))dir=base+'v5_ct_dev/qa/v6/ct_real_adv01/S'+n;
+ else if(['02','03','16'].includes(n))dir=base+'v5_clin_dev/qa/v6/clin/S'+n;
+ else if(n==='13')dir=base+'v5_mech_dev/qa/v6/mech/s13_adv01';
+ else dir='qa/v6/'+({'06':'h06_adv/s06','07':'h06_adv/s07','08':'b10','10':'c03_s10','11':'d01_s11','14':'f03_s14','19':'e12_s19'}[n]);
+ key=['06','07'].includes(n)?JSON.parse(fs.readFileSync('qa/v6/h06_adv/'+scene+'_keyframes.json')):n==='08'?{picks:JSON.parse(fs.readFileSync('qa/v6/c03_s10/s08_times.json')).map((t,i)=>({t,name:['s08_low','s08_mid','s08_high_s30','s08_high_s31','s08_high_s32','s08_high_s33','s08_high_s34'][i]}))}:JSON.parse(fs.readFileSync(dir+'/keyframes.json'));
+ configs.push({scene,dir,key});
+}
+fs.writeFileSync('qa/v6/a02/configs.json',JSON.stringify(configs,null,2));
+const target=resolveTarget('film'),chromium=await loadChromium(target.root),{server,port}=await serve(target.root),browser=await launch(chromium);
+try{for(const {scene,key} of configs){const out='qa/v6/a02/'+scene;fs.mkdirSync(out,{recursive:true});const page=await openPage(browser,{port,rel:target.rel,w:1920,h:1080,dpr:1,query:'scene='+scene});for(const p of key.picks){const t=['s06','s07','s08'].includes(scene)?p.t:Number(p.t.toFixed(6));const b=await page.evaluate(t=>{window.render(t);return document.getElementById('c').toDataURL().split(',')[1]},t);fs.writeFileSync(out+'/'+p.name+'.png',Buffer.from(b,'base64'));}console.log(scene+' done');await page.close();}}finally{await browser.close();server.close();}
+EOF
+node qa/v6/a02/parity.mjs > qa/v6/a02/parity.log 2>&1" in /workspace/病理科普视频/v5
+exec
+/bin/bash -lc 'cat qa/v6/h06_adv/subtitle_verification.json | head -25; cat qa/v6/e12_s19/keyframes.json | head -8; cat qa/v6/f03_s14/build_v10.py | head -40; cat qa/v6/h06_adv/自检.md | tail -30; cat qa/v6/a02/parity.log; ls qa/v6/e12_s19/*mp4; git log -4 --oneline' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+{
+  "1080p": {
+    "all_window_frames_checked": 1047,
+    "mean_MAE": 0.12149858366190745,
+    "max_frame_MAE": 0.37145833333333333,
+    "max_channel_difference": 56,
+    "note": "Original subtitle band is retained by overlay; CRF16 re-encoding introduces measured pixel differences."
+  },
+  "_720p": {
+    "all_window_frames_checked": 1047,
+    "mean_MAE": 0.1229625191114517,
+    "max_frame_MAE": 0.4013141957364341,
+    "max_channel_difference": 42,
+    "note": "Original subtitle band is retained by overlay; CRF16 re-encoding introduces measured pixel differences."
+  }
+}{
+  "origin": 289.93558333333294,
+  "duration": 8.174208333333297,
+  "picks": [
+    {
+      "name": "s69_low",
+      "t": 0.43641250000000015
+    },
+"""Rebuild S14 plate using cue anchors, iris mechanism and the approved assembler."""
+import json,pathlib,subprocess,sys
+P=pathlib.Path(__file__).resolve().parent;root=P.parents[2]
+def run(cmd):subprocess.run([str(x) for x in cmd],check=True)
+k=json.loads((P/'keyframes.json').read_text());o=k['origin'];duration=k['duration']
+js="import fs from 'node:fs';import {resolveRanges} from './assembly/subtitle/sceneTheme.js';const cues=JSON.parse(fs.readFileSync('qa/v6/animatic/cues_real.json')).cues;fs.writeFileSync('qa/v6/f03_s14/ranges.json',JSON.stringify(resolveRanges(cues),null,2));"
+run(['node','--input-type=module','-e',js])
+f=f"[1:v]setpts=PTS-STARTPTS+{o}/TB[s];[0:v][s]overlay=eof_action=pass:enable='gte(t,{o})*lt(t,{o+duration})'[v]"
+if '--iris-only' not in sys.argv:run(['ffmpeg','-v','error','-y','-i',root/'qa/v6/e02_s19/scene_plate.mp4','-i',P/'S14.mp4','-filter_complex_threads','1','-filter_complex',f,'-map','[v]','-c:v','libx264','-preset','veryfast','-crf','16','-an',P/'plate_insert.mp4'])
+# Exit starts at sentence 57 end and lasts 0.7 seconds.
+run(['python3',P/'iris_plate.py','--ranges',P/'ranges.json','--scene','S14','--scene-video',P/'S14.mp4','--base',P/'plate_insert.mp4','--out',P/'scene_plate.mp4','--work',P/'iris','--tail','0.7'])
+if '--plate-only' in sys.argv: sys.exit(0)
+d=json.load(open('/workspace/病理科普视频/配音/全稿_v3/timeline.json'))
+run([root/'assembly/pipeline/assemble.sh','--scene-video',P/'scene_plate.mp4','--cues',root/'qa/v6/animatic/cues_real.json','--voice','/workspace/病理科普视频/配音/全稿_v3/旁白_v3.wav','--content-duration',str(d['duration']),'--fps','30','--out-dir',P/'assembled','--out-name','粗剪_v10','--no-blind'])
+4. 下壁白色短划：删去纸白短线，改低对比小间隙，随第 25 句液体外出出现；S06 未提前画间隙。
+5. 补充同步修正：蛋白质在第 25 句后半出现，配合该句真实口播，26 继续显示间质水肿。
+
+## 验证实测
+
+- 1080p：总帧数 10195；窗口外 9148 个视频包（含时间戳）与 v14 完全一致；全部 15931 个音频包及时间戳完全一致。
+- _720p：总帧数 10195；窗口外 9148 个视频包（含时间戳）与 v14 完全一致；全部 15931 个音频包及时间戳完全一致。
+- S06：全 318 帧安全区扫描，y≥950 最大编码色差 2；换序复绘全部通过现有 render 工具容差，大于 24 的像素差占比最大 0.0。
+- S06 真实配音与 全稿_v3/旁白_v3.wav：相关系数 0.99993533，最佳相位偏移 0.0 ms；时间原点与逐句 timeline.json 一致。
+- S07：全 730 帧安全区扫描，y≥950 最大编码色差 5；换序复绘全部通过现有 render 工具容差，大于 24 的像素差占比最大 0.0。
+- S07 真实配音与 全稿_v3/旁白_v3.wav：相关系数 0.99990028，最佳相位偏移 0.0 ms；时间原点与逐句 timeline.json 一致。
+- 七个锁定文件开工/收工 SHA256 完全一致。
+- 未修改 main.js、timeline.js、锁定绘图库或其它场景；实际源代码变更仅 s07.js 与 vascular_response.js。
+- 单个浏览器、两个场景顺序导出，ffmpeg 单线程；无并行渲染。
+
+窗口内字幕使用原片字幕区域，按同一 High / Level 4.0 / CRF16 编码，字幕像素存在重新编码色差：1080p 平均 MAE 0.12150，720p 平均 MAE 0.12296；完整实测见 subtitle_verification.json。
+
+顺序解码曾发现无损中间段与原片编码参数不兼容而花屏，已弃用无损方案并按 v14 参数重拼。最终验证包含连续解码，而非仅靠 seek 抽帧。1080p/720p 的接点图片均以从片头顺序解码取得；窗外接点解码像素 MAE 为 0。
+
+## 交付与边界
+
+已输出逐句关键帧、200% 局部、两场景与总 review_sheet、前后对比、各自无字幕 MP4 与真实配音 720p、v15 的 1080p/720p。最终视频抽帧另存 *_final_video.png；接点抽帧见 boundary_review.png。
+
+仅替换全片帧区间 [2720,3767)，S06/S07 接点帧 3037；这些帧号由句子时钟按 30fps 取整生成，不在场景代码写死绝对秒数。
+
+早期分镜 y<810 与本次获准样张及 brief 的 y<950 不一致，按本次 brief 执行。窗口之前若有旧占位或低对比画面，保留原包，未扩展修正其它场景。音频真实性已用波形与时间轴核对，视觉采用逐句及交接抽帧检查，未声称人工逐秒听审。
+
+原仓库 Git 元数据只读，按 common.md 使用 /tmp 中的独立元数据逐场景提交并导出 main_adv01-dev.bundle；原 worktree 分支元数据不变。未 push、未合并其它分支。提交信息含 (Codex)，具体哈希见 commit.log。
+
+已知继承瑕疵：720p 的窗口前占位以及 S06 静默尾字幕带左端（接点帧 3035–3036）有原 v14 条痕，源画面可在 boundary_frames_720p/old_06.png、old_07.png 核对。本次保留原字幕带与窗口外视频包；未宣称原全片其它区域无瑕疵。S07 主画面圆外接缝已清除。
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+s02 done
+qa/v6/e12_s19/S19.mp4
+qa/v6/e12_s19/S19_scene.mp4
+qa/v6/e12_s19/S19_带配音_720p.mp4
+7a48943 merge clin-dev into v6-fresh (mini): unified scene registry in film/main.js
+4f2f6fd merge mech-dev into v6-fresh (mini): unified scene registry in film/main.js
+3401eb5 merge ct-dev into v6-fresh (mini): unified scene registry in film/main.js
+fca7f08 mech: adv01 brief/log
+
+exec
+/bin/bash -lc "cat > qa/v6/a02/compare.py <<'EOF'
+import json
+from pathlib import Path
+from PIL import Image
+import numpy as np
+P=Path('qa/v6/a02');out=[]
+for c in json.loads((P/'configs.json').read_text()):
+ rows=[]
+ for p in c['key']['picks']:
+  a=np.asarray(Image.open(Path(c['dir'])/(p['name']+'.png')).convert('RGB'),dtype=np.int16); b=np.asarray(Image.open(P/c['scene']/(p['name']+'.png')).convert('RGB'),dtype=np.int16)
+  rows.append(dict(name=p['name'],t=p['t'],MAE=float(np.abs(a-b).mean())))
+ out.append(dict(scene=c['scene'],reference=c['dir'],max_MAE=max(r['MAE'] for r in rows),frames=rows))
+(P/'mae.json').write_text(json.dumps(out,ensure_ascii=False,indent=2)); print([(x['scene'],x['max_MAE']) for x in out])
+EOF
+cat qa/v6/a02/parity.log; ps -eo pid,comm,%cpu,rss --sort=-%cpu | head -8" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+s02 done
+s03 done
+s04 done
+    PID COMMAND         %CPU   RSS
+      1 codex            0.0 19780
+      2 bash             0.0  3404
+      5 ps               0.0  3972
+      6 head             0.0  1936
+
+exec
+/bin/bash -lc 'ls qa/v6/d01_s11/*mp4; ls qa/v6/ct_real_adv01/S*/S??.mp4; cat qa/v6/a02/parity.log; cat qa/v6/h06_adv/s06_keyframes.json | head -4; cat qa/v6/animatic/timing.json' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+qa/v6/d01_s11/S10_S11.mp4
+qa/v6/d01_s11/S10_S11_带配音_720p.mp4
+qa/v6/d01_s11/plate_insert.mp4
+qa/v6/d01_s11/scene_plate.mp4
+qa/v6/ct_real_adv01/S04/S04.mp4
+qa/v6/ct_real_adv01/S09/S09.mp4
+qa/v6/ct_real_adv01/S12/S12.mp4
+qa/v6/ct_real_adv01/S15/S15.mp4
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+s02 done
+s03 done
+s04 done
+s06 done
+{
+  "origin": 90.63675000000003,
+  "duration": 10.585625000000007,
+  "picks": [
+{
+  "origin": 116.61454166666672,
+  "duration": 26.00191666666662,
+  "states": [
+    0.6829375,
+    2.5951625,
+    6.74502083333333,
+    11.43614583333333,
+    16.125708333333314,
+    20.228958333333317,
+    23.669145833333292
+  ]
+}
+exec
+/bin/bash -lc "cat > qa/v6/a02/build_v16.py <<'EOF'
+\"\"\"Sequential, one-thread scene patches on v15; retain its real subtitle band/audio/endcard.\"\"\"
+from pathlib import Path
+import json,math,subprocess
+P=Path(__file__).resolve().parent; A=P.parent/'animatic'; root=P.parents[2]
+def run(args): subprocess.run(list(map(str,args)),check=True)
+def probe(p):return json.loads(subprocess.check_output(['ffprobe','-v','error','-show_format','-show_streams','-of','json',str(p)]))
+configs=json.loads((P/'configs.json').read_text()); timing=json.load(open('/workspace/病理科普视频/配音/全稿_v3/timeline.json')); rows={r['n']:r for r in timing['lines']};fps=30
+# Full latest scenes; S07 owns 29–30 as in v15, S08 resumes at 31 using its original clock.
+ranges={'s02':(6,10),'s03':(11,13),'s04':(14,19),'s06':(23,24),'s07':(25,30),'s08':(31,34),'s09':(35,36),'s10':(37,42),'s11':(43,46),'s12':(47,48),'s13':(49,53),'s14':(54,57),'s15':(58,59),'s16':(60,62),'s19':(69,70)}
+patches=[]
+for c in configs:
+ s=c['scene'];a,b=ranges[s];origin=c['key'].get('origin',rows[29]['start']);start=rows[a]['start'];end=rows[b+1]['start'] if b<77 else timing['duration']
+ # Preserve existing microscope iris wrappers for S08/S10/S11/S14 already in v15.
+ if s in ['s08','s10','s11','s14']:continue
+ d=Path(c['dir']);video=d/(s.upper()+'.mp4')
+ if s in ['s06','s07']:video=root/'qa/v6/h06_adv'/s/(s.upper()+'.mp4')
+ assert video.exists(),video
+ patches.append(dict(scene=s,first=a,last=b,origin=origin,start=start,end=end,video=str(video)))
+patches.sort(key=lambda p:p['start']); (P/'coverage.json').write_text(json.dumps({'ranges':ranges,'patches':patches},indent=2))
+for suffix,w,h,safe in [('',1920,1080,950),('_720p',1280,720,634)]:
+ old=P.parent/'h06_adv'/('粗剪_v15'+suffix+'.mp4');work=P/('splice'+suffix);work.mkdir(exist_ok=True);total=int(probe(old)['streams'][0]['nb_frames']);segments=[];cursor=0
+ for i,p in enumerate(patches):
+  sf=math.ceil(p['start']*fps);ef=math.ceil(p['end']*fps)
+  if cursor<sf:segments.append((cursor,sf,None))
+  segments.append((sf,ef,p));cursor=ef
+ if cursor<total:segments.append((cursor,total,None))
+ paths=[]
+ for i,(sf,ef,p) in enumerate(segments):
+  dest=work/f'{i:02}.mp4';paths.append(dest)
+  if dest.exists():continue
+  cmd=['ffmpeg','-v','error','-y','-threads','1','-ss',sf/fps,'-i',old]
+  if p:
+   offset=max(0,sf/fps-p['origin']);cmd+=['-threads','1','-ss',offset,'-i',p['video']]
+   filt=f'[1:v]scale={w}:{h},tpad=stop_mode=clone:stop_duration=2,crop={w}:{safe}:0:0,setpts=PTS-STARTPTS[p];[0:v][p]overlay=0:0:eof_action=repeat[v]'
+   cmd+=['-filter_complex_threads','1','-filter_complex',filt,'-map','[v]']
+  else:cmd+=['-map','0:v:0']
+  cmd+=['-frames:v',ef-sf,'-an','-c:v','libx264','-crf','16','-preset','veryfast','-pix_fmt','yuv420p','-profile:v','high','-level','4.0','-bf','0','-g','30','-threads','1',dest]
+  print(suffix,i,sf,ef,p['scene'] if p else 'inherited',flush=True);run(cmd)
+ (work/'concat.txt').write_text(''.join(f\"file '{x}'\\n\" for x in paths))
+ run(['ffmpeg','-v','error','-y','-f','concat','-safe','0','-i',work/'concat.txt','-i',old,'-map','0:v:0','-map','1:a:0','-c','copy','-movflags','+faststart',A/('粗剪_v16'+suffix+'.mp4')])
+ (work/'segments.json').write_text(json.dumps([dict(start=sf,end=ef,scene=p['scene'] if p else 'inherited') for sf,ef,p in segments],indent=2))
+EOF
+cat qa/v6/a02/parity.log" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+s02 done
+s03 done
+s04 done
+s06 done
+s07 done
+s08 done
+s09 done
+
+exec
+/bin/bash -lc "cat qa/v6/e12_s19/iris_video.py | head -65; cat qa/v6/a02/parity.log; cat qa/v6/mech/s13_adv01/keyframes.json | head -6; rg 'S0[158]|S17|S18|S20|S21' 分镜/分镜_v1.md | head -15" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+"""S19 only; add cue-relative .7-second irises without assembling the full film."""
+from pathlib import Path
+import subprocess,json,math
+import numpy as np
+from PIL import Image
+P=Path(__file__).resolve().parent;k=json.loads((P/'keyframes.json').read_text());duration=k['duration'];fps=30;w,h=1920,1080
+src=P/'S19_scene.mp4'
+if not src.exists():(P/'S19.mp4').rename(src)
+dec=subprocess.Popen(['ffmpeg','-threads','1','-v','error','-i',str(src),'-f','rawvideo','-pix_fmt','rgb24','-'],stdout=subprocess.PIPE)
+enc=subprocess.Popen(['ffmpeg','-v','error','-y','-f','rawvideo','-pix_fmt','rgb24','-s','1920x1080','-r','30','-i','-','-an','-c:v','libx264','-threads','1','-crf','16','-preset','medium','-pix_fmt','yuv420p','-movflags','+faststart',str(P/'S19.mp4')],stdin=subprocess.PIPE)
+y,x=np.mgrid[:h,:w];dist=np.sqrt((x-1110)**2+(y-475)**2).astype('float32');dark=np.array([17,17,20.],dtype='float32')
+idx=-1;frame=None;total=math.ceil((duration+.45+.7)*fps)
+def smooth(t):t=min(1,max(0,t));return t*t*(3-2*t)
+for n in range(total):
+ t=n/fps-.45;want=min(round(duration*fps)-1,max(0,math.floor(t*fps+1e-5)))
+ while idx<want:
+  data=dec.stdout.read(w*h*3)
+  if len(data)!=w*h*3:break
+  frame=np.frombuffer(data,np.uint8).reshape(h,w,3);idx+=1
+ d=smooth((t+.45)/.7) if t<.25 else 1-smooth((t-duration)/.7) if t>duration else 1
+ if d<1:
+  mask=np.clip((430*d-dist)/16,0,1)[...,None];out=(frame*mask+dark*(1-mask)).astype('uint8')
+ else:out=frame
+ if n==10:Image.fromarray(out).save(P/'iris_enter.png')
+ if n==round((duration+.45+.35)*fps):Image.fromarray(out).save(P/'iris_exit.png')
+ enc.stdin.write(out.tobytes())
+enc.stdin.close();assert enc.wait()==0;dec.stdout.close();dec.wait()
+(P/'video_check.json').write_text(json.dumps({'origin_sentence_id':69,'origin':k['origin'],'local_origin_shift':-.45,'iris_enter':[-.45,.25],'iris_exit':[duration,duration+.7],'frames':total,'fps':30,'crf':16,'size':[w,h]},indent=2))
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+s02 done
+s03 done
+s04 done
+s06 done
+s07 done
+s08 done
+s09 done
+{
+  "origin": 207.1135833333332,
+  "duration": 20.9971666666666,
+  "picks": [
+    {
+      "name": "s49_start",
+本文句号均指新定稿的人类编号 01—77；场景 S01 等是制作编号，不上屏。没有新时间轴，因此不指定秒数、总片长、疾病阶段持续时间或倒计时。
+| S01／01—05 | 左：片名分行出现，颜色导航及“变质”关键词；右：人体腹部定位→盲管大标本→红黄黑三种外观横向并列。三外观无串行箭头，不画食品腐败。 | 01 定位后放大阑尾；02 三外观依次显现；03 推入壁局部；04 片名在左完整建立；05 点亮“变质”，定义留到 33。 | `figure.js: drawInsitu, specimenOutline`；`wash.js: bake, drawWash`；`ann.js: label, leader`。 | `gross_appendix.js` 正常/红/黄/黑大体状态；`intro.js` 新定位与片名构图；颜色导航组件。 |
+| S05／20—22 | 左：纵向“单纯性→化脓性（蜂窝织炎性）→坏疽性”，22 加非固定路径分支；右：当前节点对应的大体形态依次替换，保留完整阑尾体形。 | 三句合读为一段前提，21 保持镜头；22 分支从主链分出，终点用留白/省略表达个体差异，不捏造治疗结局或发生概率。无进展计时。 | `ann.js: arrow, dashed, label, dot`；`figure.js: specimenOutline`；`wash.js: drawWash`。 | `path_branch.js` 典型路径及非固定分支；左栏路径组件。 |
+| S08／31—34 | 左：层次说明与“主要在黏膜、黏膜下层”；33 定义卡“变质：变性、坏死”；右：清晰大 HE 层次视野，随后局部上皮损伤放大。 | 31—32 连续保持层次图，中性粒细胞集中于前两层，肌层仅散在几个；34 只局部上皮脱落，完整区域仍在。用边框定位后切大图，不加小到难辨的 inset。 | `he.js: drawHE, drawLens, fieldToScreen`；`he_detail.js: detailedNeutrophil, chromatin`；`he_guide.js: tissueTexture`；`ann.js: leader, brace`。 | `he_acute.js` 单纯性独立细胞分布与局灶上皮损伤；统一 HE 样式适配，不能直接沿用旧全层细胞板。 |
+| S17／63—65 | 左：蜂窝织炎性、坏疽性手术切除卡，随后“具体方案／是否马上手术，由医生评估”；右：医生与患者及简洁切除示意，避免血腥器械演出。 | 63 手术图形出现；64—65 病情资料汇入医生评估，卡片换成手术时机说明。不得给出固定小时数，也不把病理三型直接映射为临床复杂性分组。 | `figure.js: drawFigure`；`ann.js: label, arrow`；`ink.js: ink`。 | `surgery_timing.js` 急性治疗与评估卡；`clinical.js` 医患及切除示意。 |
+| S18／66—68 | 左：“反复发作→可转慢性”，再顺序显示“急性：变质、渗出”“慢性：增生”；右：反复发作的非计数回环符号，接急性/慢性组织对照大图。 | 不用日历、天数、次数刻度；67—68 连读完整保留老师原话。只有进入慢性语义后才显示纤维组织增生，不复用旧“三种动作交织”的叙述。 | `ann.js: arrow, label, dashed`；`he.js: drawLens`；`he_guide.js: tissueTexture`。 | `chronic_transition.js` 非时间表回环；`he_chronic.js` 慢性纤维化基础组织。 |
+| S20／71—74 | 左：先“正规评估”，后两路“症状缓解期：择期切除／急性发作期：视情况急诊手术”；右：慢性组织淡出接人物间歇疼痛与医生评估，随后两个清晰治疗情境窗。 | 71—72 从组织回到患者；73—74 连读老师完整原话，左侧分支按语义依次展开；不让两个手术情境同时抢字幕，也不画居家自诊。 | `figure.js: drawFigure`；`ann.js: arrow, label`；`icons.js: iconHospital`。 | `surgery_timing.js` 慢性两路卡与医生决策姿态；`path_branch.js` 分支布局。 |
+| S21／75—77 | 左：红黄黑观察导航与非固定分支，接“持续右下腹痛、发热，请及时就诊”，末态参考文献入口；右：三色罗盘→就医人物大图。 | 75 三色汇成无数值罗盘，76 转向医院图形，不展示病情演变时钟；77 就医落点停稳。参考文献入口不挤进字幕区、不新增来源，片尾展示时长待新音轨决定。 | `ann.js: ring, arrow, label`；`icons.js: iconHospital`；`figure.js: drawFigure`；`wash.js: drawWash`。 | `closing.js` 三色罗盘与就医收束；`reference_entry.js` 定稿原有参考文献入口。 |
+    scene-manifest.json       # S01—S21 与句号范围
+| A／新急性 HE 组织状态库 | 最高：正常组织基底、单纯性层次分布、全层化脓、坏疽出血及局灶穿孔须互相一致；旧细胞板不能直接代表三型。 | S08、S10、S14 及 CT 配对 | **可先做**四类静态样板与局部细胞放大，确定分布、细胞大小和坏死边缘形态。 | 场景内推拉、对焦、状态揭示和出口状态。 |
+| C／慢性 HE 与慢性炎细胞库 | 高：新增纤维化组织、淋巴细胞与浆细胞形态，避免把正常滤泡或急性脓细胞误作慢性浸润。 | S18—S19 | **可先做**慢性全景、纤维束及两类细胞样板，母图到特写定位。 | 69—70 的揭示顺序与切换。 |
+| D／新大体阑尾及局部特写库 | 高：正常、轻肿充血、灰黄混合脓苔、局部暗红黑斑、可选穿孔需统一形体与水彩质感。 | S01、S05—S06、S11、S13—S14、S21 | **可先做**新轮廓、断面及高分辨率烘焙；红黄黑并列样帧。 | 定位放大、形态切换及镜头交接。 |
+| G／临床人物、症状对照、送检及手术图形 | 中：新增医生与患者互动；症状非典型不能靠编造新临床事实填充。 | S02—S04、S16—S17、S20—S21 | **可先做**人物姿态、典型/非典型无数值版、无数值化验单、送检和简洁切除图。 | 连读镜头衔接、疼痛迁移与就医动作时间。 |
+| I／路径分支、手术时机、研究与来源卡 | 中低：图形简单但措辞和证据边界要求严格。 | S04—S05、S17—S18、S20 | **可先做**按定稿静态卡、数字来源映射、条件说明与非固定路径布局。 | 多卡依次显现及停留长度。 |
+| J／片名、三色罗盘、片尾入口 | 较低：维持颜色主线并落在及时就医，不引入时钟暗示。 | S01、S21 | **可先做**片名分行、无刻度罗盘和就医末态样帧；参考书目须先核对定稿链接原文件。 | 入片/收束节奏及片尾持续时间。 |
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+p='qa/v6/a02/build_v16.py'
+s=open(p).read().replace(\"d=Path(c['dir']);video=d/(s.upper()+'.mp4')\",\"if s=='s19':origin-=.45;start-=.45;end=max(end,rows[b]['end']+.7)\\n d=Path(c['dir']);video=d/(s.upper()+'.mp4')\")
+open(p,'w').write(s)
+PY
+cat qa/v6/a02/parity.log" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+s02 done
+s03 done
+s04 done
+s06 done
+s07 done
+s08 done
+s09 done
+
+codex
+S02、S03、S04、S06、S07、S08、S09 的验收帧已导出，正在继续镜下场景。也确认了两处需保留的时间约定：S07 覆盖句 29–30；S19 成片有提前 0.45 秒开始的开镜动画，合成时需扣除这段偏移。
+exec
+/bin/bash -lc 'du -sh qa/v6/a02; ls qa/v6/a02/s10; cat qa/v6/a02/parity.log; cat qa/v6/e12_s19/video_check.json; cat qa/v6/h06_adv/subtitle_verify.py | head -35; git diff --stat' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+29M	qa/v6/a02
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+s02 done
+s03 done
+s04 done
+s06 done
+s07 done
+s08 done
+s09 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+{
+  "origin_sentence_id": 69,
+  "origin": 289.93558333333294,
+  "local_origin_shift": -0.45,
+  "iris_enter": [
+    -0.45,
+    0.25
+  ],
+  "iris_exit": [
+    8.174208333333297,
+    8.874208333333296
+  ],
+  "frames": 280,
+  "fps": 30,
+  "crf": 16,
+  "size": [
+    1920,
+    1080
+  ]
+}from pathlib import Path
+import subprocess,json,numpy as np
+P=Path(__file__).resolve().parent;r={}
+for suffix,w,h,safe in [('',1920,1080,950),('_720p',1280,720,634)]:
+ win=json.loads((P/('splice'+suffix)/'window.json').read_text());qs=[];n=win['end_frame']-win['start_frame'];size=w*(h-safe)*3
+ for file in [P.parent/'animatic'/('粗剪_v14'+suffix+'.mp4'),P/('粗剪_v15'+suffix+'.mp4')]:
+  qs.append(subprocess.Popen(['ffmpeg','-v','error','-threads','1','-ss',str(win['start_frame']/30),'-i',str(file),'-frames:v',str(n),'-vf',f'crop={w}:{h-safe}:0:{safe}','-an','-threads','1','-f','rawvideo','-pix_fmt','rgb24','-'],stdout=subprocess.PIPE))
+ maes=[];mx=0
+ for i in range(n):
+  a,b=[np.frombuffer(q.stdout.read(size),np.uint8).astype(int) for q in qs];assert len(a)==len(b)==size;delta=abs(a-b);maes.append(float(delta.mean()));mx=max(mx,int(delta.max()))
+ assert all(q.wait()==0 for q in qs);assert max(maes)<2,(suffix,max(maes))
+ r[suffix or '1080p']={'all_window_frames_checked':n,'mean_MAE':float(np.mean(maes)),'max_frame_MAE':max(maes),'max_channel_difference':mx,'note':'Original subtitle band is retained by overlay; CRF16 re-encoding introduces measured pixel differences.'}
+(P/'subtitle_verification.json').write_text(json.dumps(r,indent=2));print(r)
+
+exec
+/bin/bash -lc "cat > qa/v6/a02/check_partial.py <<'EOF'
+exec(open('qa/v6/a02/compare.py').read().replace(\"for c in json.loads((P/'configs.json').read_text()):\",\"for c in json.loads((P/'configs.json').read_text()):\\n if not all((P/c['scene']/(p['name']+'.png')).exists() for p in c['key']['picks']):continue\"))
+EOF
+python3 qa/v6/a02/check_partial.py; cat qa/v6/a02/parity.log" in /workspace/病理科普视频/v5
+ succeeded in 2471ms:
+[('s02', 0.0), ('s03', 0.0), ('s04', 0.0), ('s06', 0.0), ('s07', 0.0), ('s08', 0.0), ('s09', 0.0)]
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+s02 done
+s03 done
+s04 done
+s06 done
+s07 done
+s08 done
+s09 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+
+exec
+/bin/bash -lc "cat qa/v6/a02/parity.log; rg -n 'timeout|READY' /workspace/garden-skills/skills/motion-showreel/scripts/lib/browser.mjs | tail -10; cat film/chapters/s10.js | head -25; ls -l film/lib/he.js engine/lib/he.js" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+s02 done
+s03 done
+s04 done
+s06 done
+s07 done
+s08 done
+s09 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+2:// exposes the render(t) contract and wait until it is READY.
+104:  const hint = setTimeout(() => console.error('… still waiting for window.READY = true (20 s). ' + (recent.length ? 'Recent errors:\n  ' + recent.join('\n  ') : 'No errors yet; does the page ever set READY?')), 20000);
+106:    await page.waitForFunction(() => typeof window.render === 'function' && (window.READY === true || window.READY === undefined), null, { timeout: 180000 });
+108:  } catch (e) { die(`window.READY never became true after ${((Date.now() - t0) / 1000) | 0}s: ${e.message.split('\n')[0]}`); }
+import {bake,drawWash} from '../lib/wash.js';
+import {detailedNeutrophil} from '../lib/he_detail.js';
+import {rng} from '../lib/motion.js';
+import {drawHE} from '../lib_ext/he_mucosa.js';
+import {cell,columnar,erythrocyte} from '../lib_ext/cells_ext.js';
+const TAU=Math.PI*2;let atlas,lowAtlas,pusAtlas,compareAtlas;
+// One continuous oblique section, shared by every magnification and camera move.
+function point(x,y){const a=x/620-Math.PI/2,r=640+y+12*Math.sin(a*3)+9*Math.sin(a*5),u=1.6*Math.cos(a)*r,v=Math.sin(a)*r;return [u*Math.cos(.4)-v*Math.sin(.4),u*Math.sin(.4)+v*Math.cos(.4)];}
+function pus(c,x,y,sz,rot,key){c.save();c.translate(x,y);c.rotate(rot);c.scale(sz,sz);c.filter='blur(1px)';c.beginPath();c.ellipse(0,0,10.2,9.6,0,0,TAU);c.fillStyle='rgba(226,170,200,.44)';c.fill();c.filter='none';c.fillStyle='#50345F';for(let j=0;j<(key%2?4:1);j++){c.beginPath();c.ellipse(key%2?-4+j*2.6:0,key%2?(j%2?2:-2):0,key%2?1.5:3.3,key%2?2:3.8,j*.7,0,TAU);c.fill();}c.restore();}
+function build(mode="base"){const src=document.createElement('canvas');src.width=1680;src.height=1580;const c=src.getContext('2d');c.scale(2,2);c.translate(420,500);drawHE(c,{ulcer:.8,neut:0,fibrin:0,t:0,detail:1,gap:[-60,70]});const R=rng(103742);
+// Pale fluid separates remaining muscle bundles instead of tinting the entire field.
+for(let j=0;j<10;j++){const y=12+j*23;c.save();c.globalAlpha=.7;drawWash(c,'s10.fluid',0,y,440,{alpha:.36});c.restore();}
+c.fillStyle='rgba(250,241,245,.86)';for(let j=0;j<5;j++){const yy=20+j*36;c.beginPath();c.moveTo(175,yy);c.bezierCurveTo(240,yy+15,325,yy-12,415,yy+8);c.lineTo(415,yy+20);c.bezierCurveTo(325,yy+2,240,yy+28,175,yy+12);c.closePath();c.fill();}
+for(let i=0;i<70;i++)cell(c,-410+R()*820,145+R()*79,'dot',.85,R()*TAU,i);
+for(let i=0;i<62;i++)cell(c,-410+i*13.5,274+Math.sin(i*.4)*2,'meso',.8,0,i);
+for(let i=0;i<710;i++){const x=-405+R()*810,y=-285+R()*557;
+ // The loose right muscle patch retains widened spaces for sentence 41.
+ if(x>170&&y>0&&y<210&&i%3!==0)continue;
+ // Sentence 42 is an intentional sparse diagnostic comparison in the same wall.
+ if(x>-20&&x<220&&y>-40&&y<160)continue;
+ const sz=.70+R()*.23,rot=R()*TAU;if(i%4===0)pus(c,x,y,sz,rot,i);else detailedNeutrophil(c,x,y,{lobes:2+i%4,rot,sz},1);
+}
+// Several irregular ulcer gaps with residual frayed epithelium and luminal exudate.
+for(const centre of [-280,0,290]){c.fillStyle='#F6EEF0';c.beginPath();c.ellipse(centre,-291,37,15,.12,0,TAU);c.fill();for(const side of [-1,1])for(let j=0;j<3;j++)columnar(c,centre+side*(37+j*2),-289-j*3,.48,side*.5,j,'fray');drawWash(c,'s10.exudate',centre,-347,110,{alpha:.42});
+for(let i=0;i<38;i++){const x=centre+(R()-.5)*115,y=-300-R()*110,sz=.65+R()*.15;if(i%3===0)pus(c,x,y,sz,R()*TAU,i);else detailedNeutrophil(c,x,y,{lobes:2+i%4,rot:R()*TAU,sz},1);}
+-rw-r--r-- 1 box box 11850 Nov 11 21:48 engine/lib/he.js
+-rw-r--r-- 1 box box 11850 Nov 11 21:48 film/lib/he.js
+
+exec
+/bin/bash -lc "rg -n 'prepare|bake|scaleBrush' film/chapters/s10.js | tail -20; tail -10 qa/v6/c03_s10/render.log; cat qa/v6/a02/parity.log; date" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+1:import {bake,drawWash} from '../lib/wash.js';
+87:export default {prepare(){for(const [key,col] of [['s10.fluid','#F5DFE8'],['s10.exudate','#E9B4B7']])bake(key,(b,P)=>P.fill(b,P.blob(0,0,230,24,.3,83),col,85,.65),{seed:83,hd:true,soft:true,grain:.12,edge:.3,bleed:.5});atlas=build();const base=atlas;lowAtlas=build("low");pusAtlas=build("pus");compareAtlas=build("compare");atlas=base;},draw(c,t,T){
+  168/837 frames  77s
+  252/837 frames  80s
+  336/837 frames  83s
+  420/837 frames  86s
+  504/837 frames  90s
+  588/837 frames  93s
+  672/837 frames  96s
+  756/837 frames  99s
+done /workspace/病理科普视频/v5/qa/v6/c03_s10/S10.mp4
+  837 frames, 27.90s, 103.1s wall (123 ms/sample)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+s02 done
+s03 done
+s04 done
+s06 done
+s07 done
+s08 done
+s09 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+Fri Nov 13 12:47:24 CST 2026
+
+exec
+/bin/bash -lc "cat > qa/v6/a02/verify_v16.py <<'EOF'
+from pathlib import Path
+import subprocess,json,hashlib,math
+import numpy as np
+from PIL import Image,ImageDraw,ImageFont
+P=Path(__file__).resolve().parent; A=P.parent/'animatic'
+def run(cmd):return subprocess.check_output(list(map(str,cmd)))
+def probe(p):return json.loads(run(['ffprobe','-v','error','-show_streams','-show_format','-of','json',p]))
+report={}
+for suffix in ['', '_720p']:
+ f=A/('粗剪_v16'+suffix+'.mp4');old=P.parent/'h06_adv'/('粗剪_v15'+suffix+'.mp4')
+ q=probe(f); run(['ffmpeg','-v','error','-threads','1','-i',f,'-map','0:v','-map','0:a','-f','null','-'])
+ def audio(p):return run(['ffmpeg','-v','error','-i',p,'-map','0:a:0','-c','copy','-f','adts','-'])
+ ah=hashlib.sha256(audio(f)).hexdigest();bh=hashlib.sha256(audio(old)).hexdigest();assert ah==bh
+ segments=json.loads((P/('splice'+suffix)/'segments.json').read_text());assert segments[0]['start']==0;assert all(a['end']==b['start'] for a,b in zip(segments,segments[1:]));assert segments[-1]['end']==int(q['streams'][0]['nb_frames'])
+ report[suffix or '1080p']={'probe':q,'audio_sha256':ah,'audio_matches_v15':True,'full_decode':True,'contiguous_frames':True}
+(A/'verification_v16.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
+font=ImageFont.truetype('/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',19); times=list(range(0,math.ceil(float(report['1080p']['probe']['format']['duration'])),15));sheet=Image.new('RGB',(1280,math.ceil(len(times)/4)*206),'#F4EFE6');d=ImageDraw.Draw(sheet); fd=P/'contact';fd.mkdir(exist_ok=True)
+for i,t in enumerate(times):
+ out=fd/f'{t:03}.png';run(['ffmpeg','-v','error','-threads','1','-y','-ss',t,'-i',A/'粗剪_v16.mp4','-frames:v','1','-vf','scale=320:180','-threads','1',out]);sheet.paste(Image.open(out),(i%4*320,i//4*206));d.text((i%4*320+8,i//4*206+182),f'{t}s',font=font,fill='#2A2A35')
+sheet.save(A/'contact_sheet_v16.png')
+# Inspect both sides of every patch boundary, sequential decoding with accurate seek.
+bounds=sorted({s[k] for s in json.loads((P/'splice/segments.json').read_text()) for k in ['start','end'] if 0<s[k]<int(report['1080p']['probe']['streams'][0]['nb_frames'])});bd=P/'boundaries';bd.mkdir(exist_ok=True);metrics=[]
+for b in bounds:
+ for frame in [b-1,b]:
+  f=bd/f'{frame:05}.png';run(['ffmpeg','-v','error','-threads','1','-y','-ss',max(0,(frame-30)/30),'-i',A/'粗剪_v16.mp4','-vf',f'select=eq(n\\\\,{min(30,frame)})','-frames:v','1','-threads','1',f]);a=np.asarray(Image.open(f).convert('RGB'))[:950];metrics.append({'frame':frame,'mean':float(a.mean()),'std':float(a.std()),'not_blank':bool(a.std()>2)})
+(P/'boundary_metrics.json').write_text(json.dumps(metrics,indent=2));assert all(x['not_blank'] for x in metrics)
+print('PASS',[(k,v['probe']['format']['duration']) for k,v in report.items()])
+EOF
+cat qa/v6/a02/parity.log" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+s02 done
+s03 done
+s04 done
+s06 done
+s07 done
+s08 done
+s09 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+s10 done
+
+codex
+前七场像素比对均为 MAE=0，目前没有发现并线差异。S10 已完成导出，继续验收剩余场景。v16 将保留 v15 的字幕带、音轨和片尾，并替换新并入及更新后的场景成片。
+exec
+/bin/bash -lc 'python3 qa/v6/a02/check_partial.py; cat qa/v6/a02/parity.log; git status --short film' in /workspace/病理科普视频/v5
+ succeeded in 2795ms:
+[('s02', 0.0), ('s03', 0.0), ('s04', 0.0), ('s06', 0.0), ('s07', 0.0), ('s08', 0.0), ('s09', 0.0), ('s10', 0.0)]
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+s02 done
+s03 done
+s04 done
+s06 done
+s07 done
+s08 done
+s09 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+s10 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+
+exec
+/bin/bash -lc 'tail -10 qa/v6/a02/parity.log; cat qa/v6/mech/s13_adv01/locked_end.sha256 | head -1; ls qa/v6/a02/s11' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+s02 done
+s03 done
+s04 done
+s06 done
+s07 done
+s08 done
+s09 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+s10 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+a2e658fc107c4a43c689607337db996fe8da13ea7e4b730f76d9789442b771bf  engine/lib/he.js
+
+exec
+/bin/bash -lc 'cat qa/v6/mech/s13_adv01/commit_bundle.py | head -100; cat qa/v6/e12_s19/make_bundle.py | head -100; cat qa/v6/a02/parity.log; date' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+import subprocess
+from pathlib import Path
+P=Path(__file__).resolve().parent
+root=Path.cwd(); temp=Path('/tmp/mech_adv01_commit')
+def run(a,**kw):return subprocess.run(a,check=True,**kw)
+# The worktree gitdir is mounted read-only; use the authorized bundle fallback.
+run(['git','clone','--shared','--no-checkout',str(root),str(temp)])
+g=['git','--git-dir='+str(temp/'.git'),'--work-tree='+str(root)]
+run(g+['reset','--mixed','HEAD'])
+run(g+['add','film/lib_ext/mech_cross.js','film/lib_ext/mech_vascular.js','film/lib_ext/mech_tissue.js',str(P.relative_to(root))])
+run(g+['-c','user.name=mini','-c','user.email=mini@local','commit','-m','mech_adv01 (Codex): 补足S13组织层次、血栓分层及坏死核碎屑'])
+run(g+['bundle','create',str(P/'mech_adv01-dev.bundle'),'HEAD^..HEAD'])
+run(['git','bundle','verify',str(P/'mech_adv01-dev.bundle')])
+print('COMMIT',subprocess.check_output(g+['rev-parse','HEAD'],text=True).strip())
+from pathlib import Path
+import subprocess,tempfile,json,hashlib
+P=Path(__file__).resolve().parent;root=Path.cwd();meta=tempfile.mkdtemp(prefix='e12-s19-git-');base=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+subprocess.run(['git','init','--bare',meta],check=True,stdout=subprocess.DEVNULL)
+g=['git','--git-dir='+meta,'--work-tree='+str(root)]
+# Read original objects; all index/ref writes stay in temporary independent metadata.
+objects=subprocess.check_output(['git','rev-parse','--git-path','objects'],text=True).strip();objects=str((root/objects).resolve())
+Path(meta,'objects/info/alternates').write_text(objects+'\n')
+subprocess.run(g+['symbolic-ref','HEAD','refs/heads/s19-dev'],check=True)
+subprocess.run(g+['update-ref','refs/heads/s19-dev',base],check=True)
+subprocess.run(g+['read-tree',base],check=True)
+files=['film/lib_ext/s19_fix12_chronic.js','film/chapters/s19.js']+[str(x.relative_to(root)) for x in sorted(P.rglob('*')) if x.is_file() and x.suffix!='.bundle' and x.name not in ['bundle交付.txt','artifact_sha256.json','git_meta.json']]
+subprocess.run(g+['add','--',*files],check=True)
+subprocess.run(g+['-c','user.name=mini','-c','user.email=mini@local','commit','-m','s19_fix12: 统一母板核形、消除拼接带并收细梭形核 (Codex)'],check=True)
+commit=subprocess.check_output(g+['rev-parse','HEAD'],text=True).strip();bundle=P/'e12_s19-dev.bundle'
+subprocess.run(g+['bundle','create',str(bundle),base+'..refs/heads/s19-dev'],check=True)
+r=subprocess.run(['git','bundle','verify',str(bundle)],capture_output=True,text=True,check=True)
+(P/'bundle交付.txt').write_text('Commit: '+commit+'\nBase: '+base+'\nRef: refs/heads/s19-dev\n原始 Git 元数据只读；独立临时元数据提交，原分支不变。\n'+r.stdout+r.stderr)
+(P/'git_meta.json').write_text(json.dumps({'root':str(root),'meta':meta,'base':base,'commit':commit},indent=2))
+(P/'artifact_sha256.json').write_text(json.dumps({str(x.relative_to(P)):hashlib.sha256(x.read_bytes()).hexdigest() for x in P.rglob('*') if x.is_file() and x.name!='artifact_sha256.json'},indent=2,ensure_ascii=False))
+print(commit)
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+s02 done
+s03 done
+s04 done
+s06 done
+s07 done
+s08 done
+s09 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+s10 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+Fri Nov 13 12:48:12 CST 2026
+
+exec
+/bin/bash -lc "cat > qa/v6/a02/report.py <<'EOF'
+from pathlib import Path
+import json,hashlib
+P=Path('qa/v6/a02');A=P.parent/'animatic';mae=json.loads((P/'mae.json').read_text());v=json.loads((A/'verification_v16.json').read_text());c=json.loads((P/'coverage.json').read_text());t=json.load(open('/workspace/病理科普视频/配音/全稿_v3/timeline.json'));rows={r['n']:r for r in t['lines']}
+assert all(x['max_MAE']<.5 for x in mae)
+assert (P/'sha256_start.txt').read_bytes()==(P/'sha256_end.txt').read_bytes()
+s=['# 粗剪 v16 并线验收（Codex）','',f\"全稿内容 {t['duration']:.6f} 秒；保留原 12 秒片尾。1080p / 720p 实测总时长均为 {v['1080p']['probe']['format']['duration']} 秒，30 fps。\",'', '## 覆盖区间','', '|场景|句号|真实口播起止（秒）|合成说明|','|---|---|---|---|']
+for scene,(a,b) in c['ranges'].items():
+ note='使用既有 v15 已完成镜下段' if scene in ['s08','s10','s11','s14'] else '最新验收成片替换；末帧覆盖至下一句起点'
+ if scene=='s19':note='最新 S19；开镜从句69起点前0.45秒开始，保留0.7秒切出'
+ s.append(f'|{scene.upper()}|{a:02}–{b:02}|{rows[a][\"start\"]:.6f}–{rows[b][\"end\"]:.6f}|{note}|')
+s+=['','仍为占位：S01 句01–05、S05 句20–22、S17 句63–65、S18 句66–68、S20 句71–74、S21 句75–77。S19 出镜动画短暂覆盖句71开始前后的静默及首段画面，未新增 S20 场景。','','S07 按 v15 约定覆盖句25–30；S08 保持原句29时钟但从句31开始可见。S10/S11 共用句37原点，句42→43保持已有连续镜下画面。这里只修合成，不改场景画法、文字或医学内容。','','## 逐像素验收','','使用各线 keyframes.json 的原始选帧时刻（标准 renderer 选帧保留6位小数，h06直接精度与原脚本相同）；1920×1080 RGB 像素 MAE。CT/mech/clin 直接读取指定工作树的定稿 PNG，其余读取当前工作树最新定稿 PNG。','','|场景|帧数|最大 MAE|结果|','|---|---:|---:|---|']
+for m in mae:s.append(f'|{m[\"scene\"].upper()}|{len(m[\"frames\"])}|{m[\"max_MAE\"]:.9f}|通过|')
+s+=['','明细与参考路径："'`../a02/mae.json`。本轮全部通过，无需修改 main.js、timeline.js、场景或共享库。MAE 指未编码关键帧，不将 H.264 的有损编码误差混入场景并线判据。'"','','## 合成和验证','','- 顺序处理单个场景补片，ffmpeg threads=1、filter_complex_threads=1；验收采用单浏览器逐页渲染，无并发渲染。脚本："'`../a02/parity.mjs`、`build_v16.py`、`verify_v16.py`。'"','- 沿用 h06_adv/v15 的全稿_v3真实配音、真实字幕时间轴和片尾；仅覆盖 y<950（720p 对应 y<634）。两版音频 AAC 数据 SHA256 与 v15 完全一致，见 verification_v16.json。字幕没有重算时刻；视频重编码会产生细微像素色差。','- 按30fps对真实时间向上取整分配区间。segments.json 的所有区间首尾严格相接，总帧数与成片一致；两版完整顺序解码成功。补片不足部分保持末帧，不插入空帧。所有接点前后帧均抽查，非空白阈值及结果见 ../a02/boundary_metrics.json；抽帧位于 ../a02/boundaries/。','- contact_sheet_v16.png 每15秒一帧，包含片尾；原始抽帧位于 ../a02/contact/。','- S19.mp4 自带提前0.45秒开镜包装，使用相应的成片原点，避免直接用句69起点导致画面迟到。其他镜下场景保留已有 v15 过渡。','','## 锁定文件','','开工与收工七文件 SHA256 完全一致；未修改锁定文件。','','"'```text'"',(P/'sha256_end.txt').read_text().strip(),'"'```'"','','## 范围与局限','','本次是并线与技术验收，没有修改或重新审核各场原创病理画法。字幕带与片尾继承 v15；占位段仍待后续制作。接点图与 contact sheet 供人工复核，未宣称全片逐秒人工听审。']
+(A/'自检_v16.md').write_text('\\n'.join(s)+'\\n')
+EOF
+cat qa/v6/a02/parity.log" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+s02 done
+s03 done
+s04 done
+s06 done
+s07 done
+s08 done
+s09 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+s10 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+
+exec
+/bin/bash -lc 'tail -6 qa/v6/a02/parity.log; du -sh qa/v6/a02; git diff --check; date' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+s07 done
+s08 done
+s09 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+s10 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+37M	qa/v6/a02
+Fri Nov 13 12:48:51 CST 2026
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+import json,hashlib
+from pathlib import Path
+out=[]
+for c in json.load(open('qa/v6/a02/configs.json')):
+ if c['scene'][1:] not in ['02','03','04','09','12','13','15','16']:continue
+ a=Path(c['dir'])/(c['scene'].upper()+'.mp4');b=Path('qa/v6')/('mech/s13_adv01' if c['scene']=='s13' else ('ct_real_adv01/' if c['scene'][1:] in ['04','09','12','15'] else 'clin/')+c['scene'].upper())/(c['scene'].upper()+'.mp4')
+ ah=hashlib.sha256(a.read_bytes()).hexdigest();bh=hashlib.sha256(b.read_bytes()).hexdigest();out.append({'scene':c['scene'],'external':str(a),'local':str(b),'sha256':ah,'equal':ah==bh})
+Path('qa/v6/a02/video_source_verification.json').write_text(json.dumps(out,ensure_ascii=False,indent=2));print([(r['scene'],r['equal']) for r in out])
+PY" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+[('s02', True), ('s03', True), ('s04', True), ('s09', True), ('s12', True), ('s13', True), ('s15', True), ('s16', True)]
+
+codex
+新增八场的本地 MP4 与对应 CT、机制、临床工作树交付文件也逐一核对，SHA256 全部相同。S10 的关键帧 MAE 同样为 0；S11 正在准备水彩与组织图层，尚未报错。
+exec
+/bin/bash -lc "cat > qa/v6/a02/commit_delivery.py <<'EOF'
+from pathlib import Path
+import subprocess,tempfile,json
+P=Path(__file__).resolve().parent;root=Path.cwd();base=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+files=[str(x.relative_to(root)) for x in P.rglob('*') if x.is_file() and x.suffix"'!='"'.bundle' and not any(v.startswith('splice') for v in x.relative_to(P).parts) and x.name not in ['commit.log','delivery.json']]
+files += ['qa/v6/animatic/'+n for n in ['粗剪_v16.mp4','粗剪_v16_720p.mp4','自检_v16.md','contact_sheet_v16.png','verification_v16.json']]
+def run(a,**kw):return subprocess.run(a,check=True,**kw)
+r=subprocess.run(['git','add','--',*files],capture_output=True,text=True)
+if r.returncode==0:
+ run(['git','-c','user.name=mini','-c','user.email=mini@local','commit','-m','v6_a02 (Codex): 并线逐场像素验收与全稿粗剪v16'])
+ result={'mode':'commit','commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()}
+else:
+ print('Original git add failed:',r.stderr,flush=True)
+ meta=tempfile.mkdtemp(prefix='a02-git-');run(['git','init','--bare',meta]);g=['git','--git-dir='+meta,'--work-tree='+str(root)];objects=subprocess.check_output(['git','rev-parse','--git-path','objects'],text=True).strip();Path(meta,'objects/info/alternates').write_text(str((root/objects).resolve())+'\\n');run(g+['symbolic-ref','HEAD','refs/heads/a02-dev']);run(g+['update-ref','refs/heads/a02-dev',base]);run(g+['read-tree',base]);run(g+['add','--',*files]);run(g+['-c','user.name=mini','-c','user.email=mini@local','commit','-m','v6_a02 (Codex): 并线逐场像素验收与全稿粗剪v16']);commit=subprocess.check_output(g+['rev-parse','HEAD'],text=True).strip();bundle=P/'a02.bundle';run(g+['bundle','create',str(bundle),base+'..refs/heads/a02-dev']);v=run(['git','bundle','verify',str(bundle)],capture_output=True,text=True);print(v.stdout+v.stderr);result={'mode':'bundle','base':base,'commit':commit,'bundle':str(bundle),'verified':True,'reason':r.stderr}
+(P/'delivery.json').write_text(json.dumps(result,ensure_ascii=False,indent=2));print(result)
+EOF
+cat qa/v6/a02/parity.log; date" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+s02 done
+s03 done
+s04 done
+s06 done
+s07 done
+s08 done
+s09 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+s10 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+s11 done
+s12 done
+Fri Nov 13 12:49:17 CST 2026
+
+exec
+/bin/bash -lc 'python3 qa/v6/a02/check_partial.py; tail -6 qa/v6/a02/parity.log' in /workspace/病理科普视频/v5
+ succeeded in 4083ms:
+[('s02', 0.0), ('s03', 0.0), ('s04', 0.0), ('s06', 0.0), ('s07', 0.0), ('s08', 0.0), ('s09', 0.0), ('s10', 0.0), ('s11', 0.012789030349794239), ('s12', 0.0), ('s13', 0.0)]
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+s10 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+s11 done
+s12 done
+s13 done
+
+exec
+/bin/bash -lc 'tail -8 qa/v6/a02/parity.log; date' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+s08 done
+s09 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+s10 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+s11 done
+s12 done
+s13 done
+Fri Nov 13 12:49:34 CST 2026
+
+exec
+/bin/bash -lc 'cat qa/v6/a02/mae.json | tail -15; cat qa/v6/d01_s11/render_all.mjs | head -50; cat qa/v6/a02/parity.log; date' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+        "MAE": 0.0
+      },
+      {
+        "name": "s53_gross",
+        "t": 19.797597916666604,
+        "MAE": 0.0
+      },
+      {
+        "name": "s53_end",
+        "t": 20.957166666666602,
+        "MAE": 0.0
+      }
+    ]
+  }
+]import fs from 'node:fs';import {execFileSync as run} from 'node:child_process';
+const P='qa/v6/d01_s11',tool='/workspace/garden-skills/skills/motion-showreel/scripts/render.mjs';
+const rows=JSON.parse(fs.readFileSync('/workspace/病理科普视频/配音/全稿_v3/timeline.json')).lines,origin=rows.find(s=>s.n===37).start;
+const at=(n,f)=>{const s=rows.find(s=>s.n===n);return s.start-origin+(s.end-s.start)*f;};
+const picks=[{name:'s42_to_43',t:at(43,.1)},...[.25,.6,.95].map((f,i)=>({name:['s43_start','s43_middle','s43_end'][i],t:at(43,f)})),{name:'s44',t:at(44,.65)},{name:'s45_fibrin',t:at(45,.28)},{name:'s45_pus',t:at(45,.75)},{name:'s46',t:at(46,.85)}];
+fs.writeFileSync(P+'/keyframes.json',JSON.stringify({origin,duration:at(46,1)+.8,picks},null,2));
+function render(args){run('node',[tool,'film',...args],{stdio:'inherit'});}
+render(['--q','scene=s11','--still',picks.map(p=>p.t.toFixed(6)).join(','),'--out',P+'/stills','--sheet']);
+render(['--q','scene=s11','--determinism']);
+render(['--q','scene=s11','--start','27.5','--duration','16','--determinism']);
+const baseline=JSON.parse(fs.readFileSync('qa/v6/c03_s10/keyframes.json'));render(['--q','scene=s11','--still',baseline.picks.map(p=>p.t.toFixed(6)).join(','),'--out',P+'/s10_parity']);
+const times=JSON.parse(fs.readFileSync('qa/v6/c03_s10/s08_times.json'));render(['--still',times.map(t=>t.toFixed(9)).join(','),'--out',P+'/s08_parity']);
+render(['--q','scene=s11','--out',P+'/S10_S11.mp4','--crf','16','--fps','30','--workers','3']);
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+s02 done
+s03 done
+s04 done
+s06 done
+s07 done
+s08 done
+s09 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+s10 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+s11 done
+s12 done
+s13 done
+Fri Nov 13 12:49:38 CST 2026
+
+codex
+目前已验收至 S13，均低于 MAE<0.5 门槛；S11 最大 MAE 为 0.01279，其余已测场景为 0。剩余 S14、S15、S16、S19 验收完成后，开始顺序合成两种分辨率的 v16。
+exec
+/bin/bash -lc 'cat qa/v6/a02/parity.log; ls qa/v6/a02/s14; date' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+[page] Failed to load resource: the server responded with a status of 404 (Not Found)
+s02 done
+s03 done
+s04 done
+s06 done
+s07 done
+s08 done
+s09 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+s10 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+s11 done
+s12 done
+s13 done
+s14 done
+s15 done
+s54_low.png
+s54_middle.png
+s55.png
+s56.png
+s57.png
+Fri Nov 13 12:49:42 CST 2026
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+import json
+r=json.load(open('qa/v6/a02/mae.json'))
+for x in r:
+ if x['scene']=='s11':print(x)
+PY
+ls qa/v6/a02/s19; tail -5 qa/v6/a02/parity.log" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+{'scene': 's11', 'reference': 'qa/v6/d01_s11', 'max_MAE': 0.012789030349794239, 'frames': [{'name': 's42_to_43', 't': 28.0026541666666, 'MAE': 0.0}, {'name': 's43_start', 't': 28.6591979166666, 'MAE': 0.012789030349794239}, {'name': 's43_middle', 't': 30.191133333333266, 'MAE': 0.01278613683127572}, {'name': 's43_end', 't': 31.723068749999932, 'MAE': 0.012755754886831276}, {'name': 's44', 't': 35.664829166666586, 'MAE': 0.0}, {'name': 's45_fibrin', 't': 39.11693666666657, 'MAE': 0.0}, {'name': 's45_pus', 't': 41.19797916666657, 'MAE': 0.0}, {'name': 's46', 't': 47.27851041666656, 'MAE': 0.0}]}
+s12 done
+s13 done
+s14 done
+s15 done
+s16 done
+
+exec
+/bin/bash -lc 'tail -8 qa/v6/a02/parity.log; date' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+s10 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+s11 done
+s12 done
+s13 done
+s14 done
+s15 done
+s16 done
+Fri Nov 13 12:49:55 CST 2026
+
+exec
+/bin/bash -lc 'tail -6 qa/v6/a02/parity.log; date' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+s12 done
+s13 done
+s14 done
+s15 done
+s16 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+Fri Nov 13 12:50:25 CST 2026
+
+codex
+S14、S15、S16 已导出，最后的 S19 正在准备图层。合成与验证脚本已就绪：会保留真实字幕时间，检查两版音轨是否与 v15 一致，并完整解码成片、检查接点和生成每 15 秒一帧的总览。
+exec
+/bin/bash -lc 'tail -5 qa/v6/a02/parity.log; date' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+s13 done
+s14 done
+s15 done
+s16 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+Fri Nov 13 12:50:59 CST 2026
+
+exec
+/bin/bash -lc 'python3 qa/v6/a02/check_partial.py' in /workspace/病理科普视频/v5
+ succeeded in 5519ms:
+[('s02', 0.0), ('s03', 0.0), ('s04', 0.0), ('s06', 0.0), ('s07', 0.0), ('s08', 0.0), ('s09', 0.0), ('s10', 0.0), ('s11', 0.012789030349794239), ('s12', 0.0), ('s13', 0.0), ('s14', 0.0), ('s15', 0.0), ('s16', 0.0)]
+
+exec
+/bin/bash -lc 'tail -5 qa/v6/a02/parity.log; date' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+s13 done
+s14 done
+s15 done
+s16 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+Fri Nov 13 12:51:37 CST 2026
+
+exec
+/bin/bash -lc "rg -n 'timeout|waitForFunction|browser.mjs' qa/v6/e04_s19/renderer/render.mjs qa/v6/e04_s19/renderer/lib/browser.mjs; tail -10 qa/v6/e12_s19/render.log; tail -8 qa/v6/a02/parity.log" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+qa/v6/e04_s19/renderer/lib/browser.mjs:106:    await page.waitForFunction(() => typeof window.render === 'function' && (window.READY === true || window.READY === undefined), null, { timeout: 600000 });
+qa/v6/e04_s19/renderer/render.mjs:34:import { loadChromium, launch, serve, resolveTarget, openPage, warnSoftwareGL, parseSize, args, die } from './lib/browser.mjs';
+  50/245 frames  201s
+  75/245 frames  203s
+  100/245 frames  204s
+  125/245 frames  206s
+  150/245 frames  207s
+  175/245 frames  209s
+  200/245 frames  210s
+  225/245 frames  212s
+done /workspace/病理科普视频/v5_s19_dev/qa/v6/e12_s19/S19_scene.mp4
+  245 frames, 8.17s, 213.3s wall (871 ms/sample)
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+s11 done
+s12 done
+s13 done
+s14 done
+s15 done
+s16 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+
+codex
+前 14 场全部通过。S19 的历史渲染记录显示，准备图层约需 200 秒，超过通用工具的 180 秒等待上限；它已有专用的 600 秒等待版本。我会沿用该设置完成验收，不改场景内容。
+exec
+/bin/bash -lc "python3 - <<'PY'
+p='qa/v6/a02/parity.mjs';s=open(p).read().replace(\"/workspace/garden-skills/skills/motion-showreel/scripts/lib/browser.mjs\",\"../e04_s19/renderer/lib/browser.mjs\").replace('of configs){const out=',\"of configs.filter(c=>"'!process.argv[2]||c.scene===process.argv[2])){const out=")
+open(p,'"'w').write(s)
+PY
+tail -3 qa/v6/a02/parity.log; date" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+s15 done
+s16 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+Fri Nov 13 12:51:52 CST 2026
+
+exec
+/bin/bash -lc 'tail -4 qa/v6/a02/parity.log; date' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+s14 done
+s15 done
+s16 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+Fri Nov 13 12:52:32 CST 2026
+
+ succeeded in 413012ms:
+exec
+/bin/bash -lc 'tail -4 qa/v6/a02/parity.log; date' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+s15 done
+s16 done
+… still waiting for window.READY = true (20 s). No errors yet; does the page ever set READY?
+s19 done
+Fri Nov 13 12:52:59 CST 2026
+
+exec
+/bin/bash -lc 'python3 qa/v6/a02/compare.py' in /workspace/病理科普视频/v5
+ succeeded in 4796ms:
+[('s02', 0.0), ('s03', 0.0), ('s04', 0.0), ('s06', 0.0), ('s07', 0.0), ('s08', 0.0), ('s09', 0.0), ('s10', 0.0), ('s11', 0.012789030349794239), ('s12', 0.0), ('s13', 0.0), ('s14', 0.0), ('s15', 0.0), ('s16', 0.0), ('s19', 0.0)]
+
+exec
+/bin/bash -lc 'python3 qa/v6/a02/build_v16.py > qa/v6/a02/build_v16.log 2>&1' in /workspace/病理科普视频/v5
+codex
+15 场验收全部通过：14 场 MAE=0，S11 最大 MAE=0.01279，无需修改合成入口或场景代码。现在开始单线程生成 v16 的 1080p 和 720p 两版。
+exec
+/bin/bash -lc 'cat qa/v6/a02/build_v16.log; du -sh qa/v6/a02/splice; cat qa/v6/a02/coverage.json | head -25; git status --short film; date' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+ 0 0 651 inherited
+ 1 651 1292 s02
+2.7M	qa/v6/a02/splice
+{
+  "ranges": {
+    "s02": [
+      6,
+      10
+    ],
+    "s03": [
+      11,
+      13
+    ],
+    "s04": [
+      14,
+      19
+    ],
+    "s06": [
+      23,
+      24
+    ],
+    "s07": [
+      25,
+      30
+    ],
+    "s08": [
+      31,
+      34
+Fri Nov 13 12:53:18 CST 2026
+
+exec
+/bin/bash -lc 'tail -6 qa/v6/a02/build_v16.log; du -sh qa/v6/a02/splice; date' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+ 4 2338 2720 inherited
+ 5 2720 3037 s06
+ 6 3037 3781 s07
+ 7 3781 4268 inherited
+ 8 4268 4511 s09
+ 9 4511 5967 inherited
+30M	qa/v6/a02/splice
+Fri Nov 13 12:53:48 CST 2026
+
+codex
+1080p 已完成前半片替换，目前正处理后半片。场景间的静默间隙用上一场末帧覆盖，接点按真实时间轴换算为连续帧号；尚未完成的 S01、S05、S17、S18、S20、S21 继续保留占位。
+exec
+/bin/bash -lc 'tail -8 qa/v6/a02/build_v16.log; du -sh qa/v6/a02/splice*; date' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+ 7 3781 4268 inherited
+ 8 4268 4511 s09
+ 9 4511 5967 inherited
+ 10 5967 6214 s12
+ 11 6214 6857 s13
+ 12 6857 7386 inherited
+ 13 7386 7687 s15
+ 14 7687 8075 s16
+78M	qa/v6/a02/splice
+Fri Nov 13 12:54:18 CST 2026
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+p='qa/v6/a02/report.py';s=open(p).read().replace(\"'|场景|句号|真实口播起止（秒）|合成说明|','|---|---|---|---|'\",\"'|场景|句号|真实口播起止（秒）|可见覆盖帧区间（30fps，左闭右开）|合成说明|','|---|---|---|---|---|'\")
+s=s.replace(\"s.append(f'|{scene.upper()}|{a:02}–{b:02}|{rows[a][\\\"start\\\"]:.6f}–{rows[b][\\\"end\\\"]:.6f}|{note}|')\", \"start=rows[a]['start'];end=rows[b+1]['start'] if b<77 else t['duration']\\n if scene=='s19':start-=.45;end=max(end,rows[b]['end']+.7)\\n import math\\n s.append(f'|{scene.upper()}|{a:02}–{b:02}|{rows[a][\\\"start\\\"]:.6f}–{rows[b][\\\"end\\\"]:.6f}|[{math.ceil(start*30)}, {math.ceil(end*30)})|{note}|')\")
+open(p,'w').write(s)
+PY
+tail -6 qa/v6/a02/build_v16.log; date" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+ 12 6857 7386 inherited
+ 13 7386 7687 s15
+ 14 7687 8075 s16
+ 15 8075 8685 inherited
+ 16 8685 8965 s19
+ 17 8965 10195 inherited
+Fri Nov 13 12:54:30 CST 2026
+
+exec
+/bin/bash -lc 'tail -5 qa/v6/a02/build_v16.log; ls -lh qa/v6/animatic/粗剪_v16*; date' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+ 16 8685 8965 s19
+ 17 8965 10195 inherited
+_720p 0 0 651 inherited
+_720p 1 651 1292 s02
+_720p 2 1292 1618 s03
+-rw-r--r-- 1 box box 100M Nov 13 12:54 qa/v6/animatic/粗剪_v16.mp4
+Fri Nov 13 12:54:39 CST 2026
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+import ast
+for f in ['report.py','verify_v16.py','commit_delivery.py']:ast.parse(open('qa/v6/a02/'+f).read());print(f,'syntax OK')
+PY
+cat qa/v6/a02/build_v16.log | tail -6; date" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+report.py syntax OK
+verify_v16.py syntax OK
+commit_delivery.py syntax OK
+ 17 8965 10195 inherited
+_720p 0 0 651 inherited
+_720p 1 651 1292 s02
+_720p 2 1292 1618 s03
+_720p 3 1618 2338 s04
+_720p 4 2338 2720 inherited
+Fri Nov 13 12:54:43 CST 2026
+
+codex
+1080p 已生成，720p 正在顺序编码。随后会核对总时长、完整解码、接点帧和锁定文件哈希，并尝试提交；若 Git 元数据仍只读，就按要求生成并验证 a02.bundle。
+exec
+/bin/bash -lc 'tail -6 qa/v6/a02/build_v16.log; date' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+_720p 12 6857 7386 inherited
+_720p 13 7386 7687 s15
+_720p 14 7687 8075 s16
+_720p 15 8075 8685 inherited
+_720p 16 8685 8965 s19
+_720p 17 8965 10195 inherited
+Fri Nov 13 12:55:08 CST 2026
+
+ succeeded in 119684ms:
+exec
+/bin/bash -lc 'python3 qa/v6/a02/verify_v16.py > qa/v6/a02/verify_v16.log 2>&1' in /workspace/病理科普视频/v5
+exec
+/bin/bash -lc 'tail -5 qa/v6/a02/verify_v16.log; ls qa/v6/a02/contact 2>/dev/null | wc -l; ls -lh qa/v6/animatic/粗剪_v16*; date' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+23
+-rw-r--r-- 1 box box 100M Nov 13 12:54 qa/v6/animatic/粗剪_v16.mp4
+-rw-r--r-- 1 box box  52M Nov 13 12:55 qa/v6/animatic/粗剪_v16_720p.mp4
+Fri Nov 13 12:55:39 CST 2026
+
+exec
+/bin/bash -lc 'tail -8 qa/v6/a02/verify_v16.log; ls qa/v6/a02/boundaries | wc -l; date' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+28
+Fri Nov 13 12:55:44 CST 2026
+
+ exited 1 in 32957ms:
+exec
+/bin/bash -lc 'tail -10 qa/v6/a02/verify_v16.log; ls qa/v6/a02/boundaries | wc -l; date' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+Traceback (most recent call last):
+  File "/workspace/病理科普视频/v5/qa/v6/a02/verify_v16.py", line 26, in <module>
+    (P/'boundary_metrics.json').write_text(json.dumps(metrics,indent=2));assert all(x['not_blank'] for x in metrics)
+                                                                                ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+34
+Fri Nov 13 12:55:50 CST 2026
+
+codex
+两版成片均已完整解码通过，音频数据与 v15 完全一致，每 15 秒总览也已生成。接点自动检查标出了几张低方差画面，我正在查看这些帧，确认它们是预期淡入淡出还是意外空帧。
+exec
+/bin/bash -lc "python3 - <<'PY'
+import json
+print([x for x in json.load(open('qa/v6/a02/boundary_metrics.json')) if not x['not_blank']])
+PY" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+[{'frame': 8685, 'mean': 17.339129385964913, 'std': 1.2602541523759838, 'not_blank': False}, {'frame': 8964, 'mean': 17.336460709064326, 'std': 1.2705965996466808, 'not_blank': False}]
+
+exec
+/bin/bash -lc "cat > qa/v6/a02/classify_iris.py <<'EOF'
+from pathlib import Path
+import subprocess,json
+import numpy as np
+from PIL import Image
+P=Path('qa/v6/a02');metrics=json.load(open(P/'boundary_metrics.json'));src=P.parent/'e12_s19/S19.mp4'; checks=[]
+for frame,candidates in [(8685,[0,1]),(8964,[278,279])]:
+ a=np.asarray(Image.open(P/'boundaries'/f'{frame:05}.png').convert('RGB'),dtype=np.int16)[:948]
+ maes=[]
+ for f in candidates:
+  out=P/f'iris_source_{f}.png';subprocess.run(['ffmpeg','-v','error','-threads','1','-y','-i',str(src),'-vf',f'select=eq(n\\\\,{f})','-frames:v','1','-threads','1',str(out)],check=True);b=np.asarray(Image.open(out).convert('RGB'),dtype=np.int16)[:948];maes.append(float(np.abs(a-b).mean()))
+ best=min(maes);assert best<.5,(frame,maes);checks.append({'frame':frame,'source_candidates':candidates,'MAE':maes,'expected_iris_dark':True})
+for m in metrics:
+ m['expected_iris_dark']=m['frame'] in [8685,8964];m['no_unexpected_blank']=m['not_blank'] or m['expected_iris_dark']
+assert all(m['no_unexpected_blank'] for m in metrics)
+(P/'boundary_metrics.json').write_text(json.dumps(metrics,indent=2));(P/'iris_boundary_verification.json').write_text(json.dumps(checks,indent=2));print(checks)
+EOF
+python3 qa/v6/a02/classify_iris.py" in /workspace/病理科普视频/v5
+ succeeded in 2684ms:
+[{'frame': 8685, 'source_candidates': [0, 1], 'MAE': [0.007189477848101266, 0.0070927830520393816], 'expected_iris_dark': True}, {'frame': 8964, 'source_candidates': [278, 279], 'MAE': [0.013835413736521331, 0.010199286509610876], 'expected_iris_dark': True}]
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+p='qa/v6/a02/classify_iris.py';s=open(p).read().replace('import subprocess,json','import subprocess,json,math');s=s.replace('for frame,candidates in [(8685,[0,1]),(8964,[278,279])]:',\"patch=next(p for p in json.load(open(P/'coverage.json'))['patches'] if p['scene']=='s19');sf=math.ceil(patch['start']*30);ef=math.ceil(patch['end']*30);n=json.load(open(P.parent/'e12_s19/video_check.json'))['frames']\\nfor frame,candidates in [(sf,[0,1]),(ef-1,[n-2,n-1])]:\").replace(\"m['frame'] in [8685,8964]\",\"m['frame'] in [sf,ef-1]\");open(p,'w').write(s)
+p='qa/v6/a02/verify_v16.py';s=open(p).read().replace(\"assert all(x['not_blank'] for x in metrics)\",\"\\nsubprocess.run(['python3',str(P/'classify_iris.py')],check=True)\");open(p,'w').write(s)
+p='qa/v6/a02/report.py';s=open(p).read().replace('所有接点前后帧均抽查，非空白阈值及结果见','所有接点前后帧均抽查；S19开镜首帧/闭镜末帧为源成片自带的深色闭合状态，已与源片逐像素比对（iris_boundary_verification.json），不算意外空帧。其余接点均非空白，阈值及结果见');open(p,'w').write(s)
+PY" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+codex
+两张低方差帧已确认是 S19 源成片的闭合镜头状态；与源帧比对，MAE 分别约为 0.007 和 0.010。其余接点均非空白，未发现意外空帧。现在收尾自检文档并打包交付。
+exec
+/bin/bash -lc "sha256sum engine/lib/{he,he_detail,wash,ann,scope,camera}.js parity_r4/chapters/04.js > qa/v6/a02/sha256_end.txt
+cmp qa/v6/a02/sha256_start.txt qa/v6/a02/sha256_end.txt
+python3 qa/v6/a02/report.py
+python3 - <<'PY'
+import json
+from pathlib import Path
+r=json.load(open('qa/v6/animatic/verification_v16.json'))
+for k,v in r.items(): print(k,v['probe']['format']['duration'],v['probe']['streams'][0]['nb_frames'])
+with open('qa/v6/a02/verify_v16.log','a') as f:f.write('\\nRESOLVED: two low-variance S19 boundary frames match intentional source iris closure (MAE<0.5); all other boundaries nonblank; full decoding/audio/contiguity checks passed. See iris_boundary_verification.json and boundary_metrics.json.\\n')
+PY
+head -24 qa/v6/animatic/自检_v16.md; git diff --check; git status --short film" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+1080p 339.833333 10195
+_720p 339.833333 10195
+# 粗剪 v16 并线验收（Codex）
+
+全稿内容 327.831500 秒；保留原 12 秒片尾。1080p / 720p 实测总时长均为 339.833333 秒，30 fps。
+
+## 覆盖区间
+
+|场景|句号|真实口播起止（秒）|可见覆盖帧区间（30fps，左闭右开）|合成说明|
+|---|---|---|---|---|
+|S02|06–10|21.666958–42.613958|[651, 1292)|最新验收成片替换；末帧覆盖至下一句起点|
+|S03|11–13|43.063958–53.450833|[1292, 1618)|最新验收成片替换；末帧覆盖至下一句起点|
+|S04|14–19|53.900833–77.124667|[1618, 2338)|最新验收成片替换；末帧覆盖至下一句起点|
+|S06|23–24|90.636750–100.772375|[2720, 3037)|最新验收成片替换；末帧覆盖至下一句起点|
+|S07|25–30|101.222375–125.556958|[3037, 3781)|最新验收成片替换；末帧覆盖至下一句起点|
+|S08|31–34|126.006958–141.816458|[3781, 4268)|使用既有 v15 已完成镜下段|
+|S09|35–36|142.266458–149.542792|[4268, 4511)|最新验收成片替换；末帧覆盖至下一句起点|
+|S10|37–42|150.342792–177.457750|[4511, 5338)|使用既有 v15 已完成镜下段|
+|S11|43–46|177.907750–198.419583|[5338, 5967)|使用既有 v15 已完成镜下段|
+|S12|47–48|198.869583–206.313583|[5967, 6214)|最新验收成片替换；末帧覆盖至下一句起点|
+|S13|49–53|207.113583–228.110750|[6214, 6857)|最新验收成片替换；末帧覆盖至下一句起点|
+|S14|54–57|228.560750–245.744708|[6857, 7386)|使用既有 v15 已完成镜下段|
+|S15|58–59|246.194708–255.427333|[7386, 7687)|最新验收成片替换；末帧覆盖至下一句起点|
+|S16|60–62|256.227333–268.699667|[7687, 8075)|最新验收成片替换；末帧覆盖至下一句起点|
+|S19|69–70|289.935583–298.109792|[8685, 8965)|最新 S19；开镜从句69起点前0.45秒开始，保留0.7秒切出|
+
+
+exec
+/bin/bash -lc 'python3 qa/v6/a02/commit_delivery.py > qa/v6/a02/commit.log 2>&1' in /workspace/病理科普视频/v5
+ exited 1 in 1824ms:
+exec
+/bin/bash -lc 'head -5 qa/v6/a02/commit.log; tail -6 qa/v6/a02/commit.log; ls -lh qa/v6/a02/a02.bundle 2>/dev/null; date' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+Original git add failed: fatal: Unable to create '/workspace/病理科普视频/v5/.git/index.lock': Read-only file system
+
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+    def run(a,**kw):return subprocess.run(a,check=True,**kw)
+                           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['git', '--git-dir=/tmp/a02-git-a9up1i47', '--work-tree=/workspace/病理科普视频/v5', 'add', '--', 'qa/v6/a02/sha256_start.txt', 'qa/v6/a02/verify_v16.py', 'qa/v6/a02/video_source_verification.json', 'qa/v6/a02/compare.py', 'qa/v6/a02/boundary_metrics.json', 'qa/v6/a02/configs.json', 'qa/v6/a02/sha256_end.txt', 'qa/v6/a02/build_v16.log', 'qa/v6/a02/iris_source_1.png', 'qa/v6/a02/mae.json', 'qa/v6/a02/iris_boundary_verification.json', 'qa/v6/a02/build_v16.py', 'qa/v6/a02/report.py', 'qa/v6/a02/parity.log', 'qa/v6/a02/check_partial.py', 'qa/v6/a02/iris_source_279.png', 'qa/v6/a02/commit_delivery.py', 'qa/v6/a02/parity.mjs', 'qa/v6/a02/verify_v16.log', 'qa/v6/a02/classify_iris.py', 'qa/v6/a02/coverage.json', 'qa/v6/a02/iris_source_0.png', 'qa/v6/a02/iris_source_278.png', 'qa/v6/a02/contact/090.png', 'qa/v6/a02/contact/315.png', 'qa/v6/a02/contact/135.png', 'qa/v6/a02/contact/045.png', 'qa/v6/a02/contact/105.png', 'qa/v6/a02/contact/255.png', 'qa/v6/a02/contact/180.png', 'qa/v6/a02/contact/075.png', 'qa/v6/a02/contact/060.png', 'qa/v6/a02/contact/120.png', 'qa/v6/a02/contact/165.png', 'qa/v6/a02/contact/270.png', 'qa/v6/a02/contact/030.png', 'qa/v6/a02/contact/285.png', 'qa/v6/a02/contact/225.png', 'qa/v6/a02/contact/195.png', 'qa/v6/a02/contact/210.png', 'qa/v6/a02/contact/150.png', 'qa/v6/a02/contact/330.png', 'qa/v6/a02/contact/300.png', 'qa/v6/a02/contact/240.png', 'qa/v6/a02/contact/015.png', 'qa/v6/a02/contact/000.png', 'qa/v6/a02/s09/s35_82.png', 'qa/v6/a02/s09/s35_30.png', 'qa/v6/a02/s09/s36_30.png', 'qa/v6/a02/s09/s36_82.png', 'qa/v6/a02/s12/s48_82.png', 'qa/v6/a02/s12/s47_82.png', 'qa/v6/a02/s12/s47_30.png', 'qa/v6/a02/s12/s48_30.png', 'qa/v6/a02/s06/s24_anchor.png', 'qa/v6/a02/s06/s24_after.png', 'qa/v6/a02/s06/s23_transition.png', 'qa/v6/a02/s06/s23_red.png', 'qa/v6/a02/s06/s24_before.png', 'qa/v6/a02/s06/s23_start.png', 'qa/v6/a02/s16/s61_late.png', 'qa/v6/a02/s16/s60_early.png', 'qa/v6/a02/s16/s62_late.png', 'qa/v6/a02/s16/s61_early.png', 'qa/v6/a02/s16/s62_early.png', 'qa/v6/a02/s16/s60_late.png', 'qa/v6/a02/s14/s55.png', 'qa/v6/a02/s14/s56.png', 'qa/v6/a02/s14/s57.png', 'qa/v6/a02/s14/s54_low.png', 'qa/v6/a02/s14/s54_middle.png', 'qa/v6/a02/boundaries/02720.png', 'qa/v6/a02/boundaries/04268.png', 'qa/v6/a02/boundaries/04267.png', 'qa/v6/a02/boundaries/04511.png', 'qa/v6/a02/boundaries/05967.png', 'qa/v6/a02/boundaries/06857.png', 'qa/v6/a02/boundaries/02338.png', 'qa/v6/a02/boundaries/06213.png', 'qa/v6/a02/boundaries/03780.png', 'qa/v6/a02/boundaries/08965.png', 'qa/v6/a02/boundaries/07686.png', 'qa/v6/a02/boundaries/01291.png', 'qa/v6/a02/boundaries/00651.png', 'qa/v6/a02/boundaries/03781.png', 'qa/v6/a02/boundaries/02337.png', 'qa/v6/a02/boundaries/08964.png', 'qa/v6/a02/boundaries/07687.png', 'qa/v6/a02/boundaries/05966.png', 'qa/v6/a02/boundaries/06856.png', 'qa/v6/a02/boundaries/03037.png', 'qa/v6/a02/boundaries/08075.png', 'qa/v6/a02/boundaries/00650.png', 'qa/v6/a02/boundaries/07386.png', 'qa/v6/a02/boundaries/01618.png', 'qa/v6/a02/boundaries/03036.png', 'qa/v6/a02/boundaries/08684.png', 'qa/v6/a02/boundaries/07385.png', 'qa/v6/a02/boundaries/04510.png', 'qa/v6/a02/boundaries/08074.png', 'qa/v6/a02/boundaries/06214.png', 'qa/v6/a02/boundaries/01292.png', 'qa/v6/a02/boundaries/01617.png', 'qa/v6/a02/boundaries/02719.png', 'qa/v6/a02/boundaries/08685.png', 'qa/v6/a02/s08/s08_high_s31.png', 'qa/v6/a02/s08/s08_mid.png', 'qa/v6/a02/s08/s08_high_s32.png', 'qa/v6/a02/s08/s08_high_s33.png', 'qa/v6/a02/s08/s08_low.png', 'qa/v6/a02/s08/s08_high_s30.png', 'qa/v6/a02/s08/s08_high_s34.png', 'qa/v6/a02/s13/s49_pressure.png', 'qa/v6/a02/s13/s53_end.png', 'qa/v6/a02/s13/s51_bleed.png', 'qa/v6/a02/s13/s51_necrosis.png', 'qa/v6/a02/s13/s50_thrombus.png', 'qa/v6/a02/s13/s49_start.png', 'qa/v6/a02/s13/s53_gross.png', 'qa/v6/a02/s13/s52_pigment.png', 'qa/v6/a02/s13/s50_squeeze.png', 'qa/v6/a02/s04/s14_80.png', 'qa/v6/a02/s04/s15_72.png', 'qa/v6/a02/s04/s17_82.png', 'qa/v6/a02/s04/s19_72.png', 'qa/v6/a02/s04/s18_72.png', 'qa/v6/a02/s04/s16_82.png', 'qa/v6/a02/s04/s16_30.png', 'qa/v6/a02/s04/s14_12.png', 'qa/v6/a02/s04/s17_30.png', 'qa/v6/a02/s19/transition_3.png', 'qa/v6/a02/s19/s69_low.png', 'qa/v6/a02/s19/transition_1.png', 'qa/v6/a02/s19/s70_plasma.png', 'qa/v6/a02/s19/s69_middle.png', 'qa/v6/a02/s19/s70_lymph.png', 'qa/v6/a02/s19/transition_2.png', 'qa/v6/a02/s19/s69_fibrosis.png', 'qa/v6/a02/s11/s45_fibrin.png', 'qa/v6/a02/s11/s43_end.png', 'qa/v6/a02/s11/s45_pus.png', 'qa/v6/a02/s11/s44.png', 'qa/v6/a02/s11/s46.png', 'qa/v6/a02/s11/s43_middle.png', 'qa/v6/a02/s11/s42_to_43.png', 'qa/v6/a02/s11/s43_start.png', 'qa/v6/a02/s10/s42.png', 'qa/v6/a02/s10/s39.png', 'qa/v6/a02/s10/s38.png', 'qa/v6/a02/s10/low_to_mid.png', 'qa/v6/a02/s10/s40.png', 'qa/v6/a02/s10/s37.png', 'qa/v6/a02/s10/s41.png', 'qa/v6/a02/s10/s37_open_low.png', 'qa/v6/a02/s15/s59_30.png', 'qa/v6/a02/s15/s58_82.png', 'qa/v6/a02/s15/s58_30.png', 'qa/v6/a02/s15/s59_82.png', 'qa/v6/a02/s07/handoff_mid.png', 'qa/v6/a02/s07/s26_protein.png', 'qa/v6/a02/s07/s27_exited.png', 'qa/v6/a02/s07/s25_fluid.png', 'qa/v6/a02/s07/s30_exudation.png', 'qa/v6/a02/s07/s27_crossing.png', 'qa/v6/a02/s07/s29_injury.png', 'qa/v6/a02/s07/s27_adhesion.png', 'qa/v6/a02/s07/s28_defense.png', 'qa/v6/a02/s07/handoff_start.png', 'qa/v6/a02/s03/s12_early.png', 'qa/v6/a02/s03/s11_late.png', 'qa/v6/a02/s03/s13_late.png', 'qa/v6/a02/s03/s11_early.png', 'qa/v6/a02/s03/s13_early.png', 'qa/v6/a02/s03/s12_late.png', 'qa/v6/a02/s02/s10_late.png', 'qa/v6/a02/s02/s08_early.png', 'qa/v6/a02/s02/s07_early.png', 'qa/v6/a02/s02/s10_early.png', 'qa/v6/a02/s02/s09_late.png', 'qa/v6/a02/s02/s06_early.png', 'qa/v6/a02/s02/s06_late.png', 'qa/v6/a02/s02/s07_late.png', 'qa/v6/a02/s02/s09_early.png', 'qa/v6/a02/s02/s08_late.png', 'qa/v6/animatic/粗剪_v16.mp4', 'qa/v6/animatic/粗剪_v16_720p.mp4', 'qa/v6/animatic/自检_v16.md', 'qa/v6/animatic/contact_sheet_v16.png', 'qa/v6/animatic/verification_v16.json']' returned non-zero exit status 1.
+Fri Nov 13 12:56:49 CST 2026
+
+exec
+/bin/bash -lc "rg -n 'fatal|ignored|error|hint: Use|qa/v6/a02' qa/v6/a02/commit.log | head -12; cat .gitignore | tail -35" in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+1:Original git add failed: fatal: Unable to create '/workspace/病理科普视频/v5/.git/index.lock': Read-only file system
+14:The following paths are ignored by one of your .gitignore files:
+17:hint: Use -f if you really want to add them.
+20:  File "/workspace/病理科普视频/v5/qa/v6/a02/commit_delivery.py", line 13, in <module>
+23:  File "/workspace/病理科普视频/v5/qa/v6/a02/commit_delivery.py", line 6, in run
+29:subprocess.CalledProcessError: Command '['git', '--git-dir=/tmp/a02-git-a9up1i47', '--work-tree=/workspace/病理科普视频/v5', 'add', '--', 'qa/v6/a02/sha256_start.txt', 'qa/v6/a02/verify_v16.py', 'qa/v6/a02/video_source_verification.json', 'qa/v6/a02/compare.py', 'qa/v6/a02/boundary_metrics.json', 'qa/v6/a02/configs.json', 'qa/v6/a02/sha256_end.txt', 'qa/v6/a02/build_v16.log', 'qa/v6/a02/iris_source_1.png', 'qa/v6/a02/mae.json', 'qa/v6/a02/iris_boundary_verification.json', 'qa/v6/a02/build_v16.py', 'qa/v6/a02/report.py', 'qa/v6/a02/parity.log', 'qa/v6/a02/check_partial.py', 'qa/v6/a02/iris_source_279.png', 'qa/v6/a02/commit_delivery.py', 'qa/v6/a02/parity.mjs', 'qa/v6/a02/verify_v16.log', 'qa/v6/a02/classify_iris.py', 'qa/v6/a02/coverage.json', 'qa/v6/a02/iris_source_0.png', 'qa/v6/a02/iris_source_278.png', 'qa/v6/a02/contact/090.png', 'qa/v6/a02/contact/315.png', 'qa/v6/a02/contact/135.png', 'qa/v6/a02/contact/045.png', 'qa/v6/a02/contact/105.png', 'qa/v6/a02/contact/255.png', 'qa/v6/a02/contact/180.png', 'qa/v6/a02/contact/075.png', 'qa/v6/a02/contact/060.png', 'qa/v6/a02/contact/120.png', 'qa/v6/a02/contact/165.png', 'qa/v6/a02/contact/270.png', 'qa/v6/a02/contact/030.png', 'qa/v6/a02/contact/285.png', 'qa/v6/a02/contact/225.png', 'qa/v6/a02/contact/195.png', 'qa/v6/a02/contact/210.png', 'qa/v6/a02/contact/150.png', 'qa/v6/a02/contact/330.png', 'qa/v6/a02/contact/300.png', 'qa/v6/a02/contact/240.png', 'qa/v6/a02/contact/015.png', 'qa/v6/a02/contact/000.png', 'qa/v6/a02/s09/s35_82.png', 'qa/v6/a02/s09/s35_30.png', 'qa/v6/a02/s09/s36_30.png', 'qa/v6/a02/s09/s36_82.png', 'qa/v6/a02/s12/s48_82.png', 'qa/v6/a02/s12/s47_82.png', 'qa/v6/a02/s12/s47_30.png', 'qa/v6/a02/s12/s48_30.png', 'qa/v6/a02/s06/s24_anchor.png', 'qa/v6/a02/s06/s24_after.png', 'qa/v6/a02/s06/s23_transition.png', 'qa/v6/a02/s06/s23_red.png', 'qa/v6/a02/s06/s24_before.png', 'qa/v6/a02/s06/s23_start.png', 'qa/v6/a02/s16/s61_late.png', 'qa/v6/a02/s16/s60_early.png', 'qa/v6/a02/s16/s62_late.png', 'qa/v6/a02/s16/s61_early.png', 'qa/v6/a02/s16/s62_early.png', 'qa/v6/a02/s16/s60_late.png', 'qa/v6/a02/s14/s55.png', 'qa/v6/a02/s14/s56.png', 'qa/v6/a02/s14/s57.png', 'qa/v6/a02/s14/s54_low.png', 'qa/v6/a02/s14/s54_middle.png', 'qa/v6/a02/boundaries/02720.png', 'qa/v6/a02/boundaries/04268.png', 'qa/v6/a02/boundaries/04267.png', 'qa/v6/a02/boundaries/04511.png', 'qa/v6/a02/boundaries/05967.png', 'qa/v6/a02/boundaries/06857.png', 'qa/v6/a02/boundaries/02338.png', 'qa/v6/a02/boundaries/06213.png', 'qa/v6/a02/boundaries/03780.png', 'qa/v6/a02/boundaries/08965.png', 'qa/v6/a02/boundaries/07686.png', 'qa/v6/a02/boundaries/01291.png', 'qa/v6/a02/boundaries/00651.png', 'qa/v6/a02/boundaries/03781.png', 'qa/v6/a02/boundaries/02337.png', 'qa/v6/a02/boundaries/08964.png', 'qa/v6/a02/boundaries/07687.png', 'qa/v6/a02/boundaries/05966.png', 'qa/v6/a02/boundaries/06856.png', 'qa/v6/a02/boundaries/03037.png', 'qa/v6/a02/boundaries/08075.png', 'qa/v6/a02/boundaries/00650.png', 'qa/v6/a02/boundaries/07386.png', 'qa/v6/a02/boundaries/01618.png', 'qa/v6/a02/boundaries/03036.png', 'qa/v6/a02/boundaries/08684.png', 'qa/v6/a02/boundaries/07385.png', 'qa/v6/a02/boundaries/04510.png', 'qa/v6/a02/boundaries/08074.png', 'qa/v6/a02/boundaries/06214.png', 'qa/v6/a02/boundaries/01292.png', 'qa/v6/a02/boundaries/01617.png', 'qa/v6/a02/boundaries/02719.png', 'qa/v6/a02/boundaries/08685.png', 'qa/v6/a02/s08/s08_high_s31.png', 'qa/v6/a02/s08/s08_mid.png', 'qa/v6/a02/s08/s08_high_s32.png', 'qa/v6/a02/s08/s08_high_s33.png', 'qa/v6/a02/s08/s08_low.png', 'qa/v6/a02/s08/s08_high_s30.png', 'qa/v6/a02/s08/s08_high_s34.png', 'qa/v6/a02/s13/s49_pressure.png', 'qa/v6/a02/s13/s53_end.png', 'qa/v6/a02/s13/s51_bleed.png', 'qa/v6/a02/s13/s51_necrosis.png', 'qa/v6/a02/s13/s50_thrombus.png', 'qa/v6/a02/s13/s49_start.png', 'qa/v6/a02/s13/s53_gross.png', 'qa/v6/a02/s13/s52_pigment.png', 'qa/v6/a02/s13/s50_squeeze.png', 'qa/v6/a02/s04/s14_80.png', 'qa/v6/a02/s04/s15_72.png', 'qa/v6/a02/s04/s17_82.png', 'qa/v6/a02/s04/s19_72.png', 'qa/v6/a02/s04/s18_72.png', 'qa/v6/a02/s04/s16_82.png', 'qa/v6/a02/s04/s16_30.png', 'qa/v6/a02/s04/s14_12.png', 'qa/v6/a02/s04/s17_30.png', 'qa/v6/a02/s19/transition_3.png', 'qa/v6/a02/s19/s69_low.png', 'qa/v6/a02/s19/transition_1.png', 'qa/v6/a02/s19/s70_plasma.png', 'qa/v6/a02/s19/s69_middle.png', 'qa/v6/a02/s19/s70_lymph.png', 'qa/v6/a02/s19/transition_2.png', 'qa/v6/a02/s19/s69_fibrosis.png', 'qa/v6/a02/s11/s45_fibrin.png', 'qa/v6/a02/s11/s43_end.png', 'qa/v6/a02/s11/s45_pus.png', 'qa/v6/a02/s11/s44.png', 'qa/v6/a02/s11/s46.png', 'qa/v6/a02/s11/s43_middle.png', 'qa/v6/a02/s11/s42_to_43.png', 'qa/v6/a02/s11/s43_start.png', 'qa/v6/a02/s10/s42.png', 'qa/v6/a02/s10/s39.png', 'qa/v6/a02/s10/s38.png', 'qa/v6/a02/s10/low_to_mid.png', 'qa/v6/a02/s10/s40.png', 'qa/v6/a02/s10/s37.png', 'qa/v6/a02/s10/s41.png', 'qa/v6/a02/s10/s37_open_low.png', 'qa/v6/a02/s15/s59_30.png', 'qa/v6/a02/s15/s58_82.png', 'qa/v6/a02/s15/s58_30.png', 'qa/v6/a02/s15/s59_82.png', 'qa/v6/a02/s07/handoff_mid.png', 'qa/v6/a02/s07/s26_protein.png', 'qa/v6/a02/s07/s27_exited.png', 'qa/v6/a02/s07/s25_fluid.png', 'qa/v6/a02/s07/s30_exudation.png', 'qa/v6/a02/s07/s27_crossing.png', 'qa/v6/a02/s07/s29_injury.png', 'qa/v6/a02/s07/s27_adhesion.png', 'qa/v6/a02/s07/s28_defense.png', 'qa/v6/a02/s07/handoff_start.png', 'qa/v6/a02/s03/s12_early.png', 'qa/v6/a02/s03/s11_late.png', 'qa/v6/a02/s03/s13_late.png', 'qa/v6/a02/s03/s11_early.png', 'qa/v6/a02/s03/s13_early.png', 'qa/v6/a02/s03/s12_late.png', 'qa/v6/a02/s02/s10_late.png', 'qa/v6/a02/s02/s08_early.png', 'qa/v6/a02/s02/s07_early.png', 'qa/v6/a02/s02/s10_early.png', 'qa/v6/a02/s02/s09_late.png', 'qa/v6/a02/s02/s06_early.png', 'qa/v6/a02/s02/s06_late.png', 'qa/v6/a02/s02/s07_late.png', 'qa/v6/a02/s02/s09_early.png', 'qa/v6/a02/s02/s08_late.png', 'qa/v6/animatic/粗剪_v16.mp4', 'qa/v6/animatic/粗剪_v16_720p.mp4', 'qa/v6/animatic/自检_v16.md', 'qa/v6/animatic/contact_sheet_v16.png', 'qa/v6/animatic/verification_v16.json']' returned non-zero exit status 1.
+node_modules/
+qa/v6/animatic/**/*.mp4
+qa/v6/animatic/**/frames/
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+p='qa/v6/a02/commit_delivery.py';s=open(p).read().replace(\"'add','--'\",\"'add','-f','--'\");open(p,'w').write(s)
+PY
+python3 qa/v6/a02/commit_delivery.py > qa/v6/a02/commit.log 2>&1" in /workspace/病理科普视频/v5
+exec
+/bin/bash -lc 'tail -5 qa/v6/a02/commit.log; ls -lh qa/v6/a02/a02.bundle 2>/dev/null; date' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+Initialized empty Git repository in /tmp/a02-git-091wcuhs/
+Fri Nov 13 12:57:06 CST 2026
+
+codex
+锁定七文件的首尾 SHA256 一致，自检文档已写好。原仓库无法创建 `.git/index.lock`，确认为只读；正在用临时独立 Git 元数据生成 `qa/v6/a02/a02.bundle`，原分支保持不变。
+ succeeded in 25643ms:
+exec
+/bin/bash -lc 'tail -10 qa/v6/a02/commit.log; ls -lh qa/v6/a02/a02.bundle 2>/dev/null; date' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+ create mode 100644 qa/v6/animatic/粗剪_v16_720p.mp4
+ create mode 100644 qa/v6/animatic/自检_v16.md
+The bundle contains this ref:
+796496a12012e6cf521411e1cb24f8a10e204f6d refs/heads/a02-dev
+The bundle requires this ref:
+7a489432f381afc8c232bd8832a322e593ecf1f8 
+The bundle uses this hash algorithm: sha1
+/workspace/病理科普视频/v5/qa/v6/a02/a02.bundle is okay
+
+{'mode': 'bundle', 'base': '7a489432f381afc8c232bd8832a322e593ecf1f8', 'commit': '796496a12012e6cf521411e1cb24f8a10e204f6d', 'bundle': '/workspace/病理科普视频/v5/qa/v6/a02/a02.bundle', 'verified': True, 'reason': "fatal: Unable to create '/workspace/病理科普视频/v5/.git/index.lock': Read-only file system\n"}
+-rw-r--r-- 1 box box 224M Nov 13 12:57 qa/v6/a02/a02.bundle
+Fri Nov 13 12:57:35 CST 2026
+
+exec
+/bin/bash -lc 'git diff --check; git diff --name-only; git rev-parse --short HEAD; sha256sum -c qa/v6/a02/sha256_start.txt; cat qa/v6/a02/delivery.json' in /workspace/病理科普视频/v5
+ succeeded in 0ms:
+7a48943
+engine/lib/he.js: OK
+engine/lib/he_detail.js: OK
+engine/lib/wash.js: OK
+engine/lib/ann.js: OK
+engine/lib/scope.js: OK
+engine/lib/camera.js: OK
+parity_r4/chapters/04.js: OK
+{
+  "mode": "bundle",
+  "base": "7a489432f381afc8c232bd8832a322e593ecf1f8",
+  "commit": "796496a12012e6cf521411e1cb24f8a10e204f6d",
+  "bundle": "/workspace/病理科普视频/v5/qa/v6/a02/a02.bundle",
+  "verified": true,
+  "reason": "fatal: Unable to create '/workspace/病理科普视频/v5/.git/index.lock': Read-only file system\n"
+}
+codex
+已完成 v16：
+
+- [1080p 成片](/workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v16.mp4) · [720p 成片](/workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v16_720p.mp4)
+- [每15秒总览](/workspace/病理科普视频/v5/qa/v6/animatic/contact_sheet_v16.png) · [自检报告](/workspace/病理科普视频/v5/qa/v6/animatic/自检_v16.md)
+
+15 场全部通过像素验收：14 场 MAE=0，S11 最大为 0.01279。总时长 339.833333 秒；两版完整解码通过，无意外空帧，锁定文件首尾哈希一致。未修改场景画法。
+
+Git 元数据只读，已生成并验证 [a02.bundle](/workspace/病理科普视频/v5/qa/v6/a02/a02.bundle)，提交 `796496a`，信息含 `(Codex)`。未 push、未合并。
+tokens used
+111,845
+已完成 v16：
+
+- [1080p 成片](/workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v16.mp4) · [720p 成片](/workspace/病理科普视频/v5/qa/v6/animatic/粗剪_v16_720p.mp4)
+- [每15秒总览](/workspace/病理科普视频/v5/qa/v6/animatic/contact_sheet_v16.png) · [自检报告](/workspace/病理科普视频/v5/qa/v6/animatic/自检_v16.md)
+
+15 场全部通过像素验收：14 场 MAE=0，S11 最大为 0.01279。总时长 339.833333 秒；两版完整解码通过，无意外空帧，锁定文件首尾哈希一致。未修改场景画法。
+
+Git 元数据只读，已生成并验证 [a02.bundle](/workspace/病理科普视频/v5/qa/v6/a02/a02.bundle)，提交 `796496a`，信息含 `(Codex)`。未 push、未合并。
