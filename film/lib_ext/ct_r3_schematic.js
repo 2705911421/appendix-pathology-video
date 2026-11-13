@@ -66,7 +66,7 @@ export function ctGeom(x,y,w,h,{lens=true,compact=false}={}){
   const R=wide?Math.min(w*.26,h*.40):Math.min(w*.35,h*.31);
   const cx=wide?x+w*.32:x+w*.48;
   const cy=wide?y+h*.46:y+h*.34;
-  const lr=wide?Math.min(w*.12,h*.19):Math.min(w*.27,h*.23);
+  const lr=wide?Math.min(w*.17,h*.23):Math.min(w*.27,h*.23);
   const lx=wide?x+w*.762:x+w*.66;
   const ly=wide?y+h*.70:y+h*.71;
   return {x,y,w,h,R,cx,cy,lens:lens?{x:lx,y:ly,r:lr}:null,appendix:{x:cx-R*.50,y:cy+R*.12},wide};
@@ -294,7 +294,7 @@ export function drawCTStatic(c,x,y,w,h,{stage=1,lens=true,compact=false}={}){
   // Native-resolution baked grey pigment: fine grain and soft wash, never colored dots.
   for(const region of [{x:g.cx,y:g.cy,rx:g.R,ry:g.R*.9},...(g.lens?[{x:g.lens.x,y:g.lens.y,rx:g.lens.r,ry:g.lens.r}]:[])]){
     const q=rand(844);c.save();ePath(c,region.x,region.y,region.rx,region.ry,11,.015);c.clip();
-    for(let i=0;i<170;i++){c.globalAlpha=.018;c.filter='blur(5px)';blob(c,region.x+(q()-.5)*region.rx*2,region.y+(q()-.5)*region.ry*2,8+q()*35,5+q()*22,i,.2,i%2?'#FAF6EB':'#393733');}
+    for(let i=0;i<(compact?40:stage===1?170:70);i++){c.globalAlpha=.018;c.filter='blur(5px)';blob(c,region.x+(q()-.5)*region.rx*2,region.y+(q()-.5)*region.ry*2,8+q()*35,5+q()*22,i,.2,i%2?'#FAF6EB':'#393733');}
     c.filter='none';for(let i=0;i<22000;i++){c.globalAlpha=.025+q()*.06;c.fillStyle=i%2?'#F8F3E9':'#34312E';c.fillRect(region.x+(q()-.5)*region.rx*2,region.y+(q()-.5)*region.ry*2,.5+q(),.5+q());}c.restore();
   }
   // leader from appendix to loupe
@@ -343,7 +343,7 @@ export function drawCTChanges(c,g,{stage=1,aFat=0,aExud=0,aDefect=0,aGas=0,aAbsc
   if(aAbscess>0){c.save();c.globalAlpha=aAbscess;blob(c,x-outer*.85,y+outer*1.9,outer*.75,outer*.57,838,.08,'#605E58');strokeBlob(c,x-outer*.85,y+outer*1.9,outer*.75,outer*.57,838,.08,'#E1DACB',2.5);c.restore();}
   // axial fat stranding (small)
   strands(c,x,y,outer*1.15,outer*2.2,811,10,aFat*.85,1.2);
-  if(stage>=2)strands(c,x,y,outer*1.15,outer*3.0,812,32,aExud,1.4);
+  if(stage>=2){c.save();ePath(c,g.cx,g.cy,g.R*.76,g.R*.64,17,.02);c.clip();strands(c,x,y,outer*1.15,outer*2.7,812,32,aExud,1.4);c.restore();}
   if(aGas>0){
     c.save();c.globalAlpha=clamp(aGas);
     for(const [aa,dd,rr] of [[2.4,1.8,.11],[2.9,2.15,.08],[1.9,2.3,.07]]){
@@ -440,7 +440,7 @@ export function drawTissueStatic(c,x,y,w,h,{stage=1}={}){
  for(const [lo,hi,col] of layers){
   c.save();sectorPath(c,CX,CY,lo,hi,a0,a1,701,.006);c.clip();c.fillStyle=col;c.fill();
   // Soft irregular overlapping pigment blooms, clipped to the anatomical layer.
-  for(let i=0;i<340;i++){let a=a0+q()*(a1-a0),r=lo+q()*(hi-lo);c.globalAlpha=.015+q()*.045;c.fillStyle=i%3?'#B06491':'#FFFFFF';c.filter='blur(4px)';blob(c,CX+Math.cos(a)*r,CY+Math.sin(a)*r,8+q()*42,4+q()*19,i,.18,c.fillStyle);}
+  for(let i=0;i<(stage===1?340:100);i++){let a=a0+q()*(a1-a0),r=lo+q()*(hi-lo);c.globalAlpha=.015+q()*.045;c.fillStyle=i%3?'#B06491':'#FFFFFF';c.filter='blur(4px)';blob(c,CX+Math.cos(a)*r,CY+Math.sin(a)*r,8+q()*42,4+q()*19,i,.18,c.fillStyle);}
   c.filter='none';c.globalAlpha=1;
   c.strokeStyle='rgba(143,83,118,.20)';c.lineWidth=1.1;sectorPath(c,CX,CY,lo+1,hi-1,a0,a1,701,.006);c.stroke();c.restore();
  }
