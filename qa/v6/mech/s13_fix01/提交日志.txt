@@ -1,0 +1,5 @@
+Cloning into bare repository '/tmp/mech_fix01_git'...
+done.
+原worktree尝试 git add 失败：Unable to create index.lock: Read-only file system。
+按用户要求，在/tmp/mech_fix01_git可写Git副本制作mech-dev后继提交，最终bundle仅携带本次提交，工作文件仍仅在当前worktree修改。不合并、不push。
+最终验证：两版视频均630帧；720p含真实音轨；首尾锁定SHA256一致；diff --check通过。
