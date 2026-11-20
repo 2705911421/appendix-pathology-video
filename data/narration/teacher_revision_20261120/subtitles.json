@@ -1,0 +1,870 @@
+[
+  {
+    "id": "S001",
+    "chapter": "开场",
+    "zh": "这根形似小香肠的盲管，就是阑尾。",
+    "en_cards": [
+      "This small sausage-shaped tube is the",
+      "appendix."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S002",
+    "chapter": "开场",
+    "zh": "发炎时，它可能呈现红、黄或暗黑。",
+    "en_cards": [
+      "When inflamed, it may look red, yellow,",
+      "or dark."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S003",
+    "chapter": "开场",
+    "zh": "这些颜色，提示不同的组织变化。",
+    "en_cards": [
+      "These colors suggest different",
+      "tissue changes."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S004",
+    "chapter": "开场",
+    "zh": "循着这抹色彩，我们走进炎症的现场。",
+    "en_cards": [
+      "Follow the colors to understand",
+      "inflammation."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S005",
+    "chapter": "开场",
+    "zh": "病理学里的“变质”，不是食物变坏。",
+    "en_cards": [
+      "In pathology, alteration has a specific",
+      "meaning."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S006",
+    "chapter": "就诊",
+    "zh": "先听听身体发出的求救信号。",
+    "en_cards": [
+      "Start with the body's warning signs."
+    ],
+    "refs": []
+  },
+  {
+    "id": "S007",
+    "chapter": "就诊",
+    "zh": "疼痛可能从肚脐周围，移向右下腹。",
+    "en_cards": [
+      "Pain may move from around the navel to the",
+      "lower right abdomen."
+    ],
+    "refs": [
+      "R2"
+    ],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S008",
+    "chapter": "就诊",
+    "zh": "还可能恶心、发热，右下腹明显压痛。",
+    "en_cards": [
+      "Nausea, fever, and marked lower right",
+      "abdominal tenderness may occur."
+    ],
+    "refs": [
+      "R2"
+    ],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S009",
+    "chapter": "就诊",
+    "zh": "疼痛若持续加重，别抱着侥幸硬扛。",
+    "en_cards": [
+      "Do not ignore persistent or worsening",
+      "pain."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S010",
+    "chapter": "就诊",
+    "zh": "相似的求救声，也可能来自其他腹部疾病。",
+    "en_cards": [
+      "Other abdominal conditions can cause",
+      "similar symptoms."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S011",
+    "chapter": "就诊",
+    "zh": "有些人的信号，却并不典型。",
+    "en_cards": [
+      "Some people have atypical symptoms."
+    ],
+    "refs": []
+  },
+  {
+    "id": "S012",
+    "chapter": "就诊",
+    "zh": "医生先循着症状和体格检查寻找线索，",
+    "en_cards": [
+      "Doctors begin with symptoms and physical",
+      "examination,"
+    ],
+    "refs": [
+      "R2"
+    ],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S013",
+    "chapter": "就诊",
+    "zh": "再参考化验，判断是否阑尾炎。",
+    "en_cards": [
+      "then use laboratory results to help assess",
+      "appendicitis."
+    ],
+    "refs": [
+      "R2"
+    ],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S014",
+    "chapter": "就诊",
+    "zh": "CT是重要的辅助确诊工具，",
+    "en_cards": [
+      "CT is an important diagnostic aid."
+    ],
+    "refs": [
+      "R1"
+    ]
+  },
+  {
+    "id": "S015",
+    "chapter": "就诊",
+    "zh": "但并非人人都必须做CT。",
+    "en_cards": [
+      "But not everyone needs a CT scan."
+    ],
+    "refs": [
+      "R1"
+    ]
+  },
+  {
+    "id": "S016",
+    "chapter": "就诊",
+    "zh": "CT能帮助发现阑尾炎和相关并发症。",
+    "en_cards": [
+      "CT can help detect appendicitis",
+      "and its complications."
+    ],
+    "refs": [
+      "R1"
+    ],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S017",
+    "chapter": "就诊",
+    "zh": "但影像不能单独确定组织病理分型。",
+    "en_cards": [
+      "Imaging alone cannot determine",
+      "the histological type."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S018",
+    "chapter": "就诊",
+    "zh": "影像表现还需结合临床，",
+    "en_cards": [
+      "Imaging findings must be considered"
+    ],
+    "refs": []
+  },
+  {
+    "id": "S019",
+    "chapter": "就诊",
+    "zh": "才能判断病情和治疗方案。",
+    "en_cards": [
+      "with the clinical picture to assess",
+      "severity and plan treatment."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S020",
+    "chapter": "路径前提",
+    "zh": "单纯性→化脓性（蜂窝织炎性）→坏疽性",
+    "en_cards": [
+      "Simple → suppurative (phlegmonous) →",
+      "gangrenous"
+    ],
+    "refs": [],
+    "spoken_zh": "单纯性、化脓性，也叫蜂窝织炎性，以及坏疽性，",
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S021",
+    "chapter": "路径前提",
+    "zh": "是常见的典型演变路径，",
+    "en_cards": [
+      "is a typical pattern of progression,"
+    ],
+    "refs": []
+  },
+  {
+    "id": "S022",
+    "chapter": "路径前提",
+    "zh": "但并不是每个患者都必经的固定流程。",
+    "en_cards": [
+      "but not every patient follows this fixed",
+      "sequence."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S023",
+    "chapter": "红·单纯性",
+    "zh": "第一幕红：单纯性阑尾炎，充血、轻度肿胀。",
+    "en_cards": [
+      "Act I, red: simple appendicitis,",
+      "with congestion and mild swelling."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S024",
+    "chapter": "红·单纯性",
+    "zh": "局部血管扩张，血流增多，染出这抹红。",
+    "en_cards": [
+      "Dilated vessels and increased blood flow",
+      "cause redness."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S025",
+    "chapter": "红·单纯性",
+    "zh": "血管里的液体和蛋白质渗出，",
+    "en_cards": [
+      "Fluid and proteins leak out of blood",
+      "vessels,"
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S026",
+    "chapter": "红·单纯性",
+    "zh": "积在组织间隙，形成水肿。",
+    "en_cards": [
+      "causing tissue edema and swelling."
+    ],
+    "refs": []
+  },
+  {
+    "id": "S027",
+    "chapter": "红·单纯性",
+    "zh": "巡逻的白细胞游出血管，挺进受损组织。",
+    "en_cards": [
+      "Patrolling white blood cells leave vessels",
+      "and advance into injured tissue."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S028",
+    "chapter": "红·单纯性",
+    "zh": "这是身体为抵御损伤，调动的防御。",
+    "en_cards": [
+      "Inflammation is the body's protective",
+      "response to injury."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S029",
+    "chapter": "红·单纯性",
+    "zh": "然而战况一旦失控，也可能伤及自身组织。",
+    "en_cards": [
+      "An excessive response can also damage the",
+      "body's own tissue."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S030",
+    "chapter": "红·单纯性",
+    "zh": "液体、蛋白质和白细胞外出，叫渗出。",
+    "en_cards": [
+      "These changes are called exudation."
+    ],
+    "refs": []
+  },
+  {
+    "id": "S031",
+    "chapter": "红·单纯性",
+    "zh": "单纯性时，中性粒细胞主要驻守在",
+    "en_cards": [
+      "In simple appendicitis, neutrophils are",
+      "mainly found"
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S032",
+    "chapter": "红·单纯性",
+    "zh": "黏膜及黏膜下层，组织损伤相对较轻。",
+    "en_cards": [
+      "in the mucosa and submucosa, with",
+      "relatively mild damage."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S033",
+    "chapter": "红·单纯性",
+    "zh": "变质，就是细胞组织的变性、坏死。",
+    "en_cards": [
+      "Alteration means cell degeneration and",
+      "necrosis."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S034",
+    "chapter": "红·单纯性",
+    "zh": "此时，黏膜上皮已局部受损脱落。",
+    "en_cards": [
+      "Mucosal epithelium is locally injured",
+      "and shed."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S035",
+    "chapter": "红·单纯性",
+    "zh": "CT可见管径增粗、壁增厚，",
+    "en_cards": [
+      "CT may show a wider appendix and a",
+      "thickened wall,"
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S036",
+    "chapter": "红·单纯性",
+    "zh": "周围脂肪轻度模糊，呼应早期的炎症。",
+    "en_cards": [
+      "with mild surrounding fat stranding,",
+      "matching early inflammation."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S037",
+    "chapter": "黄·化脓性",
+    "zh": "第二幕黄：炎症的战线累及整层阑尾壁。",
+    "en_cards": [
+      "Act II, yellow: inflammation involves",
+      "the full appendiceal wall."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S038",
+    "chapter": "黄·化脓性",
+    "zh": "这是化脓性，也叫蜂窝织炎性阑尾炎。",
+    "en_cards": [
+      "Suppurative (phlegmonous) appendicitis."
+    ],
+    "refs": []
+  },
+  {
+    "id": "S039",
+    "chapter": "黄·化脓性",
+    "zh": "中性粒细胞纷纷涌入，部分变性坏死。",
+    "en_cards": [
+      "Many neutrophils enter; some degenerate",
+      "and die."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S040",
+    "chapter": "黄·化脓性",
+    "zh": "脓液中，还混着组织碎屑与渗出的液体。",
+    "en_cards": [
+      "Pus also contains tissue debris and exuded",
+      "fluid."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S041",
+    "chapter": "黄·化脓性",
+    "zh": "渗出愈明显，局部肿胀往往愈突出。",
+    "en_cards": [
+      "More pronounced exudation often means",
+      "greater swelling."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S042",
+    "chapter": "黄·化脓性",
+    "zh": "变性坏死的中性粒细胞，就是脓细胞。",
+    "en_cards": [
+      "These degenerated, necrotic neutrophils",
+      "are pus cells."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S043",
+    "chapter": "黄·化脓性",
+    "zh": "渗出的纤维蛋白原凝成纤维素网。",
+    "en_cards": [
+      "Exuded fibrinogen forms a fibrin mesh."
+    ],
+    "refs": []
+  },
+  {
+    "id": "S044",
+    "chapter": "黄·化脓性",
+    "zh": "网与脓细胞等交织，形成纤维脓性渗出物。",
+    "en_cards": [
+      "The mesh mixes with pus cells and debris",
+      "to form fibrinopurulent exudate."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S045",
+    "chapter": "黄·化脓性",
+    "zh": "黄色来自纤维素与脓液等混合物。",
+    "en_cards": [
+      "The yellow material contains",
+      "fibrin and pus."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S046",
+    "chapter": "黄·化脓性",
+    "zh": "浆膜面可见纤维素性脓性渗出（含脓细胞）。",
+    "en_cards": [
+      "Fibrinopurulent exudate with pus cells",
+      "coats the serosa."
+    ],
+    "refs": [],
+    "spoken_zh": "浆膜面可见纤维素性脓性渗出，其中含有脓细胞。",
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S047",
+    "chapter": "黄·化脓性",
+    "zh": "CT常见壁增厚强化、周围渗出明显，",
+    "en_cards": [
+      "CT: thickened, enhancing wall; marked",
+      "surrounding exudation."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S048",
+    "chapter": "黄·化脓性",
+    "zh": "与管壁内外的炎症相互映照。",
+    "en_cards": [
+      "matching inflammation in and around the",
+      "appendix."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S049",
+    "chapter": "黑·坏疽性",
+    "zh": "终局黑：腔内压力升高，危机步步逼近。",
+    "en_cards": [
+      "Final act, black: pressure inside rises."
+    ],
+    "refs": []
+  },
+  {
+    "id": "S050",
+    "chapter": "黑·坏疽性",
+    "zh": "血管受压或形成血栓，阑尾壁陷入缺血。",
+    "en_cards": [
+      "Vessel compression or clots cause ischemia",
+      "of the appendiceal wall."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S051",
+    "chapter": "黑·坏疽性",
+    "zh": "血流受阻，组织坏死，还伴有出血。",
+    "en_cards": [
+      "Tissue dies, often with bleeding."
+    ],
+    "refs": []
+  },
+  {
+    "id": "S052",
+    "chapter": "黑·坏疽性",
+    "zh": "坏死与血红蛋白分解产物，",
+    "en_cards": [
+      "Necrosis and hemoglobin breakdown products"
+    ],
+    "refs": []
+  },
+  {
+    "id": "S053",
+    "chapter": "黑·坏疽性",
+    "zh": "让局部暗红，甚至发黑。",
+    "en_cards": [
+      "can make the tissue dark red or black."
+    ],
+    "refs": []
+  },
+  {
+    "id": "S054",
+    "chapter": "黑·坏疽性",
+    "zh": "变质在这里走向重处：大片组织坏死。",
+    "en_cards": [
+      "Alteration becomes severe:",
+      "extensive tissue necrosis."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S055",
+    "chapter": "黑·坏疽性",
+    "zh": "它与渗出，共同写下急性期的病变。",
+    "en_cards": [
+      "Alteration and exudation together mark",
+      "the acute phase."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S056",
+    "chapter": "黑·坏疽性",
+    "zh": "这便是坏疽性阑尾炎。",
+    "en_cards": [
+      "This is gangrenous appendicitis."
+    ],
+    "refs": [
+      "R2"
+    ]
+  },
+  {
+    "id": "S057",
+    "chapter": "黑·坏疽性",
+    "zh": "脆弱的管壁可能穿孔，让感染扩散至腹腔。",
+    "en_cards": [
+      "The wall may perforate, spreading",
+      "infection into the abdomen."
+    ],
+    "refs": [
+      "R2"
+    ],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S058",
+    "chapter": "黑·坏疽性",
+    "zh": "CT若见壁强化缺损，要警惕坏死；",
+    "en_cards": [
+      "A wall enhancement defect on CT raises",
+      "concern for necrosis."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S059",
+    "chapter": "黑·坏疽性",
+    "zh": "若见腔外气体、脓肿，更要警惕穿孔。",
+    "en_cards": [
+      "Extraluminal gas or an abscess raises",
+      "concern for perforation."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S060",
+    "chapter": "治疗落点",
+    "zh": "读懂分型，是为了把握治疗的紧迫性。",
+    "en_cards": [
+      "Classification helps determine treatment",
+      "urgency."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S061",
+    "chapter": "治疗落点",
+    "zh": "切除后，病理切片可帮助确认分型。",
+    "en_cards": [
+      "After removal, tissue examination",
+      "can help confirm the type."
+    ],
+    "refs": [
+      "R2"
+    ],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S062",
+    "chapter": "治疗落点",
+    "zh": "影像与大体、镜下改变相互对应，",
+    "en_cards": [
+      "Imaging, gross appearance and microscopy",
+      "offer related clues,"
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S062A",
+    "chapter": "治疗落点",
+    "zh": "但它们不是一一等号。",
+    "en_cards": [
+      "but they are not interchangeable."
+    ],
+    "refs": []
+  },
+  {
+    "id": "S063",
+    "chapter": "治疗落点",
+    "zh": "化脓性、坏疽性通常需要手术切除。",
+    "en_cards": [
+      "Suppurative and gangrenous appendicitis",
+      "usually require appendectomy."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S064",
+    "chapter": "治疗落点",
+    "zh": "面对病变，治疗要结合患者的具体情况。",
+    "en_cards": [
+      "Treatment depends on the patient's",
+      "individual condition."
+    ],
+    "refs": [
+      "R2"
+    ],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S065",
+    "chapter": "治疗落点",
+    "zh": "是否马上手术，由医生评估决定。",
+    "en_cards": [
+      "Doctors assess how urgently surgery is",
+      "needed."
+    ],
+    "refs": [
+      "R2"
+    ],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S066",
+    "chapter": "慢性与收束",
+    "zh": "反复发作，可转为慢性阑尾炎。",
+    "en_cards": [
+      "Repeated episodes may lead to chronic",
+      "appendicitis."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S067",
+    "chapter": "慢性与收束",
+    "zh": "急性期以变质、渗出为主，",
+    "en_cards": [
+      "Acute disease mainly involves",
+      "alteration and exudation;"
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S068",
+    "chapter": "慢性与收束",
+    "zh": "转为慢性后，组织改变有所不同。",
+    "en_cards": [
+      "Chronic disease can show different",
+      "tissue changes."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S069",
+    "chapter": "慢性与收束",
+    "zh": "镜下可见阑尾壁纤维组织增生、纤维化，",
+    "en_cards": [
+      "Microscopy shows fibrous tissue growth",
+      "and fibrosis in the appendiceal wall,"
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S070",
+    "chapter": "慢性与收束",
+    "zh": "伴淋巴细胞、浆细胞等慢性炎细胞浸润。",
+    "en_cards": [
+      "with chronic inflammatory cells such as",
+      "lymphocytes and plasma cells."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S071",
+    "chapter": "慢性与收束",
+    "zh": "转入慢性，并不意味着从此风平浪静。",
+    "en_cards": [
+      "Chronic disease still carries risks."
+    ],
+    "refs": []
+  },
+  {
+    "id": "S072",
+    "chapter": "慢性与收束",
+    "zh": "疼痛即便时轻时重，也应接受正规评估。",
+    "en_cards": [
+      "Even intermittent pain deserves proper",
+      "medical assessment."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S073",
+    "chapter": "慢性与收束",
+    "zh": "慢性阑尾炎一旦确诊，",
+    "en_cards": [
+      "Once chronic appendicitis is diagnosed,"
+    ],
+    "refs": []
+  },
+  {
+    "id": "S074",
+    "chapter": "慢性与收束",
+    "zh": "通常建议症状缓解期择期切除；",
+    "en_cards": [
+      "elective removal is usually advised",
+      "when symptoms settle;"
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S074A",
+    "chapter": "慢性与收束",
+    "zh": "若正处急性发作期，则视情况急诊手术。",
+    "en_cards": [
+      "During an acute episode, emergency surgery",
+      "depends on the situation."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S074B",
+    "chapter": "慢性与收束",
+    "zh": "具体处理仍须医生结合病情评估。",
+    "en_cards": [
+      "Doctors assess the individual situation."
+    ],
+    "refs": []
+  },
+  {
+    "id": "S075",
+    "chapter": "慢性与收束",
+    "zh": "红、黄、黑提示不同的组织变化，",
+    "en_cards": [
+      "Red, yellow, and black suggest",
+      "different tissue changes,"
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S076",
+    "chapter": "慢性与收束",
+    "zh": "但不能靠颜色判断病情。别等病情加重，",
+    "en_cards": [
+      "but color cannot determine severity.",
+      "Do not wait for disease to worsen."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  },
+  {
+    "id": "S077",
+    "chapter": "慢性与收束",
+    "zh": "持续右下腹痛、发热，请及时就诊。",
+    "en_cards": [
+      "Seek medical care for persistent lower",
+      "right abdominal pain or fever."
+    ],
+    "refs": [],
+    "en_continuation": "sequential"
+  }
+]
