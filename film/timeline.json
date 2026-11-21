@@ -1,0 +1,574 @@
+{
+  "fps": 30,
+  "frames": 9000,
+  "creditsFrame": 8790,
+  "cues": [
+    {
+      "act": 1,
+      "shot": "pink",
+      "zh": "一根原本粉白细长的“小香肠”，",
+      "en": "Imagine a slender, pale pink “sausage.”",
+      "startFrame": 0,
+      "audioFrames": 86,
+      "endFrame": 107
+    },
+    {
+      "act": 1,
+      "shot": "red",
+      "zh": "为什么会在十几个小时里变成暗红，",
+      "en": "In this case, why did it turn dark red in a matter of hours,",
+      "startFrame": 107,
+      "audioFrames": 104,
+      "endFrame": 232
+    },
+    {
+      "act": 1,
+      "shot": "yellow",
+      "zh": "又覆上灰黄的脓苔，甚至出现焦黑？",
+      "en": "then develop a grey-yellow coat and even black patches?",
+      "startFrame": 232,
+      "audioFrames": 108,
+      "endFrame": 361
+    },
+    {
+      "act": 1,
+      "shot": "black",
+      "zh": "这根“小香肠”，其实就是阑尾。",
+      "en": "That “sausage” is the appendix.",
+      "startFrame": 361,
+      "audioFrames": 88,
+      "endFrame": 470
+    },
+    {
+      "act": 1,
+      "shot": "title",
+      "zh": "今天沿着这本变质日记，读懂炎症保卫战。",
+      "en": "Follow its colour changes to see how inflammation unfolds.",
+      "startFrame": 470,
+      "audioFrames": 125,
+      "endFrame": 616
+    },
+    {
+      "act": 1,
+      "shot": "title",
+      "zh": "颜色是线索，再看阑尾壁发生了什么。",
+      "en": "The colours are clues to what happens inside the appendix wall.",
+      "startFrame": 616,
+      "audioFrames": 113,
+      "endFrame": 750
+    },
+    {
+      "act": 2,
+      "shot": "noon",
+      "zh": "午饭后，二十八岁的小伙开始恶心、呕吐。",
+      "en": "After lunch, a 28-year-old man feels nauseated and vomits.",
+      "startFrame": 750,
+      "audioFrames": 135,
+      "endFrame": 906
+    },
+    {
+      "act": 2,
+      "shot": "navel",
+      "zh": "最初，他只觉得肚脐周围隐隐作痛。",
+      "en": "At first, he feels a dull ache around his navel.",
+      "startFrame": 906,
+      "audioFrames": 109,
+      "endFrame": 1036
+    },
+    {
+      "act": 2,
+      "shot": "navel",
+      "zh": "这是内脏神经传来的痛，定位并不清楚。",
+      "en": "Pain carried by visceral nerves is hard to pinpoint.",
+      "startFrame": 1036,
+      "audioFrames": 113,
+      "endFrame": 1170
+    },
+    {
+      "act": 2,
+      "shot": "migrate",
+      "zh": "到了傍晚，疼痛从肚脐周围移向右下腹。",
+      "en": "By evening, the pain migrates from the navel to the lower right abdomen.",
+      "startFrame": 1170,
+      "audioFrames": 128,
+      "endFrame": 1319
+    },
+    {
+      "act": 2,
+      "shot": "target",
+      "zh": "炎症累及壁腹膜，疼痛一下变得好定位。",
+      "en": "Once the parietal peritoneum is irritated, the pain becomes localised.",
+      "startFrame": 1319,
+      "audioFrames": 122,
+      "endFrame": 1462
+    },
+    {
+      "act": 2,
+      "shot": "target",
+      "zh": "医生检查麦氏点，按压痛，松手时也痛。",
+      "en": "At McBurney's point, the clinician finds tenderness and pain on release.",
+      "startFrame": 1462,
+      "audioFrames": 135,
+      "endFrame": 1618
+    },
+    {
+      "act": 2,
+      "shot": "fever",
+      "zh": "到了急诊，他的体温已经升到三十九点三度。",
+      "en": "In the emergency department, his temperature is 39.3 °C.",
+      "startFrame": 1618,
+      "audioFrames": 129,
+      "endFrame": 1768
+    },
+    {
+      "act": 2,
+      "shot": "fever",
+      "zh": "白细胞升高，其中中性粒细胞占了大多数。",
+      "en": "His white blood cell count is high, with a marked neutrophil predominance.",
+      "startFrame": 1768,
+      "audioFrames": 131,
+      "endFrame": 1920
+    },
+    {
+      "act": 2,
+      "shot": "alarm",
+      "zh": "取出的阑尾肿胀发红，原本的粉白消失了。",
+      "en": "The removed appendix has swollen and lost its pale pink colour.",
+      "startFrame": 1920,
+      "audioFrames": 139,
+      "endFrame": 2080
+    },
+    {
+      "act": 2,
+      "shot": "alarm",
+      "zh": "暗红，来自局部血管扩张和充血。",
+      "en": "The dark red colour reflects dilated, congested blood vessels.",
+      "startFrame": 2080,
+      "audioFrames": 119,
+      "endFrame": 2220
+    },
+    {
+      "act": 3,
+      "shot": "coat",
+      "zh": "再靠近一点，阑尾表面覆着一层灰黄色脓苔。",
+      "en": "Look closer: a grey-yellow coat covers the appendix.",
+      "startFrame": 2220,
+      "audioFrames": 128,
+      "endFrame": 2369
+    },
+    {
+      "act": 3,
+      "shot": "open",
+      "zh": "把阑尾剖开，可见管腔积着浑浊的黄红色脓液。",
+      "en": "Cutting it open reveals cloudy, yellow-red pus inside the lumen.",
+      "startFrame": 2369,
+      "audioFrames": 125,
+      "endFrame": 2515
+    },
+    {
+      "act": 3,
+      "shot": "open",
+      "zh": "这样的改变，常见于蜂窝织炎性阑尾炎。",
+      "en": "These changes are typical of phlegmonous appendicitis.",
+      "startFrame": 2515,
+      "audioFrames": 107,
+      "endFrame": 2643
+    },
+    {
+      "act": 3,
+      "shot": "layers",
+      "zh": "显微镜下，急性期以变质和渗出为主。",
+      "en": "Tissue injury and exudation dominate in the acute phase.",
+      "startFrame": 2643,
+      "audioFrames": 110,
+      "endFrame": 2774
+    },
+    {
+      "act": 3,
+      "shot": "mucosa",
+      "zh": "先看“变质”：管腔可因粪石等原因梗阻。",
+      "en": "First comes tissue injury. A faecalith can obstruct the lumen.",
+      "startFrame": 2774,
+      "audioFrames": 114,
+      "endFrame": 2909
+    },
+    {
+      "act": 3,
+      "shot": "mucosa",
+      "zh": "黏膜受损，整齐的上皮出现坏死和破溃。",
+      "en": "The orderly mucosal lining breaks down, with necrosis and ulceration.",
+      "startFrame": 2909,
+      "audioFrames": 121,
+      "endFrame": 3051
+    },
+    {
+      "act": 3,
+      "shot": "vessel",
+      "zh": "再看“渗出”：血管扩张，腔内挤满红细胞。",
+      "en": "Next, exudation. Vessels dilate and fill with red blood cells.",
+      "startFrame": 3051,
+      "audioFrames": 118,
+      "endFrame": 3190
+    },
+    {
+      "act": 3,
+      "shot": "vessel",
+      "zh": "血浆成分漏进组织，纤维间拉开了距离。",
+      "en": "Plasma leaks into tissue, pushing its fibres apart and causing oedema.",
+      "startFrame": 3190,
+      "audioFrames": 114,
+      "endFrame": 3325
+    },
+    {
+      "act": 3,
+      "shot": "cells",
+      "zh": "中性粒细胞从血管游出，细胞核有二到五叶。",
+      "en": "Neutrophils leave the vessels. Their nuclei have two to five lobes.",
+      "startFrame": 3325,
+      "audioFrames": 125,
+      "endFrame": 3471
+    },
+    {
+      "act": 3,
+      "shot": "cells",
+      "zh": "在化脓期，它们密集挤进阑尾壁的各层。",
+      "en": "In the suppurative stage, they infiltrate every layer of the wall.",
+      "startFrame": 3471,
+      "audioFrames": 109,
+      "endFrame": 3601
+    },
+    {
+      "act": 3,
+      "shot": "serosa",
+      "zh": "最外面的浆膜上，纤维素交织成一张网。",
+      "en": "Along the outer serosa, fibrin forms a mesh.",
+      "startFrame": 3601,
+      "audioFrames": 104,
+      "endFrame": 3726
+    },
+    {
+      "act": 3,
+      "shot": "serosa",
+      "zh": "网里裹着变性坏死的中性粒细胞，也叫脓细胞。",
+      "en": "The mesh traps degenerating and dead neutrophils, known as pus cells.",
+      "startFrame": 3726,
+      "audioFrames": 121,
+      "endFrame": 3868
+    },
+    {
+      "act": 3,
+      "shot": "serosa",
+      "zh": "这就是纤维素性脓性渗出物，形成灰黄色脓苔。",
+      "en": "This fibrinopurulent exudate forms the grey-yellow coat.",
+      "startFrame": 3868,
+      "audioFrames": 131,
+      "endFrame": 4020
+    },
+    {
+      "act": 4,
+      "shot": "compare",
+      "zh": "单纯性到化脓性、坏疽性，是经典演变路径。",
+      "en": "Simple, suppurative and gangrenous disease illustrate a classic sequence.",
+      "startFrame": 4020,
+      "audioFrames": 156,
+      "endFrame": 4197
+    },
+    {
+      "act": 4,
+      "shot": "compare",
+      "zh": "这是一条典型路径，并非每个患者都必须经历。",
+      "en": "This is a typical progression. Each patient may follow a different course.",
+      "startFrame": 4197,
+      "audioFrames": 148,
+      "endFrame": 4366
+    },
+    {
+      "act": 4,
+      "shot": "simple",
+      "zh": "在早期的单纯性阶段，先看黏膜和黏膜下层。",
+      "en": "In early simple appendicitis, look first at the mucosa and submucosa.",
+      "startFrame": 4366,
+      "audioFrames": 152,
+      "endFrame": 4539
+    },
+    {
+      "act": 4,
+      "shot": "simple",
+      "zh": "中性粒细胞主要聚在浅层，越往深处越稀疏。",
+      "en": "Neutrophils cluster in the superficial layers and thin out deeper down.",
+      "startFrame": 4539,
+      "audioFrames": 150,
+      "endFrame": 4710
+    },
+    {
+      "act": 4,
+      "shot": "simple",
+      "zh": "到了肌层，只能看到寥寥几个散在的身影。",
+      "en": "In the muscle layer, only a few scattered cells come into view.",
+      "startFrame": 4710,
+      "audioFrames": 129,
+      "endFrame": 4860
+    },
+    {
+      "act": 4,
+      "shot": "phlegmon",
+      "zh": "到灰黄的化脓期，细胞已穿过黏膜下层。",
+      "en": "In the grey-yellow stage, neutrophils have spread beyond the submucosa.",
+      "startFrame": 4860,
+      "audioFrames": 135,
+      "endFrame": 5016
+    },
+    {
+      "act": 4,
+      "shot": "phlegmon",
+      "zh": "肌束的间隙，也被密集的中性粒细胞填满。",
+      "en": "Dense neutrophils pack the spaces between the muscle bundles.",
+      "startFrame": 5016,
+      "audioFrames": 134,
+      "endFrame": 5171
+    },
+    {
+      "act": 4,
+      "shot": "thrombus",
+      "zh": "病情继续恶化时，系膜静脉可形成血栓。",
+      "en": "With worsening disease, a thrombus may form in a mesoappendiceal vein.",
+      "startFrame": 5171,
+      "audioFrames": 142,
+      "endFrame": 5334
+    },
+    {
+      "act": 4,
+      "shot": "thrombus",
+      "zh": "一旦血运受损，管壁就可能缺血、坏死、变黑。",
+      "en": "Loss of blood supply can lead to ischaemia and blackened, necrotic tissue.",
+      "startFrame": 5334,
+      "audioFrames": 165,
+      "endFrame": 5520
+    },
+    {
+      "act": 4,
+      "shot": "rupture",
+      "zh": "阑尾壁缺血坏死后变薄变脆，严重时侧壁会穿孔。",
+      "en": "The necrotic wall becomes thin and fragile. In severe cases its side wall can perforate.",
+      "startFrame": 5520,
+      "audioFrames": 163,
+      "endFrame": 5704
+    },
+    {
+      "act": 4,
+      "shot": "rupture",
+      "zh": "脓液顺着破口流进腹腔，可引发危及生命的腹膜炎。",
+      "en": "Pus can leak through the hole and cause life-threatening peritonitis.",
+      "startFrame": 5704,
+      "audioFrames": 155,
+      "endFrame": 5880
+    },
+    {
+      "act": 5,
+      "shot": "doctor",
+      "zh": "医生先看症状和查体，再结合化验判断风险。",
+      "en": "Symptoms and examination come first, supported by lab tests.",
+      "startFrame": 5880,
+      "audioFrames": 132,
+      "endFrame": 6033
+    },
+    {
+      "act": 5,
+      "shot": "doctor",
+      "zh": "并非人人都需要做 CT。",
+      "en": "Not everyone needs a CT scan.",
+      "startFrame": 6033,
+      "audioFrames": 66,
+      "endFrame": 6120
+    },
+    {
+      "act": 5,
+      "shot": "ctOverview",
+      "zh": "把三型影像放一起看。",
+      "en": "Let's look at all three patterns together.",
+      "startFrame": 6120,
+      "audioFrames": 69,
+      "endFrame": 6210
+    },
+    {
+      "act": 5,
+      "shot": "ct0",
+      "zh": "单纯性可轻度增粗，周围脂肪间隙仍可清晰。",
+      "en": "In simple cases, mild enlargement can coexist with clear surrounding fat.",
+      "startFrame": 6210,
+      "audioFrames": 109,
+      "endFrame": 6340
+    },
+    {
+      "act": 5,
+      "shot": "ct1",
+      "zh": "化脓性可见壁增厚强化，周围脂肪呈絮状。",
+      "en": "Suppuration can show wall thickening, enhancement and hazy fat stranding.",
+      "startFrame": 6340,
+      "audioFrames": 103,
+      "endFrame": 6464
+    },
+    {
+      "act": 5,
+      "shot": "ct2",
+      "zh": "管壁缺损、少强化，或见积液和气泡，要警惕坏疽穿孔。",
+      "en": "A wall defect or weak enhancement can signal gangrene. Fluid or gas can suggest perforation.",
+      "startFrame": 6464,
+      "audioFrames": 136,
+      "endFrame": 6621
+    },
+    {
+      "act": 5,
+      "shot": "ct2",
+      "zh": "三型征象有差异，也会重叠，分型需结合病理。",
+      "en": "The imaging patterns can overlap. Subtyping also relies on pathology.",
+      "startFrame": 6621,
+      "audioFrames": 111,
+      "endFrame": 6753
+    },
+    {
+      "act": 5,
+      "shot": "ctEvidence",
+      "zh": "成人初始 CT 的敏感度中位数是百分之九十七。",
+      "en": "The guideline's median sensitivity for initial CT in adults was 97%.",
+      "startFrame": 6753,
+      "audioFrames": 105,
+      "endFrame": 6879
+    },
+    {
+      "act": 5,
+      "shot": "ctEvidence",
+      "zh": "一项成人多层增强 CT 研究也超过百分之九十三。",
+      "en": "Sensitivity also exceeded 93% in an adult multislice contrast-enhanced CT study.",
+      "startFrame": 6879,
+      "audioFrames": 113,
+      "endFrame": 7013
+    },
+    {
+      "act": 5,
+      "shot": "triage",
+      "zh": "外科评估有手术指征且病情允许时，",
+      "en": "When the surgical team confirms that early surgery is indicated and feasible,",
+      "startFrame": 7013,
+      "audioFrames": 84,
+      "endFrame": 7118
+    },
+    {
+      "act": 5,
+      "shot": "triage",
+      "zh": "蜂窝织炎性、坏疽性阑尾炎需尽早手术切除。",
+      "en": "phlegmonous or gangrenous appendicitis requires early appendectomy.",
+      "startFrame": 7118,
+      "audioFrames": 110,
+      "endFrame": 7249
+    },
+    {
+      "act": 5,
+      "shot": "triage",
+      "zh": "若有局限性脓肿，治疗方式和时机需另行评估。",
+      "en": "A contained abscess calls for a separate decision on treatment and timing.",
+      "startFrame": 7249,
+      "audioFrames": 110,
+      "endFrame": 7380
+    },
+    {
+      "act": 6,
+      "shot": "months",
+      "zh": "急性期以变质和渗出为主，增生何时更突出？",
+      "en": "Tissue injury and exudation dominate acutely. When does proliferation stand out?",
+      "startFrame": 7380,
+      "audioFrames": 118,
+      "endFrame": 7519
+    },
+    {
+      "act": 6,
+      "shot": "months",
+      "zh": "反复发作转为慢性后，纤维性增生更突出。",
+      "en": "Fibrosis becomes more prominent when recurrent inflammation turns chronic.",
+      "startFrame": 7519,
+      "audioFrames": 112,
+      "endFrame": 7652
+    },
+    {
+      "act": 6,
+      "shot": "fibrosis",
+      "zh": "阑尾壁增厚、变硬，粉红的胶原束大量堆积。",
+      "en": "The wall becomes thick and firm as pink collagen bundles accumulate.",
+      "startFrame": 7652,
+      "audioFrames": 120,
+      "endFrame": 7793
+    },
+    {
+      "act": 6,
+      "shot": "lymph",
+      "zh": "还可见深紫色圆核的淋巴细胞，",
+      "en": "You may also see lymphocytes with dark, round nuclei,",
+      "startFrame": 7793,
+      "audioFrames": 76,
+      "endFrame": 7890
+    },
+    {
+      "act": 6,
+      "shot": "lymph",
+      "zh": "以及核偏在一侧、核旁发亮的浆细胞。",
+      "en": "and plasma cells with off-centre nuclei and a pale zone beside them.",
+      "startFrame": 7890,
+      "audioFrames": 94,
+      "endFrame": 8005
+    },
+    {
+      "act": 6,
+      "shot": "elective",
+      "zh": "慢性阑尾炎手术时机的核心原则是：",
+      "en": "The key principle for surgery in chronic appendicitis is this.",
+      "startFrame": 8005,
+      "audioFrames": 88,
+      "endFrame": 8114
+    },
+    {
+      "act": 6,
+      "shot": "elective",
+      "zh": "一旦确诊，通常建议在症状缓解期择期切除；",
+      "en": "Once confirmed, elective appendectomy is usually advised when symptoms settle.",
+      "startFrame": 8114,
+      "audioFrames": 131,
+      "endFrame": 8266
+    },
+    {
+      "act": 6,
+      "shot": "elective",
+      "zh": "若正处于急性发作期，则视情况急诊手术。",
+      "en": "During an acute flare, emergency surgery depends on the clinical situation.",
+      "startFrame": 8266,
+      "audioFrames": 113,
+      "endFrame": 8400
+    },
+    {
+      "act": 7,
+      "shot": "recover",
+      "zh": "从粉白到暗红、灰黄再到焦黑，颜色在报警。",
+      "en": "Pale pink, dark red, grey-yellow and black tell a story of inflammation.",
+      "startFrame": 8400,
+      "audioFrames": 116,
+      "endFrame": 8537
+    },
+    {
+      "act": 7,
+      "shot": "call",
+      "zh": "腹痛移到右下腹，尤其还发烧、按压疼，",
+      "en": "If pain moves to the lower right abdomen, especially with fever or tenderness,",
+      "startFrame": 8537,
+      "audioFrames": 102,
+      "endFrame": 8660
+    },
+    {
+      "act": 7,
+      "shot": "call",
+      "zh": "别硬扛，也别等它自己过去。请尽快就医。",
+      "en": "Don't wait for it to pass. Seek medical care promptly.",
+      "startFrame": 8660,
+      "audioFrames": 109,
+      "endFrame": 8790
+    }
+  ]
+}

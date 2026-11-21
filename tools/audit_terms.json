@@ -1,0 +1,15 @@
+{
+  "identity": [
+    "\\u4f5c\\s*\\u8005\\s*\\u59d3\\s*\\u540d",
+    "\\u5b66\\s*\\u53f7",
+    "\\u6307\\s*\\u5bfc\\s*\\u6559\\s*\\u5e08"
+  ],
+  "template": [
+    "\\u3010\\s*\\u5f85\\u586b\\s*\\u3011",
+    "\\b(?:T[O]DO|F[I]XME|T[B]D|CHANGEM[E])\\b",
+    "\\b(?:lorem\\s+ipsum|your\\s+name)\\b",
+    "\\{\\{\\s*(?-i:NAME|STUDENT_ID|SCHOOL|SUPERVISOR)\\s*\\}\\}",
+    "<\\|(?:im_start|im_end|assistant|system|user)\\|>",
+    "\\b(?:system\\s+pr[o]mpt|ignore\\s+previous\\s+instructions|unrelated\\s+speech)\\b"
+  ]
+}
