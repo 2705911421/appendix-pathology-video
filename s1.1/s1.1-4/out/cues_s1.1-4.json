@@ -1,0 +1,62 @@
+{
+  "module": "s1.1-4",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "duration": 51,
+  "cues": [
+    {
+      "id": "S15",
+      "defaultDuration": 13,
+      "start": 0,
+      "end": 13,
+      "zhText": "从暗红的单纯性、灰黄的化脓性，再到焦黑的坏疽性，这是急性阑尾炎最常见的经典演变路径——但请记住，它并不是每个患者都必须走完的固定流程。",
+      "highlightZh": [
+        "单纯性",
+        "化脓性",
+        "坏疽性",
+        "并不是每个患者都必须走完的固定流程"
+      ],
+      "enText": "From dark-red simple, to grayish-yellow phlegmonous, to black gangrenous—this is the classic pathway, yet not a rigid sequence every patient must go through."
+    },
+    {
+      "id": "S16",
+      "defaultDuration": 12.5,
+      "start": 13,
+      "end": 25.5,
+      "zhText": "如果战火还停留在早期的单纯性阶段，中性粒细胞主要聚集在黏膜和黏膜下层，更深处的平滑肌层里，只能零星见到散在的寥寥几个。",
+      "highlightZh": [
+        "单纯性阶段",
+        "黏膜和黏膜下层",
+        "散在的寥寥几个"
+      ],
+      "enText": "In early simple appendicitis, neutrophils gather mostly in the mucosa and submucosa, with only a few scattered in the smooth muscle layer."
+    },
+    {
+      "id": "S17",
+      "defaultDuration": 12,
+      "start": 25.5,
+      "end": 37.5,
+      "zhText": "可一旦化脓蔓延全层，肿胀压迫血管、甚至让阑尾系膜静脉里长出血栓，血液供应就会被彻底掐断——",
+      "highlightZh": [
+        "蔓延全层",
+        "阑尾系膜静脉",
+        "血栓"
+      ],
+      "enText": "Once suppuration floods every layer, swelling and mesenteric venous thrombosis can cut off blood supply completely—"
+    },
+    {
+      "id": "S18",
+      "defaultDuration": 13.5,
+      "start": 37.5,
+      "end": 51,
+      "zhText": "失去血供的阑尾迅速发黑坏死，变成最凶险的坏疽性阑尾炎；脆弱的管壁随时可能穿孔，脓液涌入腹腔，引爆危及生命的弥漫性腹膜炎。",
+      "highlightZh": [
+        "坏疽性阑尾炎",
+        "穿孔",
+        "弥漫性腹膜炎"
+      ],
+      "enText": "Starved of blood, the appendix turns black and necrotic as gangrenous appendicitis; its fragile wall can perforate, triggering life-threatening peritonitis."
+    }
+  ]
+}

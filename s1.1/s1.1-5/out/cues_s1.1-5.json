@@ -1,0 +1,61 @@
+{
+  "module": "s1.1-5",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "duration": 53.5,
+  "cues": [
+    {
+      "id": "S19",
+      "defaultDuration": 10.5,
+      "zhText": "可还没进手术室之前，医生怎么隔着肚皮判断它到了哪一步？答案首先是：靠典型的临床症状和仔细的体格检查。",
+      "highlightZh": [
+        "临床症状",
+        "体格检查"
+      ],
+      "enText": "Before surgery, how do doctors tell its stage through the abdomen? First and foremost: classic clinical symptoms and a careful physical exam.",
+      "start": 0,
+      "end": 10.5
+    },
+    {
+      "id": "S20",
+      "defaultDuration": 11.5,
+      "zhText": "CT 是重要的辅助确诊工具，但并非所有患者都必须做；而在需要确诊或判断严重程度时，多层螺旋 CT 的诊断敏感度可达百分之九十三以上。",
+      "highlightZh": [
+        "辅助确诊工具",
+        "并非所有患者都必须做",
+        "百分之九十三以上"
+      ],
+      "enText": "CT is a vital diagnostic aid, though not mandatory for everyone; when needed, multi-slice CT reaches over 93% sensitivity.",
+      "start": 10.5,
+      "end": 22
+    },
+    {
+      "id": "S21",
+      "defaultDuration": 18.5,
+      "zhText": "更厉害的是，CT 影像与病理变化高度一致：单纯性仅见管腔轻度增粗、脂肪间隙清晰；化脓性可见管壁厚实强化、周围絮状渗出；坏疽性甚至会出现强化管壁局部缺损与游离气体。",
+      "highlightZh": [
+        "单纯性",
+        "化脓性",
+        "坏疽性"
+      ],
+      "enText": "Even better, CT mirrors pathology: mild thickening with clean fat in simple; thick wall enhancement and fat stranding in phlegmonous; focal wall defects and free gas in gangrenous.",
+      "start": 22,
+      "end": 40.5
+    },
+    {
+      "id": "S22",
+      "defaultDuration": 13,
+      "zhText": "临床医生最关心的，就是你现在属于哪一型、有没有化脓、坏疽或穿孔——这直接决定了治疗紧迫性。一旦发展为蜂窝织炎性或坏疽性阑尾炎，必须尽早手术切除！",
+      "highlightZh": [
+        "治疗紧迫性",
+        "蜂窝织炎性",
+        "坏疽性阑尾炎",
+        "尽早手术切除"
+      ],
+      "enText": "What matters most clinically is the current subtype and perforation risk—directly dictating urgency. Both phlegmonous and gangrenous appendicitis require prompt surgical removal!",
+      "start": 40.5,
+      "end": 53.5
+    }
+  ]
+}

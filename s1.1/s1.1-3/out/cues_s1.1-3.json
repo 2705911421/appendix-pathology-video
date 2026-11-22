@@ -1,0 +1,64 @@
+{
+  "module": "s1.1-3",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "duration": 61.5,
+  "cues": [
+    {
+      "id": "S10",
+      "defaultDuration": 9.5,
+      "zhText": "在病理学家眼里，急性阑尾炎的本质，始终绕不开两个核心动作——“变质”和“渗出”。",
+      "highlightZh": [
+        "急性阑尾炎",
+        "变质",
+        "渗出"
+      ],
+      "enText": "To a pathologist, acute appendicitis always revolves around two core processes: alteration and exudation."
+    },
+    {
+      "id": "S11",
+      "defaultDuration": 12,
+      "zhText": "当管腔被堵死、腔内压力飙升，黏膜屏障在缺血和细菌的双重夹击下迅速坏死、破溃脱落——这种组织细胞的损伤，就是“变质”。",
+      "highlightZh": [
+        "坏死、破溃脱落",
+        "变质"
+      ],
+      "enText": "Blocked and pressurized, the ischemic mucosa breaks down under bacterial attack—this cellular necrosis and ulceration is alteration."
+    },
+    {
+      "id": "S12",
+      "defaultDuration": 13,
+      "zhText": "警报一响，血管立刻扩张充血，把血浆和成群的分叶核中性粒细胞挤出血管壁，穿过内皮间隙，弥漫冲向阑尾壁全层——这就是“渗出”。",
+      "highlightZh": [
+        "扩张充血",
+        "分叶核中性粒细胞",
+        "渗出"
+      ],
+      "enText": "Alarmed vessels dilate, squeezing plasma and multi-lobed neutrophils through endothelial gaps to flood every wall layer—that is exudation."
+    },
+    {
+      "id": "S13",
+      "defaultDuration": 12.5,
+      "zhText": "战火一路烧穿肌层，直达最外层的浆膜。请仔细看浆膜表面渗出的东西：它可不只是单纯的纤维素，而是纤维素与脓液的混合渗出物。",
+      "highlightZh": [
+        "浆膜",
+        "不只是单纯的纤维素",
+        "纤维素与脓液的混合"
+      ],
+      "enText": "The battle burns through the muscle to the outer serosa. Look closely: what oozes out is not pure fibrin, but a mix of fibrin and pus."
+    },
+    {
+      "id": "S14",
+      "defaultDuration": 14.5,
+      "zhText": "在交织成网的纤维素丝之间，密密麻麻裹挟着大量变性坏死的中性粒细胞，也就是脓细胞——这种“纤维素性脓性渗出物”，才是阑尾表面灰黄色的真正来源！",
+      "highlightZh": [
+        "变性坏死的中性粒细胞",
+        "脓细胞",
+        "纤维素性脓性渗出物",
+        "灰黄色"
+      ],
+      "enText": "Tangled within the fibrin mesh are legions of degenerated neutrophils—pus cells. This fibrinous-purulent exudate is the true source of that yellow color!"
+    }
+  ]
+}
