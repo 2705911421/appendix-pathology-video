@@ -1,6 +1,5 @@
-import { createIleocecalAsset, ILEOCECAL_BOX, makeCanvas } from '../../shared/anatomyWatercolor.js';
-import { drawStageDots } from '../../shared/leftFloatNotes.js';
-import { RED, arrow, ease, lerp } from '../../shared/canvasCore.js';
+import { createIleocecalAsset, ILEOCECAL_BOX, makeCanvas, terminalIleumPoint } from '../../shared/anatomyWatercolor.js';
+import { RED, arrow, ease, ink, lerp } from '../../shared/canvasCore.js';
 import { drawRaster, drawRasterCrop, logicalContext, logicalSize, rasterScale, sizeRaster } from '../../shared/detail/raster.js';
 import { phase } from '../../shared/timelineHelper.js';
 import { scaleAround, settleScale, tracedInk, traceTo } from './motion.js';
@@ -8,25 +7,23 @@ import { scaleAround, settleScale, tracedInk, traceTo } from './motion.js';
 const charcoal = '#1F1C19';
 
 export function chronicNotes() {
-  const dots = drawStageDots({ mode: 'chronic', y: 240, showStatus: false });
   return {
-    paint: `<g class="chronic-swatches" opacity=".25" style="filter:grayscale(1)">${dots.paint}</g>`,
-    lettering: dots.lettering + `<g>
-      <text class="note note-acute" x="73" y="398" font-size="22" fill="${RED}" style="font-weight:750">急性期：变质 + 渗出</text>
-      <g class="note-arrow">${arrow('M83 424 C77 444 79 458 82 470', { color: '#8B7B70', size: 2.4, head: 12 })}</g>
-      <text class="note note-chronic" x="73" y="515" font-size="22" fill="${RED}" style="font-weight:750">慢性期：出现“增生”</text>
+    paint: '',
+    lettering: `<g>
+      <text class="note note-acute" x="73" y="515" font-size="22" fill="${RED}" style="font-weight:750">急性期：变质 + 渗出</text>
+      <text class="note note-chronic" data-entry-part="chronic" x="73" y="578" font-size="22" fill="${RED}"
+        style="font-weight:750">慢性期：修复性增生</text>
     </g>`,
   };
 }
 
 function evolution() {
   const ink = { color: charcoal, size: 2.9, head: 13, opacity: .91 };
-  return `<g id="s23-evolution" transform="translate(1090 115)" fill="${charcoal}" text-anchor="middle">
-    <text class="note" x="-258" y="0" font-size="30" fill="${charcoal}" style="font-weight:750">急性发作</text>
-    <g id="s23-cycle">${arrow('M-174 -20 C-174 -33 -149 -42 -137 -25 C-126 -8 -142 7 -157 3 C-167 0 -168 -10 -162 -15', ink)}</g>
-    <text class="note" x="-45" y="0" font-size="30" fill="${charcoal}" style="font-weight:750">反复拉锯</text>
-    ${arrow('M42 -10 Q83 -14 132 -11', ink)}
-    <text class="note" x="244" y="0" font-size="30" fill="${charcoal}" style="font-weight:750">慢性阑尾炎</text>
+  return `<g id="s23-evolution" data-entry-part="chronic" transform="translate(1090 115)" fill="${charcoal}" text-anchor="middle">
+    <text class="note" x="-312" y="0" font-size="30" fill="${charcoal}" style="font-weight:750">慢性阑尾炎</text>
+    ${arrow('M-165 -10 Q-120 -13 -72 -10', ink)}
+    <text class="note" x="-118" y="-26" font-size="19" fill="#695950">可表现为</text>
+    <text class="note" x="143" y="0" font-size="28" fill="${charcoal}">反复或持续右下腹痛</text>
   </g>`;
 }
 
@@ -45,7 +42,9 @@ function specimenLayers(specimen, art) {
   const { centre: [x, y], anchor: [sx, sy], diameter } = specimen.audit.crossSection;
   const half = diameter / 2;
   const center = (diameter + 6) / 2;
-  const inset = logicalContext(sizeRaster(art.querySelector('#s23-cross-section canvas'), center * 2, center * 2));
+  const insetCanvas = sizeRaster(art.querySelector('#s23-cross-section canvas'), center * 2, center * 2);
+  Object.assign(insetCanvas.style, { width: '100%', height: '100%' });
+  const inset = logicalContext(insetCanvas);
   drawRaster(inset, shown, center - x, center - y);
   inset.globalCompositeOperation = 'destination-in';
   inset.beginPath();
@@ -118,22 +117,25 @@ export function chronicSpecimen() {
   const y = 485 - ILEOCECAL_BOX.height * scale / 2;
   const specimen = createIleocecalAsset({ id: 's23-specimen', stage: 'chronic', x, y, scale });
   const inset = specimen.audit.crossSection;
-  const cross = inset.centre.map((u, i) => [x, y][i] + u * scale);
-  const insetSize = inset.diameter + 6;
+  const cross = [x + inset.centre[0] * scale + 6, y + inset.centre[1] * scale + 13];
+  const insetSize = (inset.diameter + 6) * 1.61;
+  const ileum = terminalIleumPoint(.18);
+  const ileumTarget = [x + ileum.x * scale, y + ileum.y * scale];
   const wall = [x + (inset.anchor[0] - 5) * scale, y + (inset.anchor[1] + 7) * scale];
   const linkStart = [x + (inset.anchor[0] + 4) * scale, y + (inset.anchor[1] + 7) * scale];
   const linkPath = `M${linkStart.join(' ')} Q${linkStart[0] + 60} ${linkStart[1] + 72}
-    ${cross[0] - 31} ${cross[1] - 24}`;
+    ${cross[0] - 49} ${cross[1] - 42}`;
   const link = `<path d="${linkPath}" fill="none" stroke="#84675D" stroke-width="1.7"
     stroke-dasharray="5 5" stroke-linecap="round" opacity=".80"/>`;
+  const insetEmphasis = 'M1202 850 C1326 847 1482 849 1617 851';
   let colorSpecimen;
   const marks = [
     ['cecum', .06, .20], ['ileum', .17, .31], ['mesentery', .28, .44],
-    ['wall', .38, .57], ['inset', .63, .88],
+    ['wall', .38, .57], ['inset', .53, .75],
   ];
 
   return {
-    paint: notes.paint + `<g id="s23-body">${specimen.paint}
+    paint: notes.paint + `<g id="s23-body" data-entry-part="subject">${specimen.paint}
       ${tracedInk('s23-link', linkPath, link, 12)}
       <g id="s23-cross-section">
         <foreignObject x="${cross[0] - insetSize / 2}" y="${cross[1] - insetSize / 2}" width="${insetSize}" height="${insetSize}">
@@ -141,33 +143,27 @@ export function chronicSpecimen() {
             style="display:block;width:100%;height:100%"></canvas>
         </foreignObject>
       </g></g>`,
-    lettering: notes.lettering + `<g id="s23-labels">${evolution()}
+    lettering: `<g data-entry-part="notes">${notes.lettering}</g><g id="s23-labels" data-entry-part="subject">${evolution()}
         ${callout('s23-cecum', '盲肠', 556, 547, 'M617 549 Q673 541 730 566')}
-        ${callout('s23-ileum', '回肠末端', 1176, 442, 'M1225 459 Q1259 494 1207 540')}
-        ${callout('s23-mesentery', '系膜纤维化牵拉', 1280, 605, 'M1262 596 C1181 579 1056 570 971 588')}
+        ${callout('s23-ileum', '回肠末端', 1176, 442, `M1225 459 Q1259 494 ${ileumTarget.join(' ')}`)}
+        ${callout('s23-mesentery', '系膜纤维化牵拉', 1280, 655, 'M1262 646 C1156 652 1094 642 1009 623')}
         ${callout('s23-wall', '苍白管壁明显增厚僵硬', 559, 767, `M829 754 C880 754 914 731 ${wall.join(' ')}`)}
-        ${callout('s23-inset', '横切面：纤维化厚壁、管腔显著狭窄', 1195, 802,
-          `M1180 791 C1147 799 1114 790 ${cross.join(' ')}`, RED)}
+        ${callout('s23-inset', '横切面 · 纤维化厚壁、狭窄星形管腔', 1200, 835,
+          `M1186 827 Q1148 836 ${cross[0] + 53} ${cross[1] + 11}`, RED)}
+        ${tracedInk('s23-inset-emphasis', insetEmphasis, ink(insetEmphasis,
+          { color: RED, size: 3.7, opacity: .78, taperStart: 6, taperEnd: 11 }), 18)}
       </g>`,
     mount(art) {
       colorSpecimen = specimenLayers(specimen, art);
     },
     update(art, labels, p) {
-      const leave = 1 - phase(p, .92, 1);
-      art.querySelector('#s23-body').setAttribute('opacity', leave);
-      labels.querySelector('#s23-labels').setAttribute('opacity', leave);
       colorSpecimen(1 - phase(p, 0, .55));
-      labels.querySelector('#s23-cycle').setAttribute('transform', `rotate(${300 * p} -151 -13)`);
-      for (const [selector, opacity] of [
-        ['.note-acute', lerp(.58, 1, phase(p, 0, .13))],
-        ['.note-arrow', phase(p, .07, .26)],
-        ['.note-chronic', phase(p, .16, .37)],
-      ]) labels.querySelector(selector).setAttribute('opacity', opacity);
-      const insetProgress = Math.max(0, Math.min(1, (p - .45) / .45));
+      const insetProgress = Math.max(0, Math.min(1, (p - .37) / .43));
       const detail = art.querySelector('#s23-cross-section');
       detail.setAttribute('transform', scaleAround(...cross, settleScale(insetProgress, .12)));
-      detail.setAttribute('opacity', phase(p, .45, .62));
-      traceTo(art, 's23-link', phase(p, .46, .75));
+      detail.setAttribute('opacity', phase(p, .37, .56));
+      traceTo(art, 's23-link', phase(p, .39, .66));
+      traceTo(labels, 's23-inset-emphasis', phase(p, .68, .99));
       for (const [name, start, end] of marks) {
         traceTo(labels, `s23-${name}`, phase(p, start, end));
         labels.querySelector(`#s23-${name}-caption`).setAttribute('opacity', phase(p, start + .03, end));

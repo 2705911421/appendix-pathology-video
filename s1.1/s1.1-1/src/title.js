@@ -6,13 +6,15 @@ import { fade, ink, letter } from './paint.js';
 const headline = '一根“香肠”的变质日记';
 const subtitle = '急性阑尾炎的色彩密码与炎症保卫战';
 const center = 1110;
-const black = '#2B2421';
-const colors = ['#D38E82', RED, '#A9751E', '#241D23'];
+const black = '#2A2622';
+const colors = ['#9A534E', RED, '#856522', '#2A2622'];
 const colorCenters = [983, 1136, 1289, 1442];
 const swatchXs = [720, 958, 1196, 1434];
+const titlePace = p => p * .96 / .65;
 
 
 export function swatchesAt(p) {
+  p = titlePace(p);
   return palette.map((_, i) => i === 0
     ? .42 * phase(p, 0, .17) + .58 * phase(p, .12, .60)
     : phase(p, .48 + i * .112, .60 + i * .112));
@@ -92,12 +94,13 @@ export function makeTitle(pigment) {
   const dab = morphShape(organic(0, 0, 14, 32, 980, .15), organic(0, 0, 24, 23, 981, .22), 8);
 
   return (ctx, motion) => {
-    const p = motion.titleProgress;
+    const p = titlePace(motion.titleProgress);
     if (p <= 0) return 0;
     palette.forEach(({ key }, i) => {
       const progress = motion.swatches[i];
-      wetSwatch(ctx, pigment, swatchXs[i], key, progress, dab);
-      fade(ctx, progress * .48 * phase(p, .48, .58),
+      const strength = .72 + .28 * phase(motion.titleAccent, i * .22, i * .22 + .29);
+      fade(ctx, strength, () => wetSwatch(ctx, pigment, swatchXs[i], key, progress, dab));
+      fade(ctx, progress * .16 * phase(p, .48, .58),
         () => pigment(ctx, key, colorCenters[i] - 54, 503, 108, 79));
     });
     const headlineProgress = phase(p, .17, .61);
@@ -106,9 +109,10 @@ export function makeTitle(pigment) {
 
     const sign = phase(p, .71, .96);
     writeSubtitle(ctx, sign);
-    fade(ctx, sign, () => {
+    const trace = sign * (.68 + .32 * phase(motion.titleAccent, .08, .48));
+    fade(ctx, trace, () => {
       ctx.translate(817, 0);
-      ctx.scale(sign, 1);
+      ctx.scale(trace, 1);
       ink(ctx, 'M0 682 C168 673 396 678 584 683', '#B74232', 5.8, 348);
     });
     return headlineProgress;

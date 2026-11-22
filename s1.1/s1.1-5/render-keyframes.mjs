@@ -9,6 +9,8 @@ import { build } from 'esbuild';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
 import { HEIGHT, WIDTH } from '../shared/canvasCore.js';
+import { CT_ROI, CT_ZOOM } from '../shared/ctRenderer.js';
+import { CT } from '../shared/detail/ct.js';
 import { formats, readVideoTimeline, renderVideo } from './render-video.mjs';
 import { sheet } from './src/cue-sheet.js';
 
@@ -139,7 +141,7 @@ async function capture(page, id, p) {
   if (id === 'S19' || id === 'S20') {
     const { doctor, left, right, foot, clinical, auxiliary, statistic, auxiliaryOpacity, statisticOpacity } = checks;
     assert.ok(doctor, 'The shared doctor canvas was not mounted');
-    assert.deepEqual(clinical.map(({ x, y }) => [x, y]), [[1115, 515], [1115, 549]]);
+    assert.deepEqual(clinical.map(({ x, y }) => [x, y]), [[1115, 515], [1115, 549], [1115, 583]]);
     assert.deepEqual(auxiliary.map(({ x, y }) => [x, y]), [[1585, 440], [1585, 472]]);
     assert.ok(clinical.every(note => note.top > left.bottom) && auxiliary.every(note => note.top > right.bottom),
       'Balance labels overlap a tray or suspension cord');
@@ -151,10 +153,12 @@ async function capture(page, id, p) {
   } else if (id === 'S21') {
     const { film, inset, roi, orientation, title, notes, study, grossStage } = checks;
     const middle = film.left + film.width / 2;
-    assert.deepEqual([film.x, film.y, film.width, film.height], [800, 245, 520, 400]);
-    assert.deepEqual([inset.x, inset.y, inset.width, inset.height], [1365, 245, 445, 400]);
+    assert.ok(Math.abs(film.width / film.height - CT.width / CT.height) < .002);
+    assert.ok(Math.abs(inset.width / (CT_ROI.width * film.width / CT.width) - CT_ZOOM) < .002);
+    assert.ok(Math.abs(inset.height / (CT_ROI.height * film.height / CT.height) - CT_ZOOM) < .002);
     assert.deepEqual(orientation.map(note => note.text), ['R', 'L']);
-    assert.deepEqual(orientation.map(note => [note.x, note.y]), [[816, 261], [1304, 261]]);
+    assert.deepEqual(orientation.map(note => [note.x, note.y]),
+      [[film.left + 16, film.top + 16], [film.right - 16, film.top + 16]]);
     assert.ok(orientation[0].right < middle && orientation[1].left > middle
       && orientation.every(mark => mark.top >= film.top && mark.bottom < film.top + 65), 'Axial R/L orientation reversed');
     assert.ok(roi.left > film.left && roi.right < middle && roi.top > film.top + film.height * .36
@@ -167,7 +171,7 @@ async function capture(page, id, p) {
       'CT annotations must fit the paper below both scans');
   } else {
     assert.ok(checks.wash <= .16 && checks.final[0].left >= 1120 && checks.final[0].right <= 1820);
-    assert.equal(checks.final[0].text, '蜂窝织炎性、坏疽性阑尾炎需尽早手术切除！');
+    assert.equal(checks.final[0].text, '局限性脓肿 · 可先抗感染，必要时引流');
   }
   return page.screenshot({ type: 'png', scale: 'css', animations: 'disabled' });
 }
@@ -270,8 +274,11 @@ async function auditPreviewMotion(page, timeline) {
         const b = text.getBoundingClientRect();
         return b.top >= 705 && b.bottom <= 825 && b.right <= 1800;
       }), 'CT label must stay in the paper region');
-      const sides = all('[data-ct-orientation] g text').map(text => [text.textContent, text.getAttribute('x'), text.getAttribute('y')]);
-      require(JSON.stringify(sides) === JSON.stringify([['R', '816', '261'], ['L', '1304', '261']]), 'R/L markers shifted');
+      const frame = query('[data-ct-box="main"]').getBoundingClientRect();
+      const sides = all('[data-ct-orientation] g text').map(text =>
+        [text.textContent, Number(text.getAttribute('x')), Number(text.getAttribute('y'))]);
+      const expected = [['R', frame.left + 16, frame.top + 16], ['L', frame.right - 16, frame.top + 16]];
+      require(JSON.stringify(sides) === JSON.stringify(expected), 'R/L markers shifted');
     }
     at('S21', .998);
     const source = query('[data-gross-stage="2"]').getBoundingClientRect();

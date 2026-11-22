@@ -3,7 +3,7 @@ import { renderProfile } from '../renderProfile.js';
 export const WIDTH = renderProfile.logicalWidth;
 export const HEIGHT = renderProfile.logicalHeight;
 export const PAPER = '#F5F1E9';
-export const INK = '#221F1C';
+export const INK = '#1F1C19';
 export const RED = '#C43428';
 export const GOLD = '#D4A537';
 export const NS = 'http://www.w3.org/2000/svg';
@@ -14,6 +14,7 @@ export const ease = (x) => {
   const t = clamp(x);
   return t * t * (3 - 2 * t);
 };
+export const easeOutCubic = (x) => 1 - (1 - clamp(x)) ** 3;
 export const round = (x) => Math.round(x * 100) / 100;
 
 export function mulberry32(seed) {

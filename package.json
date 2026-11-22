@@ -3,13 +3,31 @@
   "version": "1.1.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22.12" },
-  "workspaces": ["s1.1"],
+  "engines": {
+    "node": ">=22.12"
+  },
+  "workspaces": [
+    "s1.1"
+  ],
   "scripts": {
     "test": "npm test --workspace s1.1",
     "smoke": "node s1.1/scripts/build_master_all.mjs --smoke",
     "export:tts": "node s1.1/scripts/export_tts_sheet.mjs",
     "sync:tts": "node s1.1/scripts/sync_tts_durations.mjs",
     "build:master": "node s1.1/scripts/build_master_all.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/noto-sans-sc": "5.3.1",
+    "@fontsource-variable/noto-serif-sc": "5.3.1",
+    "esbuild": "0.28.2",
+    "flubber": "0.4.2",
+    "lxgw-wenkai-webfont": "1.7.0",
+    "p5": "2.4.0",
+    "p5.brush": "3.0.0",
+    "perfect-freehand": "1.2.3",
+    "playwright": "1.58.2",
+    "proper-lockfile": "4.1.2",
+    "roughjs": "4.6.6",
+    "sharp": "0.35.5"
   }
 }

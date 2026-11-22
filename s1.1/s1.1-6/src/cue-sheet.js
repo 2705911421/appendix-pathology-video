@@ -1,29 +1,29 @@
 import { HEIGHT, WIDTH, assertBlindReviewText } from '../../shared/canvasCore.js';
-import { createCueTimeline } from '../../shared/timelineHelper.js';
+import { createCueTimeline, CREDIT_FADE_FRACTION, timeCueSheet } from '../../shared/timelineHelper.js';
 
-export const sceneFades = { homecomingStart: .92, creditsEnd: .08 };
+export const sceneFades = { homecomingStart: .92, creditsEnd: CREDIT_FADE_FRACTION };
 
 const script = [
   {
     id: 'S23',
-    defaultDuration: 12,
-    zhText: '聊到这儿，细心的你可能会问：教科书里炎症常说的“增生”去哪了？其实，只有当急性阑尾炎反复发作、拖成慢性阑尾炎时，修复性的“增生”才会真正登场。',
-    highlightZh: ['增生', '反复发作', '慢性阑尾炎'],
-    enText: 'You might wonder: where is the "proliferation" of inflammation? Only when recurrent acute episodes turn into chronic appendicitis does reparative proliferation appear.',
+    defaultDuration: 10.5,
+    zhText: '反复或持续的右下腹痛，可能见于慢性阑尾炎。慢性炎症中，修复性增生可造成阑尾壁纤维化。',
+    highlightZh: ['慢性阑尾炎', '修复性增生', '纤维化'],
+    enText: 'Chronic appendicitis can present with recurrent or persistent right lower abdominal pain. Reparative proliferation in chronic inflammation can cause fibrosis of the appendiceal wall.',
   },
   {
     id: 'S24',
-    defaultDuration: 15.5,
-    zhText: '镜下可见阑尾壁明显纤维化、伴随淋巴细胞等慢性炎细胞浸润。慢性阑尾炎的手术时机核心原则是：一旦确诊，通常建议在症状缓解期择期切除；若正处于急性发作期，则视情况急诊手术。',
-    highlightZh: ['纤维化', '淋巴细胞', '症状缓解期择期切除', '急性发作期', '急诊手术'],
-    enText: 'Microscopy shows wall fibrosis and chronic inflammatory infiltration. Core surgical rule: once diagnosed, elective resection in remission is usually advised; during acute flare-ups, emergency surgery as indicated.',
+    defaultDuration: 16,
+    zhText: '镜下可见阑尾壁明显纤维化，有淋巴细胞和浆细胞浸润。一旦确诊，通常建议在症状缓解期择期切除；若正处于急性发作期，则视情况急诊手术。',
+    highlightZh: ['纤维化', '淋巴细胞', '浆细胞', '症状缓解期择期切除', '急性发作期', '急诊手术'],
+    enText: 'Microscopy shows wall fibrosis with lymphocyte and plasma cell infiltration. Once diagnosed, elective appendectomy is usually advised when symptoms have subsided. During an acute flare, emergency surgery may be needed depending on the clinical findings.',
   },
   {
     id: 'S25',
-    defaultDuration: 11.5,
-    zhText: '从粉白到暗红、灰黄再到焦黑，这根“小香肠”的每一次变色，都是身体发出的求救信号。面对转移性右下腹痛、高热与腹部拒按，别硬扛、别乱吃止痛药，尽早就医！',
-    highlightZh: ['求救信号', '转移性右下腹痛', '别乱吃止痛药', '尽早就医'],
-    enText: 'From pink to dark red, yellow, and black, every color shift is an SOS. Facing migratory right lower abdominal pain, fever, and guarding, never tough it out—seek prompt care!',
+    defaultDuration: 12,
+    zhText: '粉白、暗红、灰黄、焦黑，颜色帮助我们读懂阑尾的病理变化。若腹痛转移到右下腹，或持续加重，尤其伴发热或腹部拒按，应尽快就医。',
+    highlightZh: ['病理变化', '右下腹', '持续加重', '发热', '腹部拒按', '尽快就医'],
+    enText: 'Pale pink, dark red, grayish yellow and black reflect changes in the appendix. Seek urgent medical care if abdominal pain moves to the right lower abdomen or keeps worsening, especially with fever or guarding.',
   },
   {
     id: 'S26',
@@ -35,27 +35,19 @@ const script = [
   },
 ];
 
-let seconds = 0;
-export const CUES = (globalThis.__sectionCueSheet?.cues ?? script).map(cue => {
-  for (const text of [cue.zhText, cue.enText, ...cue.highlightZh]) assertBlindReviewText(text);
-  const start = seconds;
-  seconds += cue.duration ?? cue.defaultDuration;
-  return { ...cue, start, end: seconds };
+export const sheet = timeCueSheet(globalThis.__sectionCueSheet ?? {
+  module: 's1.1-6', width: WIDTH, height: HEIGHT, fps: 30, cues: script,
 });
+export const CUES = sheet.cues;
+for (const cue of CUES) {
+  for (const text of [cue.zhText, cue.enText, ...cue.highlightZh]) assertBlindReviewText(text);
+}
+const timeline = createCueTimeline(sheet);
 
 export function resolveCue(cues, t) {
-  const { cue, p } = createCueTimeline({ duration: cues.at(-1).end, cues }).at(t);
+  const { cue, p } = (cues === CUES ? timeline : createCueTimeline({ duration: cues.at(-1).end, cues })).at(t);
   return { cue, p: Math.round(p * 1e12) / 1e12 };
 }
-
-export const sheet = {
-  module: 's1.1-6',
-  width: WIDTH,
-  height: HEIGHT,
-  fps: 30,
-  duration: seconds,
-  cues: CUES,
-};
 
 export const samples = [
   ['S23', .75], ['S24', .82],

@@ -1,10 +1,9 @@
-import { HEIGHT, INK, PAPER, RED, WIDTH, createRaster, lerp, mulberry32, rasterScale, storySubtitleAt } from '../../shared/canvasCore.js';
+import { HEIGHT, INK, WIDTH, createRaster, drawPreparedStorySubtitles, drawSubtitlePaper } from '../../shared/canvasCore.js';
+import { createStoryPaperSurface } from '../../shared/detail/transitionPaper.js';
+import { SERIF_FONT } from '../../shared/fonts.js';
 import { paintSurfaces } from './brush.mjs';
-import { ramp } from './geometry.mjs';
 
 const paths = new WeakMap();
-const noteFont = '"Noto Serif SC", "KaiTi", serif';
-const captionFont = '"Noto Sans SC", "Microsoft YaHei", sans-serif';
 
 function shape(node) {
   const d = node.getAttribute('d');
@@ -53,7 +52,7 @@ function paintText(ctx, node) {
     size: Number(child.getAttribute?.('font-size') ?? fontSize),
     opacity: Number(child.getAttribute?.('opacity') ?? 1),
   }));
-  const font = size => `${weight} ${size}px ${noteFont}`;
+  const font = size => `${weight} ${size}px ${SERIF_FONT}`;
   const widths = text.map(item => {
     ctx.font = font(item.size);
     return ctx.measureText(item.text).width;
@@ -139,115 +138,28 @@ function paintNode(ctx, root, node, pixelScale) {
   ctx.restore();
 }
 
-function paperSurface(pixelScale) {
-  const canvas = createRaster(WIDTH, HEIGHT, pixelScale);
-  const ctx = canvas.getContext('2d');
-  const texture = ctx.createImageData(canvas.width, canvas.height);
-  const scale = rasterScale(canvas);
-  const rand = mulberry32(12762);
-  for (let y = 0; y < canvas.height; y++) {
-    let fibre = 0;
-    for (let x = 0; x < canvas.width; x++) {
-      if ((x + y) % 4 === 0) fibre = (rand() - .5) * 2.6;
-      const grain = (rand() - .5) * 4.9 + fibre;
-      const grid = (Math.floor(x / scale.x) % 42 === 15 ? 5.6 : 0) + (Math.floor(y / scale.y) % 42 === 11 ? 5.6 : 0);
-      const i = (y * canvas.width + x) * 4;
-      texture.data[i] = 245 + grain - grid;
-      texture.data[i + 1] = 241 + grain - grid;
-      texture.data[i + 2] = 233 + grain - grid;
-      texture.data[i + 3] = 255;
-    }
-  }
-  ctx.putImageData(texture, 0, 0);
-  return canvas;
-}
-
-function captions(ctx, subtitles, p) {
-  const shade = ctx.createLinearGradient(0, 867, 0, 922);
-  shade.addColorStop(0, 'rgba(245, 241, 233, 0)');
-  shade.addColorStop(1, PAPER);
-  ctx.fillStyle = shade;
-  ctx.fillRect(0, 867, WIDTH, HEIGHT - 867);
-
-  const { page, opacity } = storySubtitleAt(subtitles, p);
-  ctx.save();
-  ctx.globalAlpha = opacity;
-  ctx.font = `750 42px ${captionFont}`;
-  const widths = page.zh.map(({ text }) => ctx.measureText(text).width);
-  const total = widths.reduce((sum, width) => sum + width, 0);
-  const scale = Math.min(1, (WIDTH - 124) / total);
-  ctx.save();
-  ctx.translate(WIDTH / 2, 963);
-  ctx.scale(scale, 1);
-  let left = -total / 2;
-  for (const [i, { text, highlight }] of page.zh.entries()) {
-    ctx.fillStyle = highlight ? RED : '#1F1C19';
-    ctx.fillText(text, left, 0);
-    left += widths[i];
-  }
-  ctx.restore();
-  ctx.font = `500 24px ${captionFont}`;
-  ctx.textAlign = 'center';
-  ctx.fillStyle = '#5C564E';
-  ctx.fillText(page.en, WIDTH / 2, 1008, WIDTH - 124);
-  ctx.restore();
-}
-
 export function createArtSurface(layer, pixelScale = 1) {
   const canvas = createRaster(WIDTH, HEIGHT, pixelScale);
   canvas.style.display = 'block';
   layer.append(canvas);
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
-  const paperTexture = paperSurface(pixelScale);
-  const sceneArt = (context, root) => {
-    for (const child of root.children) paintNode(context, root, child, pixelScale);
-  };
-  function draw(root, lettering, id, p, subtitles, prior) {
+  const paperTexture = createStoryPaperSurface(pixelScale);
+  return (layers, subtitles, p) => {
     ctx.setTransform(pixelScale, 0, 0, pixelScale, 0, 0);
-    ctx.clearRect(0, 0, WIDTH, HEIGHT);
-    if (prior) {
-      ctx.save();
-      ctx.globalAlpha = prior.opacity;
-      ctx.drawImage(prior.canvas, 0, 0, WIDTH, HEIGHT);
-      ctx.restore();
-    }
-    sceneArt(ctx, root);
-    if (id === 'S11' && p < .18) {
-      const width = lerp(1, 2200, ramp(p, 0, .18));
-      const left = (WIDTH - width) / 2;
-      const right = left + width;
-      const paper = ctx.createLinearGradient(left, 0, right, 0);
-      paper.addColorStop(0, '#0000');
-      paper.addColorStop(.065, '#000');
-      paper.addColorStop(.935, '#000');
-      paper.addColorStop(1, '#0000');
-      ctx.save();
-      ctx.globalCompositeOperation = 'destination-in';
-      ctx.fillStyle = paper;
-      ctx.fillRect(0, 0, WIDTH, HEIGHT);
-      ctx.restore();
-    }
-    ctx.save();
-    ctx.globalCompositeOperation = 'destination-over';
     ctx.drawImage(paperTexture, 0, 0, WIDTH, HEIGHT);
-    ctx.restore();
-    const graphicOpacity = ramp(p, .08, .13) * (1 - ramp(p, .88, 1));
-    if (graphicOpacity > 0) {
+    for (const { art, lettering, opacity = 1, scale = 1, dx = 0, dy = 0 } of layers) {
+      if (opacity <= 0) continue;
       ctx.save();
-      ctx.globalAlpha = graphicOpacity;
-      sceneArt(ctx, lettering);
+      ctx.globalAlpha = opacity;
+      ctx.transform(scale, 0, 0, scale, WIDTH / 2 * (1 - scale) + dx, 465 * (1 - scale) + dy);
+      for (const root of [art, lettering]) {
+        for (const child of root.children) paintNode(ctx, root, child, pixelScale);
+      }
       ctx.restore();
     }
-    captions(ctx, subtitles, p);
-  }
-  draw.bake = root => {
-    const baked = document.createElement('canvas');
-    baked.width = canvas.width;
-    baked.height = canvas.height;
-    const context = baked.getContext('2d', { willReadFrequently: true });
-    context.scale(pixelScale, pixelScale);
-    sceneArt(context, root);
-    return baked;
+    if (subtitles) {
+      drawSubtitlePaper(ctx);
+      drawPreparedStorySubtitles(ctx, subtitles, p);
+    }
   };
-  return draw;
 }

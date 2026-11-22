@@ -1,152 +1,211 @@
-import { execFile } from 'node:child_process';
-import { copyFile, mkdir, mkdtemp, open, readdir, readFile, rm, unlink } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { createReadStream } from 'node:fs';
+import { mkdir, readFile, rename, rm, statfs, writeFile } from 'node:fs/promises';
+import { availableParallelism, freemem, totalmem } from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { promisify } from 'node:util';
-import { renderProfile as profile } from '../shared/renderProfile.js';
+import { parseArgs } from 'node:util';
+import { DEFAULT_PROFILE, getRenderProfile, renderProfile } from '../shared/renderProfile.js';
+import { cueDurationMs } from '../shared/timelineHelper.js';
+import { lockOutput } from './build_lock.mjs';
 import { credits, readCueSheets } from './export_tts_sheet.mjs';
-import { frameBoundary, launchBrowser, project, renderSection, smokeSection } from './render_master_sections.mjs';
+import { checkSegment, runMedia } from './media_probe.mjs';
+import { renderFonts } from './render_fonts.mjs';
+import { bridgePlateTarget, frameBoundary, launchBrowser, prepareBridgePlates, prepareStage, project, renderSection,
+  smokeSection } from './render_master_sections.mjs';
+import { findExternalInputs, syncDurations, voiceFile } from './sync_tts_durations.mjs';
 
-const exec = promisify(execFile);
 const output = path.join(project, 'out');
-const title = '盲审稿-一根“香肠”的变质日记：阑尾的粉→红→黄→黑';
+const gib = 1024 ** 3;
 
-async function hasExternalVoices(cues) {
-  const names = await readdir(path.join(project, 'external_tts'), { withFileTypes: true }).catch(error => {
-    if (error.code === 'ENOENT') return [];
-    throw error;
-  });
-  const ids = new Set(names.filter(entry => entry.isFile())
-    .map(entry => /^(S\d\d)\.(?:wav|mp3)$/iu.exec(entry.name)?.[1].toUpperCase()));
-  return cues.every(({ id }) => id === credits.id || ids.has(id));
+export async function hasExternalVoices(cues) {
+  return (await findExternalInputs(cues, { allowEmpty: true })).length > 0;
 }
 
-export function planSections({ sheets, cues }, master) {
-  const fallback = new Map(cues.map(cue => [cue.id, cue.defaultDuration]));
+export function planSections({ sheets, cues }, master, profile = renderProfile) {
+  const fallback = new Map(cues.map(cue => [cue.id, cue]));
   const synced = new Map(master?.cues.map(cue => [cue.id, cue]));
   let elapsedMs = 0;
   return sheets.map(({ sheet, file }, index) => {
     const sectionStart = elapsedMs;
     const activeCues = sheet.cues.map(cue => {
       const reference = synced.get(cue.id);
-      const duration = master ? reference?.slotDur : fallback.get(cue.id);
-      const ms = Math.round(duration * 1000);
-      if (!Number.isSafeInteger(ms) || ms <= 0 || (cue.id === credits.id && duration !== credits.duration)) {
+      const authored = fallback.get(cue.id);
+      const { type, defaultDuration } = authored;
+      const defaultMs = cueDurationMs(authored, { defaults: true });
+      const ms = master && type === 'speech' ? Math.round(reference?.slotDur * 1000) : defaultMs;
+      if (!Number.isSafeInteger(ms) || ms <= 0 || (cue.id === credits.id && ms !== credits.duration * 1000)) {
         throw new Error(`无效的渲染时长 ${cue.id}`);
       }
-      if (master && (reference.start !== elapsedMs / 1000 || reference.end !== (elapsedMs + ms) / 1000)) {
+      if (master && (reference?.start !== elapsedMs / 1000 || reference.end !== (elapsedMs + ms) / 1000 ||
+        (reference.type !== undefined && reference.type !== type))) {
         throw new Error(`人声与画面时间轴不一致 ${cue.id}`);
       }
       const start = (elapsedMs - sectionStart) / 1000;
       elapsedMs += ms;
-      return { ...cue, start, end: (elapsedMs - sectionStart) / 1000, duration };
+      return { ...cue, type, defaultDuration, start, end: (elapsedMs - sectionStart) / 1000, duration: ms / 1000 };
     });
-    const startFrame = frameBoundary(sectionStart / 1000);
-    const endFrame = frameBoundary(elapsedMs / 1000);
+    const startFrame = frameBoundary(sectionStart / 1000, profile.fps);
+    const endFrame = frameBoundary(elapsedMs / 1000, profile.fps);
     const samplingOffset = startFrame / profile.fps - sectionStart / 1000;
-    return { index, file, hasVoice: Boolean(master), frames: endFrame - startFrame, endFrame, samplingOffset,
+    return { index, file, hasVoice: Boolean(master), frames: endFrame - startFrame, startFrame, endFrame, samplingOffset,
       sheet: { ...sheet, duration: activeCues.at(-1).end, cues: activeCues } };
   });
 }
 
-async function smoke() {
-  const sections = planSections(await readCueSheets());
+async function smoke(profile) {
+  const sections = planSections(await readCueSheets(), undefined, profile);
   const browser = await launchBrowser();
   try {
-    await smokeSection(browser, sections[0], 'S03', .83);
-    await smokeSection(browser, sections[2], 'S13', .63);
+    await smokeSection(browser, sections[0], 'S01', .57, profile);
+    await smokeSection(browser, sections[0], 'S03', .83, profile);
+    await smokeSection(browser, sections[2], 'S13', .63, profile);
+    await smokeSection(browser, sections[4], 'S21', .51, profile);
   } finally {
     await browser.close();
   }
 }
 
-async function renderAll(sections, directory, workers) {
-  const files = sections.map(({ sheet }) => path.join(directory, `${sheet.module}.mp4`));
-  const browser = await launchBrowser();
-  let next = 0;
-  let failure;
+async function shaFile(file) {
+  const hash = createHash('sha256');
+  for await (const chunk of createReadStream(file)) hash.update(chunk);
+  return hash.digest('hex');
+}
+
+function signatureFor(section, next, runtime) {
+  const hash = createHash('sha256').update(JSON.stringify(runtime))
+    .update(JSON.stringify({ frames: section.frames, offset: section.samplingOffset, hasVoice: section.hasVoice }));
+  for (const { stage } of [section, next].filter(Boolean)) hash.update(JSON.stringify(stage));
+  return hash.digest('hex');
+}
+
+async function canResume(file, marker, signature, section, profile) {
   try {
-    await Promise.all(Array.from({ length: workers }, async () => {
-      try {
-        while (!failure && next < sections.length) {
-          const index = next++;
-          const section = sections[index];
-          console.log(`开始 ${section.sheet.module}（${section.frames} 帧）`);
-          await renderSection(browser, section, files[index], section.frames);
-        }
-      } catch (error) {
-        failure ??= error;
-        await browser.close();
+    const record = JSON.parse(await readFile(marker, 'utf8'));
+    if (record.signature !== signature) throw new Error('画面、字体、运行环境或时间轴已变更');
+    await checkSegment(file, profile, section.frames);
+    if (record.sha256 !== await shaFile(file)) throw new Error('分段校验和不一致');
+    console.log(`续渲命中 ${section.sheet.module}（ffprobe ${section.frames} 帧，${(section.frames / profile.fps).toFixed(3)} 秒）`);
+    return true;
+  } catch (error) {
+    if (error.code !== 'ENOENT') console.log(`重新渲染 ${section.sheet.module}（${error.message.split('\n')[0]}）`);
+    return false;
+  }
+}
+
+async function renderAll(sections, directory, workers, profile, ffmpegVersion, force) {
+  await mkdir(directory, { recursive: true });
+  await Promise.all(sections.map(async section => { section.stage = await prepareStage(section); }));
+  const browser = await launchBrowser();
+  const pending = [];
+  const files = [];
+  try {
+    const sources = ['../package-lock.json', 'render_master_sections.mjs', 'render_fonts.mjs'];
+    const runtime = { profile, ffmpegVersion, browser: browser.version(), platform: process.platform, arch: process.arch,
+      scripts: await Promise.all(sources.map(file => shaFile(new URL(file, import.meta.url)))) };
+    for (const section of sections) {
+      const file = path.join(directory, `${section.sheet.module}${profile.segmentSuffix}.mp4`);
+      const marker = `${file}.json`;
+      const signature = signatureFor(section, bridgePlateTarget(sections, section.index), runtime);
+      const partial = file.replace(/\.mp4$/u, '.partial.mp4');
+      const partialMarker = `${marker}.tmp`;
+      files.push(file);
+      await Promise.all([partial, partialMarker].map(item => rm(item, { force: true })));
+      if (force || !await canResume(file, marker, signature, section, profile)) {
+        pending.push({ section, file, marker, signature, partial, partialMarker });
       }
-    }));
-    if (failure) throw failure;
-    return files;
+    }
+    if (pending.length) await prepareBridgePlates(browser, sections, profile, pending.map(item => item.section));
   } finally {
     await browser.close();
   }
+  let next = 0;
+  const failure = new AbortController();
+  await Promise.all(Array.from({ length: Math.min(workers, pending.length) }, async () => {
+    try {
+      while (!failure.signal.aborted && next < pending.length) {
+        const { section, file, marker, signature, partial, partialMarker } = pending[next++];
+        console.log(`开始 ${section.sheet.module}（${section.frames} 帧）`);
+        try {
+          await renderSection(section, partial, section.frames, 0, profile, failure.signal);
+          await checkSegment(partial, profile, section.frames);
+          await writeFile(partialMarker, JSON.stringify({ signature, sha256: await shaFile(partial) }) + '\n', { flag: 'wx' });
+          await rename(partial, file);
+          await rename(partialMarker, marker);
+          console.log(`分段已校验并保存 ${section.sheet.module}`);
+        } finally {
+          section.bridgePlates = undefined;
+          await Promise.all([partial, partialMarker].map(item => rm(item, { force: true })));
+        }
+      }
+    } catch (error) {
+      failure.abort(error);
+    }
+  }));
+  failure.signal.throwIfAborted();
+  return files;
 }
 
-async function buildMaster(workers) {
-  const { assembleFinal } = await import('./assemble_final.mjs');
-  const [{ stdout: encoder }] = await Promise.all([
-    exec('ffmpeg', ['-hide_banner', '-h', `encoder=${profile.videoCodec}`], { windowsHide: true }),
-    exec('ffprobe', ['-version'], { windowsHide: true }),
+function getWorkers(requested, profileName) {
+  const concurrentMaster = totalmem() > 24 * gib && freemem() >= 8 * gib && availableParallelism() >= 4;
+  const limit = profileName === 'master' && !concurrentMaster ? 1 : 2;
+  return Math.min(requested ?? limit, limit);
+}
+
+async function buildMaster(requested, profileName, force) {
+  const profile = getRenderProfile(profileName);
+  const { assembleFinal, finalVideoName } = await import('./assemble_final.mjs');
+  const [{ stdout: encoder }, { stdout: version }] = await Promise.all([
+    runMedia('ffmpeg', ['-hide_banner', '-h', `encoder=${profile.videoCodec}`]),
+    runMedia('ffmpeg', ['-version']),
+    runMedia('ffprobe', ['-version']),
   ]);
   if (!encoder.includes(`Encoder ${profile.videoCodec} `)) throw new Error(`FFmpeg 缺少 ${profile.videoCodec}`);
-  await mkdir(output, { recursive: true });
-  const lockPath = path.join(output, '.build_master_all.lock');
-  const lock = await open(lockPath, 'wx').catch(error => {
-    if (error.code === 'EEXIST') throw new Error(`已有母带构建锁 ${lockPath}`);
-    throw error;
-  });
-  let scratch;
+  const release = await lockOutput(output);
   try {
-    await lock.writeFile(`${process.pid}\n`);
-    scratch = await mkdtemp(path.join(output, '.master-'));
-    let source = await readCueSheets();
-    let master;
-    let voicePath;
-    if (await hasExternalVoices(source.cues)) {
-      console.log('已找到 25 条外部配音，量取原音并同步时间轴。');
-      try {
-        const result = await exec(process.execPath, [path.join(project, 'scripts', 'sync_tts_durations.mjs')], { windowsHide: true });
-        console.log(result.stdout.trim());
-      } catch (error) {
-        throw new Error(`配音回填失败\n${error.stderr?.trim() || error.message}`, { cause: error });
-      }
-      master = JSON.parse(await readFile(path.join(output, 'master_timeline.json'), 'utf8'));
-      voicePath = path.join(scratch, 'voice_master.wav');
-      await copyFile(path.join(project, 'audio', 'voice_master.wav'), voicePath);
-      source = await readCueSheets();
-    } else {
-      console.log('外部配音尚未齐全，按默认分镜时长生成纯配乐版。');
+    const { bsize, bavail } = await statfs(output);
+    const freeGiB = bsize * bavail / gib;
+    const reserve = profileName === 'master' ? 10 : 1;
+    if (freeGiB < reserve) throw new Error(`输出磁盘可用 ${freeGiB.toFixed(1)} GiB，${profileName} 档需要至少 ${reserve} GiB。`);
+    const source = await readCueSheets();
+    const inputs = await findExternalInputs(source.cues, { allowEmpty: true });
+    const master = inputs.length ? await syncDurations(source, inputs) : undefined;
+    const voicePath = master ? voiceFile : undefined;
+    if (!master) console.log('使用默认时间线与程序配乐。');
+    if (master && (master.duration < 305 || master.duration > 325)) {
+      console.warn(`配音版时间线 ${master.duration.toFixed(3)} 秒，超出 305–325 秒审片目标。`);
     }
-    const sections = planSections(source, master);
+    const sections = planSections(source, master, profile);
     const frames = sections.at(-1).endFrame;
-    const segments = await renderAll(sections, scratch, workers);
-    const destination = path.join(output, `${title}${voicePath ? '' : '（纯配乐版）'}.mp4`);
-    await assembleFinal({ segments, frames, voicePath, destination, scratch, creditsDuration: credits.duration });
-    console.log(`母带 ${frames} 帧，${(frames / profile.fps).toFixed(3)} 秒\n${destination}`);
+    const bridges = sections.flatMap(section => {
+      const origin = section.startFrame / profile.fps - section.samplingOffset;
+      return section.sheet.cues.filter(cue => cue.type === 'bridge')
+        .map(({ start, end }) => ({ start: origin + start, end: origin + end }));
+    });
+    const workers = getWorkers(requested, profileName);
+    console.log(`${profileName} 档位，总计 ${frames} 帧，${workers} 路并发（内存 ${(totalmem() / gib).toFixed(1)} GiB）。`);
+    const scratch = path.join(output, '.render-cache', profileName);
+    const segments = await renderAll(sections, scratch, workers, profile, version.split('\n')[0].trim(), force);
+    const destination = path.join(output, finalVideoName(profileName, Boolean(voicePath)));
+    await assembleFinal({ segments, frames, voicePath, destination, scratch, bridges,
+      creditsDuration: credits.duration, profileName });
+    console.log(`${profileName} ${frames} 帧，${(frames / profile.fps).toFixed(3)} 秒\n${destination}`);
   } finally {
-    try {
-      if (scratch && path.dirname(path.resolve(scratch)) === path.resolve(output) && path.basename(scratch).startsWith('.master-')) {
-        await rm(scratch, { recursive: true, force: true });
-      }
-    } finally {
-      await lock.close();
-      await unlink(lockPath);
-    }
+    await release();
   }
 }
 
 if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url) {
   try {
-    const args = process.argv.slice(2);
-    const workersArgument = args.find(arg => /^--workers=[1-6]$/u.test(arg));
-    const workers = Number(workersArgument?.split('=')[1] ?? 2);
-    if (args.length === 1 && args[0] === '--smoke') await smoke();
-    else if (!args.length || (args.length === 1 && workersArgument)) await buildMaster(workers);
-    else throw new Error('用法 node s1.1/scripts/build_master_all.mjs [--workers=1..6 | --smoke]');
+    const { values } = parseArgs({ options: {
+      profile: { type: 'string', default: DEFAULT_PROFILE },
+      workers: { type: 'string' },
+      force: { type: 'boolean' },
+      smoke: { type: 'boolean' },
+    } });
+    if (values.workers !== undefined && !/^[12]$/u.test(values.workers)) throw new Error('--workers 必须是 1 或 2');
+    if (values.smoke) await smoke(getRenderProfile(values.profile));
+    else await buildMaster(values.workers === undefined ? undefined : Number(values.workers), values.profile, values.force);
   } catch (error) {
     console.error(error.message);
     process.exitCode = 1;

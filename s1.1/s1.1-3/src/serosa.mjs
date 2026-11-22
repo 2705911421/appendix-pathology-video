@@ -149,7 +149,7 @@ function fibrin() {
 
 function pusCells() {
   const rand = mulberry32(17645);
-  const count = Math.round(phlegmon.serosalPus * .46);
+  const count = Math.round(phlegmon.serosalPus * .84);
   const anchor = [542, 460];
   const points = [anchor];
   const clusters = [[592,421,83,38],[715,492,87,56],[820,394,110,53],[946,562,104,96],
@@ -159,7 +159,7 @@ function pusCells() {
     const x = cx + (rand() + rand() - 1) * a * 1.55;
     const y = cy + (rand() + rand() - 1) * b * 1.28;
     if (inside(x, y, 14) && y > face(x) + 18
-      && points.every(([px, py]) => (x - px) ** 2 + (y - py) ** 2 >= 23 ** 2)) {
+      && points.every(([px, py]) => (x - px) ** 2 + (y - py) ** 2 >= 20 ** 2)) {
       points.push([x, y]);
     }
   }
@@ -200,7 +200,7 @@ function pusCells() {
     ctx.lineWidth = .69;
     ctx.stroke(wall);
     drawMicroNeutrophil(fragmentContext, x, y, 334 + i * 971, {
-      karyorrhexis: true, scale: diameter / 10.4, alpha: i % 7 === 4 ? .53 : .96,
+      karyorrhexis: true, scale: diameter / 9.6, alpha: i % 7 === 4 ? .64 : 1,
     });
     return { x: positionX, y: positionY, tx, ty,
       begins: .22 + .054 * (i % 8) + .018 * rand(), phase: 2 * Math.PI * rand() };
@@ -253,15 +253,15 @@ export function createSerosaDetail(pixelScale = 1) {
     { color: '#704451', head: 15, size: 3.8, seed: 28 });
   const calloutMesh = inkTrail('M1625 155 C1646 264 1612 413 1560 470 Q1507 524 1423 522',
     { color: '#87622C', head: 15, size: 3.8, seed: 64 });
-  const conclusion = [...'纤维素性脓性渗出物 —— 灰黄色的真正来源！'];
+  const conclude = inkTrail('M756 824 C900 818 1067 824 1204 821', { color: RED, size: 3.4, seed: 84 });
   const audit = { highPowerCells: pus.count, fibrinThreads: network.threads.length, highPowerLens: detailView };
   let threads;
   let washNode;
   let cellsCanvas;
   let labels;
-  let glyphs;
   let cellTrail;
   let meshTrail;
+  let conclusionTrail;
   return {
     audit,
     paint: `<defs>
@@ -279,12 +279,12 @@ export function createSerosaDetail(pixelScale = 1) {
       </g>
     </g>${rings}`,
     lettering: `
-      ${group('macro-pus-label', `<text class="note title" x="310" y="140" font-size="26" fill="#1F1C19">变性坏死的中性粒细胞（脓细胞）</text>
+      ${group('macro-pus-label', `<text class="note title" x="310" y="140" font-size="26" fill="#1F1C19">变性、坏死的中性粒细胞（脓细胞）</text>
         <g id="macro-pus-trail"></g>`)}
       ${group('macro-fibrin-label', `<text class="note title" x="1610" y="140" font-size="26" fill="#1F1C19">纤维素网</text>
         <g id="macro-mesh-trail"></g>`)}
-      ${group('macro-result', `<text class="note title" x="980" y="782" text-anchor="middle" font-size="32"
-        fill="${RED}">${conclusion.map(char => `<tspan opacity="0">${char}</tspan>`).join('')}</text>`)}`,
+      ${group('macro-result', `<text class="note title" x="980" y="806" text-anchor="middle" font-size="32"
+        fill="${RED}">纤维素性脓性渗出物 · 浆膜面呈灰黄色</text><g id="macro-underline"></g>`)}`,
     mount(art, lettering) {
       mountSurface(art, 'macro-muscle-wash', pigment.muscle);
       mountSurface(art, 'macro-watercolor', pigment.liquid);
@@ -295,19 +295,19 @@ export function createSerosaDetail(pixelScale = 1) {
         const strokes = [...node.querySelectorAll('path')];
         return { ...thread, node, strokes, length: strokes[0].getTotalLength() + 1 };
       });
-      labels = selectIds(lettering, ['macro-pus-label', 'macro-fibrin-label', 'macro-pus-trail', 'macro-mesh-trail']);
-      glyphs = [...lettering.querySelectorAll('#macro-result tspan')];
+      labels = selectIds(lettering, ['macro-pus-label', 'macro-fibrin-label', 'macro-pus-trail',
+        'macro-mesh-trail', 'macro-result', 'macro-underline']);
     },
-    update(_lettering, p) {
-      const diffusion = ramp(p, .07, .56);
+    update(_lettering, p, prime) {
+      const diffusion = lerp(.34 + .33 * prime, 1, ramp(p, .03, .56));
       washNode.setAttribute('opacity', diffusion);
       washNode.setAttribute('transform',
         `translate(${cx} 332) scale(${lerp(.65, 1, diffusion)} ${lerp(.24, 1, diffusion)}) translate(${-cx} -332)`);
       audit.visiblePus = pus.draw(cellsCanvas, p);
       let woven = 0;
-      for (const thread of threads) {
+      for (const [i, thread] of threads.entries()) {
         const { node, strokes, length, arrival, travel } = thread;
-        const f = ramp(p, arrival, arrival + travel);
+        const f = Math.max(i % 5 === 0 ? .73 * prime : 0, ramp(p, arrival, arrival + travel));
         if (f > 0) woven++;
         if (thread.previous === f) continue;
         node.setAttribute('opacity', f > 0 ? 1 : 0);
@@ -330,10 +330,14 @@ export function createSerosaDetail(pixelScale = 1) {
         labels['macro-mesh-trail'].innerHTML = calloutMesh(stopMesh);
         meshTrail = stopMesh;
       }
-      glyphs.forEach((glyph, i) => {
-        const first = .49 + .009 * i;
-        glyph.setAttribute('opacity', ramp(p, first, first + .067));
-      });
+      const result = ramp(p, .48, .60);
+      labels['macro-result'].setAttribute('opacity', result);
+      labels['macro-result'].setAttribute('transform', `translate(0 ${6 * (1 - result)})`);
+      const underline = ramp(p, .56, .97);
+      if (conclusionTrail !== underline) {
+        labels['macro-underline'].innerHTML = conclude(underline);
+        conclusionTrail = underline;
+      }
     },
   };
 }

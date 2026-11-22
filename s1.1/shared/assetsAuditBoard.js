@@ -8,14 +8,14 @@ const height = 1800;
 const margin = 72;
 const column = (width - margin * 2) / 5;
 const cases = [
-  { key: 'normal', label: '正常', color: '#A45C55', gross: '16.5 px · 纤细粉白', micro: '40 个隐窝 · 6 个淋巴滤泡' },
-  { key: 'simple', label: '单纯性', color: '#A93130', gross: '25.5 px · 浆膜血管充盈', micro: '216 个浅层中性粒细胞 · 肌层 4 个' },
-  { key: 'phlegmon', label: '化脓性', color: '#89621F', gross: '37.5 px · 厚壁、脓腔及粪石', micro: '858 个中性粒细胞 · 浆膜纤维素脓苔' },
+  { key: 'normal', label: '正常', color: '#A45C55', gross: '16.5 px · 纤细粉白', micro: '隐窝与淋巴滤泡' },
+  { key: 'simple', label: '单纯性', color: '#A93130', gross: '25.5 px · 浆膜血管充盈', micro: '中性粒细胞聚于浅层，肌层零星' },
+  { key: 'phlegmon', label: '化脓性', color: '#89621F', gross: '37.5 px · 厚壁、脓腔及粪石', micro: '中性粒细胞全层浸润 · 纤维素性脓性渗出' },
   { key: 'gangrene', label: '坏疽穿孔', color: '#572D38', gross: '40.5 px · 坏死与穿孔渗出', micro: '出血坏死、核溶解及全层裂隙' },
   { key: 'chronic', label: '慢性纤维化', color: '#8C5263', gross: '24.0 px · 短缩，横切面厚壁窄腔', micro: '层间胶原、淋巴细胞与浆细胞' },
 ];
 const notes = {
-  simple: '轻度增粗（>6 mm）· 薄壁强化 · 周围脂肪清晰',
+  simple: '轻度增粗 · 薄壁强化 · 周围脂肪清晰',
   phlegmon: '厚壁靶征 · 粪石 · 脂肪条索',
   gangrene: '壁强化中断 · 邻近脓肿与腔外气泡',
 };

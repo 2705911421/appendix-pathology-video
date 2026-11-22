@@ -106,7 +106,7 @@ function injury() {
     const ry = 1.2 + random() * .88;
     return i % 4 === 0 ? cellDot(0, 0, rx, ry, '#2B0F54', random() * 180)
       : fillPath(organic(0, 0, rx, ry, 291 + i * 17, .27, random(), 8), '#2B0F54', .93);
-  }, 148, -3);
+  }, 148, 4);
   const microbes = marks(15, (_, random) =>
     cellDot(0, 0, .77 + random() * .61, .51 + random() * .24, '#633357', random() * 165, .63), 134, -16);
   const detached = Array.from({ length: 11 }, (_, i) => {
@@ -114,7 +114,10 @@ function injury() {
     const shape = organic(0, 0, 3.5 + rand() * 5.3, 2 + rand() * 3.3, 442 + i * 29, .59, rand(), 10);
     return { x, lift: 0, detached: true, art: fillPath(shape, '#D67D96', .57) };
   });
-  return [...fibers, ...nuclei, ...microbes, ...detached];
+  const eosinDebris = marks(27, (i, random) =>
+    fillPath(organic(0, 0, 2 + random()*6, 1.1 + random()*2.5, 981+i*43, .48, random()*2.8, 9),
+      i%4 ? '#DFA5AE' : '#CE7A91', .72), 146, 7);
+  return [...eosinDebris, ...fibers, ...nuclei, ...microbes, ...detached];
 }
 
 function bloodWashes() {
@@ -163,7 +166,7 @@ function erythrocytes() {
     if (b >= 23) wash(organic(sx - 2, sy - 2, a * .50, b * .43, seed + 9, .2, angle),
       '#FFD5BA', 133, { bleed: .11, texture: .59, border: .38 });
   };
-  const tiled = displayDensity() > 1;
+  const tiled = displayDensity() !== 1;
   const atlas = tiled ? createSurface() : paintSurface(877, () => cells.forEach(paintCell));
   const ctx = logicalContext(atlas);
   if (tiled) {
@@ -287,17 +290,17 @@ function migrantPose(cell, movement, scale, prelude) {
   const release = ramp(departure, .03, .96);
   const xGap = junctions[cell.gap];
   const entrance = cell.initialX + 28 * prelude;
-  const crawl = Math.sin(release * Math.PI) * Math.sin(release * 16 + cell.seed);
-  const x = lerp(entrance, xGap, skim) + (cell.toX - xGap) * release + crawl * 9;
+  const crawl = Math.sin(release * Math.PI) * Math.sin(release * 8 + cell.seed);
+  const x = lerp(entrance, xGap, skim) + (cell.toX - xGap) * release + crawl * 5;
   const approachY = vesselAxis + (upper(x) - vesselAxis) * scale;
   const wallY = vesselAxis + (upper(xGap) - vesselAxis) * scale;
   const upright = Math.exp(-(((movement - cell.crossing) / .074) ** 2));
   const squeeze = Math.round(upright * 48) / 48;
   const yIn = approachY + scale * lerp(cell.depth, 14, reach) * (1 - crossing);
-  const yOut = wallY + (cell.toY - wallY) * (1 - (1 - departure) ** 2) + crawl * 5;
+  const yOut = wallY + (cell.toY - wallY) * (1 - (1 - departure) ** 2) + crawl * 3;
   return {
     squeeze, x, y: movement <= cell.crossing ? yIn : yOut,
-    angle: (1 - upright) * (21 * Math.sin(movement * 18 + cell.seed + prelude) - 13 * release),
+    angle: (1 - upright) * (13 * Math.sin(movement * 12 + cell.seed + prelude) - 13 * release),
     out: movement > cell.crossing && yOut < wallY - 28,
   };
 }
@@ -365,7 +368,7 @@ export function createVascularScene(entranceTime, pixelScale = 1) {
     paint,
     lettering: `
       ${group('s3-wound-label', '<text class="note title" x="220" y="148" font-size="32" fill="#1F1C19">黏膜破溃缺损 · 变质</text><g id="s3-wound-leader"></g>')}
-      ${group('s3-exudate-label', `<text class="note title" x="1360" y="148" font-size="32" fill="#1F1C19">白细胞游出 · <tspan fill="${RED}">渗出</tspan></text><g id="s3-exudate-leader"></g>`)}`,
+      ${group('s3-exudate-label', `<text class="note title" x="1310" y="148" font-size="31" fill="#1F1C19">中性粒细胞变形游出 · <tspan fill="${RED}">渗出</tspan></text><g id="s3-exudate-leader"></g>`)}`,
     mount(art, lettering) {
       mountSurface(art, 'wall-washes', washes);
       mountSurface(art, 's3-congestion', congestion);
@@ -433,7 +436,10 @@ export function createVascularScene(entranceTime, pixelScale = 1) {
       artNodes['s3-plasma'].setAttribute('transform', `translate(0 ${vesselAxis}) scale(1 ${spread}) translate(0 ${-vesselAxis})`);
       drawBlood(bloodCanvas, travel, expansion);
       const poses = migrants.map(cell => migrantPose(cell, movement, scale, isUlcer ? p : 1));
-      const opening = junctions.map((_, gap) => ramp(movement, .15, .29 + gap * .045));
+      const opening = junctions.map((_, gap) => Math.max(...migrants
+        .filter(cell => cell.gap === gap)
+        .map(({ crossing }) => ramp(movement, crossing - .085, crossing - .025)
+          * (1 - ramp(movement, crossing + .028, crossing + .090)))));
       wall.retract.forEach(({ id, far, length, gap }) => {
         const tip = 1 + (wall.halfGap - .24) * (1 - opening[gap]) / length;
         artNodes[id].setAttribute('transform', `translate(${far} 0) scale(${tip} 1) translate(${-far} 0)`);

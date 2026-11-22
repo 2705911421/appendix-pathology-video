@@ -1,5 +1,5 @@
 import { createIleocecalAsset, ILEOCECAL_BOX } from '../../shared/anatomyWatercolor.js';
-import { arrow, lerp, organic, pigment, washLayer } from '../../shared/canvasCore.js';
+import { arrow, organic, pigment, washLayer } from '../../shared/canvasCore.js';
 import { drawStageSwatch } from '../../shared/leftFloatNotes.js';
 import { axialComparison } from './ct-film.js';
 import { sheet } from './cue-sheet.js';
@@ -7,11 +7,11 @@ import { appear, CINNABAR, inkMask, label, penProgress, reveal, SOFT_INK } from 
 
 export const cases = [
   { stage: 'simple', title: '单纯性', colorName: '暗红', start: 0,
-    lines: ['轻度增粗阑尾（&gt;6 mm）· 薄壁轻度均匀强化', '周围脂肪间隙干净清晰'] },
+    lines: ['阑尾轻度增粗 · 薄壁轻度均匀强化', '周围脂肪间隙清晰'] },
   { stage: 'phlegmon', title: '化脓性', colorName: '灰黄', start: .33,
-    lines: ['显著增粗 · 双环靶征厚壁强化（内见偏心粪石）', '周围斑片状/絮状脂肪条索渗出'] },
-  { stage: 'gangrene', title: '坏疽性', colorName: '焦黑', start: .66,
-    lines: ['强化管壁局部中断缺损（提示壁坏死）', '邻近盲肠旁脓肿积液 + 4 枚腔外游离气泡'] },
+    lines: ['双环靶征 · 厚壁强化、偏心粪石', '周围非对称斑片状脂肪条索'] },
+  { stage: 'gangrene', title: '坏疽穿孔', colorName: '焦黑', start: .66,
+    lines: ['强化管壁局部缺损 · 提示坏死', '盲肠旁脓肿与腔外游离气泡'] },
 ];
 
 function specimen({ cx, cy, scale, ...appearance }) {
@@ -22,7 +22,7 @@ function specimen({ cx, cy, scale, ...appearance }) {
 }
 
 const steps = [916, 1120, 1324];
-const inactive = '#8A8278';
+const inactive = '#6D655B';
 const halfDissolve = .03;
 const gangreneStart = cases[2].start;
 const comparisonCue = sheet.cues.find(cue => cue.id === 'S21');
@@ -38,8 +38,8 @@ function studyAt(p) {
   return {
     current,
     weights: [1 - second, second - third, third],
-    noteOpacity: appear(p, start, start + .028) * opacity,
-    drawIn: appear(p, start, start + .060),
+    noteOpacity: (current === 0 ? .82 + .18 * appear(p, start, start + .028) : appear(p, start, start + .028)) * opacity,
+    drawIn: appear(p, start, start + .14),
   };
 }
 
@@ -51,7 +51,7 @@ export function comparisonScene(stage) {
     <g data-color-dots style="isolation:isolate">${swatches.map(({ paint }, i) => `<g data-color-dot="${i}" ${lighter}>${paint}</g>`).join('')}</g>
     <g style="isolation:isolate">${organs.map(({ paint }, i) => `<g data-gross-stage="${i}" ${lighter}>${paint}</g>`).join('')}</g>`);
   const type = stage.lettering(`
-    ${label('病理大体', 490, 217, { size: 26 })}
+    ${label('病理大体示意', 490, 217, { size: 26 })}
     ${label('→', 1018, 115, { size: 25, fill: inactive, weight: 550 })}
     ${label('→', 1222, 115, { size: 25, fill: inactive, weight: 550 })}
     ${cases.map(({ title, colorName }, i) => `<g data-step="${i}">
@@ -70,10 +70,6 @@ export function comparisonScene(stage) {
     const state = studyAt(p);
     const { current, weights, noteOpacity } = state;
     const duration = cue.end - cue.start;
-    const transfer = appear(p, .935, 1);
-    const fade = 1 - appear(p, .92, .985);
-    type.setAttribute('opacity', fade);
-    art.querySelector('[data-color-dots]').setAttribute('opacity', fade);
     for (const [index, heading] of headings.entries()) {
       const active = index === current;
       const weight = weights[index];
@@ -87,11 +83,9 @@ export function comparisonScene(stage) {
       heading.style.fontWeight = active ? '810' : '550';
     }
     if (weights[2]) {
-      const scale = lerp(1, .78 / .86, transfer);
-      groups[2].setAttribute('transform', `translate(${lerp(490, 875, transfer)} 465) scale(${scale}) translate(-490 -465)`);
-      organs[2].update(groups[2], { time: Math.max(0, p - gangreneStart) * duration, exudateBoost: lerp(1, 1.35, transfer) });
+      organs[2].update(groups[2], { time: Math.max(0, p - gangreneStart) * duration });
     }
-    updateCt({ ...state, elapsed: p * duration, visibility: fade });
+    updateCt({ ...state, elapsed: p * duration, visibility: 1 });
     const center = steps.reduce((value, x, i) => value + x * weights[i], 0);
     const span = 47 + 28 * appear(p, 0, .15) + 2.2 * Math.sin(p * Math.PI * 6);
     line.setAttribute('d', `M${center - span / 2} 128 Q${center} 123 ${center + span / 2} 127`);
@@ -127,16 +121,17 @@ export function treatmentScene(stage) {
     ${inkMask('s115-urgency-brush', [1093, 598, 730, 119], [['M1118 668 C1320 659 1577 654 1787 642', 82]])}
     <g data-urgency-wash mask="url(#s115-urgency-brush)">${conclusionWash()}</g>
     ${inkMask('s115-urgency-arrow', [1414, 397, 92, 116], [[arrowLine, 22], ['M1441 473 L1459 501 L1480 475', 27]])}
-    <g mask="url(#s115-urgency-arrow)">${arrow(arrowLine, { color: CINNABAR, size: 13, head: 30 })}</g>`);
+    <g mask="url(#s115-urgency-arrow)">${arrow(arrowLine, { color: CINNABAR, size: 8.5, head: 23 })}</g>`);
 
   const type = stage.lettering(`
-    <g data-treatment-heading>${label('临床医生最核心关注：', center, 265, { size: 28, fill: SOFT_INK, weight: 620 })}</g>
-    <g data-treatment-question>${label('当前属于哪一型？是否已化脓、坏疽或穿孔？', center, 335, { size: 32 })}</g>
-    <g data-urgency="0">${label('直接决定治疗紧迫性 ——', center, 575, { size: 34, fill: CINNABAR, weight: 810 })}</g>
-    <g data-urgency="1">${label('蜂窝织炎性、坏疽性阑尾炎需尽早手术切除！', center, 672,
-      { size: 36, fill: '#B82018', weight: 810, fit: 680 })}</g>
-    <g data-specimen-label="0">${label('蜂窝织炎性（灰黄）', 520, 714, { size: 26 })}</g>
-    <g data-specimen-label="1">${label('坏疽性（焦黑）', 875, 714, { size: 26 })}</g>`);
+    <g data-treatment-heading>${label('先评估有无坏疽、穿孔或腹膜炎', center, 265, { size: 29, fill: SOFT_INK, weight: 620 })}</g>
+    <g data-treatment-question>${label('怀疑坏疽或穿孔 · 尽快外科评估', center, 335, { size: 34 })}</g>
+    <g data-urgency="0">${label('弥漫性腹膜炎 · 通常需紧急手术', center, 575,
+      { size: 32, fill: CINNABAR, weight: 810 })}</g>
+    <g data-urgency="1">${label('局限性脓肿 · 可先抗感染，必要时引流', center, 672,
+      { size: 29, fill: '#4E4137', weight: 690, fit: 680 })}</g>
+    <g data-specimen-label="0">${label('化脓性（灰黄）', 520, 714, { size: 26 })}</g>
+    <g data-specimen-label="1">${label('坏疽穿孔（焦黑）', 875, 714, { size: 26 })}</g>`);
 
   const views = [...art.querySelectorAll('[data-specimen]')];
   specimens.forEach((organ, i) => organ.mount(views[i]));
@@ -151,18 +146,17 @@ export function treatmentScene(stage) {
 
   return (p, cue) => {
     const elapsed = p * (cue.end - cue.start);
-    const enter = appear(p, .015, .22);
-    reveal(views[0], enter, 17);
-    reveal(labels[0], enter, 0);
-    reveal(labels[1], appear(p, .02, .20), 0);
+    reveal(views[0], 1, 17);
+    reveal(labels[0], 1, 0);
+    reveal(labels[1], 1, 0);
     specimens[1].update(views[1], { time: carryTime + elapsed });
     warning.setAttribute('opacity', (.068 + .032 * Math.sin(elapsed * 1.99)) * appear(p, .06, .25));
-    reveal(heading, appear(p, .055, .22), 0);
-    reveal(question, appear(p, .19, .38), 0);
+    reveal(heading, .9 + .1 * appear(elapsed, 0, .15), 5);
+    reveal(question, appear(p, .18, .28), 6);
     penProgress(shaft, appear(p, .34, .51));
     penProgress(arrowHead, appear(p, .47, .57));
-    penProgress(washTrace, appear(p, .50, .76));
-    reveal(wash, .16 * appear(p, .50, .62), 0);
-    for (const [i, phrase] of phrases.entries()) reveal(phrase, appear(p, .49 + .08 * i, .63 + .08 * i), 0);
+    penProgress(washTrace, appear(p, .62, .97));
+    reveal(wash, .16 * appear(p, .64, .87), 0);
+    for (const [i, phrase] of phrases.entries()) reveal(phrase, appear(p, .45 + .20 * i, .55 + .20 * i), 6);
   };
 }

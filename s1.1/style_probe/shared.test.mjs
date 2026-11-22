@@ -19,7 +19,9 @@ test('subtitle pages split at punctuation and keep the highlighted text on one l
   const after = storySubtitleAt(subtitles, subtitles.breakAt);
   assert.equal(before.page, subtitles.pages[0]);
   assert.equal(after.page, subtitles.pages[1]);
-  assert.ok(before.opacity < .16 && after.opacity < .16);
+  assert.equal(before.opacity, 1);
+  assert.ok(after.opacity >= .90 && after.offset <= 3);
+  assert.equal(storySubtitleAt(subtitles, subtitles.breakAt + .03).offset, 0);
 });
 
 test('the subtitle boundary counts Unicode characters and keeps exactly two pages past 22', () => {
@@ -49,15 +51,18 @@ function sheets() {
   }));
 }
 
-test('six cue sheets must provide exactly 9,000 continuous picture frames', () => {
+test('six cue sheets accept an elastic duration and still cover every picture frame', () => {
   const input = sheets();
   const film = validateFilmCues(input.toReversed());
   assert.equal(film.duration, 300);
   assert.equal(film.frames, 9000);
   assert.deepEqual(film.sections.at(-1), { module: 's1.1-6', startFrame: 7500, endFrame: 9000 });
   input[0].duration += 1 / 30;
-  input[0].cues[1].end += 1 / 30;
-  assert.throws(() => validateFilmCues(input), /9000 frames/);
+  input[0].cues.push({ id: 'B01', type: 'bridge', start: 50, end: 50 + 1 / 30 });
+  assert.equal(validateFilmCues(input).frames, 9001);
+  input[0].cues.at(-1).zh = '桥段有字幕';
+  assert.throws(() => validateFilmCues(input), /Silent cue/);
+  delete input[0].cues.at(-1).zh;
   input[0].cues[1].start += 1 / 30;
   assert.throws(() => validateFilmCues(input), /continuously/);
   input[0].cues[1].start += .001;

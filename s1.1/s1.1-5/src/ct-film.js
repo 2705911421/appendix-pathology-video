@@ -1,16 +1,24 @@
 import { NS } from '../../shared/canvasCore.js';
 import { createCTAsset, CT_ROI, CT_ZOOM } from '../../shared/ctRenderer.js';
+import { CT } from '../../shared/detail/ct.js';
 import { appear, label, penProgress } from './scene-tools.js';
 
-export const mainBox = Object.freeze({ x: 800, y: 245, width: 520, height: 400 });
-export const zoomBox = Object.freeze({ x: 1365, y: 245, width: 445, height: 400 });
-const ink = '#BB4136';
-const connectorInk = '#C9473B';
-const noteX = 1135;
+const filmScale = 570 / CT.width;
+export const mainBox = Object.freeze({ x: 776, y: 244, width: CT.width * filmScale, height: CT.height * filmScale });
+const zoomHeight = CT_ROI.height * CT_ZOOM * filmScale;
+export const zoomBox = Object.freeze({
+  x: 1430, y: mainBox.y + (mainBox.height - zoomHeight) / 2,
+  width: CT_ROI.width * CT_ZOOM * filmScale, height: zoomHeight,
+});
+const ink = '#A24336';
+const connectorInk = '#AF4E43';
+const noteX = 1000;
+const mainBottom = mainBox.y + mainBox.height;
+const zoomBottom = zoomBox.y + zoomBox.height;
 const anchors = [
-  [[193, 155], [238, 197]],
-  [[185, 147], [229, 169]],
-  [[201, 155], [262, 162]],
+  [[193, 147], [238, 197]],
+  [[175, 130], [229, 169]],
+  [[201, 155], [264, 165]],
 ];
 
 function place(source, box) {
@@ -78,19 +86,27 @@ function zoomPoint([x, y]) {
     zoomBox.y + y * zoomBox.height / Math.round(CT_ROI.height * CT_ZOOM)];
 }
 
+function lowerLeader(anchor, end) {
+  const [x, y] = zoomPoint(anchor);
+  const edge = Math.round(zoomBox.x + zoomBox.width + 16);
+  return `M${x} ${y} C${x + 46} ${y + 12} ${edge} ${zoomBottom - 18} ${edge} ${zoomBottom + 20}
+    V789 Q${edge} 802 ${edge - 13} 802 H${end}`;
+}
+
 function leaderGroup(index, lines) {
   const [[ax, ay], [bx, by]] = anchors[index].map(zoomPoint);
-  const one = `M${ax} ${ay} L1423 653 L1110 703 V741 H1124`;
-  const two = `M${bx} ${by} L1790 621 V797`;
+  const one = `M${ax} ${ay} C${ax - 25} ${ay + 36} 1483 ${zoomBottom + 16} 1410 ${mainBottom + 17}
+    C1366 ${mainBottom + 39} 1150 704 995 704 Q973 704 973 726 V734 Q973 741 983 741`;
+  const two = lowerLeader(anchors[index][1], 1410);
   return `<g data-ct-notes="${index}">
-    <g fill="none" stroke="${ink}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round">
+    <g fill="none" stroke="${ink}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round">
       <path data-ct-line="0" d="${one}" pathLength="1" stroke-dasharray="1"/>
       <path data-ct-line="1" d="${two}" pathLength="1" stroke-dasharray="1"/>
       <circle cx="${ax}" cy="${ay}" r="2.8" fill="${ink}" stroke="none"/>
       <circle cx="${bx}" cy="${by}" r="2.8" fill="${ink}" stroke="none"/>
     </g>
-    ${label(lines[0], noteX, 750, { size: 28, anchor: 'start' })}
-    ${label(lines[1], noteX, 806, { size: 28, anchor: 'start' })}
+    ${label(lines[0], noteX, 751, { size: 29, anchor: 'start' })}
+    ${label(lines[1], noteX, 811, { size: 29, anchor: 'start' })}
   </g>`;
 }
 
@@ -104,6 +120,8 @@ export function axialComparison(stage, cases) {
   const studies = assets.map(asset => nativeStudy(art.ownerDocument, asset));
   const fossa = blendCanvases(studies.map(study => study.fossa));
   const closeup = blendCanvases(studies.map(study => study.zoom));
+  fossa.placeholder.setAttribute('data-ct-scan', 'fossa');
+  closeup.placeholder.setAttribute('data-ct-scan', 'inset');
   const { axial, roi, outline } = studies[0];
   const main = place(assets[0].main, mainBox);
   const inset = place(assets[0].zoom, zoomBox);
@@ -112,7 +130,8 @@ export function axialComparison(stage, cases) {
   panel(art, inset, closeup.placeholder, outline);
   const type = stage.lettering(`
     <g data-ct-guides fill="none" stroke="${connectorInk}" stroke-width="2.4" stroke-dasharray="7 6"><path/><path/></g>
-    ${label('轴位 CT · 右髂窝（图像左侧 R 为患者右侧）', 1305, 196, { size: 25 })}
+    ${label('增强轴位 CT 示意 · 图像左侧 R 为患者右侧', 1260, 190, { size: 25 })}
+    ${label('影像辅助判断严重程度 · 亚型由病理判定', 1260, 222, { size: 21, weight: 550 })}
     <g data-ct-orientation>${assets[0].lettering}</g>
     ${cases.map(({ lines }, i) => leaderGroup(i, lines)).join('')}`);
 
@@ -152,16 +171,16 @@ export function axialComparison(stage, cases) {
     roi.setAttribute('opacity', .86 + .12 * breath);
     const [rx, top] = main.point(center[0] + pulse * CT_ROI.width / 2, center[1] - pulse * CT_ROI.height / 2);
     const [, bottom] = main.point(center[0] + pulse * CT_ROI.width / 2, center[1] + pulse * CT_ROI.height / 2);
-    upperTrace.setAttribute('d', `M${rx} ${top} L1320 333 L1364 289`);
-    lowerTrace.setAttribute('d', `M${rx} ${bottom} L1320 566 L1364 605`);
-    guide.setAttribute('stroke-dashoffset', -((elapsed * 13) % 13));
-    guide.setAttribute('opacity', .73 + .13 * breath);
+    upperTrace.setAttribute('d', `M${rx} ${top} L${zoomBox.x} ${zoomBox.y + 13}`);
+    lowerTrace.setAttribute('d', `M${rx} ${bottom} L${zoomBox.x} ${zoomBox.y + zoomBox.height - 13}`);
+    guide.setAttribute('stroke-dashoffset', -(2.8 * elapsed % 13));
+    guide.setAttribute('opacity', .72 + .06 * breath);
 
     notes.forEach((group, i) => group.toggleAttribute('hidden', i !== current));
     const [wall, surrounding] = paths[current];
     if (!drawnGeometry.has(current)) {
-      const end = Math.min(1781, noteX + lowerLabels[current].getComputedTextLength() + 14);
-      surrounding.setAttribute('d', `M${zoomPoint(anchors[current][1]).join(' ')} L1790 621 V797 H${end}`);
+      const end = Math.min(zoomBox.x + zoomBox.width, noteX + lowerLabels[current].getComputedTextLength() + 17);
+      surrounding.setAttribute('d', lowerLeader(anchors[current][1], end));
       drawnGeometry.add(current);
     }
     notes[current].setAttribute('opacity', noteOpacity);

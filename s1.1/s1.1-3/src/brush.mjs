@@ -52,7 +52,7 @@ export function paintSurface(seed, paint, [x, y, width, height] = [0, 0, WIDTH, 
   brush.render();
   const canvas = createRaster(width, height);
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
-  ctx.drawImage(brushTarget, 0, 0);
+  ctx.drawImage(brushTarget, 0, 0, canvas.width, canvas.height);
   const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const rgba = pixels.data;
   for (let i = 0; i < rgba.length; i += 4) {

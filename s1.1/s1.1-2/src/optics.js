@@ -1,13 +1,14 @@
 import flubber from 'flubber';
 import { ellipse, lerp, mulberry32, organic, samplePath } from '../../shared/canvasCore.js';
 import { createHistologyAsset, HISTOLOGY_DIAMETER } from '../../shared/histologyProcedural.js';
+import { HANDOFF_SLIDE_SEED } from '../../shared/detail/microscopeHandoff.js';
 import { phase } from '../../shared/timelineHelper.js';
+import { MICROSCOPE_HANDOFF } from '../../shared/transitionAnchors.js';
 import { calls, circle, dotted, fill, glaze, ink, liveLayer, roughCircle, stroke, watercolor } from './brushwork.js';
 import { mountSurface } from './gross.js';
 
 export const MAGNIFIER = Object.freeze({ x: 1590, y: 275, radius: 142, labelTop: 460 });
-export const MICROSCOPE = Object.freeze({ x: 1040, y: 465, radius: 290 });
-export const MICROSCOPE_IN = .65;
+export const MICROSCOPE = Object.freeze({ x: MICROSCOPE_HANDOFF.cx, y: MICROSCOPE_HANDOFF.cy, radius: MICROSCOPE_HANDOFF.radius });
 
 const serosalTrunks = [
   'M-166 96 C-125 89 -119 53 -78 50 C-36 49 -35 9 4 3 C45 -3 47 -42 92 -53 Q127 -61 165 -92',
@@ -119,8 +120,8 @@ export function createMagnifier() {
     ctx.translate(x, y);
     ctx.scale(r / radius, r / radius);
     glaze(ctx, pigment);
-    const pulse = Math.sin(time * 5.0);
-    ctx.scale(1 + .019 * pulse, 1 + .014 * pulse);
+    const pulse = Math.sin(time * 3.1);
+    ctx.scale(1 + .008 * pulse, 1 + .006 * pulse);
     glaze(ctx, tree);
     ctx.restore();
     roughCircle(ctx, x, y, r * 2 - 3.1, '#5C372E', 2.7, 4236);
@@ -165,18 +166,18 @@ export function createMicroscope() {
   const { outline, art } = crossSection(x, y);
   const toCircle = flubber.toCircle(outline, x, y, radius, { maxSegmentLength: 5 });
   calls.toCircle++;
-  const slide = createHistologyAsset({ id: 's12-phlegmon-he', stage: 'phlegmon' });
+  const slide = createHistologyAsset({ id: 's12-phlegmon-he', stage: MICROSCOPE_HANDOFF.mode, seed: HANDOFF_SLIDE_SEED });
   const tissue = mountSurface(slide);
   const final = ellipse(x, y, radius, radius);
   return {
     recipe: slide.recipe,
     draw(ctx, p, origin) {
-      if (p <= MICROSCOPE_IN) return null;
-      const flight = phase(p, MICROSCOPE_IN, .955);
-      const growth = phase(p, MICROSCOPE_IN, 1);
-      const reveal = phase(p, MICROSCOPE_IN, .699);
-      const histology = phase(p, .786, .984);
-      const magnification = lerp(1, 1.19, phase(p, .835, 1));
+      if (p <= 0) return null;
+      const flight = phase(p, .25, .76);
+      const growth = phase(p, .25, .76);
+      const reveal = phase(p, .02, .25);
+      const histology = phase(p, .40, .75);
+      const magnification = 1 + .030 * phase(p, .47, .60) * (1 - phase(p, .60, .75));
       const dx = (origin.x - x) * (1 - flight);
       const dy = (origin.y - y) * (1 - flight) - 17 * Math.sin(Math.PI * flight);
       const d = growth >= 1 ? final : toCircle(growth);
@@ -202,7 +203,7 @@ export function createMicroscope() {
       ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
       ctx.drawImage(tissue, x - field / 2 - (magnification - 1) * 27, y - field / 2, field, field);
       ctx.restore();
-      const rim = phase(p, .914, 1);
+      const rim = phase(p, .62, .76);
       stroke(ctx, aperture, '#69483C', 2.6 + histology * 2.7, 1 - .73 * rim);
       ctx.globalAlpha *= rim;
       roughCircle(ctx, x, y, radius * 2 + 10, '#483536', 4.2, 17057);

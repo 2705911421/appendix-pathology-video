@@ -4,7 +4,7 @@ import path from 'node:path';
 
 const sharedModules = new Set([
   'canvasCore.js', 'timelineHelper.js', 'leftFloatNotes.js', 'anatomyWatercolor.js', 'histologyProcedural.js',
-  'detail/raster.js', 'renderProfile.js',
+  'detail/bridgePlates.js', 'detail/raster.js', 'detail/transitionPaper.js', 'renderProfile.js', 'transitionAnchors.js',
 ]);
 
 async function sources(directory) {
@@ -106,17 +106,17 @@ export async function auditMotion(page, cues) {
     at('S15', .42);
     const grownScale = transform('s15-simple-reveal', 1).a;
     const thirdLater = amount('s15-gangrene-reveal');
-    at('S15', .62);
+    at('S15', .42);
     const firstDash = Number(get('s15-control-trace').getAttribute('stroke-dashoffset'));
     at('S15', .91);
     const finishedDash = Number(get('s15-control-trace').getAttribute('stroke-dashoffset'));
 
-    at('S16', .08);
+    at('S16', .001);
     const firstZoom = transform('s16-field', 1).a;
-    const initialCarry = amount('s16-carry-phlegmon-reveal');
-    at('S16', .29);
+    const fieldVisible = !get('s16-field').hasAttribute('opacity') || amount('s16-field') >= .90;
+    const { start: lensStart, end: lensEnd } = timeline.find(cue => cue.id === 'S16');
+    at('S16', .15 / (lensEnd - lensStart));
     const pushedZoom = transform('s16-field', 1).a;
-    const finalCarry = amount('s16-carry-phlegmon-reveal');
     at('S16', .86);
     const leaders = ['s16-upper', 's16-lower'].map(id => {
       const path = get(`${id}-trace`);
@@ -152,8 +152,8 @@ export async function auditMotion(page, cues) {
     const leakTangent = tangencies('S18', 's18-inset');
 
     return {
-      s15: earlyScale < grownScale && thirdInitially === 0 && thirdLater > .9 && firstDash > finishedDash && finishedDash === 0,
-      s16: firstZoom < pushedZoom && initialCarry > finalCarry && finalCarry === 0 && braces.every(w => w === 1),
+      s15: earlyScale === 1 && grownScale === 1 && thirdInitially === 0 && thirdLater > .9 && firstDash > finishedDash && finishedDash === 0,
+      s16: firstZoom >= .98 && firstZoom < pushedZoom && Math.abs(pushedZoom - 1) < .001 && fieldVisible && braces.every(w => w === 1),
       leaders, muscle, shallow,
       s17: earlyCell < laterCell && earlyClot < grownClot && earlyQueue < filledQueue && drained === 0 && initialTangent && finalTangent,
       s18: startFront < laterFront && startMist < laterMist && earlyTear && leakTangent,
@@ -162,5 +162,5 @@ export async function auditMotion(page, cues) {
   assert.deepEqual(evidence, {
     s15: true, s16: true, leaders: [[405, 405], [605, 605]], muscle: 4, shallow: 228, s17: true, s18: true,
   });
-  console.log('[PASS] 连续动作检查：接力微扩、光镜推进、双平行引线、红细胞向右与淤积、血栓增厚、坏死推进与渗液下漂');
+  console.log('[PASS] 连续动作检查：演变路线、光镜入场、分层引线、红细胞向右与淤积、血栓增厚、坏死推进与渗液下漂');
 }

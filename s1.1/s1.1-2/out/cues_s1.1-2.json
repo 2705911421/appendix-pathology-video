@@ -3,35 +3,62 @@
   "width": 1920,
   "height": 1080,
   "fps": 30,
-  "duration": 45,
+  "duration": 39.1,
   "cues": [
     {
       "id": "S06",
-      "defaultDuration": 9.5,
-      "zhText": "平时藏在盲肠盲端的阑尾，只是一根粉白细长、柔软安静的小盲管，和你的小指差不多粗细。",
-      "highlightZh": ["盲肠盲端", "粉白细长"],
-      "enText": "Usually tucked beneath the cecum, the appendix is a pale-pink, slender blind tube about the width of your pinky."
+      "type": "speech",
+      "defaultDuration": 8,
+      "zhText": "正常阑尾起自盲肠后内侧，是一根粉白、细长的盲管，通常只有几毫米粗。",
+      "highlightZh": [
+        "盲肠后内侧",
+        "粉白",
+        "细长的盲管"
+      ],
+      "enText": "The normal appendix arises from the posteromedial cecum. It is a slender, pale-pink, blind-ended tube, usually only a few millimeters across."
     },
     {
       "id": "S07",
-      "defaultDuration": 11.0,
-      "zhText": "可急诊手术台取出的这一根，早就变了模样：它肿胀增粗、通体暗红，浆膜上的血管像愤怒的蛛网一样剧烈扩张充血。",
-      "highlightZh": ["肿胀增粗", "通体暗红", "扩张充血"],
-      "enText": "Yet the resected one is transformed: swollen and dark red, with serosal vessels fiercely engorged like angry webs."
+      "type": "speech",
+      "defaultDuration": 7.5,
+      "zhText": "术中看到的阑尾肿胀增粗、通体暗红，浆膜血管扩张充血。",
+      "highlightZh": [
+        "肿胀增粗",
+        "通体暗红",
+        "扩张充血"
+      ],
+      "enText": "At surgery, the appendix is swollen and dark red, with dilated, congested serosal vessels."
     },
     {
       "id": "S08",
-      "defaultDuration": 11.5,
-      "zhText": "把镜头再推近一点，暗红表面还裹着一层醒目的灰黄色脓苔——这正是急性化脓性，也就是蜂窝织炎性阑尾炎的标志。",
-      "highlightZh": ["灰黄色脓苔", "蜂窝织炎性阑尾炎"],
-      "enText": "Zooming closer, a striking grayish-yellow purulent coat wraps the dark-red wall—the hallmark of acute phlegmonous appendicitis."
+      "type": "speech",
+      "defaultDuration": 9.4,
+      "zhText": "暗红的浆膜面还覆有灰黄色脓苔，提示急性化脓性阑尾炎，也叫蜂窝织炎性阑尾炎。",
+      "highlightZh": [
+        "灰黄色脓苔",
+        "化脓性阑尾炎",
+        "蜂窝织炎性阑尾炎"
+      ],
+      "enText": "The dark-red serosa bears a grayish-yellow purulent coating, suggesting acute suppurative, or phlegmonous, appendicitis."
     },
     {
       "id": "S09",
-      "defaultDuration": 13.0,
-      "zhText": "沿着虚线轻轻切开，狭小的管腔里早已灌满黄红色脓液，有时还能找到堵死出口的粪石。让我们钻进显微镜，看看微观世界发生了什么。",
-      "highlightZh": ["黄红色脓液", "粪石", "显微镜"],
-      "enText": "Slicing along the dotted line reveals yellow-red pus filling the lumen, sometimes with an obstructing fecalith. Let's step under the microscope."
+      "type": "speech",
+      "defaultDuration": 11.7,
+      "zhText": "沿虚线纵切，见水肿增厚的管壁和积脓的窄腔。有时可见阻塞管腔的粪石。再到镜下看看。",
+      "highlightZh": [
+        "水肿增厚",
+        "积脓",
+        "粪石"
+      ],
+      "enText": "The cut along the dashed line exposes an edematous, thick wall and a narrow, pus-filled lumen. An obstructing fecalith may be present. Let's look under the microscope."
+    },
+    {
+      "id": "B03",
+      "type": "bridge",
+      "duration": 2.5,
+      "start": 36.6,
+      "end": 39.1
     }
   ]
 }

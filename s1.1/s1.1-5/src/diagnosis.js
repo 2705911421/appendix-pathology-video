@@ -1,7 +1,6 @@
 import {
   cellDot, clamp, fillPath, ink, inkLines, organic, pencil, pigment, roughProp, washLayer,
 } from '../../shared/canvasCore.js';
-import { drawStageDots } from '../../shared/leftFloatNotes.js';
 import { logicalContext, sizeRaster } from '../../shared/detail/raster.js';
 import { drawMinimalDoctor } from '../../shared/minimalistCharacters.js';
 import { appear, CINNABAR, inkMask, label, penProgress, reveal } from './scene-tools.js';
@@ -13,6 +12,7 @@ const loadedAngle = -11;
 const radians = angle => angle * Math.PI / 180;
 const arms = [-230, 240].map(x => x / Math.cos(radians(loadedAngle)));
 const suspension = 477 - 17 - pivot.y - arms[0] * Math.sin(radians(loadedAngle));
+const panLabels = [{ x: 1115, bottom: 477 }, { x: 1585, bottom: 400 }];
 const beamPath = `M${arms[0]} 0 Q-151 -3 -83 -5 Q-35 -9 0 -13 Q53 -9 101 -5 Q176 -3 ${arms[1]} 0`;
 
 function stand() {
@@ -94,14 +94,14 @@ export function diagnosisScene(stage) {
   const pans = [pan(115, true), pan(105, false)];
   const hub = cellDot(0, 0, 18, 18, '#E5D2B0')
     + roughProp('ellipse', [0, 0, 36, 36], 721, '#665243', 3.7, .29) + cellDot(0, 0, 5.5, 5.5, '#88725C');
-  const miniature = `<g transform="translate(185 366) scale(.255)" opacity=".59">${base}
+  const miniature = `<g data-entry-part="icon" transform="translate(185 296) scale(.255)" opacity=".59">${base}
     <g transform="rotate(${loadedAngle})">${crossbar}</g>
     ${arms.map((arm, i) => `<g transform="translate(${bearing(arm, loadedAngle).join(' ')})">${pans[i]}</g>`).join('')}
     ${hub}</g>`;
-  const dots = drawStageDots({ y: 487, showStatus: false });
   const art = stage.paint(`
     <g data-diagnosis-figures>
-      ${miniature}<g opacity=".53">${dots.paint}</g>
+      ${miniature}
+      <g data-entry-part="subject">
       <foreignObject data-doctor x="${doctorBox.x}" y="${doctorBox.y}" width="${doctorBox.width}" height="${doctorBox.height}">
         <canvas xmlns="http://www.w3.org/1999/xhtml" width="${doctorBox.width}" height="${doctorBox.height}" style="display:block"></canvas>
       </foreignObject>
@@ -110,29 +110,30 @@ export function diagnosisScene(stage) {
         <g data-beam>${crossbar}</g><g data-pan="left">${pans[0]}</g>
         <g data-pan="right"><g data-ct-weight>${scanner()}</g>${pans[1]}</g>${hub}
       </g>
+      </g>
     </g>
     ${inkMask('s115-stat-brush', [990, 638, 760, 112], [['M1018 711 C1209 683 1447 699 1710 678', 80]])}
     <g data-stat-wash mask="url(#s115-stat-brush)">${statisticWash()}</g>`);
 
   const type = stage.lettering(`
-    <g data-diagnosis-notes>
-      <g data-question>${label('术前怎样判断？', 1120, 110, { size: 34 })}</g>
+    <g data-diagnosis-notes data-entry-part="subject">
+      <g data-question>${label('怀疑急性阑尾炎，先做什么？', 1120, 110, { size: 34 })}</g>
       <g data-clinical-caption>
-        <g data-symptoms>${label('典型症状（转移性右下腹痛）', 1115, 515, { size: 25 })}</g>
-        <g data-exam>${label('+ 体格检查（麦氏点压痛、反跳痛）', 1115, 549, { size: 25, fit: 368 })}</g>
+        <g data-symptoms>${label('典型症状（转移性右下腹痛）', 1115, 526, { size: 26 })}</g>
+        <g data-exam>${label('+ 体格检查（麦氏点压痛、反跳痛）', 1115, 562, { size: 25, fit: 368 })}</g>
+        <g data-labs>${label('+ 化验结果', 1115, 598, { size: 24, weight: 570 })}</g>
       </g>
       <g data-ct-caption>
-        ${label('CT 检查', 1585, 440, { size: 25, fill: CINNABAR })}
-        ${label('（重要辅助工具，非人人必做）', 1585, 472, { size: 22, fill: '#3E3934', weight: 550 })}
+        ${label('CT 检查', 1585, 450, { size: 26, fill: CINNABAR })}
+        ${label('（重要辅助工具，非人人必做）', 1585, 484, { size: 24, fill: '#5C564E', weight: 600 })}
       </g>
     </g>
     <g data-stat>${label(`多层螺旋 CT 诊断敏感度 <tspan font-size="56" fill="${CINNABAR}" font-weight="820">&gt; 93%</tspan>`,
-      1365, 695, { size: 30 })}</g>`);
+      1365, 695, { size: 30 })}</g>
+    <g data-stat-scope>${label('成人疑似急性阑尾炎 · 文献汇总', 1365, 746, { size: 22, weight: 550 })}</g>`);
 
   const doctor = art.querySelector('[data-doctor]');
   const doctorCtx = logicalContext(sizeRaster(doctor.firstElementChild, doctorBox.width, doctorBox.height));
-  const figures = art.querySelector('[data-diagnosis-figures]');
-  const notes = type.querySelector('[data-diagnosis-notes]');
   const scale = art.querySelector('[data-scale]');
   const wash = art.querySelector('[data-clinical-wash]');
   const beamGroup = art.querySelector('[data-beam]');
@@ -141,51 +142,51 @@ export function diagnosisScene(stage) {
   const statBrush = art.querySelector('#s115-stat-brush path');
   const statWash = art.querySelector('[data-stat-wash]');
   const question = type.querySelector('[data-question]');
+  const clinicalCaption = type.querySelector('[data-clinical-caption]');
   const symptoms = type.querySelector('[data-symptoms]');
   const exam = type.querySelector('[data-exam]');
+  const labs = type.querySelector('[data-labs]');
   const auxiliary = type.querySelector('[data-ct-caption]');
   const stat = type.querySelector('[data-stat]');
+  const statScope = type.querySelector('[data-stat-scope]');
 
   return (p, cue) => {
     const second = cue.id === 'S20';
     const opening = second ? 1 : p;
     const clinical = appear(opening, .20, .57);
-    const ct = second ? appear(p, .075, .40) : 0;
-    const statistic = second ? appear(p, .45, .90) : 0;
-    const exit = second ? 1 - appear(p, .90, 1) : 1;
-    const statExit = second ? 1 - appear(p, .95, 1) : 1;
-    const angle = second ? loadedAngle + 4 * settle(p, .20, .40) : loadedAngle * settle(p, .08, .76);
-    const landed = second ? appear(p, .05, .235) : 0;
-    const seconds = cue.start + (cue.end - cue.start) * p;
+    const elapsed = (cue.end - cue.start) * p;
+    const ct = second ? .88 + .12 * appear(elapsed, 0, .15) : 0;
+    const statistic = second ? appear(p, .43, .79) : 0;
+    const angle = second ? loadedAngle + 4 * settle(p, .035, .35) : loadedAngle * settle(p, 0, .70);
+    const landed = appear(elapsed, 0, .15);
+    const seconds = cue.start + elapsed;
     doctorCtx.clearRect(0, 0, doctorBox.width, doctorBox.height);
     drawMinimalDoctor(doctorCtx, { x: 595 - doctorBox.x, y: 224 - doctorBox.y, scale: 2.04,
       pose: 'explain', breathPhase: seconds * 2 * Math.PI / 3.85, nod: .58 });
-    figures.setAttribute('opacity', exit);
-    notes.setAttribute('opacity', exit);
-    reveal(doctor, appear(opening, 0, .22), 18);
-    const structure = appear(opening, .025, .22);
-    scale.setAttribute('opacity', structure);
+    reveal(doctor, 1, 18);
+    scale.setAttribute('opacity', 1);
     beamGroup.setAttribute('transform', `rotate(${angle})`);
-    arms.forEach((arm, i) => {
-      const [x, y] = bearing(arm, angle);
+    const positions = arms.map(arm => bearing(arm, angle));
+    [clinicalCaption, auxiliary].forEach((caption, i) => {
+      const [x, y] = positions[i];
+      const { x: baselineX, bottom } = panLabels[i];
+      const panBottom = pivot.y + y + suspension + 17;
       panGroups[i].setAttribute('transform', `translate(${x} ${y})`);
+      caption.setAttribute('transform', `translate(${pivot.x + x - baselineX} ${panBottom - bottom})`);
     });
-    const [x, y] = bearing(arms[0], angle);
+    const [x, y] = positions[0];
     wash.setAttribute('transform', `translate(${pivot.x + x - 1115} ${pivot.y + y + suspension - 460})`);
-    wash.setAttribute('opacity', .20 * clinical);
-    weight.setAttribute('transform', `translate(0 ${suspension - 48 * (1 - landed) - 5 * pulses(p)})`);
-    weight.setAttribute('opacity', second ? appear(p, .05, .16) : 0);
-    reveal(question, appear(opening, .045, .25), 0);
-    reveal(symptoms, appear(opening, .31, .52), 0);
-    reveal(exam, appear(opening, .44, .65), 0);
-    reveal(auxiliary, ct, 0);
+    wash.setAttribute('opacity', .16 * clinical);
+    weight.setAttribute('transform', `translate(0 ${suspension - 4 * (1 - landed)})`);
+    weight.setAttribute('opacity', ct);
+    reveal(question, 1, 0);
+    reveal(symptoms, appear(opening, .27, .44), 4);
+    reveal(exam, appear(opening, .43, .60), 4);
+    reveal(labs, appear(opening, .59, .74), 4);
+    auxiliary.setAttribute('opacity', ct);
     penProgress(statBrush, statistic);
-    statWash.setAttribute('opacity', .16 * appear(statistic, 0, .20) * statExit);
-    reveal(stat, second ? appear(p, .51, .85) * statExit : 0, 0);
+    statWash.setAttribute('opacity', .16 * appear(statistic, 0, .20));
+    reveal(stat, second ? appear(p, .40, .52) : 0, 6);
+    reveal(statScope, second ? appear(p, .46, .60) : 0, 6);
   };
-}
-
-function pulses(p) {
-  const u = clamp((p - .233) / .09);
-  return Math.sin(u * Math.PI) * (1 - .35 * u);
 }

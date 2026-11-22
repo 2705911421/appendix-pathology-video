@@ -10,7 +10,7 @@ const libraries = new WeakMap();
 
 function brushTarget([x, y, width, height]) {
   // All specimen washes fit the local plate. Reserve a full-stage buffer for larger crops.
-  const local = displayDensity() > 1 && x >= 0 && y >= 0 && x + width <= 640 && y + height <= 560;
+  const local = displayDensity() !== 1 && x >= 0 && y >= 0 && x + width <= 640 && y + height <= 560;
   const w = local ? 640 : WIDTH;
   const h = local ? 560 : HEIGHT;
   if (!targets.has(local)) {

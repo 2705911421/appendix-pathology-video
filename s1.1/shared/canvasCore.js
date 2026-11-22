@@ -1,6 +1,7 @@
 import { HEIGHT, INK, NS, PAPER, RED, WIDTH, clamp, ease } from './detail/geometry.js';
 import { createPaper } from './detail/paper.js';
 import { assertBlindReviewText } from './blindReview.js';
+import { ENGLISH_FONT, NUMERAL_FONT, SANS_FONT, SERIF_FONT } from './fonts.js';
 
 export {
   HEIGHT, INK, NS, PAPER, RED, WIDTH, cellDot, clamp, closedCurve, ease, ellipse, fillPath, lerp,
@@ -14,11 +15,10 @@ export {
   createRaster, drawRaster, drawRasterCrop, logicalContext, logicalSize, rasterScale, setLogicalSize, sizeRaster,
 } from './detail/raster.js';
 
-const textFont = '"Noto Sans SC", "Microsoft YaHei", sans-serif';
-const handFont = '"Noto Serif SC", "KaiTi", serif';
-const chinese = { font: `750 42px ${textFont}`, color: '#1F1C19', baseline: 963 };
-const english = { font: `500 24px ${textFont}`, color: '#5C564E', baseline: 1008 };
-const captionInset = 62;
+const chinese = { font: `750 46px ${SANS_FONT}`, color: INK, baseline: 964 };
+const english = { font: `500 31px ${ENGLISH_FONT}`, color: '#5C564E', baseline: 1014 };
+export const CAPTION_SAFE_Y = 885;
+const captionInset = 82;
 const captionWidth = WIDTH - 2 * captionInset;
 const graphemes = new Intl.Segmenter('zh-CN', { granularity: 'grapheme' });
 const breaksAfter = /[，。！？、；：,.!?;:][）】》”’」』]*$/u;
@@ -82,7 +82,7 @@ function englishPages(text, split, ratio) {
   return best.index ? [line.slice(0, best.index), line.slice(best.index + 1)] : [line, line];
 }
 
-export function prepareStorySubtitles(zh, en, { splitAt, pageAt } = {}) {
+export function prepareStorySubtitles(zh, en, { splitAt, pageAt, singlePage = false } = {}) {
   const value = typeof zh === 'string' ? { text: zh, highlights: [] } : zh;
   const text = oneLine(value.text);
   const ranges = highlightRanges(text, value.highlights ?? []);
@@ -91,7 +91,7 @@ export function prepareStorySubtitles(zh, en, { splitAt, pageAt } = {}) {
     throw new RangeError('Subtitle split must be at an interior grapheme');
   }
   if (pageAt !== undefined && !(pageAt > 0 && pageAt < 1)) throw new RangeError('Invalid subtitle page time');
-  const split = splitAt !== undefined || letters.length > 22;
+  const split = splitAt !== undefined || (!singlePage && letters.length > 22);
   const boundary = split ? splitAt ?? chineseBreak(text, letters, ranges) : text.length;
   const ratio = clamp(boundary / Math.max(text.length, 1), .35, .65);
   const breakAt = split ? pageAt ?? ratio : 1;
@@ -120,9 +120,12 @@ export function prepareStorySubtitles(zh, en, { splitAt, pageAt } = {}) {
 export function storySubtitleAt({ pages, breakAt }, progress = 0) {
   if (!Number.isFinite(progress)) throw new TypeError('Subtitle progress must be finite');
   const current = clamp(progress);
+  const second = pages.length > 1 && current >= breakAt;
+  const enter = second ? ease((current - breakAt) / .025) : 1;
   return {
-    page: pages[Number(pages.length > 1 && current >= breakAt)],
-    opacity: pages.length === 1 ? 1 : .14 + .86 * ease(Math.abs(current - breakAt) / .065),
+    page: pages[Number(second)],
+    opacity: .90 + .10 * enter,
+    offset: 3 * (1 - enter),
   };
 }
 
@@ -132,13 +135,17 @@ function measureRuns(ctx, runs) {
   return { sizes, width, scale: width > captionWidth ? captionWidth / width : 1 };
 }
 
-export function drawStorySubtitles(ctx, zh, en, progress = 0) {
-  const { page, opacity } = storySubtitleAt(prepareStorySubtitles(zh, en), progress);
+export function drawStorySubtitles(ctx, zh, en, progress = 0, options) {
+  drawPreparedStorySubtitles(ctx, prepareStorySubtitles(zh, en, options), progress);
+}
+
+export function drawPreparedStorySubtitles(ctx, subtitles, progress = 0) {
+  const { page, opacity, offset } = storySubtitleAt(subtitles, progress);
   const draw = (runs, style) => {
     ctx.save();
     ctx.font = style.font;
     const { sizes, scale, width } = measureRuns(ctx, runs);
-    ctx.translate(WIDTH / 2, style.baseline);
+    ctx.translate(WIDTH / 2, style.baseline + offset);
     ctx.scale(scale, 1);
     let x = -width / 2;
     for (const [i, { text, highlight }] of runs.entries()) {
@@ -157,10 +164,18 @@ export function drawStorySubtitles(ctx, zh, en, progress = 0) {
   ctx.restore();
 }
 
+export function drawSubtitlePaper(ctx) {
+  const shade = ctx.createLinearGradient(0, CAPTION_SAFE_Y, 0, 947);
+  shade.addColorStop(0, '#F5F1E900');
+  shade.addColorStop(1, PAPER);
+  ctx.fillStyle = shade;
+  ctx.fillRect(0, CAPTION_SAFE_Y, WIDTH, HEIGHT - CAPTION_SAFE_Y);
+}
+
 const storyStyle = `
   .story-stage {
     color-scheme: light;
-    --paper: ${PAPER}; --ink: ${INK}; --red: ${RED}; --hand: ${handFont}; --text: ${textFont};
+    --paper: ${PAPER}; --ink: ${INK}; --red: ${RED}; --hand: ${SERIF_FONT}; --text: ${SANS_FONT};
     width: ${WIDTH}px; height: ${HEIGHT}px; position: relative; overflow: hidden; isolation: isolate;
     background-color: var(--paper);
     background-image: linear-gradient(to right, rgba(120, 110, 95, .055) 1px, transparent 1px),
@@ -176,18 +191,23 @@ const storyStyle = `
   .story-stage .note { font-family: var(--hand); font-weight: 600; }
   .story-stage .title { font-weight: 740; }
   .story-stage .note:not([fill]) { fill: var(--ink); }
-  .story-stage .numeral { font-family: Georgia, "Times New Roman", serif; font-variant-numeric: lining-nums tabular-nums; }
+  .story-stage .numeral { font-family: ${NUMERAL_FONT}; font-variant-numeric: lining-nums tabular-nums; }
   .story-stage .callout { paint-order: stroke; stroke: var(--paper); stroke-width: 7; stroke-linejoin: round; }
   .story-stage .ct-note { font-family: var(--text); font-weight: 600; paint-order: stroke; stroke: #262325; stroke-width: 4; }
   .story-stage .ct-side { font-family: var(--text); font-weight: 680; }
   .story-caption-halo {
-    position: absolute; inset: 867px 0 0;
+    position: absolute; inset: ${CAPTION_SAFE_Y}px 0 0;
     background: linear-gradient(to bottom, transparent, var(--paper) 32%, var(--paper));
   }
-  .story-caption { position: absolute; top: 919px; inset-inline: ${captionInset}px; text-align: center; white-space: nowrap; }
-  .story-caption-cn { margin: 0; font: ${chinese.font}; line-height: 1.33; color: ${chinese.color}; }
+  .story-caption {
+    position: absolute; top: 920px; inset-inline: ${captionInset}px;
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; white-space: nowrap;
+  }
+  .story-caption p { width: max-content; }
+  .story-caption-cn { margin: 0; font: ${chinese.font}; line-height: 54px; color: ${chinese.color}; }
   .story-caption-cn span { color: var(--red); }
-  .story-caption-en { margin: 10px 0 0; font: ${english.font}; line-height: 1.22; color: ${english.color}; }
+  .story-caption-en { margin: 8px 0 0; font: ${english.font}; line-height: 43px; color: ${english.color}; }
 `;
 
 export function createStoryStage(root, { paper = true } = {}) {
@@ -205,13 +225,14 @@ export function createStoryStage(root, { paper = true } = {}) {
     <div class="story-caption-halo"></div>
     <div class="story-layer story-lettering"></div>
     <div class="story-caption"><p class="story-caption-cn"></p><p class="story-caption-en" lang="en"></p></div>`;
-  const [paint, grain, , lettering, caption] = root.children;
+  const [paint, grain, halo, lettering, caption] = root.children;
   const [cn, en] = caption.children;
   const ctx = document.createElement('canvas').getContext('2d');
   const ready = Promise.all([
     paper ? createPaper(grain) : () => {},
-    document.fonts.load('750 42px "Noto Sans SC"'),
-    document.fonts.load('600 42px "Noto Serif SC"'),
+    document.fonts.load(chinese.font),
+    document.fonts.load(english.font),
+    document.fonts.load(`600 42px ${SERIF_FONT}`),
   ]).then(async ([drawPaper]) => {
     await document.fonts.ready;
     drawPaper();
@@ -221,7 +242,9 @@ export function createStoryStage(root, { paper = true } = {}) {
   return {
     paint, lettering, ready,
     setSubtitles(subtitles, progress) {
-      const { page, opacity } = storySubtitleAt(subtitles, progress);
+      caption.hidden = halo.hidden = !subtitles;
+      if (!subtitles) return;
+      const { page, opacity, offset } = storySubtitleAt(subtitles, progress);
       if (page !== current) {
         cn.replaceChildren(...page.zh.map(({ text, highlight }) => {
           if (!highlight) return document.createTextNode(text);
@@ -242,6 +265,7 @@ export function createStoryStage(root, { paper = true } = {}) {
         current = page;
       }
       caption.style.opacity = opacity;
+      caption.style.transform = offset ? `translateY(${offset}px)` : '';
     },
   };
 }

@@ -17,7 +17,7 @@ const lensScale = lens.diameter / HISTOLOGY_DIAMETER;
 function serosalNote() {
   const { x, y, width, height } = frame;
   const border = `<rect id="he-target-dash" x="${x}" y="${y}" width="${width}" height="${height}" fill="none"
-    stroke="${RED}" stroke-width="2.45" stroke-dasharray="7 6"/>`;
+    stroke="${RED}" stroke-width="3" stroke-dasharray="9 7"/>`;
   const segment = 14;
   const corners = [
     `M${x} ${y + segment}v-${segment}h${segment}`,
@@ -27,8 +27,8 @@ function serosalNote() {
   ].map((path, i) => ink(path, { color: RED, size: 3.2, seed: i * 9 + 53 })).join('');
   return group('he-target', border + corners)
     + '<g id="he-surface-leader"></g>'
-    + '<text class="note title" x="1305" y="671" font-size="30" fill="#1F1C19">浆膜面：不只是单纯纤维素</text>'
-    + `<text class="note" x="1305" y="715" font-size="26" fill="${RED}">纤维素 + 脓液混合渗出</text>`;
+    + `<text class="note title" x="1275" y="671" font-size="30" fill="${RED}">浆膜面 · 纤维素性脓性渗出物</text>`
+    + '<text class="note" x="1275" y="715" font-size="25" fill="#1F1C19">纤维素丝网内含变性、坏死的中性粒细胞</text>';
 }
 
 export function createHistologySequence(pixelScale = 1) {
@@ -79,38 +79,36 @@ export function createHistologySequence(pixelScale = 1) {
       };
     },
     update(cue, p) {
+      const zooming = cue.id === 'B04';
       const macro = cue.id === 'S14';
-      const moving = macro ? p : 0;
-      const progression = ramp(moving, 0, .25);
+      const progression = zooming ? ramp(p, 0, .65) : Number(macro);
       const camera = pushTo(focus, 1, 1 / initialScale, progression);
       const x = lerp(focus.x, detailView.x, progression);
       const y = lerp(focus.y, detailView.y, progression);
       artNodes['he-micro-lens'].setAttribute('transform', `translate(${x - focus.x} ${y - focus.y}) ${camera.transform}`);
-      artNodes['he-micro-lens'].setAttribute('opacity', macro ? 1 - ramp(p, .06, .24) : ramp(p, .02, .24));
+      artNodes['he-micro-lens'].setAttribute('opacity', zooming ? 1 - ramp(p, .14, .65) : 1 - Number(macro));
       const size = camera.scale * initialScale;
       artNodes['he-high-power'].setAttribute('transform',
         `translate(${x} ${y}) scale(${size}) translate(${-detailView.x} ${-detailView.y})`);
-      artNodes['he-high-power'].setAttribute('opacity', ramp(moving, .035, .25));
-      labelNodes['he-layer-labels'].toggleAttribute('hidden', macro);
-      labelNodes['he-surface-note'].toggleAttribute('hidden', macro);
+      artNodes['he-high-power'].setAttribute('opacity', zooming ? ramp(p, .17, .62) : Number(macro));
+      const outgoingLabels = zooming ? 1 - ramp(p, 0, .48) : 1 - Number(macro);
+      labelNodes['he-layer-labels'].setAttribute('opacity', outgoingLabels);
       labelNodes['he-macro-labels'].toggleAttribute('hidden', !macro);
-      if (macro) {
-        closeup.update(labelRoot, p);
-        return;
-      }
+      if (zooming || macro) closeup.update(labelRoot, macro ? p : 0, zooming ? ramp(p, .45, .96) : 1);
+      const overview = zooming || macro ? 1 : p;
       braces.forEach(({ trace }, i) => {
         const start = .105 + .034 * i;
-        const completion = ramp(p, start, start + .185);
+        const completion = ramp(overview, start, start + .185);
         if (drawn[i] !== completion) {
           labelNodes[`he-brace-${i}`].innerHTML = trace(completion);
           drawn[i] = completion;
         }
-        labelNodes[`he-layer-${i}`].setAttribute('opacity', ramp(p, start + .035, start + .15));
+        labelNodes[`he-layer-${i}`].setAttribute('opacity', ramp(overview, start + .035, start + .15));
       });
-      labelNodes['he-surface-note'].setAttribute('opacity', ramp(p, .35, .50));
-      labelNodes['he-target'].setAttribute('opacity', .73 + .27 * (.5 + .5 * Math.cos((p - .35) * 29)));
-      labelNodes['he-target-dash'].setAttribute('stroke-dashoffset', -24 * ramp(p, .35, 1));
-      const completion = ramp(p, .39, .57);
+      labelNodes['he-surface-note'].setAttribute('opacity', outgoingLabels * ramp(overview, .35, .50));
+      labelNodes['he-target'].setAttribute('opacity', .72 + .28 * ramp(overview, .49, .90));
+      labelNodes['he-target-dash'].setAttribute('stroke-dashoffset', -56 * ramp(overview, .35, 1));
+      const completion = ramp(overview, .39, .57);
       if (drawnLeader !== completion) {
         labelNodes['he-surface-leader'].innerHTML = leader(completion);
         drawnLeader = completion;

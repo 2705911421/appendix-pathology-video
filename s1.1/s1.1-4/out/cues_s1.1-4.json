@@ -3,60 +3,77 @@
   "width": 1920,
   "height": 1080,
   "fps": 30,
-  "duration": 51,
+  "duration": 53.2,
   "cues": [
     {
       "id": "S15",
+      "type": "speech",
       "defaultDuration": 13,
       "start": 0,
       "end": 13,
-      "zhText": "从暗红的单纯性、灰黄的化脓性，再到焦黑的坏疽性，这是急性阑尾炎最常见的经典演变路径——但请记住，它并不是每个患者都必须走完的固定流程。",
+      "zhText": "从暗红的单纯性、灰黄的化脓性，到焦黑的坏疽性，这是常见的典型演变路径。但请记住，有的病例可在早期控制，有的会迅速恶化，病程因人而异。",
       "highlightZh": [
         "单纯性",
         "化脓性",
         "坏疽性",
-        "并不是每个患者都必须走完的固定流程"
+        "早期控制",
+        "迅速恶化",
+        "病程因人而异"
       ],
-      "enText": "From dark-red simple, to grayish-yellow phlegmonous, to black gangrenous—this is the classic pathway, yet not a rigid sequence every patient must go through."
+      "enText": "Dark-red simple, grayish-yellow phlegmonous, and black gangrenous appendicitis illustrate a typical course. The course varies: some cases can be controlled early, while others worsen rapidly."
     },
     {
       "id": "S16",
+      "type": "speech",
       "defaultDuration": 12.5,
       "start": 13,
       "end": 25.5,
       "zhText": "如果战火还停留在早期的单纯性阶段，中性粒细胞主要聚集在黏膜和黏膜下层，更深处的平滑肌层里，只能零星见到散在的寥寥几个。",
       "highlightZh": [
         "单纯性阶段",
+        "中性粒细胞",
         "黏膜和黏膜下层",
-        "散在的寥寥几个"
+        "平滑肌层"
       ],
-      "enText": "In early simple appendicitis, neutrophils gather mostly in the mucosa and submucosa, with only a few scattered in the smooth muscle layer."
+      "enText": "In early simple appendicitis, neutrophils gather mostly in the mucosa and submucosa, with only a few scattered in the muscularis propria."
     },
     {
       "id": "S17",
+      "type": "speech",
       "defaultDuration": 12,
       "start": 25.5,
       "end": 37.5,
-      "zhText": "可一旦化脓蔓延全层，肿胀压迫血管、甚至让阑尾系膜静脉里长出血栓，血液供应就会被彻底掐断——",
+      "zhText": "化脓波及全层时，水肿和腔内压升高可妨碍静脉回流；阑尾系膜静脉也可形成血栓，进一步损害阑尾壁的血液灌注。",
       "highlightZh": [
-        "蔓延全层",
+        "化脓波及全层",
+        "静脉回流",
         "阑尾系膜静脉",
-        "血栓"
+        "血栓",
+        "血液灌注"
       ],
-      "enText": "Once suppuration floods every layer, swelling and mesenteric venous thrombosis can cut off blood supply completely—"
+      "enText": "With transmural suppuration, edema and raised luminal pressure can impede venous drainage. A thrombus can form in a mesoappendiceal vein, further reducing perfusion of the appendiceal wall."
     },
     {
       "id": "S18",
+      "type": "speech",
       "defaultDuration": 13.5,
       "start": 37.5,
       "end": 51,
-      "zhText": "失去血供的阑尾迅速发黑坏死，变成最凶险的坏疽性阑尾炎；脆弱的管壁随时可能穿孔，脓液涌入腹腔，引爆危及生命的弥漫性腹膜炎。",
+      "zhText": "灌注严重受损时，阑尾壁可出血、坏死，形成坏疽性阑尾炎；脆弱的管壁可能穿孔，脓液外漏可引发危及生命的弥漫性腹膜炎。",
       "highlightZh": [
+        "出血、坏死",
         "坏疽性阑尾炎",
         "穿孔",
         "弥漫性腹膜炎"
       ],
-      "enText": "Starved of blood, the appendix turns black and necrotic as gangrenous appendicitis; its fragile wall can perforate, triggering life-threatening peritonitis."
+      "enText": "Severely reduced perfusion can cause hemorrhage and necrosis of the wall, producing gangrenous appendicitis. The weakened wall may perforate, and leaking pus can cause life-threatening diffuse peritonitis."
+    },
+    {
+      "id": "B06",
+      "type": "bridge",
+      "duration": 2.2,
+      "start": 51,
+      "end": 53.2
     }
   ]
 }

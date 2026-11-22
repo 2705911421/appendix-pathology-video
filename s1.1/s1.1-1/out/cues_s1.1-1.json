@@ -6,38 +6,78 @@
   "cues": [
     {
       "id": "S01",
+      "type": "speech",
       "defaultDuration": 9.5,
       "zhText": "一顿再普通不过的午饭后，你的肚脐周围，突然开始隐隐作痛，甚至泛起恶心，连吐了两次。",
-      "highlightZh": ["肚脐周围", "隐隐作痛"],
+      "highlightZh": [
+        "肚脐周围",
+        "隐隐作痛"
+      ],
       "enText": "After an ordinary lunch, a dull ache starts around your navel, bringing nausea and two bouts of vomiting."
     },
     {
       "id": "S02",
+      "type": "speech",
       "defaultDuration": 8.5,
-      "zhText": "这会儿炎症还藏在阑尾内层，疼痛借着内脏神经往外传，定位含糊不清，像在和你捉迷藏。",
-      "highlightZh": ["内脏神经", "定位含糊不清"],
-      "enText": "Inflammation is still tucked inside the inner wall; visceral nerves carry vague signals, playing hide-and-seek."
+      "zhText": "早期的疼痛经内脏神经传导，常让人觉得肚脐周围在疼，却很难指出具体位置。",
+      "highlightZh": [
+        "内脏神经",
+        "肚脐周围"
+      ],
+      "enText": "Early pain travels through visceral nerves. It is often felt around the navel, and its exact location is hard to pinpoint."
     },
     {
       "id": "S03",
-      "defaultDuration": 11.5,
-      "zhText": "可窗外的太阳落下去、弯月升起来，傍晚六点，这股疼突然“搬了家”，死死钉在了右下腹的麦氏点——一按就痛，松手更痛。",
-      "highlightZh": ["右下腹", "麦氏点"],
-      "enText": "As the sun sets and the moon rises at 6 PM, the pain suddenly migrates to McBurney's point—tender to press, worse on release."
+      "type": "speech",
+      "defaultDuration": 8.1,
+      "zhText": "傍晚六点左右，疼痛转移到右下腹。检查时，麦氏点一按就痛，松手更痛。",
+      "highlightZh": [
+        "右下腹",
+        "麦氏点",
+        "松手更痛"
+      ],
+      "enText": "Around 6 PM, the pain shifts to the right lower abdomen. On exam, McBurney's point is tender, with worse pain on release."
+    },
+    {
+      "id": "B01",
+      "type": "bridge",
+      "duration": 1.8,
+      "start": 26.1,
+      "end": 27.9
     },
     {
       "id": "S04",
-      "defaultDuration": 9.5,
-      "zhText": "熬到晚上十点急诊入院，体温飙到三十九点三度，白细胞和中性粒细胞全线拉响警报。",
-      "highlightZh": ["三十九点三度", "白细胞", "中性粒细胞"],
-      "enText": "By 10 PM in the ER, your fever hits 39.3°C, while white blood cells and neutrophils sound full alarm."
+      "type": "speech",
+      "defaultDuration": 8.8,
+      "zhText": "晚上十点到急诊，测得体温三十九点三度。白细胞总数和中性粒细胞比例升高。",
+      "highlightZh": [
+        "三十九点三度",
+        "白细胞总数",
+        "中性粒细胞比例"
+      ],
+      "enText": "At 10 PM in the emergency department, the temperature is 39.3°C. The white blood cell count and neutrophil percentage are elevated."
     },
     {
       "id": "S05",
-      "defaultDuration": 11.0,
-      "zhText": "短短十个小时，腹腔深处那根原本粉白细长的“小香肠”，正经历一场触目惊心的变色日记：从粉、到红、到黄、甚至发黑。",
-      "highlightZh": ["粉", "红", "黄", "黑"],
-      "enText": "In just ten hours, that pale-pink \"little sausage\" undergoes a dramatic color diary: from pink, to red, to yellow, even black."
+      "type": "speech",
+      "defaultDuration": 10.8,
+      "zhText": "到急诊时已过去十小时。那根原本粉白细长的“小香肠”，在炎症中可经历变色：暗红、灰黄，甚至焦黑。",
+      "highlightZh": [
+        "十小时",
+        "粉白",
+        "暗红",
+        "灰黄",
+        "焦黑"
+      ],
+      "enText": "Ten hours have passed by arrival at the emergency department. The slender, pale-pink appendix can change color with inflammation: dark red, grayish yellow, or even black."
+    },
+    {
+      "id": "B02",
+      "type": "bridge",
+      "duration": 2.2,
+      "start": 47.5,
+      "end": 49.7
     }
-  ]
+  ],
+  "duration": 49.7
 }

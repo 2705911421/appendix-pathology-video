@@ -1,17 +1,20 @@
 import {
-  appendStorySvg, createStoryStage, PAPER, prepareStorySubtitles, waitForWashes,
+  appendStorySvg, createStoryStage, prepareStorySubtitles, waitForWashes,
 } from '../../shared/canvasCore.js';
+import { selectEntryPart } from '../../shared/detail/bridgePlates.js';
+import { mountPaperBridge } from '../../shared/detail/transitionPaper.js';
+import { mountStageDotOverlay } from '../../shared/leftFloatNotes.js';
 import { phase } from '../../shared/timelineHelper.js';
-import { CUES, resolveCue, sceneFades } from './cue-sheet.js';
+import { CUES, resolveCue } from './cue-sheet.js';
 import { createCreditPlate } from './credit.js';
 import { chronicSpecimen } from './chronic-specimen.js';
 import { chronicSlide } from './chronic-slide.js';
 import { homecoming } from './homecoming.js';
 
 const subtitleBreaks = [
-  { at: [.42], zh: ['？'], en: ['inflammation?'] },
-  { at: [.23, .55], zh: ['浸润。', '择期切除；'], en: ['infiltration.', 'usually advised;'] },
-  { at: [.54], zh: ['求救信号。'], en: ['an SOS.'] },
+  { at: [.49], zh: ['阑尾炎。'], en: ['abdominal pain.'] },
+  { at: [.32, .63], zh: ['浸润。', '择期切除；'], en: ['infiltration.', 'symptoms have subsided.'] },
+  { at: [.45], zh: ['病理变化。'], en: ['changes in the appendix.'] },
 ];
 
 function splitAfter(text, markers) {
@@ -29,20 +32,14 @@ function splitAfter(text, markers) {
 
 function cueSubtitles({ zhText, highlightZh, enText }, breaks) {
   const translation = splitAfter(enText, breaks.en);
-  return splitAfter(zhText, breaks.zh).map((text, i) => {
-    const prepared = prepareStorySubtitles({ text, highlights: highlightZh }, translation[i]);
-    return { pages: [{ zh: prepared.pages.flatMap(page => page.zh), en: translation[i] }], breakAt: 1 };
-  });
+  return splitAfter(zhText, breaks.zh).map((text, i) =>
+    prepareStorySubtitles({ text, highlights: highlightZh }, translation[i], { singlePage: true }));
 }
 
 const root = document.querySelector('#plate');
 const stage = createStoryStage(root);
 const storyLayers = [...root.children];
-const captionLayer = storyLayers.at(-1);
-const plainPaper = document.createElement('div');
-plainPaper.setAttribute('aria-hidden', 'true');
-plainPaper.style.cssText = `position:absolute;inset:0;background:${PAPER};pointer-events:none`;
-root.prepend(plainPaper);
+const showPaper = mountPaperBridge(root);
 const scenes = [chronicSpecimen(), chronicSlide(), homecoming()].map((scene, i) => {
   const art = appendStorySvg(stage.paint, scene.paint, { hidden: true });
   const labels = appendStorySvg(stage.lettering, scene.lettering, { hidden: true });
@@ -52,36 +49,41 @@ const scenes = [chronicSpecimen(), chronicSlide(), homecoming()].map((scene, i) 
 });
 const credit = createCreditPlate();
 root.append(credit.canvas);
+const showDots = mountStageDotOverlay(root);
 
 const [drawPaper] = await Promise.all([stage.ready, waitForWashes()]);
 
-function renderAt(time) {
+function renderAt(time, capture = false) {
   const { cue, p } = resolveCue(CUES, time);
   root.dataset.cue = cue.id;
-  plainPaper.hidden = cue.id !== 'S25';
-  plainPaper.style.opacity = cue.id === 'S25' ? phase(p, sceneFades.homecomingStart, 1) : 0;
-  for (const layer of storyLayers) layer.toggleAttribute('hidden', Boolean(cue.isCredits));
-  credit.canvas.hidden = !cue.isCredits;
-  if (cue.isCredits) {
+  const credits = cue.type === 'credits';
+  for (const layer of storyLayers) layer.toggleAttribute('hidden', credits);
+  credit.canvas.hidden = !credits;
+  if (credits) {
+    showPaper(0);
+    showDots({ opacity: 0 });
     credit.draw(p);
-    return;
+    return { id: cue.id, p };
   }
 
   const index = scenes.findIndex(scene => scene.cueId === cue.id);
   const scene = scenes[index];
-  const sceneOpacity = scene.fade?.(p) ?? 1;
-  for (const layer of storyLayers) layer.style.opacity = sceneOpacity;
   for (const other of scenes) {
     other.art.toggleAttribute('hidden', other !== scene);
     other.labels.toggleAttribute('hidden', other !== scene);
   }
   scene.update(scene.art, scene.labels, p);
   drawPaper(index);
+  showPaper(cue.id === 'S23' && !capture ? 1 - phase(p, 0, .10) : 0);
+  showDots({ gray: 1, opacity: capture || cue.id === 'S25' ? 0 : .55 });
   const page = scene.breaks.filter(boundary => p >= boundary).length;
-  stage.setSubtitles(scene.captions[page], p);
-  const captionOpacity = Number(captionLayer.style.opacity);
-  captionLayer.style.opacity = captionOpacity * sceneOpacity * (cue.id === 'S23' ? 1 - phase(p, .94, 1) : 1);
+  stage.setSubtitles(capture ? null : scene.captions[page], p);
+  return { id: cue.id, p };
 }
 
 renderAt(0);
 window.renderAt = renderAt;
+window.renderBridgeEntry = part => {
+  renderAt(0, true);
+  selectEntryPart(root, part);
+};

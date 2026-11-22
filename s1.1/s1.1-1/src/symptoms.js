@@ -3,7 +3,7 @@ import { phase } from '../../shared/timelineHelper.js';
 import { dot, fade, fill, ink, letter, pathOf, stroke } from './paint.js';
 
 const center = { x: 1340, y: 465 };
-const U = { x: 0, y: -110 };
+const U = { x: 0, y: -106 };
 const A = { x: -155, y: 30 };
 const M = { x: lerp(A.x, U.x, 1 / 3), y: lerp(A.y, U.y, 1 / 3) };
 const umber = '#5B5A56';
@@ -13,11 +13,11 @@ const anatomyOutline = 'M-116 -232 C-101 -197 -107 -163 -121 -144 C-132 -128 -13
   + ' C153 -57 127 -70 129 -95 C132 -112 132 -128 121 -144 C107 -163 101 -197 116 -232Z';
 const flank = 'M-111 -202 C-107 -174 -116 -153 -124 -138 C-135 -114 -129 -100 -129 -92'
   + ' Q-135 -64 -160 -42 C-174 -23 -190 18 -195 48 C-200 101 -177 157 -154 180';
-const wing = 'M-155 30 C-168 22 -181 16 -182 -3 C-182 -29 -151 -43 -118 -41'
+const wing = 'M-155 30 C-157 26 -168 26 -176 17 C-183 11 -185 3 -182 -6 C-175 -29 -151 -43 -118 -41'
   + ' C-83 -41 -50 -26 -30 -10 C-19 1 -24 23 -18 43 Q-13 60 -5 75'
   + ' C-1 83 -6 98 -21 98 Q-34 94 -47 91 C-61 92 -64 115 -81 126'
   + ' C-97 135 -120 121 -127 109 C-131 102 -130 89 -137 80'
-  + ' C-148 70 -157 54 -155 30Z';
+  + ' C-147 68 -143 49 -154 40 Q-163 34 -155 30Z';
 const brow = 'M-178 -5 C-168 -24 -139 -38 -110 -33 C-71 -27 -44 -13 -36 5';
 const socket = 'M-137 46 Q-125 32 -112 45 Q-99 59 -115 70 Q-132 77 -139 64Z';
 const foramen = 'M-100 84 C-85 72 -70 79 -67 93 C-65 104 -81 117 -94 110 C-104 107 -110 92 -100 84Z';
@@ -31,8 +31,8 @@ const routeD = 'M' + U.x + ' ' + U.y + ' L' + M.x + ' ' + M.y;
 const routeAngle = Math.atan2(M.y - U.y, M.x - U.x);
 const nerveStart = 'M' + (M.x + 17) + ' ' + (M.y + 5);
 const neuralPaths = [
-  nerveStart + ' C-79 -33 -49 -48 -26 -67 Q-8 -82 0 -110',
-  nerveStart + ' C-59 -25 -63 -60 -35 -73 Q-13 -88 0 -110',
+  nerveStart + ` C-79 -33 -49 -48 -26 -67 Q-8 -82 ${U.x} ${U.y}`,
+  nerveStart + ` C-59 -25 -63 -60 -35 -73 Q-13 -88 ${U.x} ${U.y}`,
 ];
 let guide;
 
@@ -173,12 +173,12 @@ function markLandmarks(ctx, alpha) {
   const ny = (U.x - A.x) / length;
   fade(ctx, alpha, () => {
     ctx.save();
-    ctx.setLineDash([6, 6]);
+    ctx.setLineDash([7, 6]);
     ctx.beginPath();
     ctx.moveTo(U.x, U.y);
     ctx.lineTo(A.x, A.y);
-    ctx.lineWidth = 1.6;
-    ctx.strokeStyle = '#5A5248';
+    ctx.lineWidth = 2.05;
+    ctx.strokeStyle = '#54493F';
     ctx.stroke();
     ctx.restore();
     ctx.beginPath();
@@ -197,7 +197,8 @@ function markLandmarks(ctx, alpha) {
       });
     }
     dot(ctx, A.x, A.y, 4.2, 4.2, '#4C585C');
-    leader(ctx, { x: -162, y: 33 }, { x: -219, y: 54 }, '#77848A', 2.0);
+    dot(ctx, M.x, M.y, 3.1, 3.1, '#54493F');
+    leader(ctx, { x: A.x - 6, y: A.y + 3 }, { x: -219, y: 54 }, '#77848A', 2.0);
     letter(ctx, '右髂前上棘', -225, 66, { align: 'right', size: 25, color: '#536369', weight: 650 });
   });
 }
@@ -233,7 +234,7 @@ function showMigration(ctx, motion, pigment, point) {
     }
     leader(ctx, { x: M.x + 14, y: M.y + 18 }, { x: -88, y: 221 }, '#A34338A0', 2.3);
     letter(ctx, '麦氏点（压痛、反跳痛）', -88, 257, { size: 34, color: RED, weight: 700 });
-    letter(ctx, '脐与右髂前上棘连线外 1/3', -88, 299, { size: 27, color: umber });
+    letter(ctx, '从右髂前上棘向脐量 1/3', -88, 299, { size: 27, color: umber });
   });
 }
 
@@ -245,7 +246,7 @@ export function drawAnatomy(ctx, motion, pigment) {
   fade(ctx, motion.diagramOpacity, () => {
     ctx.translate(x, y);
     washPelvis(ctx, pigment);
-    markLandmarks(ctx, motion.markings);
+    markLandmarks(ctx, motion.migrating ? motion.markings : .84);
     if (motion.migrating) showMigration(ctx, motion, pigment, painCenter);
     else {
       const radius = lerp(36, 67, motion.neural) + 5.5 * Math.sin(motion.t * 2.8);
@@ -253,7 +254,7 @@ export function drawAnatomy(ctx, motion, pigment) {
     }
     neuralMotion(ctx, motion.t, motion.neural);
     drawNerveNote(ctx, motion.neuralLabel);
-    markNavel(ctx, Math.max(motion.neuralLabel, motion.markings));
+    markNavel(ctx, Math.max(.84, motion.neuralLabel, motion.markings));
   });
   const project = ({ x: px, y: py }) => ({ x: x + px, y: y + py });
   return { navel: project(U), asisR: project(A), mcburney: project(M), appendix: project(M), painCenter: project(painCenter) };

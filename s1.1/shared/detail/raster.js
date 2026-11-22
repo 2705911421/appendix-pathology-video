@@ -47,3 +47,22 @@ export function drawRasterCrop(context, source, x, y, w, h, ...destination) {
   const scale = rasterScale(source);
   context.drawImage(source, x * scale.x, y * scale.y, w * scale.x, h * scale.y, ...destination);
 }
+
+export function liftWhiteMatte(context) {
+  const { width, height } = context.canvas;
+  const pixels = context.getImageData(0, 0, width, height);
+  const { data } = pixels;
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] === 0) continue;
+    const white = Math.min(data[i], data[i + 1], data[i + 2]);
+    const pigment = 255 - white;
+    if (pigment < 3) {
+      data[i + 3] = 0;
+      continue;
+    }
+    const ratio = 255 / pigment;
+    for (let c = 0; c < 3; c++) data[i + c] = (data[i + c] - white) * ratio;
+    data[i + 3] /= ratio;
+  }
+  context.putImageData(pixels, 0, 0);
+}

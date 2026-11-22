@@ -4,7 +4,7 @@ import {
 import {
   columnarCell, createDiapedesisCell,
 } from '../../shared/charactersAndHistology.js';
-import { createHistologyAsset, HISTOLOGY_DIAMETER } from '../../shared/histologyProcedural.js';
+import { MICROSCOPE_HANDOFF } from '../../shared/transitionAnchors.js';
 import { canvasSlot, mountSurface, paintSurface, wash } from './brush.mjs';
 import { band, edgePath, group, ramp, selectIds } from './geometry.mjs';
 import { inkTrail } from './ink-trail.mjs';
@@ -31,7 +31,7 @@ function flame() {
       i % 3 ? '#B49A83' : '#9B5747', 12 + rand() * 21, .12 + rand() * .35);
   }).join('');
   return `<defs><clipPath id="opening-glyph-clip"><path d="${silhouette}"/></clipPath></defs>
-    <g transform="translate(960 415) scale(${195 / 174}) translate(-93 -87)" aria-label="炎">
+    <g transform="translate(${MICROSCOPE_HANDOFF.cx} ${MICROSCOPE_HANDOFF.cy}) scale(${195 / 174}) translate(-93 -87)" aria-label="炎">
       ${fillPath(silhouette, '#1F1C19')}
       <g clip-path="url(#opening-glyph-clip)">${bristles}</g>
     </g>`;
@@ -123,7 +123,6 @@ function microDiagrams() {
 }
 
 export function createInkOpening() {
-  const lens = createHistologyAsset({ id: 'opening-glass', stage: 'simple', x: 750, y: 205, scale: 420 / HISTOLOGY_DIAMETER });
   const diagrams = microDiagrams();
   const vermilion = paintSurface(5103, () => {
     wash(organic(959, 414, 182, 133, 67, .2, -.34, 22), '#CB4D42', 37,
@@ -141,44 +140,43 @@ export function createInkOpening() {
   const drawRight = inkTrail('M1062 419 C1152 413 1210 380 1327 428', { size: 5.5, color: '#773A31', seed: 77 });
   let lastArc;
   return {
-    paint: group('opening-art', group('opening-lens', lens.paint)
-      + group('opening-verm', canvasSlot('opening-verm-canvas'))
-      + group('opening-flame', flame(), 'data-paint-cache=""') + diagrams.paint),
-    lettering: `<g id="opening-left-trail"></g><g id="opening-right-trail"></g>
+    paint: group('opening-art', group('opening-verm', canvasSlot('opening-verm-canvas'))
+      + group('opening-flame', flame(), 'data-paint-cache=""') + group('opening-diagrams', diagrams.paint)),
+    lettering: `<g id="opening-branches"><g id="opening-left-trail"></g><g id="opening-right-trail"></g>
       ${concept('opening-left', 510, '#1F1C19', '变质', '细胞变性、坏死与破溃')}
       ${concept('opening-right', 1410, RED, '渗出', '血管扩张、血浆与白细胞游出')}
       <text class="note title" x="90" y="105" font-size="26" fill="#2A2622">急性阑尾炎始终以变质、渗出为主</text>
-      ${ink('M91 122 Q150 123 207 120', { color: '#826E5F', size: 1.6, opacity: .43, seed: 66 })}`,
+      ${ink('M91 122 Q150 123 207 120', { color: '#826E5F', size: 1.6, opacity: .43, seed: 66 })}</g>`,
     mount(art, lettering) {
-      lens.mount(art);
       mountSurface(art, 'opening-verm-canvas', vermilion);
       diagrams.mount(art);
-      artNodes = selectIds(art, ['opening-art', 'opening-lens', 'opening-verm', 'opening-flame']);
-      labelNodes = selectIds(lettering, ['opening-left-trail', 'opening-right-trail', 'opening-left', 'opening-right']);
+      artNodes = selectIds(art, ['opening-verm', 'opening-flame', 'opening-diagrams']);
+      labelNodes = selectIds(lettering, ['opening-branches', 'opening-left-trail', 'opening-right-trail', 'opening-left', 'opening-right']);
     },
-    update(_cue, p) {
-      const draw = ramp(p, 0, .35);
-      const closing = artNodes['opening-lens'];
-      const scale = lerp(1, .31, draw);
-      closing.setAttribute('transform', `translate(960 415) scale(${scale}) translate(-960 -415)`);
-      closing.setAttribute('opacity', .72 * (1 - draw));
-      artNodes['opening-art'].setAttribute('opacity', 1 - ramp(p, .88, 1));
-      artNodes['opening-flame'].setAttribute('opacity', ramp(p, .09, .35));
-      artNodes['opening-verm'].setAttribute('opacity', ramp(p, .07, .35));
-      const glow = lerp(.69, 1, draw);
-      artNodes['opening-verm'].setAttribute('transform', `translate(960 415) scale(${glow}) translate(-960 -415)`);
+    update(_cue, p, bridgeProgress = 0) {
+      const draw = ramp(p, 0, .23);
+      const stretch = lerp(1, 1.28, ramp(bridgeProgress, 0, .73));
+      const branches = 1 - ramp(bridgeProgress, .02, .65);
+      artNodes['opening-diagrams'].setAttribute('opacity', branches);
+      labelNodes['opening-branches'].setAttribute('opacity', branches);
+      artNodes['opening-flame'].setAttribute('opacity', .94 + .06 * draw);
+      artNodes['opening-flame'].setAttribute('transform', `translate(960 0) scale(${stretch} 1) translate(-960 0)`);
+      artNodes['opening-verm'].setAttribute('opacity', .65 + .35 * draw);
+      const glow = lerp(.91, 1, draw);
+      artNodes['opening-verm'].setAttribute('transform',
+        `translate(${MICROSCOPE_HANDOFF.cx} ${MICROSCOPE_HANDOFF.cy}) scale(${glow * stretch} ${glow}) translate(-960 -415)`);
       diagrams.update(p);
-      const arc = ramp(p, .35, .86);
+      const arc = ramp(p, .26, .60);
       if (arc !== lastArc) {
         labelNodes['opening-left-trail'].innerHTML = drawLeft(arc);
         labelNodes['opening-right-trail'].innerHTML = drawRight(arc);
         lastArc = arc;
       }
       for (const [index, side] of ['left', 'right'].entries()) {
-        const enter = ramp(p, .46 + index * .025, .73 + index * .025);
+        const enter = ramp(p, .32 + index * .035, .49 + index * .035);
         labelNodes[`opening-${side}`].setAttribute('opacity', enter);
         labelNodes[`opening-${side}`].setAttribute('transform',
-          `translate(${(1 - enter) * (index === 0 ? 23 : -23)} 0)`);
+          `translate(0 ${7 * (1 - enter)})`);
       }
     },
   };

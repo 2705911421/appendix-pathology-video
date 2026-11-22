@@ -1,5 +1,6 @@
 import { lerp } from '../../shared/canvasCore.js';
-import { dot, fade, fill, ink, letter, pathOf, roughPath, stroke } from './paint.js';
+import { NUMERAL_FONT } from '../../shared/fonts.js';
+import { dot, fade, fill, ink, letter, pathOf, roughPath } from './paint.js';
 
 export const palette = [
   { key: 'pink', label: '粉白', color: '#F2B8B0' },
@@ -16,7 +17,7 @@ export function makeNotes(pigment) {
   const clockEdge = roughPath('M141 355 C142 314 81 314 81 355 C81 395 142 396 141 355Z', 299, '#645649', 2);
   const nightStars = [[113, 152, 2], [126, 190, 1.6], [197, 155, 1.1], [238, 177, 2.3], [221, 216, 1.25]];
   return (ctx, motion) => {
-    const { sunset, night, noteOpacity, swatches } = motion;
+    const { sunset, night, noteOpacity } = motion;
     fade(ctx, noteOpacity, () => {
       ctx.save();
       ctx.clip(pathOf(pane));
@@ -54,6 +55,10 @@ export function makeNotes(pigment) {
       ink(ctx, 'M87 209 Q166 209 263 210', '#625545', 5);
       ink(ctx, 'M76 304 Q156 309 275 302', '#8B6F56', 6.5);
 
+      ctx.save();
+      ctx.translate(111, 335);
+      ctx.scale(.74, .74);
+      ctx.translate(-111, -355);
       clockEdge(ctx);
       for (let tick = 0; tick < 12; tick++) {
         const angle = tick / 12 * Math.PI * 2;
@@ -79,29 +84,11 @@ export function makeNotes(pigment) {
         ctx.restore();
       }
       dot(ctx, 111, 355, 2.5, 2.5, '#4D4139');
+      ctx.restore();
       const time = String(Math.floor(minutes / 60)).padStart(2, '0') + ':' + String(minutes % 60).padStart(2, '0');
-      letter(ctx, time, 153, 364, { size: 31, weight: 700, font: 'Georgia, serif' });
-      letter(ctx, night > .56 ? '急诊入院 · 病程 10h' : sunset > .75 ? '傍晚' : '午饭后', 88, 412, { size: 24, color: '#56493E' });
-    });
-
-    fade(ctx, motion.paletteOpacity, () => {
-      palette.forEach(({ key, label, color }, index) => {
-        const x = 88 + index * 54;
-        const y = 492;
-        const strength = swatches
-          ? Math.max(swatches[index], index === 1 ? motion.redCarry : 0)
-          : index === 0 ? 1 - sunset : index === 1 ? sunset : 0;
-        dot(ctx, x, y, 13, 12, color);
-        pigment(ctx, key, x - 20, y - 19, 40, 39);
-        fade(ctx, strength, () => {
-          ctx.save();
-          ctx.translate(x, y);
-          stroke(ctx, 'M15 9 Q10 19 -7 16 Q-20 11 -17 -4 Q-13 -20 4 -17 Q18 -13 18 1', '#B84739', 2.0);
-          ctx.restore();
-        });
-        fade(ctx, noteOpacity, () => letter(ctx, label, x, y + 37,
-          { align: 'center', size: 19, color: '#50453E' }));
-      });
+      letter(ctx, time, 153, 347, { size: 32, weight: 700, color: '#1F1C19', font: NUMERAL_FONT });
+      letter(ctx, night > .56 ? '急诊入院 · 病程 10h' : sunset > .75 ? '傍晚' : '午饭后', 88, 381,
+        { size: 19, color: '#5C564E' });
     });
   };
 }

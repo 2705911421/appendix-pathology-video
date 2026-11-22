@@ -220,7 +220,7 @@ try {
   assert.equal(counts.infiltrate, 950);
   assert.equal(counts.layerLabels, 5);
   assert.ok(counts.liveHistologyCanvases >= 1, 'Frozen histology did not mount its canvas');
-  assert.ok(counts.highPowerCells >= 65 && counts.highPowerCells <= 80 && counts.fibrinThreads >= 80);
+  assert.ok(counts.highPowerCells >= 140 && counts.fibrinThreads >= 80);
   assert.equal(counts.erythrocytes, 28);
   assert.ok(counts.leukocytes >= 5 && counts.leukocytes <= 6);
   assert.ok(counts.debrisNuclei >= 18 && counts.debrisNuclei <= 24);

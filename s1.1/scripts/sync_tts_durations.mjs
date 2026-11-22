@@ -1,17 +1,20 @@
 import { execFile } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { constants } from 'node:fs';
-import { copyFile, mkdir, open, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
 import { credits, readCueSheets } from './export_tts_sheet.mjs';
+import { cueDurationMs } from '../shared/timelineHelper.js';
+import { lockOutput } from './build_lock.mjs';
 
 const exec = promisify(execFile);
 const root = fileURLToPath(new URL('../', import.meta.url));
 const external = path.join(root, 'external_tts');
-const audio = path.join(root, 'audio');
 const output = path.join(root, 'out');
+export const voiceFile = path.join(root, 'audio', 'voice_master.wav');
+const timelineFile = path.join(output, 'master_timeline.json');
 const sampleRate = 44100;
 const channels = 2;
 const padding = 0.45;
@@ -33,18 +36,20 @@ async function fingerprint(file) {
   return [info.dev, info.ino, info.size, info.mtimeNs, info.ctimeNs].join('/');
 }
 
-async function findInputs(voices) {
-  const names = await readdir(external).catch(error => {
+export async function findExternalInputs(cues, { allowEmpty = false } = {}) {
+  const voices = cues.filter(({ type }) => type === 'speech');
+  const entries = await readdir(external, { withFileTypes: true }).catch(error => {
     if (error.code === 'ENOENT') return [];
     throw error;
   });
   const byId = new Map(voices.map(({ id }) => [id, []]));
-  for (const name of names) {
+  for (const { name } of entries.filter(entry => entry.isFile())) {
     const match = /^(S\d{2})\.(wav|mp3)$/iu.exec(name);
     if (match) byId.get(match[1].toUpperCase())?.push(name);
   }
   const missing = voices.filter(({ id }) => byId.get(id).length === 0).map(({ id }) => id);
   const duplicate = voices.filter(({ id }) => byId.get(id).length > 1).map(({ id }) => byId.get(id).join(' / '));
+  if (allowEmpty && missing.length === voices.length) return [];
   const errors = [];
   if (missing.length) errors.push(`缺少 ${missing.length} 条音频（.wav 或 .mp3）\n${missing.join('、')}`);
   if (duplicate.length) errors.push(`同一个 cue 需要唯一音频\n${duplicate.join('\n')}`);
@@ -84,17 +89,19 @@ function timeline(sheets, cues, measured) {
   const byId = new Map(measured.map(input => [input.id, input]));
   const sectionStarts = new Map();
   let cursorMs = 0;
-  const slots = cues.map(({ id, module, zhText, enText, defaultDuration }) => {
+  const slots = cues.map(cue => {
+    const { id, module, type, zhText, enText, defaultDuration } = cue;
     const input = byId.get(id);
     const realDur = input?.realDur ?? 0;
-    const slotDur = id === credits.id ? credits.duration : Number((realDur + padding).toFixed(3));
+    const slotMs = type === 'speech' ? Math.round((realDur + padding) * 1000) : cueDurationMs(cue);
+    const slotDur = slotMs / 1000;
     const startMs = cursorMs;
-    cursorMs += Math.round(slotDur * 1000);
+    cursorMs += slotMs;
     if (!Number.isSafeInteger(cursorMs * sampleRate)) throw new Error('时间轴超出可处理范围');
     if (!sectionStarts.has(module)) sectionStarts.set(module, startMs);
     const sectionOffset = sectionStarts.get(module);
     return {
-      id, module, zhText, enText, defaultDuration, realDur, slotDur,
+      id, module, type, zhText, enText, defaultDuration, realDur, slotDur,
       inputPath: input?.inputPath ?? null,
       start: startMs / 1000, end: cursorMs / 1000,
       sectionStart: (startMs - sectionOffset) / 1000, sectionEnd: (cursorMs - sectionOffset) / 1000,
@@ -119,12 +126,13 @@ function timeline(sheets, cues, measured) {
 async function renderVoice(measured, master, file) {
   const format = `aformat=sample_fmts=s16:sample_rates=${sampleRate}:channel_layouts=stereo`;
   const clock = 'asetpts=N/SR/TB';
-  const filters = master.cues.map(({ id, startSample, endSample }, index) => {
+  const speechStreams = new Map(measured.map(({ id }, index) => [id, index]));
+  const filters = master.cues.map(({ id, type, startSample, endSample }, index) => {
     const length = endSample - startSample;
     const clip = `atrim=end_sample=${length},${clock}[slot${index}]`;
-    return id === credits.id
+    return type !== 'speech'
       ? `anullsrc=r=${sampleRate}:cl=stereo,${format},${clip}`
-      : `[${index}:a:0]aresample=${sampleRate},${format},apad=whole_len=${length},${clip}`;
+      : `[${speechStreams.get(id)}:a:0]aresample=${sampleRate},${format},apad=whole_len=${length},${clip}`;
   });
   const inputs = master.cues.map((_, index) => `[slot${index}]`).join('');
   filters.push(`${inputs}concat=n=${master.cues.length}:v=0:a=1[voice]`);
@@ -163,10 +171,7 @@ async function publish(files, token) {
         if (error.code !== 'ENOENT') throw error;
       }
     }
-    for (const { temporary, destination, original } of files) {
-      if (original && !(await readFile(destination)).equals(original)) {
-        throw new Error(`配音处理期间清单发生变化 ${destination}`);
-      }
+    for (const { temporary, destination } of files) {
       await rename(temporary, destination);
       committed.push(destination);
     }
@@ -191,63 +196,51 @@ async function publish(files, token) {
   }
 }
 
-async function syncDurations() {
-  const { sheets, cues } = await readCueSheets();
-  const inputs = await findInputs(cues.filter(({ id }) => id !== credits.id));
-  await Promise.all([audio, output].map(directory => mkdir(directory, { recursive: true })));
-  const mutex = path.join(output, '.sync_tts_durations.lock');
-  let lock;
-  try {
-    lock = await open(mutex, 'wx');
-  } catch (error) {
-    if (error.code === 'EEXIST') throw new Error(`已有回填锁 ${mutex}`, { cause: error });
-    throw error;
-  }
+export async function syncDurations({ sheets, cues }, inputs) {
+  await mkdir(path.dirname(voiceFile), { recursive: true });
   const token = randomUUID();
   const staged = [];
-  const stage = (destination, original) => {
-    const record = { destination, original, temporary: `${destination}.${token}.tmp` };
+  const stage = destination => {
+    const record = { destination, temporary: `${destination}.${token}.tmp` };
     staged.push(record);
     return record.temporary;
   };
-  const persistJson = (file, value) => writeFile(file, `${JSON.stringify(value, null, 2)}\n`, { flag: 'wx' });
   try {
-    await lock.writeFile(`${process.pid}\n`);
     const measured = [];
     for (const input of inputs) {
       const { realDur } = await probe(input.file, input.id);
       measured.push({ ...input, realDur });
     }
     const master = timeline(sheets, cues, measured);
-    const durations = new Map(master.cues.map(({ id, slotDur }) => [id, slotDur]));
-    await renderVoice(measured, master, stage(path.join(audio, 'voice_master.wav')));
-    for (const { file, original, sheet } of sheets) {
-      if (!(await readFile(file)).equals(original)) throw new Error(`配音处理期间清单发生变化 ${file}`);
-      await persistJson(stage(file, original), {
-        ...sheet,
-        cues: sheet.cues.map(cue => ({ ...cue, duration: durations.get(cue.id) })),
-      });
-    }
-    await persistJson(stage(path.join(output, 'master_timeline.json')), master);
+    await renderVoice(measured, master, stage(voiceFile));
+    await writeFile(stage(timelineFile), `${JSON.stringify(master, null, 2)}\n`, { flag: 'wx' });
     for (const input of inputs) {
       if (await fingerprint(input.file) !== input.fingerprint) {
         throw new Error(`配音处理期间音频发生变化 ${input.id}`);
       }
     }
     await publish(staged, token);
-    console.log(`已回填 ${measured.length} 句，全片 ${master.duration.toFixed(3)} 秒，含 S26 的 ${credits.duration.toFixed(3)} 秒静音。`);
-    console.log(path.join(audio, 'voice_master.wav'));
-    console.log(path.join(output, 'master_timeline.json'));
+    const bridgeDuration = master.cues.reduce((sum, cue) => sum + (cue.type === 'bridge' ? cue.slotDur : 0), 0);
+    console.log(`已回填 ${measured.length} 句，全片 ${master.duration.toFixed(3)} 秒，含 ${bridgeDuration.toFixed(3)} 秒静音桥段及 S26 的 ${credits.duration.toFixed(3)} 秒静音。`);
+    console.log(voiceFile);
+    console.log(timelineFile);
+    return master;
   } finally {
     await cleanFiles(staged.map(record => record.temporary));
-    await lock.close();
-    await cleanFiles([mutex]);
   }
 }
 
-try {
-  await syncDurations();
-} catch (error) {
-  console.error(error.message);
-  process.exitCode = 1;
+if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url) {
+  try {
+    const release = await lockOutput(output);
+    try {
+      const source = await readCueSheets();
+      await syncDurations(source, await findExternalInputs(source.cues));
+    } finally {
+      await release();
+    }
+  } catch (error) {
+    console.error(error.message);
+    process.exitCode = 1;
+  }
 }

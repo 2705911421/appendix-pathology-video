@@ -54,9 +54,10 @@ async function preflight(worker) {
   assert.equal(states.vessel.dilation, 24);
   assert.deepEqual(states.vessel.clefts, [[1040, 20], [1230, 20]]);
   assert.equal(states.last.migrated, 6);
+  assert.ok(states.last.clefts.every(([, width]) => width < 1));
   assert.equal(states.weaveEnd.infiltrate, 950);
   assert.equal(states.weaveEnd.layerLabels, 5);
-  assert.ok(states.weaveEnd.fibrinThreads >= 80 && states.weaveEnd.highPowerCells >= 65 && states.weaveEnd.highPowerCells <= 80);
+  assert.ok(states.weaveEnd.fibrinThreads >= 80 && states.weaveEnd.highPowerCells >= 140);
   assert.ok(states.weaveStart.visibleThreads < states.weaveEnd.visibleThreads
     && states.weaveStart.visiblePus < states.weaveEnd.visiblePus);
   assert.equal(states.weaveEnd.rasterNodes, 0);

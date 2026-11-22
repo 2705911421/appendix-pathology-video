@@ -3,62 +3,93 @@
   "width": 1920,
   "height": 1080,
   "fps": 30,
-  "duration": 61.5,
+  "duration": 64.2,
   "cues": [
     {
       "id": "S10",
-      "defaultDuration": 9.5,
+      "type": "speech",
+      "defaultDuration": 8.6,
       "zhText": "在病理学家眼里，急性阑尾炎的本质，始终绕不开两个核心动作——“变质”和“渗出”。",
       "highlightZh": [
-        "急性阑尾炎",
         "变质",
         "渗出"
       ],
-      "enText": "To a pathologist, acute appendicitis always revolves around two core processes: alteration and exudation."
+      "enText": "In pathology, acute appendicitis centers on two processes: tissue injury and exudation."
+    },
+    {
+      "id": "B03b",
+      "type": "bridge",
+      "duration": 1.4,
+      "start": 8.6,
+      "end": 10
     },
     {
       "id": "S11",
-      "defaultDuration": 12,
-      "zhText": "当管腔被堵死、腔内压力飙升，黏膜屏障在缺血和细菌的双重夹击下迅速坏死、破溃脱落——这种组织细胞的损伤，就是“变质”。",
+      "type": "speech",
+      "defaultDuration": 11.4,
+      "zhText": "如果阑尾腔堵塞，腔内压会升高。缺血和细菌可使黏膜坏死、脱落并形成溃疡，这种组织损伤叫作“变质”。",
       "highlightZh": [
-        "坏死、破溃脱落",
+        "腔内压",
+        "缺血",
+        "坏死",
+        "溃疡",
         "变质"
       ],
-      "enText": "Blocked and pressurized, the ischemic mucosa breaks down under bacterial attack—this cellular necrosis and ulceration is alteration."
+      "enText": "An obstruction can raise pressure inside the appendix. Ischemia and bacteria can cause mucosal necrosis, sloughing and ulceration. This is tissue injury."
     },
     {
       "id": "S12",
-      "defaultDuration": 13,
-      "zhText": "警报一响，血管立刻扩张充血，把血浆和成群的分叶核中性粒细胞挤出血管壁，穿过内皮间隙，弥漫冲向阑尾壁全层——这就是“渗出”。",
+      "type": "speech",
+      "defaultDuration": 13.5,
+      "zhText": "炎症使血管扩张、通透性增加，液体和蛋白外渗。分叶核中性粒细胞变形，穿过内皮间隙，化脓时可浸润全层。这些都属于“渗出”。",
       "highlightZh": [
-        "扩张充血",
+        "血管扩张",
+        "通透性增加",
         "分叶核中性粒细胞",
+        "内皮间隙",
         "渗出"
       ],
-      "enText": "Alarmed vessels dilate, squeezing plasma and multi-lobed neutrophils through endothelial gaps to flood every wall layer—that is exudation."
+      "enText": "Inflamed vessels dilate and become more permeable, allowing fluid and proteins to leak out. Neutrophils with lobed nuclei deform and cross endothelial gaps. In suppurative disease they can infiltrate the full wall. All of this is exudation."
     },
     {
       "id": "S13",
-      "defaultDuration": 12.5,
-      "zhText": "战火一路烧穿肌层，直达最外层的浆膜。请仔细看浆膜表面渗出的东西：它可不只是单纯的纤维素，而是纤维素与脓液的混合渗出物。",
+      "type": "speech",
+      "defaultDuration": 11.7,
+      "zhText": "化脓时，中性粒细胞可穿过肌层、浸润阑尾壁全层。最外面的浆膜可覆有纤维素性脓性渗出物。",
       "highlightZh": [
+        "浸润阑尾壁全层",
         "浆膜",
-        "不只是单纯的纤维素",
-        "纤维素与脓液的混合"
+        "纤维素性脓性渗出物"
       ],
-      "enText": "The battle burns through the muscle to the outer serosa. Look closely: what oozes out is not pure fibrin, but a mix of fibrin and pus."
+      "enText": "In suppurative appendicitis, neutrophils can infiltrate the full wall, including muscle. The outer serosa may be coated with fibrinous-purulent exudate."
+    },
+    {
+      "id": "B04",
+      "type": "bridge",
+      "duration": 2,
+      "start": 46.6,
+      "end": 48.6
     },
     {
       "id": "S14",
-      "defaultDuration": 14.5,
-      "zhText": "在交织成网的纤维素丝之间，密密麻麻裹挟着大量变性坏死的中性粒细胞，也就是脓细胞——这种“纤维素性脓性渗出物”，才是阑尾表面灰黄色的真正来源！",
+      "type": "speech",
+      "defaultDuration": 13.6,
+      "zhText": "交织的纤维素丝网中，可见大量变性、坏死的中性粒细胞，也就是脓细胞。这层纤维素性脓性渗出物，使阑尾表面呈灰黄色。",
       "highlightZh": [
-        "变性坏死的中性粒细胞",
+        "纤维素丝网",
+        "变性、坏死的中性粒细胞",
         "脓细胞",
         "纤维素性脓性渗出物",
         "灰黄色"
       ],
-      "enText": "Tangled within the fibrin mesh are legions of degenerated neutrophils—pus cells. This fibrinous-purulent exudate is the true source of that yellow color!"
+      "enText": "The fibrin mesh contains many degenerated and necrotic neutrophils, or pus cells. This fibrinous-purulent exudate gives the appendix its grayish-yellow surface."
+    },
+    {
+      "id": "B05",
+      "type": "bridge",
+      "duration": 2,
+      "start": 62.2,
+      "end": 64.2
     }
   ]
 }

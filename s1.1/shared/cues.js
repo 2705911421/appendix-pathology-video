@@ -2,13 +2,12 @@ import { randomUUID } from 'node:crypto';
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { asciiApostrophes, assertBlindReviewText, HEIGHT, WIDTH } from './canvasCore.js';
+import { cueType } from './timelineHelper.js';
 
 export const FPS = 30;
-export const FILM_DURATION = 300.0;
-export const FILM_FRAMES = FILM_DURATION * FPS;
 const sections = Array.from({ length: 6 }, (_, index) => `s1.1-${index + 1}`);
 const sheetKeys = ['module', 'width', 'height', 'fps', 'duration', 'cues'];
-const cueKeys = ['id', 'start', 'end', 'zh', 'en'];
+const cueKeys = ['id', 'type', 'start', 'end', 'zh', 'en'];
 
 function assertFields(value, allowed, label) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new TypeError(`${label} must be an object`);
@@ -43,7 +42,7 @@ export function normalizeSectionCues(sheet) {
   if (!sections.includes(module)) throw new RangeError('Expected an s1.1 section from 1 to 6');
   if (fps !== FPS || width !== WIDTH || height !== HEIGHT) throw new RangeError('Expected 1920×1080 at 30 fps');
   const durationFrames = frame(duration);
-  if (durationFrames < 1 || durationFrames > FILM_FRAMES) throw new RangeError('Invalid section duration');
+  if (durationFrames < 1) throw new RangeError('Invalid section duration');
   if (!Array.isArray(cues) || !cues.length) throw new TypeError('Expected visual cues');
   let cursor = 0;
   const ids = new Set();
@@ -61,7 +60,11 @@ export function normalizeSectionCues(sheet) {
       throw new RangeError('Visual cues must cover each frame continuously');
     }
     cursor = endFrame;
-    return { id, start: startFrame / FPS, end: endFrame / FPS, zh: zhText(zh), en: enText(en) };
+    const declared = cue.type === undefined ? {} : { type: cueType(cue) };
+    if (declared.type && declared.type !== 'speech' && (zh !== '' || en !== '')) {
+      throw new Error(`Silent cue ${id} cannot have captions`);
+    }
+    return { id, ...declared, start: startFrame / FPS, end: endFrame / FPS, zh: zhText(zh), en: enText(en) };
   });
   if (cursor !== durationFrames) throw new RangeError('Visual cues must reach the end of the section');
   return { module, width, height, fps, duration: durationFrames / FPS, cues: timeline };
@@ -81,8 +84,7 @@ export function validateFilmCues(sheets) {
     cursor += frame(sheet.duration);
     return { module, startFrame, endFrame: cursor };
   });
-  if (cursor !== FILM_FRAMES) throw new RangeError(`Expected ${FILM_FRAMES} frames (300.0s), received ${cursor}`);
-  return { duration: FILM_DURATION, frames: cursor, fps: FPS, sections: timeline };
+  return { duration: cursor / FPS, frames: cursor, fps: FPS, sections: timeline };
 }
 
 const fileName = module => `cues_${module}.json`;

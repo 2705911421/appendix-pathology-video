@@ -5,14 +5,16 @@ import { drawRaster, logicalContext, rasterScale } from './detail/raster.js';
 export const HISTOLOGY_DIAMETER = 520;
 const D = HISTOLOGY_DIAMETER, R = D / 2, TAU = 2 * Math.PI;
 const WHITE = '#FDF9FB';
+const TISSUE = '#F1D8E5';
 const MATRIX = 'rgba(232,168,196,0.14)';
 const MUSCLE = 'rgba(218,118,158,0.22)';
 const PURE_NUCLEUS = '#361366';
 const hematoxylin = '#4A1F85';
+export const SIMPLE_MUSCLE_NEUTROPHILS = Object.freeze([[143,349],[226,401],[319,363],[390,433]].map(Object.freeze));
 const presets = {
   normal: { crypts: 44, follicles: 7, vessels: 11, muscleStrokes: 90, muscleNuclei: 180 },
-  simple: { crypts: 14, vessels: 8, shallow: 228, muscle: 4, muscleStrokes: 65, muscleNuclei: 150 },
-  phlegmon: { crypts: 5, vessels: 9, shallow: 550, muscle: 400, freePus: 25, serosalPus: 156, fibrin: 68 },
+  simple: { crypts: 14, vessels: 8, shallow: 228, muscle: SIMPLE_MUSCLE_NEUTROPHILS.length, muscleStrokes: 65, muscleNuclei: 150 },
+  phlegmon: { crypts: 5, vessels: 9, shallow: 550, muscle: 400, freePus: 25, serosalPus: 190, fibrin: 68 },
   gangrene: { crypts: 0, clouds: 21, ghostField: 408, thrombosed: 6, fissurePus: 132, fissureRedCells: 102 },
   chronic: { crypts: 7, bundles: 26, fibroblasts: 100, clusters: 6, vessels: 4,
     lymphocytes: 206, plasmaCells: 50, laminaNuclei: 108, serosalVessels: 2, serosalLymphocytes: 14 },
@@ -208,14 +210,14 @@ export function drawPlasmaCell(ctx,x,y,seed,{ chronic = false }={}) {
   ctx.translate(x,y);
   ctx.rotate(rand()*TAU);
   if (chronic) ctx.scale(.79,.79);
-  ell(ctx,0,0,4.5,6,'rgba(176,172,212,.72)');
-  area(ctx,'M-2.91 1.35 C-2.41 -1.40 -0.45 -2.74 2.11 -1.08 C.14 -1.53 -1.29 -.10 -.84 1.70 C-1.54 2.0 -2.12 1.68 -2.91 1.35Z','#FFFFFF',.96);
-  ell(ctx,1.04,2.12,2.4,2.4,'#33125E');
-  const n=3+Math.floor(rand()*2);
-  for(let i=0;i<n;i++){
-    const a=i*TAU/n+.37;
-    ell(ctx,1.04+1.59*Math.cos(a),2.12+1.59*Math.sin(a),.82,.47,'#210C44',1,a);
+  ell(ctx,0,0,4.5,6,'rgba(174,153,195,.83)');
+  area(ctx,'M-2.92 1.91 C-3.30 -.34 -1.14 -2.47 2.21 -.89 C.44 -.92 -.81 .34 -.89 2.1 Q-1.88 2.32 -2.92 1.91Z','#FFF8FA',.96);
+  ell(ctx,1.02,2.12,2.46,2.46,'#84599F');
+  for(let i=0;i<6;i++){
+    const a=i*TAU/6+.37;
+    ell(ctx,1.02+1.71*Math.cos(a),2.12+1.71*Math.sin(a),.82,.51,'#341259',1,a+Math.PI/2);
   }
+  ell(ctx,1.02,2.12,.45,.45,'#422066',.83);
   ctx.restore();
 }
 
@@ -235,7 +237,7 @@ const rectified = n => () => n;
 const layers = {
   simple:[.14,.38,.60,.88],
   phlegmon:[.14,.37,.58,.83],
-  chronic:[.13,.28,.56,.85],
+  chronic:[.13,.26,.56,.83],
 };
 const ripple = (x,i) => 4.4*Math.sin(x/39+i*.69) + 2.1*Math.sin(x/20-i*1.20);
 function boundaries(stage) {
@@ -285,28 +287,52 @@ function matrixThreads(ctx,seed,levels) {
 }
 
 function wallBase(ctx,stage,levels,seed) {
-  for(const [i,color] of [[1,MATRIX],[2,MATRIX],[3,MUSCLE],[4,stage==='phlegmon'?'rgba(228,200,108,.44)':'rgba(222,138,173,.17)']]){
+  const serosaBase=stage==='phlegmon'?'rgba(230,161,182,.34)':'rgba(222,138,173,.17)';
+  for(const [i,color] of [[1,MATRIX],[2,MATRIX],[3,MUSCLE],[4,serosaBase]]){
     area(ctx,band(levels[i],levels[i+1]),color);
   }
   for(let i=1;i<=4;i++) trace(ctx,profilePath(levels[i]),i===1?'#AE648A':'#C087A4',i===1?1.42:1.02,i===1?.56:.38);
   if(stage==='phlegmon') {
-    ctx.save();
-    ctx.clip(new Path2D(band(levels[4],levels[5])));
-    paintWatercolor(ctx,seed+457,wash=>{
+    const deposit=makeCanvas(D,D);
+    const coating=logicalContext(deposit,{willReadFrequently:true});
+    paintWatercolor(coating,seed+457,wash=>{
       for(let j=0;j<8;j++){
         const x=24+j*(D/8), y=levels[4](x)+27+8*Math.sin(j*1.83);
         wash(organic(x,y,41+6*Math.sin(j),17+j%3*8,seed+j*251,.27,-.08,18),j%3?'#DFC474':'#E8CE88',121,
           {bleed:.23,edge:.25});
       }
-    },{opacity:.27});
+    },{blend:'source-over'});
+    // Flatten the brush buffer before clipping and constrain this fibrin glaze to its golden pigments.
+    const pixels=coating.getImageData(0,0,deposit.width,deposit.height);
+    const {data}=pixels;
+    for(let i=0;i<data.length;i+=4){
+      if(data[i+3]&&data[i+2]>data[i+1]+4){
+        data[i]=223;
+        data[i+1]=196;
+        data[i+2]=116;
+      }
+    }
+    coating.putImageData(pixels,0,0);
+    ctx.save();
+    ctx.clip(new Path2D(band(levels[4],levels[5])));
+    ctx.globalAlpha*=.27;
+    ctx.globalCompositeOperation='multiply';
+    drawRaster(ctx,deposit);
     ctx.restore();
+  } else {
+    const rand=mulberry32(seed+643);
+    const fits=between(levels,4,5,2);
+    deposit(82,()=>roundSample(rand),(x,y,i)=>{
+      spindle(ctx,x,y,(rand()-.5)*.8,seed+i*191,{color:'#9B688E',length:3.4+rand()*4,width:.9,alpha:.59});
+      if(i%3===0)trace(ctx,`M${x-8} ${y+2} q8 -5 17 -2`,'#C882A4',.81,.36);
+    },fits);
   }
   matrixThreads(ctx,seed+104,levels);
 }
 
 function polarNormal(ctx,seed,metrics,recipe) {
   const rand=mulberry32(seed);
-  ctx.fillStyle='#FCF8FA';
+  ctx.fillStyle=TISSUE;
   ctx.fillRect(0,0,D,D);
   area(ctx,around(R,R,R*.761,R*.761),MATRIX);
   const annulus=around(R,R,R+1,R+1);
@@ -371,21 +397,22 @@ function polarNormal(ctx,seed,metrics,recipe) {
   trace(ctx,around(R,R,R-1.8,R-1.9),'#D58AA9',1.8,.46);
 }
 
+function muscleChannel(lines,x,lane) {
+  return lerp(lines[3](x),lines[4](x),lane)+4.01*Math.sin(x/42+lane*6)+1.6*Math.sin(x/20+lane*10);
+}
+
 function muscleStrands(ctx,stage,lines,seed,metrics,{strokes,nuclei}) {
   const rand=mulberry32(seed);
   ctx.save();
   ctx.clip(new Path2D(band(lines[3],lines[4])));
   const phleg=stage==='phlegmon';
-  function channel(x,lane){
-    return lerp(lines[3](x),lines[4](x),lane)+4.01*Math.sin(x/42+lane*6)+1.6*Math.sin(x/20+lane*10);
-  }
   for(let i=0;i<strokes;i++){
     const lane = phleg ? .105+(i%6)*.158 + (rand()-.5)*.084 : .036+(i+rand()*.58)/strokes*.92;
     const x0 = -30 + rand() * 193 - (i % 3 === 0 ? 103 : 0);
     const end = phleg ? 155+rand()*352 : 127+rand()*328;
     const pts=Array.from({length:46},(_,j)=>{
       const x=x0+end*j/45;
-      return [round(x),round(channel(x,lane)+.89*Math.sin(x/11+i))];
+      return [round(x),round(muscleChannel(lines,x,lane)+.89*Math.sin(x/11+i))];
     });
     const opacity=phleg ? .16+rand()*.12 : .22;
     trace(ctx,'M'+pts.join('L'),`rgba(204,86,134,${opacity})`,1.25+rand()*(phleg?3.85:1.81));
@@ -483,17 +510,16 @@ function phlegmonCells(ctx,lines,seed,metrics,recipe) {
     drawMicroNeutrophil(ctx,x,y,seed+i*103);
     metrics.shallow++;
   },between(lines,1,3,4));
-  const streaks = [[81,46,.10],[171,67,.25],[290,97,.41],
-    [382,55,.58],[254,81,.75],[106,42,.92]];
-  for (let j=0; j<streaks.length;j++) {
-    const [cx,spread,lane] = streaks[j];
+  const streaks = [[81,46,.18],[171,67,.34],[290,97,.50],
+    [382,55,.66],[254,81,.82],[151,64,.94]];
+  for (const [j,[cx,spread,lane]] of streaks.entries()) {
     const sample=()=>{
       const x = cx+gaussish(rand)*spread;
-      const y = lerp(lines[3](x),lines[4](x),lane)+4.6*Math.sin(x/37+lane*5)
-        + 2.45*Math.cos(x/18+lane*7) + gaussish(rand)*3.4;
+      const y = muscleChannel(lines,x,lane) + gaussish(rand)*3.4;
       return [x,y];
     };
-    const n=[47,75,85,63,73,57][j];
+    const n = Math.floor(recipe.muscle * (j + 1) / streaks.length)
+      - Math.floor(recipe.muscle * j / streaks.length);
     deposit(n,sample,(x,y,i)=>{
       drawMicroNeutrophil(ctx,x,y,seed+i*71+j*1859);
       metrics.muscle++;
@@ -518,9 +544,8 @@ function simpleCells(ctx,lines,seed,metrics,recipe) {
     drawMicroNeutrophil(ctx,x,y,seed+i*113);
     metrics.shallow++;
   },between(lines,1,3,4));
-  const muscle = [[143,349],[226,401],[319,363],[390,433]];
   const fits=between(lines,3,4,6);
-  muscle.forEach(([x,y],i)=>{
+  SIMPLE_MUSCLE_NEUTROPHILS.forEach(([x,y],i)=>{
     if (!fits(x,y)) throw new Error('The scattered simple-stage cell left the muscle layer');
     drawMicroNeutrophil(ctx,x,y,seed+i*719+50027);
     metrics.muscle++;
@@ -670,7 +695,7 @@ function chronicMuscularis(ctx, lines, seed, metrics) {
   ];
   for (const [i, [x, y, rx, ry, tilt]] of islands.entries()) {
     const fragment = new Path2D(organic(x, y, rx, ry, seed + i * 337, .22, tilt, 27));
-    area(ctx, fragment, 'rgba(196,74,122,.30)');
+    area(ctx, fragment, 'rgba(196,74,122,.21)');
     ctx.save();
     ctx.clip(fragment);
     for (let j = 0; j < 20; j++) {
@@ -688,11 +713,11 @@ function chronicMuscularis(ctx, lines, seed, metrics) {
     }
     ctx.restore();
   }
-  for (let i = 0; i < 13; i++) {
-    const x = 32 + i % 5 * 115 + rand() * 23;
-    const y = lerp(lines[3](x) + 7, lines[4](x) - 3, .17 + .28 * Math.floor(i / 5) + rand() * .12);
+  for (let i = 0; i < 20; i++) {
+    const x = 32 + i % 5 * 108 + rand() * 23;
+    const y = lerp(lines[3](x) + 7, lines[4](x) - 3, .12 + .23 * Math.floor(i / 5) + rand() * .08);
     const direction = i % 3 === 0 ? -.57 : .39 + rand() * .27;
-    chronicFibrils(ctx, chronicFibrePath(x, y, 65 + rand() * 82, direction, rand), rand, '#E09EB9');
+    chronicFibrils(ctx, chronicFibrePath(x, y, 65 + rand() * 82, direction, rand), rand, '#D57EA5');
   }
   ctx.restore();
 }
@@ -811,9 +836,13 @@ function tornChannel(seed) {
 
 function necroticField(ctx,seed,metrics,recipe) {
   const rand=mulberry32(seed);
-  ctx.fillStyle='#B57D84';
+  const ground=ctx.createLinearGradient(122,40,380,490);
+  ground.addColorStop(0,'#925F61');
+  ground.addColorStop(.53,'#692F35');
+  ground.addColorStop(1,'#9A6265');
+  ctx.fillStyle=ground;
   ctx.fillRect(0,0,D,D);
-  const pigmentPalette=['#5A1620','#7E2632','#3E1018','#78585C'];
+  const pigmentPalette=['#561923','#8B3A35','#471A24','#75474C'];
   for(let depth=0;depth<3;depth++){
     const depositCanvas=makeCanvas(D,D);
     const depositCtx=logicalContext(depositCanvas,{willReadFrequently:true});
@@ -842,22 +871,22 @@ function necroticField(ctx,seed,metrics,recipe) {
     drawRaster(ctx,depositCanvas);
     ctx.restore();
   }
-  for(let i=0;i<42;i++){
-    const x=rand()*D-96,y=192+rand()*316,length=91+rand()*222;
-    trace(ctx,`M${x} ${y} Q${x+length*.46} ${y-12+rand()*16} ${x+length} ${y+12-rand()*18}`,
-      i%3?'#C5879C':'#D49BA3',1.1+rand()*4.9,.10+rand()*.14);
+  for(let i=0;i<80;i++){
+    const x=rand()*D,y=86+rand()*428, length=11+rand()*72, tilt=(rand()-.5)*37;
+    trace(ctx,`M${x} ${y} q${length*.31} ${tilt*.38} ${length*.64} ${tilt*.77} t${length*.36} ${tilt*.23}`,
+      i%4?'#A4656D':'#C38D8B',.8+rand()*3.3,.09+rand()*.17);
   }
   deposit(recipe.ghostField,()=>roundSample(rand),(x,y,i)=>{
     const distance=Math.hypot((x-296)*1.02,(y-283)*.92);
-    const alpha=clamp(.10+.80*(distance/R),.10,.88);
-    const grey=spectral([166,133,148],[54,19,102],clamp(.08+distance/R*.72));
+    const alpha=clamp(.045+.72*(distance/R)**1.7,.045,.85);
+    const grey=spectral([164,121,128],[50,20,67],clamp(.08+distance/R*.76));
     if(i%4<2) drawMicroNeutrophil(ctx,x,y,seed+i*79,{alpha,color:grey});
     else ell(ctx,x,y,1.1+rand()*1.42,.71+rand()*.61,grey,alpha,rand()*TAU);
     metrics.ghostField++;
   },(x,y)=>inside(x,y,5));
   const hemorrhage=clusterSample(rand,[[181,185,64,44],[302,258,83,64],[342,342,52,57],[243,365,84,62]]);
   deposit(537,hemorrhage,(x,y,i)=>{
-    redCell(ctx,x,y,rand()*Math.PI,i%4?'#A83E49':'#CC5562',.45+rand()*.44);
+    redCell(ctx,x,y,rand()*Math.PI,i%4?'#9E3039':'#CC5562',.48+rand()*.44);
     metrics.extravascularReds++;
   },(x,y)=>inside(x,y,4));
   [[143,151,15.4,12.5],[92,255,15.9,12.0],[149,342,16.5,13.1],
@@ -869,16 +898,30 @@ function necroticField(ctx,seed,metrics,recipe) {
   area(ctx,tear.shape(4.1),'#501824',.84);
   trace(ctx,tear.shape(3.4),'#974653',2.4,.81);
   const slit = new Path2D(tear.shape(0));
-  area(ctx,slit,'#EDE096');
+  area(ctx,slit,'#DAB872');
   ctx.save();
   ctx.clip(slit);
-  paintWatercolor(ctx,seed+164,wash=>{
+  const stain = makeCanvas(D,D);
+  const stainCtx = logicalContext(stain, { willReadFrequently: true });
+  paintWatercolor(stainCtx,seed+164,wash=>{
     for(let i=0;i<17;i++){
       const {x,y,w}=tear.rows[i*7+4];
       wash(organic(x+(rand()-.5)*7,y,w*.81+4,17+rand()*20,seed+i*115,.24,.06),i%3?'#DEC66C':'#B98757',
         112+rand()*39,{bleed:.15,edge:.24});
     }
-  },{opacity:.56});
+  },{blend:'source-over'});
+  const gold=stainCtx.getImageData(0,0,stain.width,stain.height);
+  for(let i=0;i<gold.data.length;i+=4){
+    if (gold.data[i+3] && gold.data[i+2] > gold.data[i+1]+3) {
+      gold.data[i]=208;
+      gold.data[i+1]=176;
+      gold.data[i+2]=97;
+    }
+  }
+  stainCtx.putImageData(gold,0,0);
+  ctx.globalAlpha=.62;
+  drawRaster(ctx,stain);
+  ctx.globalAlpha=1;
   const sample=()=>{
     const {x,y,w}=tear.rows[3+Math.floor(rand()*125)];
     return [x+(rand()-.5)*Math.max(2,w*1.40), y-1.6+rand()*3.1];
@@ -888,7 +931,7 @@ function necroticField(ctx,seed,metrics,recipe) {
     metrics.fissurePus++;
   },(x,y)=>inside(x,y,5));
   deposit(recipe.fissureRedCells,sample,(x,y,i)=>{
-    redCell(ctx,x,y,rand()*Math.PI,i%3?'#B94854':'#CD5860',.86);
+    redCell(ctx,x,y,rand()*Math.PI,i%3?'#A33541':'#BD4B52',.95);
     metrics.fissureRedCells++;
   },(x,y)=>inside(x,y,3));
   ctx.restore();
@@ -925,6 +968,7 @@ function bake(stage,seed) {
   else if(stage==='gangrene') necroticField(ctx,seed,metrics,recipe);
   else {
     levels=boundaries(stage);
+    area(ctx,band(levels[1],levels[5]),TISSUE);
     if(stage==='chronic'){
       chronicMicroscopy(ctx,levels,seed+5050,metrics,recipe);
     } else {

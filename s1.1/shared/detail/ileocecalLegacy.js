@@ -4,11 +4,11 @@ import {
 } from '../canvasCore.js';
 
 const stages = Object.freeze({
-  normal:   { diameter: 34, base: '#F7D5C8', dye: '#C67569' },
-  simple:   { diameter: 47, base: '#DD8C7F', dye: '#AC3F42' },
-  phlegmon: { diameter: 68, base: '#CD796F', dye: '#A94B41' },
-  gangrene: { diameter: 78, base: '#A44849', dye: '#6B2935' },
-  chronic:  { diameter: 51, base: '#DBBEB3', dye: '#A67E73' },
+  normal:   { diameter: 20, base: '#F7D5C8', dye: '#C67569' },
+  simple:   { diameter: 31, base: '#DD8C7F', dye: '#AC3F42' },
+  phlegmon: { diameter: 45, base: '#CD796F', dye: '#A94B41' },
+  gangrene: { diameter: 49, base: '#A44849', dye: '#6B2935' },
+  chronic:  { diameter: 29, base: '#DBBEB3', dye: '#A67E73' },
 });
 
 // Anterior projection. The root is 38 drawing units below the valve, behind the cecal lip.
@@ -19,14 +19,16 @@ const bendB = { x: 291, y: 383 };
 const tip = { x: 397, y: 426 };
 const thrombus = { x: 272, y: 296 };
 const cecalWidth = 180;
+const ilealWidth = 64;
+const ilealEnd = 292;
 const cecum = `M14 1 C11 23 21 34 12 51 C-2 70 1 92 13 107 C22 120 20 130 10 143
   C-2 158 0 182 12 196 C23 209 21 219 13 232 C1 247 3 272 10 289
   C22 322 50 340 90 340 C131 340 157 323 172 302 C184 286 186 264 177 243
   C172 232 173 221 180 207 C188 189 187 169 176 153 C168 142 168 130 176 116
   C189 97 189 76 178 57 C168 40 176 23 174 1Z`;
-const ileum = `M421 164 C384 167 345 169 309 177 C269 185 236 198 207 204
-  C191 208 183 212 169 213 C161 215 162 231 171 235 C183 232 194 235 208 235
-  C239 234 277 224 320 220 C358 216 391 215 421 218 C427 212 430 197 429 188 C428 174 425 166 421 164Z`;
+const ileum = `M421 ${ilealEnd - ilealWidth / 2} C372 259 337 242 301 224 C259 204 218 194 172 201
+  C158 204 160 234 171 244 C208 240 242 249 279 267 C322 287 374 317 421 ${ilealEnd + ilealWidth / 2}
+  C431 319 434 275 421 ${ilealEnd - ilealWidth / 2}Z`;
 const meso = `M194 220 C213 216 237 220 253 234 C279 256 311 303 365 397
   C338 375 302 365 268 352 C240 340 218 325 199 305 C204 275 196 250 194 220Z`;
 const vein = 'M221 219 C230 242 242 263 253 275 C260 285 266 290 272 296 C296 320 316 341 336 369';
@@ -67,7 +69,7 @@ function cutPaths(diameter, opening, fibrosis) {
   const from = .56 - .21 * opening;
   const to = .56 + .23 * opening;
   const lip = (u, t) => radius(u, diameter) * Math.sin(Math.PI * t) ** .70 * opening * .78;
-  const lumen = (u, t) => lip(u, t) * lerp(.62, .27, fibrosis);
+  const lumen = (u, t) => lip(u, t) * lerp(.40, .20, fibrosis);
   return {
     lip: ribbon(from, to, (u, t) => -lip(u, t), lip, 30),
     lumen: ribbon(from, to, (u, t) => -lumen(u, t), lumen, 30),
@@ -97,14 +99,14 @@ function junctionDrawing() {
     for (const fold of folds) pigment(fold, '#FFF1DA', 136, { bleed: .12, border: .35 });
     pigment(taenia, '#F9D8B7', 155, { ...soft, bleed: .15 });
     pigment(ileum, '#C58A7F', 103, soft);
-    pigment('M173 219 C238 212 318 182 425 174 L427 190 C365 187 288 203 227 219 Q200 227 172 229Z', '#F7D9C6', 145, soft);
+    pigment('M174 210 C252 202 298 252 421 274 L424 290 C369 286 319 260 277 239 Q230 213 173 221Z', '#F7D9C6', 145, soft);
   }, 'multiply', [0, 0, 442, 355]);
   return fillPath(cecum, '#F5C8B9') + fillPath(taenia, '#F8D6BC', .70) + fillPath(ileum, '#F2C4B6') + wash
     + inkLines([cecum, ileum], { size: 2.9, color: '#794D47', opacity: .85, taperStart: 2, taperEnd: 3 })
     + inkLines([taenia, 'M91 13 C94 69 86 116 90 179 C91 213 98 250 111 272',
       'M183 210 C172 211 167 223 176 234', 'M168 212 C158 215 159 232 168 237',
-      'M191 225 C239 222 256 206 306 198 Q357 189 403 186',
-      'M401 171 Q411 190 404 214', 'M415 169 Q424 189 419 215',
+      'M191 221 C258 216 304 262 402 285',
+      'M397 258 Q404 281 397 312', 'M413 266 Q419 290 413 318',
     ], { size: 2.1, color: '#A56560', opacity: .77 })
     + inkLines(folds.map(path => path.slice(0, -1)), { size: 1.55, color: '#C08D79', opacity: .74 });
 }
@@ -183,7 +185,9 @@ function state({ x = 0, y = 0, scale = 1, stage = 'normal', fromStage = stage, s
   const weight = key => (fromStage === key ? 1 - progress : 0) + (stage === key ? progress : 0);
   const diameter = diameterRatio === undefined ? lerp(stages[fromStage].diameter, stages[stage].diameter, progress)
     : stages.normal.diameter * diameterRatio;
-  if (!Number.isFinite(diameter) || diameter <= 0) throw new RangeError('Invalid appendiceal diameter');
+  if (!Number.isFinite(diameter) || diameter <= 0 || diameter >= ilealWidth) {
+    throw new RangeError('Appendix must remain smaller than the terminal ileum');
+  }
   const opening = clamp(Number(cutaway));
   const clotOpacity = showThrombus === undefined ? weight('gangrene') : clamp(Number(showThrombus));
   if (!Number.isFinite(clotOpacity)) throw new RangeError('Invalid thrombus visibility');
@@ -200,12 +204,13 @@ function state({ x = 0, y = 0, scale = 1, stage = 'normal', fromStage = stage, s
     stone: fecalith ? clamp((opening - .25) / .35) * (1 - fibrosis) : 0,
     anchors: {
       cecum: { x: x + 70 * scale, y: y + 278 * scale },
-      ileum: { x: x + 354 * scale, y: y + 194 * scale },
+      ileum: { x: x + 354 * scale, y: y + 277 * scale },
       valve: { x: x + valve.x * scale, y: y + valve.y * scale },
       appendixBase: { x: x + root.x * scale, y: y + root.y * scale },
       appendixTip: { x: x + tip.x * scale, y: y + tip.y * scale },
       window: { x: x + cutCenter.x * scale, y: y + cutCenter.y * scale },
       diameter: diameter * scale,
+      ilealDiameter: ilealWidth * scale,
       thrombusX: x + thrombus.x * scale, thrombusY: y + thrombus.y * scale,
       appendixPoint(u, offset = 0) {
         const point = axis(u);

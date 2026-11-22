@@ -1,10 +1,10 @@
 import { getStroke } from 'perfect-freehand';
 import * as brush from 'p5.brush/standalone';
 import { createRaster, drawRasterCrop } from './detail/raster.js';
-import { displayDensity, inkTick } from './renderProfile.js';
+import { displayDensity } from './renderProfile.js';
 
-const INK = '#24201D';
-const PAPER_SKIN = '#FAF6EE';
+const INK = '#2A2622';
+const PAPER_SKIN = '#F8F3E9';
 const PIVOT_Y = 154;
 const ARM_LENGTH = 108;
 const TAU = 2 * Math.PI;
@@ -134,7 +134,7 @@ function prepareWashes() {
   wash('shirt', cubics([-46, 43], [-57, 67, -54, 110, -47, 130],
     [-38, 144, -22, 146, -17, 144], [-28, 126, -36, 104, -36, 85],
     [-35, 65, -39, 55, -46, 43]), '#CDBB98', .26, .16, .69, .21);
-  wash('coat', shifted(body, 1.1, 2, .960, .976), '#FFFFFF', 1, .073, .35, .14);
+  wash('coat', shifted(body, 1.1, 2, .960, .976), '#F4F0E8', 1, .066, .38, .15);
   wash('coat', cubics([45, 28], [57, 48, 56, 81, 54, 109], [54, 134, 43, 146, 17, 151],
     [29, 136, 37, 110, 37, 78], [37, 54, 38, 40, 45, 28]), '#D1D7D7', .48, .13, .62, .25);
   wash('coat', cubics([-21, 6], [-9, 13, 9, 13, 21, 7], [19, 25, 9, 49, 0, 63],
@@ -150,7 +150,7 @@ function prepareWashes() {
   brush.render();
 
   const atlas = createRaster(width, height);
-  atlas.getContext('2d').drawImage(target, 0, 0);
+  atlas.getContext('2d').drawImage(target, 0, 0, atlas.width, atlas.height);
   washAtlas = atlas;
 }
 
@@ -196,23 +196,23 @@ function drawArm(ctx, curve, side, bowlPosition, occlusion = 0) {
     outside.rect(-250, -120, 510, 475);
     ctx.save();
     ctx.clip(outside, 'evenodd');
-    drawInk(ctx, points, 5.8, { phase });
+    drawInk(ctx, points, 5, { phase });
     ctx.restore();
     if (occlusion < 1) {
       ctx.save();
       ctx.clip(bowl);
-      drawInk(ctx, points, 5.8, { phase, opacity: 1 - occlusion });
+      drawInk(ctx, points, 5, { phase, opacity: 1 - occlusion });
       ctx.restore();
     }
   } else {
-    drawInk(ctx, points, 5.8, { phase });
+    drawInk(ctx, points, 5, { phase });
   }
   const [, control, wrist] = curve;
   ctx.save();
   ctx.translate(...wrist);
   ctx.rotate(Math.atan2(wrist[1] - control[1], wrist[0] - control[0]) * .64);
   stamp(ctx, 'hand');
-  drawInk(ctx, hand, 4.65, { closed: true, phase: side < 0 ? .1 : 1.2 });
+  drawInk(ctx, hand, 4.1, { closed: true, phase: side < 0 ? .1 : 1.2 });
   ctx.restore();
 }
 
@@ -282,9 +282,9 @@ function drawHead(ctx, style, position, turn) {
   ctx.translate(...position);
   ctx.rotate(turn);
   stamp(ctx, 'head');
-  drawInk(ctx, head, 5.45, { closed: true });
+  drawInk(ctx, head, 4.9, { closed: true });
   for (const [i, arc] of (style === 'doctor' ? doctorHair : patientHair).entries()) {
-    drawInk(ctx, arc, 4.7, { taper: 3.7, phase: i * 1.1 });
+    drawInk(ctx, arc, 4.2, { taper: 3.7, phase: i * 1.1 });
   }
 }
 
@@ -350,8 +350,8 @@ export function drawMinimalPatient(ctx, opts = {}) {
   const pain = limit(opts.painLevel ?? mix(a.pain, b.pain, blend));
   const shiver = limit(opts.shiver ?? mix(a.shiver, b.shiver, blend));
   const breath = Math.sin(breathPhase);
-  const tremorPhase = seconds === undefined ? breathPhase : 4.2 / 5 * inkTick(seconds);
-  const tremor = shiver * Math.sin(8.4 * tremorPhase + .39);
+  const tremorPhase = seconds === undefined ? breathPhase * 2.7 : TAU * 1.85 * seconds;
+  const tremor = .64 * shiver * Math.sin(tremorPhase + .39);
   const distress = weight('rlq_acute');
   const torso = figureSpace(1.8 * tremor, 254 + .95 * tremor,
     -.68 * hunch + .013 * tremor, 1 + .014 * breath, 1 - .13 * hunch + .013 * breath);
@@ -372,7 +372,7 @@ export function drawMinimalPatient(ctx, opts = {}) {
     stamp(ctx, 'shirt');
     stamp(ctx, 'pain', mix(0, -24, distress), 100 + distress * 14, .79 + .20 * pain + .055 * Math.sin(2 * breathPhase),
       pain * (.83 + .14 * Math.sin(2 * breathPhase)));
-    drawInk(ctx, body, 5.9, { closed: true, phase: 1.3 });
+    drawInk(ctx, body, 5.25, { closed: true, phase: 1.3 });
     drawInk(ctx, curve([-16, 9], [.2, 29], [17, 10]), 3.37, { taper: 3.4, opacity: .85 });
     ctx.restore();
 
@@ -412,7 +412,7 @@ function drawDoctorFace(ctx) {
 
 function drawCoat(ctx) {
   stamp(ctx, 'coat');
-  drawInk(ctx, body, 5.75, { closed: true, phase: 1.3 });
+  drawInk(ctx, body, 5.15, { closed: true, phase: 1.3 });
   const editorial = { opacity: .84, taper: 1.75 };
   drawInk(ctx, cubics([-19, 6], [-23, 13, -28, 17, -30, 25], [-24, 24, -22, 24, -19, 24],
     [-20, 27, -24, 30, -25, 34], [-19, 44, -5, 61, .5, 67]), 3.45, editorial);

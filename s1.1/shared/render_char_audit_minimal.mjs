@@ -11,7 +11,7 @@ const here = fileURLToPath(new URL('.', import.meta.url));
 
 async function presentBoard() {
   const labels = ['午饭', '脐周隐痛', '右下腹剧痛', '临床医生 · 讲解', '康复'];
-  const labelFont = '590 27px "Noto Serif SC", "Microsoft YaHei", serif';
+  const labelFont = `590 27px ${SERIF_FONT}`;
   await document.fonts.load(labelFont, labels.join(''));
   await document.fonts.ready;
   const board = document.querySelector('canvas');
@@ -84,6 +84,7 @@ async function presentBoard() {
 const { outputFiles: [entry] } = await build({
   stdin: {
     contents: `import { drawMinimalPatient, drawMinimalDoctor } from './minimalistCharacters.js';
+      import { SERIF_FONT } from './fonts.js';
       await (${presentBoard.toString()})();`,
     resolveDir: here,
     sourcefile: 'minimal-character-audit-browser.js',

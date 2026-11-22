@@ -70,7 +70,7 @@ async function presentBoard() {
   const micro = [
     `${slices[0].audit.crypts} 个隐窝 · ${slices[0].audit.follicles} 个淋巴滤泡`,
     `中性粒细胞 · 浅层 ${slices[1].audit.shallow} · 肌层 ${slices[1].audit.muscle}`,
-    `${slices[2].audit.shallow+slices[2].audit.muscle} 个全层中性粒细胞 · 浆膜纤维素脓苔`,
+    `${slices[2].audit.shallow+slices[2].audit.muscle} 个全层中性粒细胞 · 纤维素性脓性渗出`,
     '出血坏死、核溶解与脓性穿孔裂隙',
     '胶原束间透光 · 5 簇淋巴与浆细胞',
   ];

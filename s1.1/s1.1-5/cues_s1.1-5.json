@@ -3,35 +3,71 @@
   "width": 1920,
   "height": 1080,
   "fps": 30,
-  "duration": 53.5,
+  "duration": 57.2,
   "cues": [
     {
       "id": "S19",
-      "defaultDuration": 10.5,
-      "zhText": "可还没进手术室之前，医生怎么隔着肚皮判断它到了哪一步？答案首先是：靠典型的临床症状和仔细的体格检查。",
-      "highlightZh": ["临床症状", "体格检查"],
-      "enText": "Before surgery, how do doctors tell its stage through the abdomen? First and foremost: classic clinical symptoms and a careful physical exam."
+      "type": "speech",
+      "defaultDuration": 10,
+      "zhText": "怀疑急性阑尾炎，医生先做什么？先问典型症状，再仔细做体格检查，并综合化验结果判断。",
+      "highlightZh": [
+        "典型症状",
+        "体格检查",
+        "化验结果"
+      ],
+      "enText": "How do doctors first assess suspected acute appendicitis? They ask about typical symptoms, perform a careful physical exam, and consider the lab results."
     },
     {
       "id": "S20",
+      "type": "speech",
       "defaultDuration": 11.5,
-      "zhText": "CT 是重要的辅助确诊工具，但并非所有患者都必须做；而在需要确诊或判断严重程度时，多层螺旋 CT 的诊断敏感度可达百分之九十三以上。",
-      "highlightZh": ["辅助确诊工具", "并非所有患者都必须做", "百分之九十三以上"],
-      "enText": "CT is a vital diagnostic aid, though not mandatory for everyone; when needed, multi-slice CT reaches over 93% sensitivity."
+      "zhText": "CT 是重要的辅助确诊工具，是否需要检查，要看临床评估。成人疑似病例中，多层螺旋 CT 诊断敏感度可超过百分之九十三。",
+      "highlightZh": [
+        "辅助确诊工具",
+        "临床评估",
+        "诊断敏感度",
+        "超过百分之九十三"
+      ],
+      "enText": "CT is an important diagnostic aid. Clinical assessment guides who needs it. In adults with suspected appendicitis, multidetector helical CT sensitivity can exceed 93%."
     },
     {
       "id": "S21",
-      "defaultDuration": 18.5,
-      "zhText": "更厉害的是，CT 影像与病理变化高度一致：单纯性仅见管腔轻度增粗、脂肪间隙清晰；化脓性可见管壁厚实强化、周围絮状渗出；坏疽性甚至会出现强化管壁局部缺损与游离气体。",
-      "highlightZh": ["单纯性", "化脓性", "坏疽性"],
-      "enText": "Even better, CT mirrors pathology: mild thickening with clean fat in simple; thick wall enhancement and fat stranding in phlegmonous; focal wall defects and free gas in gangrenous."
+      "type": "speech",
+      "defaultDuration": 19.5,
+      "zhText": "下面是三种病理表现的增强 CT 示意。单纯性可见阑尾轻度增粗，周围脂肪清晰；化脓性可见厚壁靶征、偏心粪石和脂肪条索；坏疽穿孔可见壁强化缺损、盲肠旁脓肿和腔外气泡。",
+      "highlightZh": [
+        "单纯性",
+        "化脓性",
+        "厚壁靶征",
+        "偏心粪石",
+        "脂肪条索",
+        "坏疽穿孔",
+        "壁强化缺损",
+        "盲肠旁脓肿",
+        "腔外气泡"
+      ],
+      "enText": "These drawings illustrate typical contrast-enhanced CT appearances. In simple appendicitis, the appendix is mildly enlarged with clear surrounding fat. In phlegmonous appendicitis, a thick-walled target sign, an eccentric fecalith and fat stranding may be seen. In perforated gangrenous appendicitis, focal loss of wall enhancement, a pericecal abscess and extraluminal gas may be seen."
     },
     {
       "id": "S22",
-      "defaultDuration": 13.0,
-      "zhText": "临床医生最关心的，就是你现在属于哪一型、有没有化脓、坏疽或穿孔——这直接决定了治疗紧迫性。一旦发展为蜂窝织炎性或坏疽性阑尾炎，必须尽早手术切除！",
-      "highlightZh": ["治疗紧迫性", "蜂窝织炎性", "坏疽性阑尾炎", "尽早手术切除"],
-      "enText": "What matters most clinically is the current subtype and perforation risk—directly dictating urgency. Both phlegmonous and gangrenous appendicitis require prompt surgical removal!"
+      "type": "speech",
+      "defaultDuration": 14,
+      "zhText": "医生先评估有无坏疽、穿孔或腹膜炎。怀疑坏疽或穿孔时，需尽快外科评估；弥漫性腹膜炎通常需紧急手术，局限性脓肿可视情况先抗感染，必要时引流。",
+      "highlightZh": [
+        "尽快外科评估",
+        "弥漫性腹膜炎",
+        "紧急手术",
+        "局限性脓肿",
+        "引流"
+      ],
+      "enText": "Doctors look for gangrene, perforation or peritonitis. Suspected gangrene or perforation needs prompt surgical assessment. Diffuse peritonitis usually needs emergency surgery. A localized abscess may initially be treated with antibiotics and drainage if needed."
+    },
+    {
+      "id": "B07",
+      "type": "bridge",
+      "duration": 2.2,
+      "start": 55,
+      "end": 57.2
     }
   ]
 }

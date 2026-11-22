@@ -1,15 +1,13 @@
-import { NS, RED, arrow, lerp, roughProp } from '../shared/canvasCore.js';
+import { NS, RED, arrow, lerp } from '../shared/canvasCore.js';
 import { makeCanvas, retainedCanvas } from '../shared/anatomyWatercolor.js';
 import { logicalContext } from '../shared/detail/raster.js';
-import { HISTOLOGY_DIAMETER, drawMicroNeutrophil } from '../shared/histologyProcedural.js';
-import { evolutionPlate } from './s15.mjs';
+import { HISTOLOGY_DIAMETER, SIMPLE_MUSCLE_NEUTROPHILS, drawMicroNeutrophil } from '../shared/histologyProcedural.js';
 import { histologyLens, opacity, pathologyProgress, phase, scaleAround, trace, traceMask } from './scene-tools.mjs';
 
 const field = { x: 920, y: 465, radius: 285 };
 const example = { x: 1430, y: 700, radius: 42 };
 const microscopeScale = field.radius * 2 / HISTOLOGY_DIAMETER;
-// The sweep crosses the four positions used by the frozen simple-stage recipe.
-const muscleSweep = [[143, 349], [226, 401], [319, 363], [390, 433]]
+const muscleSweep = SIMPLE_MUSCLE_NEUTROPHILS
   .map(([x, y]) => [field.x - field.radius + x * microscopeScale, field.y - field.radius + y * microscopeScale]);
 const callouts = [
   { id: 's16-upper', x: 1003, y: 405, label: '黏膜与黏膜下层聚集', color: '#1F1C19', start: .35, end: .55 },
@@ -17,8 +15,9 @@ const callouts = [
 ];
 
 function leader({ id, x, y, label, color }) {
-  return `<defs>${traceMask(id, `M${x - 4} ${y} H1354`, 18)}</defs>
-    <g mask="url(#${id}-mask)">${arrow(`M1350 ${y} H${x}`, { color, size: 2.9, head: 11 })}</g>
+  const route = `M1350 ${y} Q${(x + 1350) / 2} ${y - 8} ${x} ${y}`;
+  return `<defs>${traceMask(id, route, 22)}</defs>
+    <g mask="url(#${id}-mask)">${arrow(route, { color, size: 3.2, head: 11 })}</g>
     <text id="${id}-text" class="note" x="1370" y="${y + 9}" font-size="28" fill="${color}"
       style="font-weight:750">${label}</text>`;
 }
@@ -46,9 +45,7 @@ function cellLegend() {
   const cell = retainedCanvas('s16-example', canvas, { x: x - radius, y: y - radius });
   return {
     paint: `<g id="s16-legend">
-      <circle cx="${x}" cy="${y}" r="${radius}" fill="#FFFDF9"/>
       <g id="s16-legend-cell">${cell.markup}</g>
-      ${roughProp('circle', [x, y, 2 * radius], 6712, '#8F7567', 2.05, .39)}
     </g>`,
     mount: cell.mount,
   };
@@ -75,40 +72,25 @@ function moveSweep(node, x, y, strength) {
 
 export function s16() {
   const notes = pathologyProgress('s16-notes', 'simple');
-  const carry = evolutionPlate('s16-carry');
   const slide = histologyLens({ mode: 'simple', id: 's16-he', ...field });
-  const origin = carry.specimens[0].organ.appendixTip;
   const legend = cellLegend();
   return {
-    paint: notes.paint + carry.paint + `<g id="s16-field">${slide.paint}${softFocus}</g>` + legend.paint,
-    lettering: notes.lettering + carry.lettering + `<text id="s16-title" class="note title" x="${field.x}" y="143"
+    paint: notes.paint + `<g id="s16-field">${slide.paint}${softFocus}</g>` + legend.paint,
+    lettering: notes.lettering + `<text id="s16-title" class="note title" x="${field.x}" y="143"
       text-anchor="middle" font-size="28" fill="#1F1C19">H&amp;E 光学视野 · 单纯性</text>`
       + tracedBraces(slide) + callouts.map(leader).join('')
-      + `<text id="s16-legend-label" class="note" x="1493" y="708" font-size="24" fill="#2E2924">分叶核中性粒细胞</text>`,
+      + `<text id="s16-legend-label" class="note" x="1493" y="708" font-size="24" fill="#2E2924">分叶核中性粒细胞（放大）</text>`,
     audit: { ...slide.audit, lens: slide.lens },
-    mount(art, labels) {
-      carry.mount(art);
-      carry.update(art, labels, 1);
+    mount(art) {
       slide.mount(art);
       legend.mount(art);
     },
-    update(art, labels, p) {
-      for (const [i, { id }] of carry.specimens.entries()) {
-        const fade = i === 0 ? phase(p, .09, .25) : phase(p, 0, .13 + .03 * i);
-        opacity(art, `${id}-reveal`, 1 - fade);
-        opacity(labels, `${id}-labels`, 1 - phase(p, 0, .105));
-      }
-      opacity(labels, 's16-carry-diagram', 1 - phase(p, 0, .10));
-      const push = phase(p, .013, .32);
-      const focusX = lerp(origin.x, field.x, push);
-      const focusY = lerp(origin.y, field.y, push);
-      art.querySelector('#s16-carry-simple-reveal').setAttribute('transform',
-        scaleAround(origin.x, origin.y, lerp(1, 2.15, phase(p, .015, .24)), focusX, focusY));
-      const focus = scaleAround(field.x, field.y, lerp(.070, 1, phase(p, .035, .32)), focusX, focusY);
+    update(art, labels, p, duration) {
+      const push = phase(p * duration, 0, .15);
+      const focus = scaleAround(field.x, field.y, lerp(.986, 1, push));
       art.querySelector('#s16-field').setAttribute('transform', focus);
       labels.querySelector('#s16-brace-stack').setAttribute('transform', focus);
-      opacity(art, 's16-field', phase(p, .05, .175));
-      opacity(labels, 's16-title', phase(p, .20, .34));
+      opacity(labels, 's16-title', lerp(.9, 1, push));
 
       for (let i = 0; i < 5; i++) {
         const drawn = phase(p, .15 + i * .039, .255 + i * .048);
@@ -123,8 +105,8 @@ export function s16() {
       const top = phase(p, .35, .59);
       moveSweep(art.querySelector('#s16-sweep-upper'), lerp(962, 1080, top), lerp(367, 439, top),
         .77 * phase(p, .355, .437) * (1 - phase(p, .555, .660)));
-      const travel = 3 * phase(p, .59, .847);
-      const part = Math.min(2, Math.floor(travel));
+      const travel = (muscleSweep.length - 1) * phase(p, .59, .847);
+      const part = Math.min(muscleSweep.length - 2, Math.floor(travel));
       const [x1, y1] = muscleSweep[part];
       const [x2, y2] = muscleSweep[part + 1];
       moveSweep(art.querySelector('#s16-sweep-lower'), lerp(x1, x2, travel - part), lerp(y1, y2, travel - part),

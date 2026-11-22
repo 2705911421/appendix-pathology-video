@@ -8,15 +8,18 @@ export {
 } from './detail/ileocecalLegacy.js';
 
 export const ILEOCECAL_BOX = Object.freeze({ width: 640, height: 520, cecum: 150, ileum: 63 });
+export const PHLEGMON_CUT = Object.freeze({
+  start: .215, end: .735, stone: .280, pus: .57, center: .475, lumenFraction: .40,
+});
 const valve = [245, 250];
-const root = [228, 308];
-const ileumCurve = [[520, 315], [400, 295], [320, 265], valve];
+const root = [234, 340];
+const ileumCurve = [[520, 356], [438, 356], [338, 285], valve];
 const acute = [
-  [root, [242, 345], [259, 380], [285, 395]],
+  [root, [246, 363], [261, 381], [285, 395]],
   [[285, 395], [324, 417.5], [377, 436], [410, 415]],
 ];
 const chronic = [
-  [root, [241, 341], [254, 372], [278, 388]],
+  [root, [244, 356], [258, 376], [278, 388]],
   [[278, 388], [302, 404], [347, 428], [383, 418]],
 ];
 const colors = Object.freeze({
@@ -37,9 +40,14 @@ function bezier(points, u) {
   return [coordinates[0][0], coordinates[1][0], Math.atan2(coordinates[1][1], coordinates[0][1])];
 }
 
-function centreline(stage, u) {
+export function appendixCentreline(stage, u) {
   const parts = stage === 'chronic' ? chronic : acute;
   return u < .47 ? bezier(parts[0], u / .47) : bezier(parts[1], (u - .47) / .53);
+}
+
+export function terminalIleumPoint(u) {
+  const [x, y] = bezier(ileumCurve, u);
+  return { x, y };
 }
 
 export function ileocecalDimensions(stage) {
@@ -47,7 +55,7 @@ export function ileocecalDimensions(stage) {
   let length = 0;
   let previous = root;
   for (let i = 1; i <= 350; i++) {
-    const next = centreline(stage, i / 350);
+    const next = appendixCentreline(stage, i / 350);
     length += Math.hypot(next[0] - previous[0], next[1] - previous[1]);
     previous = next;
   }
@@ -75,7 +83,7 @@ function axisPath(axis, from, to, shift, count = 32) {
 }
 
 function haustra() {
-  const swell = y => 59 + 16 * Math.abs(Math.sin(y * .032));
+  const swell = y => ILEOCECAL_BOX.cecum / 2 - 16 + 16 * Math.abs(Math.sin(y * .032));
   const wall = side => Array.from({ length: 56 }, (_, i) => {
     const y = lerp(36, 320, i / 55);
     return [185 + side * swell(y), y];
@@ -85,8 +93,10 @@ function haustra() {
 }
 
 const cecum = haustra();
-const ileum = ribbon(u => bezier(ileumCurve, u), () => -31.5, () => 31.5);
-const band = 'M178 35 C186 92 177 132 183 188 C186 242 191 272 208 296 Q218 307 228 308 Q231 306 227 302 C221 298 217 287 211 271 C201 246 202 208 199 184 C194 128 202 76 195 35Z';
+const ileumRadius = ILEOCECAL_BOX.ileum / 2;
+const ileum = ribbon(u => bezier(ileumCurve, u), () => -ileumRadius, () => ileumRadius);
+const band = `M178 35 C186 92 177 132 183 188 C186 245 187 282 209 320 Q221 340 ${root.join(' ')}
+  Q236 336 231 332 C223 323 217 310 213 294 C199 259 202 208 199 184 C194 128 202 76 195 35Z`;
 const meso = 'M251 267 C279 266 296 280 323 288 C354 297 385 302 405 318 C399 330 385 333 382 350 C380 373 399 388 410 407 C391 414 368 412 349 409 C324 405 301 400 281 388 C265 377 252 354 239 329 C235 306 245 283 251 267Z';
 
 const vein = [[271, 282], [281, 353], [332, 400], [397, 406]];
@@ -157,6 +167,28 @@ function line(ctx, d, color, width, opacity = 1) {
   fill(ctx, inkOutline(d, { size: width, taperStart: 4, taperEnd: 6 }), color, opacity);
 }
 
+export function correctAppendixPigment(ctx, path) {
+  const density = rasterScale(ctx.canvas);
+  const x = Math.floor(203 * density.x);
+  const y = Math.floor(303 * density.y);
+  const w = Math.ceil(243 * density.x);
+  const h = Math.ceil(151 * density.y);
+  const pixels = ctx.getImageData(x, y, w, h);
+  const { data } = pixels;
+  // Keep cold mesenteric vessels outside the ribbon and remove stray brush hues inside the specimen.
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i], g = data[i + 1], b = data[i + 2];
+    if (!data[i + 3] || (g <= r + 11 && b <= r + 16)) continue;
+    const p = i / 4;
+    if (!ctx.isPointInPath(path, x + p % w + .5, y + Math.floor(p / w) + .5)) continue;
+    const value = .2126 * r + .7152 * g + .0722 * b;
+    data[i] = value + 47;
+    data[i + 1] = value * .78;
+    data[i + 2] = value * .71;
+  }
+  ctx.putImageData(pixels, x, y);
+}
+
 function cxOfBox() {
   const canvas = makeCanvas(ILEOCECAL_BOX.width, ILEOCECAL_BOX.height);
   const ctx = logicalContext(canvas);
@@ -200,7 +232,7 @@ function foundations() {
   });
   c.restore();
   line(c, cecum, '#794A43', 2.55, .81);
-  line(c, 'M187 44 C194 155 182 241 207 287 Q216 302 228 308', '#FCE3BA', 2.2, .93);
+  line(c, `M187 44 C194 155 185 250 207 309 Q219 333 ${root.join(' ')}`, '#FCE3BA', 2.2, .93);
   for (const y of [76, 168, 264, 321]) {
     line(c, `M125 ${y + 3} Q145 ${y - 9} 173 ${y + 4}`, '#9B5B56', 2.25, .70);
     line(c, `M206 ${y + 3} Q230 ${y - 6} 246 ${y + 6}`, '#9B5B56', 2.25, .70);
@@ -219,8 +251,13 @@ function foundations() {
   i.restore();
   line(i, ileum, '#82534C', 2.4, .77);
   line(i, axisPath(u => bezier(ileumCurve, u), .12, .89, u => 8 + 3 * Math.sin(u * 6)), '#F5D9B8', 2.5, .85);
-  for (const d of ['M279 234 Q284 241 280 254', 'M305 240 Q311 260 300 270',
-    'M352 258 Q356 266 350 276', 'M398 273 Q405 289 396 298']) line(i, d, '#A5675D', 1.5, .36);
+  for (const u of [.35, .51, .68, .82]) {
+    const a = bezier(ileumCurve, u);
+    const [x, y] = offset(a, -23);
+    const [qx, qy] = offset(bezier(ileumCurve, u - .017), -8);
+    const [ex, ey] = offset(a, 10);
+    line(i, `M${x} ${y} Q${qx} ${qy} ${ex} ${ey}`, '#A5675D', 1.5, .36);
+  }
   feather(i, 520 - .22 * (520 - valve[0]), 520);
 
   const m = cxOfBox();
@@ -254,7 +291,7 @@ function vessels(ctx, stage, diameter, showThrombus) {
       const u = site + (width > 3.5 ? [0,.038,-.020,.035,-.03,.017,-.013][i] : 0);
       const [x, y] = bezier(curve, u * shortened);
       const p = .29 + u * .66;
-      const [tx, ty] = offset(centreline(stage, p), -diameter * .42);
+      const [tx, ty] = offset(appendixCentreline(stage, p), -diameter * .42);
       const bend = (i % 3 - 1) * 5.0;
       ctx.beginPath();
       ctx.moveTo(x, y);
@@ -274,6 +311,10 @@ function vessels(ctx, stage, diameter, showThrombus) {
   }
   if (showThrombus) {
     const [x, y, angle] = thrombus;
+    const lumen = ribbon(u => bezier(vein, u), () => -4.4, () => 4.4, { from: .475, to: .605, steps: 16 });
+    ctx.globalAlpha = 1;
+    fill(ctx, lumen, '#3E6581');
+    ctx.clip(new Path2D(lumen));
     ctx.translate(x, y);
     ctx.rotate(angle);
     fill(ctx, organic(0, 0, 11.2, 3.25, 402, .19), '#582138');
@@ -282,7 +323,7 @@ function vessels(ctx, stage, diameter, showThrombus) {
   ctx.restore();
 }
 
-function radius(stage, diameter, u) {
+export function appendixWallRadius(stage, diameter, u) {
   const end = clamp((u - .91) / .09);
   const crest = .90 + .10 * Math.sin(Math.PI * u);
   const irregular = stage === 'gangrene' && u > .52 ? .94 + .06 * Math.sin(u * 95) : 1;
@@ -291,10 +332,10 @@ function radius(stage, diameter, u) {
 
 function arcParameter(stage) {
   const table = [{ u: 0, length: 0 }];
-  let previous = centreline(stage, 0);
+  let previous = appendixCentreline(stage, 0);
   for (let i = 1; i <= 512; i++) {
     const u = i / 512;
-    const next = centreline(stage, u);
+    const next = appendixCentreline(stage, u);
     table.push({ u, length: table.at(-1).length + Math.hypot(next[0] - previous[0], next[1] - previous[1]) });
     previous = next;
   }
@@ -309,11 +350,12 @@ function arcParameter(stage) {
 }
 
 function phlegmonWindow(ctx, axis, r, parameter) {
-  const from = parameter(.215);
-  const to = parameter(.735);
+  const { start, end, stone: stoneSite, lumenFraction } = PHLEGMON_CUT;
+  const from = parameter(start);
+  const to = parameter(end);
   const lip = (u, t) => r(u) * Math.min(1, t * 10, (1 - t) * 10) ** .58;
   const border = ribbon(axis, (u,t) => -lip(u,t), lip, { from, to });
-  const lumen = ribbon(axis, (u,t) => -.40 * lip(u,t), (u,t) => .40 * lip(u,t), { from, to });
+  const lumen = ribbon(axis, (u,t) => -lumenFraction * lip(u,t), (u,t) => lumenFraction * lip(u,t), { from, to });
   fill(ctx, border, '#87313C');
   paintWatercolor(ctx, 53561, wash => {
     wash(border, '#A34A53', 109, { bleed: .075, direction: 'in', edge: .50 });
@@ -338,7 +380,7 @@ function phlegmonWindow(ctx, axis, r, parameter) {
       j % 3 ? '#F7D988' : '#9F4A33', 1.24, .66);
     ctx.restore();
   }
-  const [x, y, a] = axis(parameter(.280));
+  const [x, y, a] = axis(parameter(stoneSite));
   ctx.translate(x, y);
   ctx.rotate(a);
   const stone = organic(0, 0, 9.9, 6.0, 74, .17);
@@ -350,11 +392,11 @@ function phlegmonWindow(ctx, axis, r, parameter) {
   ctx.restore();
   line(ctx, border, '#652C34', 1.75, .79);
   line(ctx, lumen, '#923C35', 1.25, .69);
-  return { wallFraction: .30, cavityFraction: .40, lengthFraction: .52 };
+  return { wallFraction: (1 - lumenFraction) / 2, cavityFraction: lumenFraction, lengthFraction: end - start };
 }
 
 function chronicSection(ctx, parameter) {
-  const [px, py] = centreline('chronic', parameter(.50));
+  const [px, py] = appendixCentreline('chronic', parameter(.50));
   const [x, y] = [px + 125, py + 75];
   const r = 39;
   ctx.save();
@@ -383,14 +425,15 @@ function chronicSection(ctx, parameter) {
     line(ctx, organic(offset, -.4 + offset * .3, rr, rr * .94, 9115 + i * 31, .103, .13, 21),
       i % 3 ? '#CA969D' : '#A96E7E', .87 + .22 * (i % 3), .38 + .13 * (i % 3));
   }
-  const contours = [1, .43, 1, .55, 1, .38, .85, .45, .93, .51];
+  const lumenFraction = .20;
+  const contours = [1, .37, .97, .52, 1, .35, .85, .41, .93, .45];
   const lumen = contours.map((v, i) => {
     const a = i / contours.length * TAU + .14;
-    return [r * .20 * Math.cos(a) * v, r * .20 * Math.sin(a) * v];
+    return [r * lumenFraction * Math.cos(a) * v, r * lumenFraction * Math.sin(a) * v];
   });
-  fill(ctx, closedCurve(lumen), '#633844');
+  fill(ctx, 'M' + lumen.join('L') + 'Z', '#633844');
   ctx.restore();
-  return { diameter: 2 * r, centre: [x,y], anchor: [px,py] };
+  return { diameter: 2 * r, lumenFraction, centre: [x,y], anchor: [px,py] };
 }
 
 function gangrenousPlume(distal) {
@@ -441,13 +484,13 @@ function perforation(ctx, distal, a) {
   ctx.restore();
 }
 
-function staticSpecimen(stage, cutaway, showThrombus) {
+function staticSpecimen(stage, cutaway, showThrombus, perforated) {
   const base = foundations();
   const ctx = cxOfBox();
   const diameter = ileocecalDimensions(stage).appendix;
   const parameter = arcParameter(stage);
-  const axis = u => centreline(stage, u);
-  const r = u => radius(stage, diameter, u);
+  const axis = u => appendixCentreline(stage, u);
+  const r = u => appendixWallRadius(stage, diameter, u);
   const outer = ribbon(axis, u => -r(u), r);
   const distalU = .87;
   const distal = offset(axis(distalU), r(distalU) * .90);
@@ -456,7 +499,8 @@ function staticSpecimen(stage, cutaway, showThrombus) {
   drawRaster(ctx, base.ileum);
   fill(ctx, outer, colors[stage].base);
   ctx.save();
-  ctx.clip(new Path2D(outer));
+  const outerMask = new Path2D(outer);
+  ctx.clip(outerMask);
   const coating=stage==='phlegmon' ? ribbon(axis,u=>(-.88+.11*Math.sin(u*48))*r(u),
     u=>(.84+.12*Math.cos(u*41))*r(u),{from:.12,to:.986}) : null;
   paintWatercolor(ctx, 10401, wash => {
@@ -494,8 +538,9 @@ function staticSpecimen(stage, cutaway, showThrombus) {
   }
   const window = stage === 'phlegmon' && cutaway ? phlegmonWindow(ctx, axis, r, parameter) : null;
   ctx.restore();
+  correctAppendixPigment(ctx, outerMask);
   line(ctx, outer, stage === 'gangrene' ? '#513038' : '#84454A', 1.92, .85);
-  if (stage === 'gangrene') perforation(ctx, distal, axis(distalU)[2]);
+  if (perforated) perforation(ctx, distal, axis(distalU)[2]);
   drawRaster(ctx, base.colon);
   line(ctx, 'M247 224 C260 235 261 254 244 271', '#A8685D', 1.65, .59);
   line(ctx, 'M251 227 Q265 247 250 271', '#A8685D', 1.60, .50);
@@ -504,9 +549,9 @@ function staticSpecimen(stage, cutaway, showThrombus) {
 }
 
 const finished = new Map();
-function anatomySurface(stage, cutaway, showThrombus) {
-  const key = `${stage}:${Boolean(cutaway)}:${Boolean(showThrombus)}`;
-  if (!finished.has(key)) finished.set(key, staticSpecimen(stage, cutaway, showThrombus));
+function anatomySurface(stage, cutaway, showThrombus, perforated) {
+  const key = `${stage}:${Boolean(cutaway)}:${Boolean(showThrombus)}:${perforated}`;
+  if (!finished.has(key)) finished.set(key, staticSpecimen(stage, cutaway, showThrombus, perforated));
   return finished.get(key);
 }
 
@@ -515,22 +560,24 @@ function validateExudateBoost(value) {
 }
 
 export function createIleocecalAsset({
-  id, stage = 'normal', x = 0, y = 0, scale = 1, cutaway = false, showThrombus = false, exudateBoost = 1,
+  id, stage = 'normal', x = 0, y = 0, scale = 1, cutaway = false, showThrombus = false,
+  perforated = stage === 'gangrene', exudateBoost = 1,
 } = {}) {
   id = svgId('cecal-asset', id);
   if (![x,y,scale].every(Number.isFinite) || scale <= 0) throw new RangeError('Invalid specimen placement');
   validateExudateBoost(exudateBoost);
   const dimensions = ileocecalDimensions(stage);
-  const art = anatomySurface(stage, cutaway, showThrombus);
+  const art = anatomySurface(stage, cutaway, showThrombus, perforated);
   const skin = retainedCanvas(`${id}-body`, art.canvas);
-  const gas = stage === 'gangrene' ? gangrenousPlume(art.distal) : null;
+  const gas = perforated ? gangrenousPlume(art.distal) : null;
   const haze = gas ? retainedCanvas(`${id}-bleed`, makeCanvas(640,520)) : null;
   const position = ([u,v]) => ({ x:x+u*scale, y:y+v*scale });
   const clot = position(thrombus);
   const paint = `<g id="${id}" transform="translate(${x} ${y}) scale(${scale})">${skin.markup}${haze?.markup ?? ''}</g>`;
   return {
-    paint, dimensions, valve: position(valve), appendixBase: position(root), appendixTip: position(centreline(stage,1)),
-    thrombusX:clot.x,thrombusY:clot.y,
+    paint, dimensions, valve: position(valve), appendixBase: position(root), appendixTip: position(appendixCentreline(stage, 1)),
+    perforation: gas ? position(art.distal) : null,
+    thrombusX:clot.x,thrombusY:clot.y,thrombusAngle:thrombus[2] * 180 / Math.PI,
     audit: { crossSection:art.crossSection, cutaway:art.window, smokeLayers:gas?.layers.length ?? 0, drops:gas?.drops.length ?? 0 },
     mount(svg) { skin.mount(svg); haze?.mount(svg); },
     update(svg, { time=0, cutaway:opening=cutaway, showThrombus:clotVisible=showThrombus, exudateBoost:boost=exudateBoost } = {}) {
@@ -539,7 +586,7 @@ export function createIleocecalAsset({
       const body = logicalContext(skin.mount(svg));
       if (Boolean(opening) !== Boolean(cutaway) || Boolean(clotVisible) !== Boolean(showThrombus)) {
         body.clearRect(0,0,640,520);
-        drawRaster(body, anatomySurface(stage,opening,clotVisible).canvas);
+        drawRaster(body, anatomySurface(stage,opening,clotVisible,perforated).canvas);
       } else {
         body.clearRect(0,0,640,520);
         drawRaster(body, art.canvas);

@@ -1,29 +1,36 @@
 import { drawStorySubtitles } from '../../shared/canvasCore.js';
+import { cueType } from '../../shared/timelineHelper.js';
 
-// Timing positions point into the original Chinese line without changing any wording.
 const cuts = {
-  S01: [[.27, '午饭后，'], [.76, '隐隐作痛，']],
-  S02: [[.31, '阑尾内层，'], [.86, '定位含糊不清，']],
-  S03: [[.36, '傍晚六点，'], [.65, '死死钉在了']],
-  S04: [[.22, '急诊入院，'], [.65, '三十九点三度，']],
-  S05: [[.29, '那根原本'], [.58, '“小香肠”，'], [.78, '变色日记：']],
+  S01: [[.23, '午饭后，', 'lunch,'], [.72, '隐隐作痛，', 'navel,']],
+  S02: [[.31, '内脏神经传导，', 'visceral nerves.'], [.72, '肚脐周围在疼，', 'the navel,']],
+  S03: [[.34, '左右，', '6 PM,'], [.67, '右下腹。', 'abdomen.']],
+  S04: [[.22, '急诊，', 'department,'], [.65, '三十九点三度。', '39.3°C.']],
+  S05: [[.27, '十小时。', 'department.'], [.57, '“小香肠”，', 'appendix'], [.74, '变色：', 'inflammation:']],
 };
 
-function chinesePages(cue) {
-  let start = 0;
-  return [...cuts[cue.id], [1, '']].map(([until, ending]) => {
-    const match = ending ? cue.zhText.indexOf(ending, start) : cue.zhText.length;
-    if (match < 0) throw new Error(`Caption break not found in ${cue.id}`);
-    const end = match + ending.length;
-    const text = cue.zhText.slice(start, end);
-    start = end;
-    if ([...text].length > 22) throw new Error(`Subtitle page exceeds shared line length in ${cue.id}`);
-    return { until, zh: { text, highlights: cue.highlightZh } };
+function splitAfter(text, endings, id) {
+  let cursor = 0;
+  return [...endings, ''].map(ending => {
+    const match = ending ? text.indexOf(ending, cursor) : text.length;
+    if (match < 0) throw new Error(`Caption break not found in ${id}`);
+    const page = text.slice(cursor, match + ending.length).trim();
+    cursor = match + ending.length;
+    return page;
   });
 }
 
+function bilingualPages({ id, zhText, enText, highlightZh }) {
+  const timing = cuts[id];
+  const chinese = splitAfter(zhText, timing.map(([, zh]) => zh), id);
+  const english = splitAfter(enText, timing.map(([, , en]) => en), id);
+  return chinese.map((text, i) => ({
+    until: timing[i]?.[0] ?? 1, zh: { text, highlights: highlightZh }, en: english[i],
+  }));
+}
+
 export function mountCaptions(root, cues) {
-  const pages = new Map(cues.map(cue => [cue.id, chinesePages(cue)]));
+  const pages = new Map(cues.filter(cue => cueType(cue) === 'speech').map(cue => [cue.id, bilingualPages(cue)]));
   const caption = document.createElement('div');
   caption.className = 'story-caption';
   const chinese = document.createElement('p');
@@ -34,11 +41,13 @@ export function mountCaptions(root, cues) {
   caption.append(chinese, english);
   root.append(caption);
 
-  return (ctx, { id, enText }, p) => {
+  return (ctx, { id }, p) => {
     const options = pages.get(id);
-    const { zh } = options.find(page => p < page.until) ?? options.at(-1);
-    drawStorySubtitles(ctx, zh, enText);
+    caption.hidden = !options;
+    if (!options) return;
+    const { zh, en } = options.find(page => p < page.until) ?? options.at(-1);
+    drawStorySubtitles(ctx, zh, en, 0, { singlePage: true });
     if (chinese.textContent !== zh.text) chinese.textContent = zh.text;
-    if (english.textContent !== enText) english.textContent = enText;
+    if (english.textContent !== en) english.textContent = en;
   };
 }

@@ -1,5 +1,6 @@
 import * as brush from 'p5.brush/standalone';
 import { HEIGHT, WIDTH, createRaster, rasterScale, samplePath, setLogicalSize } from '../../shared/canvasCore.js';
+import { liftWhiteMatte } from '../../shared/detail/raster.js';
 import { displayDensity } from '../../shared/renderProfile.js';
 
 let target;
@@ -44,24 +45,6 @@ export function pencil(d, name, color, { distance = 5.4, angle = 38, weight = .5
   brushCalls.set++;
 }
 
-function liftWhiteMatte(context, width, height) {
-  const pixels = context.getImageData(0, 0, width, height);
-  const { data } = pixels;
-  for (let i = 0; i < data.length; i += 4) {
-    if (data[i + 3] === 0) continue;
-    const white = Math.min(data[i], data[i + 1], data[i + 2]);
-    const pigment = 255 - white;
-    if (pigment < 3) {
-      data[i + 3] = 0;
-      continue;
-    }
-    const ratio = 255 / pigment;
-    for (let c = 0; c < 3; c++) data[i + c] = (data[i + c] - white) * ratio;
-    data[i + 3] = data[i + 3] / ratio;
-  }
-  context.putImageData(pixels, 0, 0);
-}
-
 export function paintWash(canvas, seed, draw, [x, y, width, height]) {
   const source = brushTarget();
   brush.load(source);
@@ -77,7 +60,7 @@ export function paintWash(canvas, seed, draw, [x, y, width, height]) {
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.drawImage(source, x * scale.x, y * scale.y, width * scale.x, height * scale.y,
     0, 0, canvas.width, canvas.height);
-  liftWhiteMatte(context, canvas.width, canvas.height);
+  liftWhiteMatte(context);
 }
 
 // Shared wash producers paint into WebGL. Keep the wet pigment in live canvases.

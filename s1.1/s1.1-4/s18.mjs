@@ -11,10 +11,12 @@ const exudateBoost = 1.48;
 
 function perforationSource(art, organ) {
   const canvas = art.querySelector('#s18-gangrene-body canvas');
+  const density = rasterScale(canvas);
+  // At reduced density the cavity can contain fewer than eight solid-color pixels.
+  if (density.x < 1 || density.y < 1) return organ.perforation;
   const scale = organ.scale;
   const x0 = Math.round((organ.appendixTip.x - organ.x) / scale) - 39;
   const y0 = Math.round((organ.appendixTip.y - organ.y) / scale) + 16;
-  const density = rasterScale(canvas);
   const width = Math.round(27 * density.x);
   const height = Math.round(19 * density.y);
   const { data } = canvas.getContext('2d').getImageData(Math.round(x0 * density.x), Math.round(y0 * density.y), width, height);
@@ -86,12 +88,13 @@ export function s18() {
   const audit = { histology: slide.audit, optic, exudateBoost, plume: organ.audit };
   let paintInjury;
   return {
-    paint: swatch.paint + inflamed.paint + organ.paint + mist.paint + `<g id="s18-inset">${slide.paint}</g>`,
+    paint: `<g data-b06-departure>${swatch.paint}${inflamed.paint}${organ.paint}${mist.paint}</g>
+      <g id="s18-inset">${slide.paint}</g>`,
     lettering: swatch.lettering + tangentPair('s18-tangents') + `
       <text id="s18-micro-title" class="note title" x="${optic.x}" y="167" text-anchor="middle"
         font-size="24" fill="#1F1C19">镜下：出血坏死与全层穿孔</text>
       <text id="s18-warning" class="note" x="${optic.x}" y="715" text-anchor="middle" font-size="32"
-        fill="${RED}" style="font-weight:800">管壁坏死穿孔 → 弥漫性腹膜炎</text>`,
+        fill="${RED}" style="font-weight:800">管壁穿孔可引发弥漫性腹膜炎</text>`,
     audit,
     mount(art) {
       inflamed.mount(art);
@@ -113,7 +116,7 @@ export function s18() {
       const zoom = phase(p, .35, .71);
       const magnification = lerp(.78, 1, zoom) + .042 * Math.sin(Math.PI * zoom) * zoom ** 3;
       art.querySelector('#s18-inset').setAttribute('transform', scaleAround(optic.x, optic.y, magnification));
-      opacity(art, 's18-inset', zoom);
+      opacity(art, 's18-inset', phase(p, .35, .54));
       setTangents(labels, 's18-tangents', audit.source, { ...optic, radius: optic.radius * magnification },
         .87 * zoom * phase(p, .410, .56));
       opacity(labels, 's18-micro-title', phase(p, .46, .69));

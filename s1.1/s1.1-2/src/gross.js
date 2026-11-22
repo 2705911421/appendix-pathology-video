@@ -1,13 +1,14 @@
 import flubber from 'flubber';
 import {
-  createIleocecalAsset, ILEOCECAL_BOX, ileocecalDimensions, makeCanvas,
+  appendixCentreline, appendixWallRadius, correctAppendixPigment, createIleocecalAsset, ILEOCECAL_BOX,
+  ileocecalDimensions, makeCanvas, PHLEGMON_CUT,
 } from '../../shared/anatomyWatercolor.js';
 import { clamp, closedCurve, ease, lerp, mulberry32 } from '../../shared/canvasCore.js';
 import { drawRaster, logicalContext, rasterScale } from '../../shared/detail/raster.js';
 import { calls, circle, dotted, fill, glaze, ink, inkReveal, stroke, trace, watercolor } from './brushwork.js';
 
 export const SPECIMEN = Object.freeze({ x: 990, y: 450, scale: 1.40 });
-export const CUT = Object.freeze({ start: .215, end: .735, stone: .280, pus: .57, center: .475 });
+export const CUT = PHLEGMON_CUT;
 export const LENS_SAMPLE = .61;
 export const DIMENSIONS = Object.freeze(Object.fromEntries(
   ['normal', 'simple', 'phlegmon'].map(stage => [stage, ileocecalDimensions(stage)]),
@@ -15,19 +16,9 @@ export const DIMENSIONS = Object.freeze(Object.fromEntries(
 
 const { width, height } = ILEOCECAL_BOX;
 
-// Registration for masks and callouts along the acute centerline of the shared plate.
-// The mounted shared canvases supply all tissue, outlines, mesenteric vessels and the cut surface.
 function position(u) {
-  const first = u < .47;
-  const t = first ? u / .47 : (u - .47) / .53;
-  const v = 1 - t;
-  const points = first ? [[228, 308], [242, 345], [259, 380], [285, 395]]
-    : [[285, 395], [324, 417.5], [377, 436], [410, 415]];
-  const [x, y] = [0, 1].map(i => v ** 3 * points[0][i] + 3 * v * t *
-    (v * points[1][i] + t * points[2][i]) + t ** 3 * points[3][i]);
-  const [dx, dy] = [0, 1].map(i => v ** 2 * (points[1][i] - points[0][i]) +
-    2 * v * t * (points[2][i] - points[1][i]) + t ** 2 * (points[3][i] - points[2][i]));
-  return { x, y, angle: Math.atan2(dy, dx) };
+  const [x, y, angle] = appendixCentreline('phlegmon', u);
+  return { x, y, angle };
 }
 
 const guide = [{ u: 0, distance: 0, ...position(0) }];
@@ -55,7 +46,7 @@ function offset(u, normalDistance) {
 export const appendixPoint = (fraction, distance = 0) => offset(uAt(fraction), distance);
 
 function radius(diameter, u) {
-  return diameter / 2 * (.90 + .10 * Math.sin(Math.PI * u)) * Math.sqrt(1 - clamp((u - .91) / .09) ** 2);
+  return appendixWallRadius('phlegmon', diameter, u);
 }
 
 function ribbon(from, to, inner, outer, steps = 55) {
@@ -117,8 +108,9 @@ function phlegmonFibers(source) {
     wet(coat, '#D0BA78', 158, .50, .6, .4);
     wet(ribbon(.40, .979, u => top(u) * .62, u => bottom(u) * .65), '#E4D9AF', 130, .42, .6, .4);
   });
+  const outline = new Path2D(silhouette(diameter));
   ctx.save();
-  ctx.clip(new Path2D(silhouette(diameter)));
+  ctx.clip(outline);
   ctx.globalAlpha = .46;
   glaze(ctx, tint);
   ctx.globalAlpha = 1;
@@ -135,6 +127,7 @@ function phlegmonFibers(source) {
       i % 5 ? '#FFF2C9' : '#A48B61', .34 + rand() * .51, .30 + rand() * .44);
   }
   ctx.restore();
+  correctAppendixPigment(ctx, outline);
   return canvas;
 }
 
@@ -290,7 +283,8 @@ export function createGrossAnatomy() {
   const cutEnd = uAt(CUT.end);
   const cutLine = modelPath(CUT.start, CUT.end);
   const lip = (u, t) => radius(phlegmon.dimensions.appendix, u) * Math.min(1, t * 10, (1 - t) * 10) ** .58;
-  const lumen = new Path2D(ribbon(cutStart, cutEnd, (u,t) => -.39 * lip(u,t), (u,t) => .39 * lip(u,t)));
+  const lumen = new Path2D(ribbon(cutStart, cutEnd,
+    (u,t) => -CUT.lumenFraction * lip(u,t), (u,t) => CUT.lumenFraction * lip(u,t)));
 
   function shade(shell, clip, progress) {
     composite.save();
@@ -345,7 +339,7 @@ export function createGrossAnatomy() {
         if (guide > 0) {
           composite.save();
           composite.globalAlpha *= guide;
-          dotted(composite, cutLine, '#674034', 2.3, 4.8, 3.2, cutProgress);
+          dotted(composite, cutLine, '#674034', 2.3, 4.8, 3.2, lerp(.48, 1, cutProgress));
           composite.restore();
         }
         if (scissors > 0) {

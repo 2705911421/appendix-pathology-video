@@ -1,6 +1,9 @@
 import {
-  HEIGHT, WIDTH, arrow, cellDot, ease, fillPath, ink, inkLines, organic, pigment, roughProp, svgId, washLayer,
+  HEIGHT, WIDTH, arrow, cellDot, ease, fillPath, ink, inkLines, lerp, organic, pigment, roughProp, svgId, washLayer,
 } from './canvasCore.js';
+import { paintWatercolor } from './anatomyWatercolor.js';
+import { createRaster, drawRaster, liftWhiteMatte, logicalContext } from './detail/raster.js';
+import { SERIF_FONT } from './fonts.js';
 
 const left = 65;
 const width = 245;
@@ -19,7 +22,10 @@ const swatches = [
   [248, '#B39A5B', 163, '灰黄', 'phlegmon'],
   [317, '#1C1719', 230, '焦黑', 'gangrene'],
 ];
-export const STAGE_DOT_CENTERS = Object.freeze(swatches.map(([x]) => left + dotScale * (x - localLeft)));
+export const STAGE_DOT_X = 88;
+export const STAGE_DOT_Y = 415;
+export const STAGE_DOT_CENTERS = Object.freeze(swatches.map(([x]) => STAGE_DOT_X + dotScale * (x - swatches[0][0])));
+const stageDotsTransform = y => `translate(${STAGE_DOT_X} ${y}) scale(${dotScale} 1) translate(${-swatches[0][0]} -647)`;
 const stages = [
   { y: 319, key: 'simple', label: '单纯性', wash: '#CE7E83', strength: 172 },
   { y: 444, key: 'phlegmon', label: '化脓性', wash: '#BA954A', strength: 158 },
@@ -143,8 +149,8 @@ function grayDots() {
   }, 'normal', [87, 620, 254, 53]);
 }
 
-export function drawStageDots({ stage = 'normal', mode = 'acute', y = 647, showStatus = true } = {}) {
-  const transform = `translate(0 ${y - 647}) ${leftScale}`;
+export function drawStageDots({ stage = 'normal', mode = 'acute', y = STAGE_DOT_Y, showStatus = true } = {}) {
+  const transform = stageDotsTransform(y);
   const chronic = mode === 'chronic';
   return {
     paint: column(chronic ? grayDots() : coloredDots() + dotUnderline(stage), transform),
@@ -152,10 +158,76 @@ export function drawStageDots({ stage = 'normal', mode = 'acute', y = 647, showS
   };
 }
 
+// Both sides of a cut draw the same fixed pigment, lettering and selection mark.
+export function mountStageDotOverlay(root, density) {
+  const x = 52, y = STAGE_DOT_Y - 31, width = 252, height = 84;
+  const canvas = createRaster(width, height, density);
+  canvas.hidden = true;
+  Object.assign(canvas.style, { position: 'absolute', left: `${x}px`, top: `${y}px`, pointerEvents: 'none' });
+  canvas.setAttribute('aria-hidden', 'true');
+  root.append(canvas);
+  const ctx = logicalContext(canvas);
+  let baked, previous;
+  function bake() {
+    baked = createRaster(width, height, density);
+    const pigment = logicalContext(baked);
+    pigment.translate(-x, -y);
+    for (const [i, [, color]] of swatches.entries()) {
+      pigment.globalAlpha = i % 2 ? .36 : .22;
+      pigment.fillStyle = color;
+      pigment.fill(new Path2D(organic(STAGE_DOT_CENTERS[i], STAGE_DOT_Y, 16, 15, 145 + i * 69, .2)));
+    }
+    pigment.globalAlpha = 1;
+    const glaze = createRaster(width, height, density);
+    const wet = logicalContext(glaze, { willReadFrequently: true });
+    wet.translate(-x, -y);
+    paintWatercolor(wet, 5568, wash => swatches.forEach(([seed, color, strength], i) => {
+      wash(organic(STAGE_DOT_CENTERS[i], STAGE_DOT_Y, 17, 19, seed, .16), color, strength,
+        { bleed: .22, texture: .72, edge: .76 });
+    }), { blend: 'source-over' });
+    liftWhiteMatte(wet);
+    const wells = new Path2D();
+    for (const center of STAGE_DOT_CENTERS) {
+      wells.moveTo(center + 26, STAGE_DOT_Y);
+      wells.ellipse(center, STAGE_DOT_Y, 26, 25, 0, 0, 2 * Math.PI);
+    }
+    pigment.save();
+    pigment.clip(wells);
+    drawRaster(pigment, glaze, x, y);
+    pigment.restore();
+    pigment.font = `730 26px ${SERIF_FONT}`;
+    pigment.textAlign = 'center';
+    pigment.fillStyle = '#2E2924';
+    swatches.forEach(([, , , label], i) => pigment.fillText(label, STAGE_DOT_CENTERS[i], STAGE_DOT_Y + 42));
+  }
+  return ({ marker = null, opacity = 1, gray = 0 } = {}) => {
+    canvas.hidden = opacity === 0;
+    if (!opacity) return;
+    canvas.style.opacity = String(opacity);
+    canvas.style.filter = gray ? `grayscale(${gray})` : '';
+    if (!baked) bake();
+    if (previous === marker) return;
+    previous = marker;
+    ctx.clearRect(0, 0, width, height);
+    drawRaster(ctx, baked);
+    if (marker === null) return;
+    const from = Math.floor(marker);
+    const center = lerp(STAGE_DOT_CENTERS[from], STAGE_DOT_CENTERS[Math.min(from + 1, 3)], marker - from) - x;
+    const at = STAGE_DOT_Y - y;
+    ctx.strokeStyle = '#A83C31';
+    ctx.lineWidth = 2.4;
+    ctx.lineCap = 'round';
+    ctx.save();
+    ctx.translate(center, at);
+    ctx.stroke(new Path2D('M18 11 Q12 23 -8 19 Q-24 13 -21 -5 Q-15 -23 6 -20 Q22 -16 21 4'));
+    ctx.restore();
+  };
+}
+
 /** Replay the original watercolor swatches one by one along the left margin. */
-export function createStageRecap({ id, y = 647 } = {}) {
+export function createStageRecap({ id, y = STAGE_DOT_Y } = {}) {
   id = svgId('stage-recap', id);
-  const transform = `translate(0 ${y - 647}) ${leftScale}`;
+  const transform = stageDotsTransform(y);
   const defs = `<g id="${id}-pigment">${coloredDots()}</g>` + swatches.map(([x], i) =>
     `<clipPath id="${id}-clip-${i}"><rect x="${x - 30}" y="616" width="60" height="61"/></clipPath>`).join('');
   const marks = swatches.map((_, i) => `<g id="${id}-mark-${i}" clip-path="url(#${id}-clip-${i})">

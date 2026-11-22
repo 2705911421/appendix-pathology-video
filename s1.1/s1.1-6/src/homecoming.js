@@ -1,18 +1,17 @@
 import { getStroke } from 'perfect-freehand';
-import { createStoryWindow, drawStageDots, STAGE_DOT_CENTERS } from '../../shared/leftFloatNotes.js';
+import { createStoryWindow, drawStageDots, STAGE_DOT_CENTERS, STAGE_DOT_Y } from '../../shared/leftFloatNotes.js';
 import { RED, closedCurve, fillPath, lerp, samplePath } from '../../shared/canvasCore.js';
 import { logicalContext, sizeRaster } from '../../shared/detail/raster.js';
 import { drawMinimalPatient } from '../../shared/minimalistCharacters.js';
 import { phase } from '../../shared/timelineHelper.js';
-import { sceneFades } from './cue-sheet.js';
 import { tracedInk, traceTo } from './motion.js';
 
 const helpLines = [
-  { text: '转移性右下腹痛 · 高热 · 腹部拒按', y: 365, size: 34, color: '#1F1C19', start: .10, end: .28 },
-  { text: '= 立即就医！', y: 455, size: 44, color: RED, start: .29, end: .47 },
-  { text: '别硬扛 · 切勿自行服用止痛药掩盖病情', y: 570, size: 32, color: '#B82018', start: .53, end: .71 },
+  { text: '腹痛转移到右下腹，或持续加重', y: 365, size: 37, color: '#1F1C19', start: .30, end: .43 },
+  { text: '尤其伴发热或腹部拒按', y: 422, size: 30, color: '#5C564E', start: .36, end: .47 },
+  { text: '尽快就医', y: 500, size: 48, color: RED, start: .43, end: .55 },
 ];
-const warmStroke = 'M1321 475 C1403 472 1496 476 1597 472';
+const warmStroke = 'M1332 522 C1403 515 1496 522 1584 517';
 const patientBox = { x: 438, y: 270, width: 510, height: 540 };
 const patient = { x: 650, y: 505, scale: 1.55, pose: 'recovered' };
 
@@ -33,10 +32,10 @@ function morningLight() {
 }
 
 function swatchRecap() {
-  const dots = drawStageDots({ stage: null, y: 609 });
+  const dots = drawStageDots({ stage: null });
   return {
     paint: STAGE_DOT_CENTERS.map((x, i) => `<defs><clipPath id="s25-dot-crop-${i}">
-      <rect x="${x - 25}" y="582" width="50" height="55"/></clipPath></defs>
+      <rect x="${x - 25}" y="${STAGE_DOT_Y - 27}" width="50" height="55"/></clipPath></defs>
       <g id="s25-dot-${i}" clip-path="url(#s25-dot-crop-${i})">${dots.paint}</g>`).join(''),
     lettering: dots.lettering,
     update(art, p) {
@@ -57,12 +56,11 @@ function pressureUnderline() {
 }
 
 export function homecoming() {
-  const window = createStoryWindow({ id: 's25-daybreak', phase: 0, y: 199 });
+  const window = createStoryWindow({ id: 's25-daybreak', phase: 0, y: 159 });
   const dots = swatchRecap();
   const { x, y, width, height } = patientBox;
   let portrait;
   return {
-    fade: p => phase(p, 0, .085) * (1 - phase(p, sceneFades.homecomingStart, 1)),
     paint: window.paint + dots.paint + morningLight() + `
       <foreignObject id="s25-minimal-patient" x="${x}" y="${y}" width="${width}" height="${height}">
         <canvas xmlns="http://www.w3.org/1999/xhtml" width="${width}" height="${height}"
@@ -70,7 +68,7 @@ export function homecoming() {
       </foreignObject>`,
     lettering: dots.lettering + helpLines.map((line, i) => `
       <text id="s25-action-${i}" class="note" x="1458" y="${line.y}" font-size="${line.size}" fill="${line.color}"
-        text-anchor="middle" style="font-weight:${i === 1 ? 850 : 800}">${line.text}</text>`).join('') + pressureUnderline(),
+        text-anchor="middle" style="font-weight:${i === 2 ? 850 : 800}">${line.text}</text>`).join('') + pressureUnderline(),
     mount(art) {
       portrait = logicalContext(sizeRaster(art.querySelector('#s25-minimal-patient canvas'), width, height));
     },
@@ -89,7 +87,7 @@ export function homecoming() {
         element.setAttribute('opacity', entered);
         element.setAttribute('transform', `translate(0 ${6 * (1 - entered)})`);
       }
-      traceTo(labels, 's25-underline', phase(p, .415, .61));
+      traceTo(labels, 's25-underline', phase(p, .46, .60));
     },
   };
 }

@@ -2,17 +2,19 @@ import { clamp, closedCurve, lerp, mulberry32, organic, scopeSvg, svgId } from '
 import { CT, axialFilm } from './detail/ct.js';
 import { makeCanvas, retainedCanvas } from './anatomyWatercolor.js';
 import { drawRaster, logicalContext, logicalSize, rasterScale } from './detail/raster.js';
+import { SANS_FONT } from './fonts.js';
 
 export const CT_ZOOM = 2.4;
 export const CT_ROI = Object.freeze({ x: 103, y: 179, width: 151, height: 127 });
 export const CT_DISPLAY_PALETTE = Object.freeze({
-  gas:'#020304', fat:'#1C2026', fluid:'#2B323D', muscle:'#525B68',
+  gas:'#000000', fat:'#1C2026', fluid:'#2B323D', muscle:'#525B68',
   enhancement:'#8C98A8', thickWall:'#CAD5E3', calcium:'#F2F6FA',
 });
 const TAU=2*Math.PI;
 const width=Math.round(CT_ROI.width*CT_ZOOM), height=Math.round(CT_ROI.height*CT_ZOOM);
 const pad=19;
 const focus={x:182,y:146};
+const gangrenousGas = [[216,129,3.9],[236,135,5.7],[256,149,4.3],[243,170,2.7]];
 const vermilion='#C9473B';
 const stageNames=['simple','phlegmon','gangrene'];
 const cache=new Map();
@@ -180,9 +182,9 @@ function fatCloud(ctx,seed,stage) {
   const n=layer.width, scale=n/side;
   const image=temp.createImageData(n,n);
   const alpha=new Float32Array(n*n);
-  const asym=(x,y) => .74*Math.exp(-((x-26)**2/950+(y-14)**2/407))
-    + .48*Math.exp(-((x+24)**2/630+(y+9)**2/770))
-    + .37*Math.exp(-((x-3)**2/480+(y-36)**2/311));
+  const asym=(x,y) => .96*Math.exp(-((x-36)**2/950+(y-15)**2/526))
+    + .48*Math.exp(-((x+24)**2/530+(y-7)**2/500))
+    + .51*Math.exp(-((x-12)**2/620+(y-38)**2/435));
   let voxels=0;
   for(let j=0;j<n;j++) for(let i=0;i<n;i++){
     const x=i/scale-half,y=j/scale-half,r=Math.hypot(x,y);
@@ -192,13 +194,12 @@ function fatCloud(ctx,seed,stage) {
       + .15*val(x*.196-6,y*.248+63);
     const thickness = smooth((r-12)/6)*smooth((58-r)/12);
     const lobe = clamp(asym(x,y)*1.43);
-    const a=thickness*(.25+.27*fib)*smooth((lobe-.10)/.70)*smooth((fib-.18)/.27)*(stage==='gangrene'?.79:1.0);
+    const a=thickness*(.28+.43*fib)*smooth((lobe-.10)/.67)*smooth((fib-.18)/.27)*(stage==='gangrene'?.82:1.0);
     if(a<.012)continue;
     const index=j*n+i,p=index*4;
     alpha[index]=a;
-    image.data[p]=lerp(61,92,fib);
-    image.data[p+1]=lerp(70,103,fib);
-    image.data[p+2]=lerp(84,120,fib);
+    const attenuation = lerp(81,130,fib);
+    image.data[p]=image.data[p+1]=image.data[p+2]=attenuation;
     image.data[p+3]=255*a;
     voxels++;
   }
@@ -213,8 +214,8 @@ function fatCloud(ctx,seed,stage) {
   drawRaster(ctx,layer,focus.x-half,focus.y-half);
 
   const rand=mulberry32(seed+173);
-  const startPoints=[[136,135],[144,151],[152,181],[165,117],[180,181],[187,108],[199,188],[206,111],
-                     [215,163],[214,191],[230,156],[230,129],[223,177],[156,125],[168,196],[243,159]];
+  const startPoints=[[137,153],[144,163],[153,184],[165,124],[184,177],[199,188],
+                     [210,160],[214,181],[217,191],[229,149],[229,163],[224,178],[243,159],[241,185],[239,178]];
   const traces=[];
   for(const [i,[x,y]] of startPoints.entries()) {
     const x0=x+(rand()-.50)*5, y0=y+(rand()-.50)*5;
@@ -226,7 +227,7 @@ function fatCloud(ctx,seed,stage) {
       m${l*ux*.11} ${l*uy*.11} q${l*ux*.14} ${l*uy*.19-bend*.20} ${l*ux*.35} ${l*uy*.32}`;
     ctx.save();
     ctx.filter='blur(.62px)';
-    line(ctx,path,i%3?'#85909F':'#909AA4',1.05+rand()*.87,.30+rand()*.24);
+    line(ctx,path,'#919191',1.35+rand()*.98,.39+rand()*.25);
     ctx.restore();
     traces.push([x0,y0,a]);
   }
@@ -262,7 +263,6 @@ function simpleAppendix(ctx) {
   line(ctx,tube,'#2D3440',19.1);
   line(ctx,'M173 133 C184 151 199 162 217 164','#424A58',5.3,.64);
   ctx.restore();
-  [[177,180,1.78],[221,191,1.91],[249,176,1.37]].forEach(([x,y,r],i)=>dot(ctx,x,y,r,r*.67,'#737E8E',.85,i*.65));
 }
 
 function swollenAppendix(ctx,stage,seed){
@@ -272,16 +272,15 @@ function swollenAppendix(ctx,stage,seed){
   const stalk='M151 117 Q163 119 174 125 L177 127';
   const gapAngle=gap*180/Math.PI;
   const stranding=fatCloud(ctx,seed,stage);
-  let gasBubbles=0;
   if(necrotic){
-    const pool='M201 139 C206 125 217 128 225 132 C231 122 248 126 250 138 C261 144 271 142 273 156 C284 168 274 181 261 176 C249 198 240 180 232 177 C219 183 204 176 205 166 C194 157 197 145 201 139Z';
+    const pool='M201 139 C187 134 189 121 204 119 C215 117 219 125 226 127 C240 120 249 130 251 139 C262 144 271 142 273 156 C284 168 274 181 261 176 C249 198 240 180 232 177 C219 183 204 176 205 166 C194 157 197 145 201 139Z';
     ctx.save();
     ctx.filter='blur(2px)';
-    line(ctx,pool,'#6B7788',3.2,.82);
+    line(ctx,pool,'#9F9F9F',4.2,.76);
     ctx.restore();
     form(ctx,pool,'#272E39');
     form(ctx,organic(240,155,28,16,seed+94,.39,.2,22),'#303846',.42);
-    line(ctx,pool,'#55616F',1.18,.51);
+    line(ctx,pool,'#858585',1.5,.58);
   }
   ctx.save();
   ctx.filter='blur(.58px)';
@@ -292,17 +291,11 @@ function swollenAppendix(ctx,stage,seed){
     form(ctx,shapeRing(x,y,22,19.2,seed%31,outside,inside,gap),a);
   }
   ctx.restore();
-  if(necrotic){
-    const bubbles=[[216,129,3.9],[236,135,5.7],[256,149,4.3],[243,170,2.7]];
-    for(const [i,[gx,gy,r]] of bubbles.entries()){
-      dot(ctx,gx,gy,r,r*(.87+i*.031),CT_DISPLAY_PALETTE.gas,1,i*.43);
-      gasBubbles++;
-    }
-  } else {
+  if(!necrotic){
     dot(ctx,x+2.8,y-1.7,5.1,3.57,'#DCE3EE',.64,-.47);
     dot(ctx,x+2.8,y-1.7,3.88,2.68,'#F8FBFF',1,-.47);
   }
-  return {stranding,gasBubbles,gapAngle};
+  return {stranding,gapAngle};
 }
 
 function exposePixels(ctx,seed) {
@@ -314,8 +307,8 @@ function exposePixels(ctx,seed) {
   for(let j=0;j<h;j++)for(let i=0;i<w;i++){
     const p=(j*w+i)*4;
     const noise=5.5*Math.sqrt(-2*Math.log(Math.max(rand(),1e-12)))*Math.cos(TAU*rand());
-    const before=image.data[p+1];
-    for(let c=0;c<3;c++)image.data[p+c]+=noise;
+    const before=Math.round(.2126*image.data[p]+.7152*image.data[p+1]+.0722*image.data[p+2]);
+    image.data[p]=image.data[p+1]=image.data[p+2]=before+noise;
     if(i/scale.x>=pad&&i/scale.x<pad+width&&j/scale.y>=pad&&j/scale.y<pad+height){
       total+=noise; squares+=noise*noise; n++;
       const diff=image.data[p+1]-before;
@@ -340,10 +333,13 @@ function regionField(stage){
   ctx.lineCap='round';
   ctx.lineJoin='round';
   contextualFossa(ctx);
-  let pathology={stranding:null,gasBubbles:0,gapAngle:0};
+  let pathology={stranding:null,gapAngle:0};
   if(stage==='simple')simpleAppendix(ctx);
   else pathology=swollenAppendix(ctx,stage,seed);
   const noise=exposePixels(ctx,seed+5303);
+  const air = stage === 'gangrene' ? gangrenousGas : [];
+  // Preserve sharp black extraluminal air in the final CT window.
+  for(const [i,[x,y,r]] of air.entries())dot(ctx,x,y,r,r*(.87+i*.031),CT_DISPLAY_PALETTE.gas,1,i*.43);
   const view=makeCanvas(width,height);
   const viewContext=view.getContext('2d',{willReadFrequently:true});
   const left=Math.round(pad*scale.x), top=Math.round(pad*scale.y);
@@ -358,7 +354,8 @@ function regionField(stage){
   const mainCrop=ctx.getImageData(left,top,view.width,view.height).data;
   const zoomCrop=viewContext.getImageData(0,0,view.width,view.height).data;
   const sameSource=mainCrop.every((value,i)=>value===zoomCrop[i]);
-  const result={field,view,audit:{...pathology,noise,multiplier:CT_ZOOM,sameSource}};
+  const result={field,view,audit:{...pathology,gasBubbles:air.length,airCenters:air.map(([x,y])=>[x,y]),
+    noise,multiplier:CT_ZOOM,sameSource}};
   cache.set(stage,result);
   return result;
 }
@@ -384,7 +381,7 @@ export function createCTAsset({id,stage='simple',x=0,y=0,scale=1}={}){
     <rect x="${zoom.x}" y="${zoom.y}" width="${zoom.width}" height="${zoom.height}" fill="none" stroke="${vermilion}" stroke-width="3.0"/>
   </g>`;
   const size=Math.max(16,29*scale), markerY=y+16+size*.77;
-  const lettering=`<g fill="#FFFDF9" font-family="sans-serif" font-size="${size}" font-weight="720">
+  const lettering=`<g fill="#FFFDF9" font-family="${SANS_FONT}" font-size="${size}" font-weight="720">
     <text x="${x+16}" y="${markerY}">R</text>
     <text x="${x+CT.width*scale-16}" y="${markerY}" text-anchor="end">L</text>
   </g>

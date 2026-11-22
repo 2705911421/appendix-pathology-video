@@ -1,6 +1,7 @@
 import {
-  HEIGHT, PAPER, WIDTH, clamp, createRaster, drawRasterCrop, inkOutline, logicalContext, mulberry32, organic, pencil, pigment, roughProp,
+  HEIGHT, WIDTH, clamp, createRaster, drawRasterCrop, inkOutline, logicalContext, mulberry32, organic, pencil, pigment, roughProp,
 } from '../../shared/canvasCore.js';
+import { HAND_FONT } from '../../shared/fonts.js';
 import { displayDensity } from '../../shared/renderProfile.js';
 import { paintWash } from './watercolorCanvas.js';
 
@@ -46,7 +47,7 @@ export function dot(ctx, x, y, rx, ry, color) {
 }
 
 export function letter(ctx, line, x, y, {
-  size = 28, weight = 500, color = '#433C36', align = 'left', font = 'KaiTi, STKaiti, "Microsoft YaHei", serif',
+  size = 28, weight = 500, color = '#433C36', align = 'left', font = HAND_FONT,
 } = {}) {
   ctx.font = weight + ' ' + size + 'px ' + font;
   ctx.textAlign = align;
@@ -123,12 +124,4 @@ export function makePigments() {
     const cell = cells.get(name);
     drawRasterCrop(ctx, atlas, cell.x, cell.y, cell.width, cell.height, x, y, width, height);
   };
-}
-
-export function captionPaper(ctx) {
-  const wash = ctx.createLinearGradient(0, 867, 0, 934);
-  wash.addColorStop(0, '#F5F1E900');
-  wash.addColorStop(1, PAPER);
-  ctx.fillStyle = wash;
-  ctx.fillRect(0, 867, WIDTH, HEIGHT - 867);
 }
