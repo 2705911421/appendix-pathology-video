@@ -98,7 +98,8 @@ function storyMotion(cue, p, t) {
   };
   if (id === 'S01') {
     motion.camera = dolly({ scale: 1, x: 0, y: 0 }, lunchView, phase(p, 0, 1));
-    motion.patientPose = { fromPose: 'eat', pose: 'navel_pain', progress: clamp((p - .13) / (.72 - .13)) };
+    motion.patientPose = { fromPose: 'eat', pose: 'navel_pain', progress: clamp((p - .13) / (.72 - .13)),
+      hasBowl: 1 - phase(p, .80, .99) };
     const makeRoom = phase(p, .90, 1);
     motion.portraitX = lerp(920, 690, makeRoom);
     motion.portraitScale = lerp(1, .92, makeRoom);
@@ -135,7 +136,7 @@ function storyMotion(cue, p, t) {
     const bridge = id === 'B01';
     const exit = bridge ? phase(p, .07, .83) : 1;
     motion.camera = dolly(duskView, hospitalView, exit);
-    motion.portraitX = 690 - 176 * exit;
+    motion.portraitX = 690 - 56 * exit;
     motion.portraitScale = .92;
     motion.hipY += 17 + 11 * exit;
     motion.patientPose = { pose: 'rlq_acute' };

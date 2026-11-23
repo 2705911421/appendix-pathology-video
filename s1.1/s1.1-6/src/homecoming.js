@@ -12,8 +12,8 @@ const helpLines = [
   { text: '尽快就医', y: 500, size: 48, color: RED, start: .43, end: .55 },
 ];
 const warmStroke = 'M1332 522 C1403 515 1496 522 1584 517';
-const patientBox = { x: 438, y: 270, width: 510, height: 540 };
-const patient = { x: 650, y: 505, scale: 1.55, pose: 'recovered' };
+const patientBox = { x: 402, y: 236, width: 518, height: 600 };
+const patient = { x: 649, y: 267, scale: 1.55, pose: 'recovered' };
 
 function morningLight() {
   return `<defs>
@@ -76,8 +76,7 @@ export function homecoming() {
       dots.update(art, p);
       portrait.clearRect(0, 0, width, height);
       portrait.save();
-      // The shared preset's shoulder is 100 units below its placement origin.
-      portrait.translate(-x, -y - 100 * patient.scale);
+      portrait.translate(-x, -y);
       drawMinimalPatient(portrait, { ...patient, breathPhase: p * 2 * Math.PI * 3.15 });
       portrait.restore();
       art.querySelector('#s25-light').setAttribute('opacity', lerp(.040, .07, phase(p, .04, .49)));

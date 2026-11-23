@@ -6,7 +6,7 @@ import { drawMinimalDoctor } from '../../shared/minimalistCharacters.js';
 import { appear, CINNABAR, inkMask, label, penProgress, reveal } from './scene-tools.js';
 
 const pivot = { x: 1345, y: 265 };
-const doctorBox = { x: 415, y: 214, width: 460, height: 556 };
+const doctorBox = { x: 355, y: 192, width: 558, height: 605 };
 const baseY = 555;
 const loadedAngle = -11;
 const radians = angle => angle * Math.PI / 180;
@@ -161,7 +161,7 @@ export function diagnosisScene(stage) {
     const landed = appear(elapsed, 0, .15);
     const seconds = cue.start + elapsed;
     doctorCtx.clearRect(0, 0, doctorBox.width, doctorBox.height);
-    drawMinimalDoctor(doctorCtx, { x: 595 - doctorBox.x, y: 224 - doctorBox.y, scale: 2.04,
+    drawMinimalDoctor(doctorCtx, { x: 568 - doctorBox.x, y: 218 - doctorBox.y, scale: 1.60,
       pose: 'explain', breathPhase: seconds * 2 * Math.PI / 3.85, nod: .58 });
     reveal(doctor, 1, 18);
     scale.setAttribute('opacity', 1);
