@@ -1,11 +1,9 @@
 import flubber from 'flubber';
 import { ellipse, lerp, mulberry32, organic, samplePath } from '../../shared/canvasCore.js';
-import { createHistologyAsset, HISTOLOGY_DIAMETER } from '../../shared/histologyProcedural.js';
-import { HANDOFF_SLIDE_SEED } from '../../shared/detail/microscopeHandoff.js';
+import { histologyRecipe } from '../../shared/histologyProcedural.js';
 import { phase } from '../../shared/timelineHelper.js';
 import { MICROSCOPE_HANDOFF } from '../../shared/transitionAnchors.js';
 import { calls, circle, dotted, fill, glaze, ink, liveLayer, roughCircle, stroke, watercolor } from './brushwork.js';
-import { mountSurface } from './gross.js';
 
 export const MAGNIFIER = Object.freeze({ x: 1590, y: 275, radius: 142, labelTop: 460 });
 export const MICROSCOPE = Object.freeze({ x: MICROSCOPE_HANDOFF.cx, y: MICROSCOPE_HANDOFF.cy, radius: MICROSCOPE_HANDOFF.radius });
@@ -132,85 +130,34 @@ export function createMagnifier() {
   };
 }
 
-function crossSection(x, y) {
-  const outline = organic(x, y, 36, 30.5, 2818, .12, -.24, 21);
-  const muscle = organic(x - 1, y + .25, 29.3, 24.5, 4051, .13, -.23, 19);
-  const inner = organic(x + 2, y - 1.8, 19.3, 15, 8737, .19, -.18, 18);
-  const lumen = organic(x + 2, y - 1.8, 12, 8.5, 7494, .29, -.17, 16);
-  const crop = [x - 53, y - 48, 106, 96];
-  const wash = watercolor(crop, 5121, wet => {
-    wet(outline, '#873943', 199, .23, .77, .5);
-    wet(muscle, '#C66B69', 151, .22, .73, .48);
-    wet(inner, '#9B3A48', 168, .21, .72, .49);
-    wet(lumen, '#E9AD50', 231, .24, .74, .54);
-  });
-  const art = liveLayer(crop);
-  fill(art.ctx, outline, '#87343E');
-  fill(art.ctx, muscle, '#B75B5A');
-  fill(art.ctx, inner, '#843441');
-  fill(art.ctx, lumen, '#E6B05C');
-  glaze(art.ctx, wash);
-  ink(art.ctx, lumen, '#77313F', 2.15, .9);
-  return { outline, art };
-}
-
-function pathSize(d) {
-  const points = samplePath(d, 3.1, 700);
+function boundsOf(d) {
+  const points = samplePath(d, 4.5, 640);
   const xs = points.map(([x]) => x);
   const ys = points.map(([, y]) => y);
-  return { width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
+  const left = Math.min(...xs), right = Math.max(...xs), top = Math.min(...ys), bottom = Math.max(...ys);
+  return { x: (left + right) / 2, y: (top + bottom) / 2, width: right - left, height: bottom - top };
 }
 
 export function createMicroscope() {
   const { x, y, radius } = MICROSCOPE;
-  const { outline, art } = crossSection(x, y);
-  const toCircle = flubber.toCircle(outline, x, y, radius, { maxSegmentLength: 5 });
-  calls.toCircle++;
-  const slide = createHistologyAsset({ id: 's12-phlegmon-he', stage: MICROSCOPE_HANDOFF.mode, seed: HANDOFF_SLIDE_SEED });
-  const tissue = mountSurface(slide);
-  const final = ellipse(x, y, radius, radius);
+  let previous, tween;
   return {
-    recipe: slide.recipe,
-    draw(ctx, p, origin) {
-      if (p <= 0) return null;
-      const flight = phase(p, .25, .76);
-      const growth = phase(p, .25, .76);
-      const reveal = phase(p, .02, .25);
-      const histology = phase(p, .40, .75);
-      const magnification = 1 + .030 * phase(p, .47, .60) * (1 - phase(p, .60, .75));
-      const dx = (origin.x - x) * (1 - flight);
-      const dy = (origin.y - y) * (1 - flight) - 17 * Math.sin(Math.PI * flight);
-      const d = growth >= 1 ? final : toCircle(growth);
-      const aperture = new Path2D(d);
-      ctx.save();
-      ctx.translate(dx, dy);
-      ctx.globalAlpha *= reveal;
-      ctx.save();
-      ctx.clip(aperture);
-      ctx.fillStyle = '#823642';
-      ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
-      const sampleScale = lerp(1, radius / 33, growth);
-      ctx.save();
-      ctx.translate(x * (1 - sampleScale), y * (1 - sampleScale));
-      ctx.scale(sampleScale, sampleScale);
-      glaze(ctx, art);
-      ctx.restore();
-
-      const lensScale = radius * 2 / HISTOLOGY_DIAMETER * magnification;
-      const field = HISTOLOGY_DIAMETER * lensScale;
-      ctx.globalAlpha *= histology;
-      ctx.fillStyle = '#FDF9FB';
-      ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
-      ctx.drawImage(tissue, x - field / 2 - (magnification - 1) * 27, y - field / 2, field, field);
-      ctx.restore();
-      const rim = phase(p, .62, .76);
-      stroke(ctx, aperture, '#69483C', 2.6 + histology * 2.7, 1 - .73 * rim);
-      ctx.globalAlpha *= rim;
-      roughCircle(ctx, x, y, radius * 2 + 10, '#483536', 4.2, 17057);
-      roughCircle(ctx, x, y, radius * 2 + 3.9, '#A27D54', 2.4, 19933);
-      ctx.restore();
-      const size = growth >= 1 ? { width: radius * 2, height: radius * 2 } : pathSize(d);
-      return { growth, histology, magnification, x: x + dx, y: y + dy, ...size };
+    recipe: histologyRecipe(MICROSCOPE_HANDOFF.mode),
+    at(p, outline) {
+      const growth = phase(p, 0, .58);
+      const opacity = phase(p, .015, .25);
+      const paperOpacity = phase(p, .28, .58);
+      if (growth >= 1) return { growth, opacity: 1, paperOpacity: 1, x, y, width: 2 * radius, height: 2 * radius };
+      if (outline !== previous) {
+        tween = flubber.toCircle(outline, x, y, radius, { maxSegmentLength: 8 });
+        calls.toCircle++;
+        previous = outline;
+      }
+      const mask = tween(growth);
+      const box = boundsOf(mask);
+      const overscan = lerp(1.43, 1.04, growth);
+      return { growth, opacity, paperOpacity, mask, ...box,
+        placement: { x: box.x, y: box.y, sx: overscan * box.width / (2 * radius), sy: overscan * box.height / (2 * radius) } };
     },
   };
 }

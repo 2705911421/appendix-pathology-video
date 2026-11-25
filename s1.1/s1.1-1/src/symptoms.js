@@ -29,14 +29,9 @@ const appendix = 'M-5 -15 C-7 -8 -5 -4 -4 1 C-3 10 4 17 12 16 C18 15 21 9 20 4'
 
 const routeD = 'M' + U.x + ' ' + U.y + ' L' + M.x + ' ' + M.y;
 const routeAngle = Math.atan2(M.y - U.y, M.x - U.x);
-const nerveStart = 'M' + (M.x + 17) + ' ' + (M.y + 5);
-const neuralPaths = [
-  nerveStart + ` C-79 -33 -49 -48 -26 -67 Q-8 -82 ${U.x} ${U.y}`,
-  nerveStart + ` C-59 -25 -63 -60 -35 -73 Q-13 -88 ${U.x} ${U.y}`,
-];
 let guide;
 
-function washPelvis(ctx, pigment) {
+function washPelvis(ctx, pigment, localized) {
   const linen = ctx.createLinearGradient(0, -232, 0, 215);
   for (const [offset, color] of [
     [0, '#EBE1CF00'], [.12, '#EBE1CF7D'], [.52, '#ECE0CFC3'], [.76, '#E5D8C7A9'],
@@ -78,19 +73,19 @@ function washPelvis(ctx, pigment) {
   ink(ctx, 'M-64 112 Q-46 137 -25 131 Q-13 126 0 130', '#AF9F8977', 1.6);
   ink(ctx, 'M64 112 Q46 137 25 131 Q13 126 0 130', '#AF9F8977', 1.6);
 
-  ctx.save();
-  ctx.translate(M.x, M.y);
-  fill(ctx, cecum, '#BAB0A384');
-  fade(ctx, .19, () => {
-    ctx.clip(pathOf(cecum));
-    pigment(ctx, 'skin', -25, -49, 50, 42);
+  fade(ctx, localized, () => {
+    ctx.translate(M.x, M.y);
+    fill(ctx, cecum, '#BAB0A384');
+    fade(ctx, .19, () => {
+      ctx.clip(pathOf(cecum));
+      pigment(ctx, 'skin', -25, -49, 50, 42);
+    });
+    stroke(ctx, cecum, '#81746995', 1.55);
+    ink(ctx, 'M-13 -34 Q-6 -30 6 -35', '#938578A2', 1.8);
+    ink(ctx, 'M-13 -24 Q-6 -20 6 -25', '#938578A2', 1.55);
+    fill(ctx, appendix, '#C3A4978C');
+    stroke(ctx, appendix, '#8B776DA2', 1.55);
   });
-  stroke(ctx, cecum, '#81746995', 1.55);
-  ink(ctx, 'M-13 -34 Q-6 -30 6 -35', '#938578A2', 1.8);
-  ink(ctx, 'M-13 -24 Q-6 -20 6 -25', '#938578A2', 1.55);
-  fill(ctx, appendix, '#C3A4978C');
-  stroke(ctx, appendix, '#8B776DA2', 1.55);
-  ctx.restore();
 }
 
 export function paintPainHalo(ctx, pigment, point, radius, opacity, tightness = 0) {
@@ -142,23 +137,6 @@ function routeAt(progress) {
   return progress === 1 ? M : { x: lerp(U.x, M.x, progress), y: lerp(U.y, M.y, progress) };
 }
 
-function neuralMotion(ctx, t, strength) {
-  fade(ctx, strength, () => {
-    ctx.setLineDash([4, 7]);
-    for (const [i, d] of neuralPaths.entries()) {
-      ctx.lineDashOffset = -t * 36 - 5 * i;
-      stroke(ctx, d, i === 0 ? '#678B99' : '#94A9AD', i === 0 ? 2.55 : 1.9);
-    }
-  });
-}
-
-function drawNerveNote(ctx, amount) {
-  fade(ctx, amount, () => {
-    leader(ctx, { x: 23, y: -130 }, { x: 155, y: -178 }, '#788C90', 2.4);
-    letter(ctx, '内脏神经传导 · 定位模糊', 166, -177, { size: 28, color: '#536D76', weight: 700 });
-  });
-}
-
 function markNavel(ctx, alpha) {
   fade(ctx, alpha, () => {
     dot(ctx, U.x, U.y, 4.2, 4.2, '#4C585C');
@@ -190,7 +168,7 @@ function markLandmarks(ctx, alpha) {
     ctx.strokeStyle = '#5A5248BD';
     ctx.stroke();
     for (const [start, end, text, offset] of [
-      [A, M, '外 1/3', 35], [M, U, '内 2/3', 22],
+      [A, M, '外 1/3', 35], [M, U, '内 2/3', 20],
     ]) {
       letter(ctx, text, (start.x + end.x) / 2 - nx * offset, (start.y + end.y) / 2 - ny * offset, {
         size: 20, align: 'center', color: '#5A5248', weight: 650,
@@ -236,6 +214,17 @@ function showMigration(ctx, motion, pigment, point) {
     letter(ctx, '麦氏点（压痛、反跳痛）', -88, 257, { size: 34, color: RED, weight: 700 });
     letter(ctx, '从右髂前上棘向脐量 1/3', -88, 299, { size: 27, color: umber });
   });
+  const signs = motion.peritonealSigns;
+  fade(ctx, phase(signs, .36, .49), () => {
+    ink(ctx, 'M-235 331 Q-233 363 -234 389', '#A34338', 3.3);
+    letter(ctx, '按压壁腹膜 → 压痛', -218, 347, { size: 29, color: RED, weight: 670 });
+  });
+  fade(ctx, phase(signs, .55, .70), () => {
+    letter(ctx, '突然松手牵拉 → 反跳痛', 80, 347, { size: 29, color: RED, weight: 670 });
+  });
+  fade(ctx, phase(signs, .74, .88), () => {
+    letter(ctx, '腹膜刺激征 · 提示炎症累及腹膜', -218, 389, { size: 28, color: umber, weight: 660 });
+  });
 }
 
 export function drawAnatomy(ctx, motion, pigment) {
@@ -245,15 +234,13 @@ export function drawAnatomy(ctx, motion, pigment) {
   const painCenter = motion.migrating ? routeAt(motion.migration) : U;
   fade(ctx, motion.diagramOpacity, () => {
     ctx.translate(x, y);
-    washPelvis(ctx, pigment);
-    markLandmarks(ctx, motion.migrating ? motion.markings : .84);
+    washPelvis(ctx, pigment, motion.migrating ? motion.markings : 0);
+    if (motion.migrating) markLandmarks(ctx, motion.markings);
     if (motion.migrating) showMigration(ctx, motion, pigment, painCenter);
     else {
       const radius = lerp(36, 67, motion.neural) + 5.5 * Math.sin(motion.t * 2.8);
       paintPainHalo(ctx, pigment, U, radius, motion.neural * .56);
     }
-    neuralMotion(ctx, motion.t, motion.neural);
-    drawNerveNote(ctx, motion.neuralLabel);
     markNavel(ctx, Math.max(.84, motion.neuralLabel, motion.markings));
   });
   const project = ({ x: px, y: py }) => ({ x: x + px, y: y + py });

@@ -5,7 +5,7 @@ import {
 } from '../../shared/anatomyWatercolor.js';
 import { clamp, closedCurve, ease, lerp, mulberry32 } from '../../shared/canvasCore.js';
 import { drawRaster, logicalContext, rasterScale } from '../../shared/detail/raster.js';
-import { calls, circle, dotted, fill, glaze, ink, inkReveal, stroke, trace, watercolor } from './brushwork.js';
+import { calls, circle, fill, glaze, ink, inkReveal, stroke, trace, watercolor } from './brushwork.js';
 
 export const SPECIMEN = Object.freeze({ x: 990, y: 450, scale: 1.40 });
 export const CUT = PHLEGMON_CUT;
@@ -59,6 +59,15 @@ function ribbon(from, to, inner, outer, steps = 55) {
 }
 
 const silhouette = diameter => ribbon(0, 1, u => -radius(diameter, u) - .8, u => radius(diameter, u) + .8);
+
+export function projectAppendixSilhouette(project) {
+  const edge = direction => Array.from({ length: 46 }, (_, i) => {
+    const fraction = i / 45;
+    const { x, y } = project(appendixPoint(fraction, direction * radius(DIMENSIONS.phlegmon.appendix, uAt(fraction))));
+    return [x, y];
+  });
+  return closedCurve([...edge(1), ...edge(-1).reverse()]);
+}
 
 function modelPath(from, to, distance = () => 0, segments = 42) {
   return trace(Array.from({ length: segments + 1 }, (_, i) => {
@@ -188,6 +197,7 @@ function drawScissors(ctx, at, progress) {
   ctx.save();
   ctx.translate(at.x + Math.sin(at.angle) * 5, at.y - Math.cos(at.angle) * 5);
   ctx.rotate(at.angle - .16);
+  ctx.scale(1.18, 1.18);
   circle(ctx, -10, -4.6, 3.6, 2.55, '#F4E8D4');
   circle(ctx, -10, 3.8, 3.6, 2.55, '#F4E8D4');
   const opening = 3.5 + 2.1 * Math.sin(progress * 7 * Math.PI) ** 2;
@@ -281,7 +291,6 @@ export function createGrossAnatomy() {
   calls.interpolate += 2;
   const cutStart = uAt(CUT.start);
   const cutEnd = uAt(CUT.end);
-  const cutLine = modelPath(CUT.start, CUT.end);
   const lip = (u, t) => radius(phlegmon.dimensions.appendix, u) * Math.min(1, t * 10, (1 - t) * 10) ** .58;
   const lumen = new Path2D(ribbon(cutStart, cutEnd,
     (u,t) => -CUT.lumenFraction * lip(u,t), (u,t) => CUT.lumenFraction * lip(u,t)));
@@ -336,16 +345,20 @@ export function createGrossAnatomy() {
           animatePus(composite, lumen, opening, progress);
           composite.restore();
         }
-        if (guide > 0) {
+        if (guide > 0 && cutProgress > 0) {
           composite.save();
           composite.globalAlpha *= guide;
-          dotted(composite, cutLine, '#674034', 2.3, 4.8, 3.2, lerp(.48, 1, cutProgress));
+          const cutLine = new Path2D(modelPath(.02, lerp(.02, .97, cutProgress)));
+          composite.setLineDash([6.7, 4.5]);
+          composite.lineCap = 'round';
+          stroke(composite, cutLine, '#F4DFB8', 4.6);
+          stroke(composite, cutLine, '#C43428', 2.9);
           composite.restore();
         }
         if (scissors > 0) {
           composite.save();
           composite.globalAlpha *= scissors;
-          drawScissors(composite, appendixPoint(lerp(CUT.start, CUT.end, cutProgress)), cutProgress);
+          drawScissors(composite, appendixPoint(lerp(.02, .97, cutProgress)), cutProgress);
           composite.restore();
         }
       }

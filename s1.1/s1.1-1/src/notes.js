@@ -19,6 +19,7 @@ export function makeNotes(pigment) {
   return (ctx, motion) => {
     const { sunset, night, noteOpacity } = motion;
     fade(ctx, noteOpacity, () => {
+      ctx.translate(0, 88);
       ctx.save();
       ctx.clip(pathOf(pane));
       fill(ctx, pane, '#D5DFDD');

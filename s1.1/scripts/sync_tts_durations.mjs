@@ -17,7 +17,6 @@ export const voiceFile = path.join(root, 'audio', 'voice_master.wav');
 const timelineFile = path.join(output, 'master_timeline.json');
 const sampleRate = 44100;
 const channels = 2;
-const padding = 0.45;
 
 async function run(tool, args, label) {
   try {
@@ -93,7 +92,8 @@ function timeline(sheets, cues, measured) {
     const { id, module, type, zhText, enText, defaultDuration } = cue;
     const input = byId.get(id);
     const realDur = input?.realDur ?? 0;
-    const slotMs = type === 'speech' ? Math.round((realDur + padding) * 1000) : cueDurationMs(cue);
+    // Round up to a timeline millisecond so the resampled voice tail fits its slot.
+    const slotMs = type === 'speech' ? Math.ceil(realDur * 1000 - 1e-8) : cueDurationMs(cue);
     const slotDur = slotMs / 1000;
     const startMs = cursorMs;
     cursorMs += slotMs;

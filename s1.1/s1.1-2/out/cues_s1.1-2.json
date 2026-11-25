@@ -3,7 +3,7 @@
   "width": 1920,
   "height": 1080,
   "fps": 30,
-  "duration": 39.1,
+  "duration": 40.5,
   "cues": [
     {
       "id": "S06",
@@ -20,26 +20,28 @@
     {
       "id": "S07",
       "type": "speech",
-      "defaultDuration": 7.5,
-      "zhText": "术中看到的阑尾肿胀增粗、通体暗红，浆膜血管扩张充血。",
+      "defaultDuration": 8.2,
+      "zhText": "术中看到的阑尾肿胀增粗、通体暗红。浆膜血管扩张充血，交织起来像烧红的铁丝网。",
       "highlightZh": [
         "肿胀增粗",
         "通体暗红",
-        "扩张充血"
+        "扩张充血",
+        "烧红的铁丝网"
       ],
-      "enText": "At surgery, the appendix is swollen and dark red, with dilated, congested serosal vessels."
+      "enText": "At surgery, the appendix is swollen and dark red. Its dilated, congested serosal vessels form a network like red-hot wire mesh."
     },
     {
       "id": "S08",
       "type": "speech",
-      "defaultDuration": 9.4,
-      "zhText": "暗红的浆膜面还覆有灰黄色脓苔，提示急性化脓性阑尾炎，也叫蜂窝织炎性阑尾炎。",
+      "defaultDuration": 10.1,
+      "zhText": "暗红的浆膜面还覆有灰黄色脓苔。这正是急性化脓性阑尾炎，也就是急性蜂窝织性阑尾炎的外现特征。",
       "highlightZh": [
         "灰黄色脓苔",
-        "化脓性阑尾炎",
-        "蜂窝织炎性阑尾炎"
+        "急性化脓性阑尾炎",
+        "急性蜂窝织性阑尾炎",
+        "外现特征"
       ],
-      "enText": "The dark-red serosa bears a grayish-yellow purulent coating, suggesting acute suppurative, or phlegmonous, appendicitis."
+      "enText": "The dark-red serosa is coated in grayish-yellow pus. This is a characteristic external manifestation of acute suppurative (phlegmonous) appendicitis."
     },
     {
       "id": "S09",
@@ -57,8 +59,8 @@
       "id": "B03",
       "type": "bridge",
       "duration": 2.5,
-      "start": 36.6,
-      "end": 39.1
+      "start": 38,
+      "end": 40.5
     }
   ]
 }

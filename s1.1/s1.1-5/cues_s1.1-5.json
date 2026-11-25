@@ -3,7 +3,7 @@
   "width": 1920,
   "height": 1080,
   "fps": 30,
-  "duration": 57.2,
+  "duration": 63.7,
   "cues": [
     {
       "id": "S19",
@@ -51,23 +51,26 @@
     {
       "id": "S22",
       "type": "speech",
-      "defaultDuration": 14,
-      "zhText": "医生先评估有无坏疽、穿孔或腹膜炎。怀疑坏疽或穿孔时，需尽快外科评估；弥漫性腹膜炎通常需紧急手术，局限性脓肿可视情况先抗感染，必要时引流。",
+      "defaultDuration": 20.5,
+      "zhText": "疑似急性蜂窝织性阑尾炎，先评估有无坏疽、穿孔或腹膜炎。未穿孔者结合临床评估，通常尽早手术切除。怀疑坏疽或穿孔，需尽快外科评估。弥漫性腹膜炎通常需紧急手术；局限性脓肿可先抗感染，必要时引流。",
       "highlightZh": [
+        "急性蜂窝织性阑尾炎",
+        "未穿孔",
+        "尽早手术切除",
         "尽快外科评估",
         "弥漫性腹膜炎",
         "紧急手术",
         "局限性脓肿",
         "引流"
       ],
-      "enText": "Doctors look for gangrene, perforation or peritonitis. Suspected gangrene or perforation needs prompt surgical assessment. Diffuse peritonitis usually needs emergency surgery. A localized abscess may initially be treated with antibiotics and drainage if needed."
+      "enText": "For suspected acute phlegmonous appendicitis, assess for gangrene, perforation or peritonitis. Without perforation, early appendectomy is usual after clinical assessment. Suspected gangrene or perforation needs prompt surgical assessment. Diffuse peritonitis usually needs emergency surgery. A localized abscess may initially be treated with antibiotics and drainage if needed."
     },
     {
       "id": "B07",
       "type": "bridge",
       "duration": 2.2,
-      "start": 55,
-      "end": 57.2
+      "start": 61.5,
+      "end": 63.7
     }
   ]
 }

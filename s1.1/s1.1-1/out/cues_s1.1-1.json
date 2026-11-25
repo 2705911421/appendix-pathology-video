@@ -29,33 +29,40 @@
     {
       "id": "S03",
       "type": "speech",
-      "defaultDuration": 8.1,
-      "zhText": "傍晚六点左右，疼痛转移到右下腹。检查时，麦氏点一按就痛，松手更痛。",
+      "defaultDuration": 17.8,
+      "zhText": "傍晚六点左右，疼痛转移到右下腹。麦氏点是阑尾根部的体表投影。炎症刺激壁腹膜，按压时产生压痛；突然松手，壁腹膜受牵拉，引发反跳痛。两者都是腹膜刺激征，提示炎症已累及腹膜。",
       "highlightZh": [
         "右下腹",
         "麦氏点",
-        "松手更痛"
+        "体表投影",
+        "壁腹膜",
+        "压痛",
+        "反跳痛",
+        "腹膜刺激征",
+        "累及腹膜"
       ],
-      "enText": "Around 6 PM, the pain shifts to the right lower abdomen. On exam, McBurney's point is tender, with worse pain on release."
+      "enText": "Around 6 PM, the pain shifts to the right lower abdomen. McBurney's point marks the surface projection of the appendiceal base. Inflammation irritates the parietal peritoneum, causing tenderness on pressure. Sudden release stretches the parietal peritoneum and elicits rebound tenderness. Both are signs of peritoneal irritation, indicating peritoneal involvement."
     },
     {
       "id": "B01",
       "type": "bridge",
       "duration": 1.8,
-      "start": 26.1,
-      "end": 27.9
+      "start": 35.8,
+      "end": 37.6
     },
     {
       "id": "S04",
       "type": "speech",
-      "defaultDuration": 8.8,
-      "zhText": "晚上十点到急诊，测得体温三十九点三度。白细胞总数和中性粒细胞比例升高。",
+      "defaultDuration": 18.4,
+      "zhText": "体温飙升至 39.3℃（正常参考范围 36–37℃），白细胞总数升至 13.0×10⁹/L（正常 4–10×10⁹/L），中性粒细胞数升至 11.3×10⁹/L（正常 2–7×10⁹/L）。",
       "highlightZh": [
-        "三十九点三度",
+        "39.3℃",
         "白细胞总数",
-        "中性粒细胞比例"
+        "13.0×10⁹/L",
+        "中性粒细胞数",
+        "11.3×10⁹/L"
       ],
-      "enText": "At 10 PM in the emergency department, the temperature is 39.3°C. The white blood cell count and neutrophil percentage are elevated."
+      "enText": "Temperature rose to 39.3°C (reference range 36–37°C). White blood cells rose to 13.0 × 10⁹/L (reference 4–10 × 10⁹/L). Absolute neutrophils rose to 11.3 × 10⁹/L (reference 2–7 × 10⁹/L)."
     },
     {
       "id": "S05",
@@ -75,9 +82,9 @@
       "id": "B02",
       "type": "bridge",
       "duration": 2.2,
-      "start": 47.5,
-      "end": 49.7
+      "start": 66.8,
+      "end": 69
     }
   ],
-  "duration": 49.7
+  "duration": 69
 }

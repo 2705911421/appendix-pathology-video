@@ -1,7 +1,7 @@
 import { NS } from '../../shared/canvasCore.js';
 import { createCTAsset, CT_ROI, CT_ZOOM } from '../../shared/ctRenderer.js';
 import { CT } from '../../shared/detail/ct.js';
-import { appear, label, penProgress } from './scene-tools.js';
+import { label } from './scene-tools.js';
 
 const filmScale = 570 / CT.width;
 export const mainBox = Object.freeze({ x: 776, y: 244, width: CT.width * filmScale, height: CT.height * filmScale });
@@ -10,15 +10,23 @@ export const zoomBox = Object.freeze({
   x: 1430, y: mainBox.y + (mainBox.height - zoomHeight) / 2,
   width: CT_ROI.width * CT_ZOOM * filmScale, height: zoomHeight,
 });
-const ink = '#A24336';
 const connectorInk = '#AF4E43';
 const noteX = 1000;
-const mainBottom = mainBox.y + mainBox.height;
-const zoomBottom = zoomBox.y + zoomBox.height;
-const anchors = [
-  [[193, 147], [238, 197]],
-  [[175, 130], [229, 169]],
-  [[201, 155], [264, 165]],
+const insetAnnotations = [
+  [
+    ['管壁轻增粗', [187, 137], [31, 50], [123, 72]],
+    ['脂肪清晰', [244, 200], [219, 265], [282, 228]],
+  ],
+  [
+    ['双环靶征', [177, 127], [30, 52], [125, 87]],
+    ['偏心粪石', [186, 140], [217, 74], [227, 98]],
+    ['脂肪条索', [222, 178], [210, 255], [253, 219]],
+  ],
+  [
+    ['壁强化缺损', [201, 153], [31, 49], [114, 90]],
+    ['盲肠旁脓肿', [240, 157], [188, 259], [287, 213]],
+    ['游离气体', [245, 143], [202, 55], [300, 100]],
+  ],
 ];
 
 function place(source, box) {
@@ -86,27 +94,30 @@ function zoomPoint([x, y]) {
     zoomBox.y + y * zoomBox.height / Math.round(CT_ROI.height * CT_ZOOM)];
 }
 
-function lowerLeader(anchor, end) {
-  const [x, y] = zoomPoint(anchor);
-  const edge = Math.round(zoomBox.x + zoomBox.width + 16);
-  return `M${x} ${y} C${x + 46} ${y + 12} ${edge} ${zoomBottom - 18} ${edge} ${zoomBottom + 20}
-    V789 Q${edge} 802 ${edge - 13} 802 H${end}`;
+function insetArrows(index) {
+  return insetAnnotations[index].map(([text, feature, position, knee]) => {
+    const [desiredX, y] = zoomPoint(position);
+    const fontSize = 17;
+    const x = Math.max(zoomBox.x + 16, Math.min(desiredX, zoomBox.x + zoomBox.width - 16 - fontSize * text.length));
+    const [tx, ty] = zoomPoint(feature);
+    const [kx, ky] = zoomPoint(knee);
+    const theta = Math.atan2(ty - ky, tx - kx);
+    const wings = [-.56, .56].map(a => [tx - 5 * Math.cos(theta + a), ty - 5 * Math.sin(theta + a)]);
+    const startX = x + fontSize * text.length * .55;
+    return `<g data-ct-inset-arrow>
+      <path d="M${startX} ${y + 5} L${kx} ${ky} L${tx} ${ty} M${wings[0].join(' ')} L${tx} ${ty} L${wings[1].join(' ')}"
+        fill="none" stroke="#F5DF9C" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="${x}" y="${y}" font-size="${fontSize}" fill="#FFFFFF" stroke="#161310"
+        stroke-width="2" stroke-linejoin="round" paint-order="stroke" style="font-family:var(--text);font-weight:820">${text}</text>
+    </g>`;
+  }).join('');
 }
 
 function leaderGroup(index, lines) {
-  const [[ax, ay], [bx, by]] = anchors[index].map(zoomPoint);
-  const one = `M${ax} ${ay} C${ax - 25} ${ay + 36} 1483 ${zoomBottom + 16} 1410 ${mainBottom + 17}
-    C1366 ${mainBottom + 39} 1150 704 995 704 Q973 704 973 726 V734 Q973 741 983 741`;
-  const two = lowerLeader(anchors[index][1], 1410);
   return `<g data-ct-notes="${index}">
-    <g fill="none" stroke="${ink}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round">
-      <path data-ct-line="0" d="${one}" pathLength="1" stroke-dasharray="1"/>
-      <path data-ct-line="1" d="${two}" pathLength="1" stroke-dasharray="1"/>
-      <circle cx="${ax}" cy="${ay}" r="2.8" fill="${ink}" stroke="none"/>
-      <circle cx="${bx}" cy="${by}" r="2.8" fill="${ink}" stroke="none"/>
-    </g>
     ${label(lines[0], noteX, 751, { size: 29, anchor: 'start' })}
-    ${label(lines[1], noteX, 811, { size: 29, anchor: 'start' })}
+    ${label(lines[1], noteX, 808, { size: 28, weight: 600, anchor: 'start' })}
+    ${insetArrows(index)}
   </g>`;
 }
 
@@ -152,13 +163,10 @@ export function axialComparison(stage, cases) {
   zoomTitle.textContent = '右髂窝 · 2.4× 局部放大';
 
   const notes = [...type.querySelectorAll('[data-ct-notes]')];
-  const paths = notes.map(group => [...group.querySelectorAll('[data-ct-line]')]);
-  const lowerLabels = notes.map(group => group.querySelector('text:last-child'));
-  const drawnGeometry = new Set();
   const guide = type.querySelector('[data-ct-guides]');
   const [upperTrace, lowerTrace] = guide.querySelectorAll('path');
   const center = [CT_ROI.x + CT_ROI.width / 2, CT_ROI.y + CT_ROI.height / 2];
-  return ({ current, weights, noteOpacity, drawIn, elapsed, visibility }) => {
+  return ({ current, weights, noteOpacity, elapsed, visibility }) => {
     fossa.draw(weights);
     closeup.draw(weights);
     art.dataset.ctStage = String(current);
@@ -177,14 +185,6 @@ export function axialComparison(stage, cases) {
     guide.setAttribute('opacity', .72 + .06 * breath);
 
     notes.forEach((group, i) => group.toggleAttribute('hidden', i !== current));
-    const [wall, surrounding] = paths[current];
-    if (!drawnGeometry.has(current)) {
-      const end = Math.min(zoomBox.x + zoomBox.width, noteX + lowerLabels[current].getComputedTextLength() + 17);
-      surrounding.setAttribute('d', lowerLeader(anchors[current][1], end));
-      drawnGeometry.add(current);
-    }
     notes[current].setAttribute('opacity', noteOpacity);
-    penProgress(wall, drawIn);
-    penProgress(surrounding, appear(drawIn, .08, 1));
   };
 }

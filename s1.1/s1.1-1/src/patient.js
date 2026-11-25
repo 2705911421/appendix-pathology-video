@@ -1,7 +1,12 @@
-import { drawMinimalPatient, PORTRAIT_LAYER } from '../../shared/minimalistCharacters.js';
+import { drawMinimalPatient, drawSeatedMeal, PORTRAIT_LAYER } from '../../shared/minimalistCharacters.js';
 import { fade } from './paint.js';
 
 const portraitScale = 1.81;
+
+export function drawPinnedMeal(ctx, motion) {
+  return drawSeatedMeal(ctx, { x: 960, y: 735 - PORTRAIT_LAYER.waist * portraitScale,
+    scale: portraitScale, opacity: motion.patientPose.hasBowl ?? 0, seconds: motion.t });
+}
 
 export function drawOpeningPatient(ctx, motion, view) {
   let portrait;
@@ -17,6 +22,7 @@ export function drawOpeningPatient(ctx, motion, view) {
         scale,
         breathPhase: motion.t * 4.2, seconds: motion.t,
         ...pose,
+        paintMeal: false,
       }),
     };
   });

@@ -8,16 +8,17 @@
     {
       "id": "S23",
       "type": "speech",
-      "defaultDuration": 10.5,
-      "zhText": "反复或持续的右下腹痛，可能见于慢性阑尾炎。慢性炎症中，修复性增生可造成阑尾壁纤维化。",
+      "defaultDuration": 10.6,
+      "zhText": "反复或持续的右下腹痛，可能见于慢性阑尾炎。长期炎症刺激导致的“增生”，可使阑尾壁逐渐增厚，并出现纤维化。",
       "highlightZh": [
         "慢性阑尾炎",
-        "修复性增生",
+        "炎症刺激导致的“增生”",
+        "增厚",
         "纤维化"
       ],
-      "enText": "Chronic appendicitis can present with recurrent or persistent right lower abdominal pain. Reparative proliferation in chronic inflammation can cause fibrosis of the appendiceal wall.",
+      "enText": "Chronic appendicitis can present with recurrent or persistent right lower abdominal pain. Inflammation-induced proliferation can gradually thicken and fibrose the appendiceal wall.",
       "start": 0,
-      "end": 10.5
+      "end": 10.6
     },
     {
       "id": "S24",
@@ -33,8 +34,15 @@
         "急诊手术"
       ],
       "enText": "Microscopy shows wall fibrosis with lymphocyte and plasma cell infiltration. Once diagnosed, elective appendectomy is usually advised when symptoms have subsided. During an acute flare, emergency surgery may be needed depending on the clinical findings.",
-      "start": 10.5,
-      "end": 26.5
+      "start": 10.6,
+      "end": 26.6
+    },
+    {
+      "id": "B08",
+      "type": "bridge",
+      "duration": 1.4,
+      "start": 26.6,
+      "end": 28
     },
     {
       "id": "S25",
@@ -50,18 +58,18 @@
         "尽快就医"
       ],
       "enText": "Pale pink, dark red, grayish yellow and black reflect changes in the appendix. Seek urgent medical care if abdominal pain moves to the right lower abdomen or keeps worsening, especially with fever or guarding.",
-      "start": 26.5,
-      "end": 38.5
+      "start": 28,
+      "end": 40
     },
     {
       "id": "S26",
       "type": "credits",
-      "defaultDuration": 8,
+      "defaultDuration": 6.5,
       "isCredits": true,
       "zhText": "",
       "highlightZh": [],
       "enText": "",
-      "start": 38.5,
+      "start": 40,
       "end": 46.5
     }
   ]

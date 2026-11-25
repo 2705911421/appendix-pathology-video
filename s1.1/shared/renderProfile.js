@@ -1,5 +1,6 @@
 export const DEFAULT_PROFILE = 'master';
-export const bridgeScale = 1.0;
+export const tempoScale = 1.15;
+export const bridgeScale = .80;
 
 const master = Object.freeze({
   logicalWidth: 1920,
@@ -15,6 +16,7 @@ const master = Object.freeze({
   maxBitrate: 60,
   reloadIntervalFrames: 360,
   segmentSuffix: '_video',
+  tempoScale,
   bridgeScale,
 });
 
@@ -31,14 +33,21 @@ const review = Object.freeze({
   preset: 'veryfast',
   reloadIntervalFrames: 240,
   segmentSuffix: '_review_480p',
+  tempoScale,
   bridgeScale,
 });
 
-export const renderProfiles = Object.freeze({ master, review });
+const review15 = Object.freeze({
+  ...review,
+  fps: 15,
+  segmentSuffix: '_review_480p_15fps',
+});
+
+export const renderProfiles = Object.freeze({ master, review, review15 });
 export const renderProfile = renderProfiles[DEFAULT_PROFILE];
 
 export function getRenderProfile(name = DEFAULT_PROFILE) {
-  if (!Object.hasOwn(renderProfiles, name)) throw new Error(`未知渲染档位 ${name}（可选 master 或 review）`);
+  if (!Object.hasOwn(renderProfiles, name)) throw new Error(`未知渲染档位 ${name}（可选 master、review 或 review15）`);
   return renderProfiles[name];
 }
 

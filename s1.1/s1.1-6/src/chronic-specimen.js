@@ -6,17 +6,6 @@ import { scaleAround, settleScale, tracedInk, traceTo } from './motion.js';
 
 const charcoal = '#1F1C19';
 
-export function chronicNotes() {
-  return {
-    paint: '',
-    lettering: `<g>
-      <text class="note note-acute" x="73" y="515" font-size="22" fill="${RED}" style="font-weight:750">急性期：变质 + 渗出</text>
-      <text class="note note-chronic" data-entry-part="chronic" x="73" y="578" font-size="22" fill="${RED}"
-        style="font-weight:750">慢性期：修复性增生</text>
-    </g>`,
-  };
-}
-
 function evolution() {
   const ink = { color: charcoal, size: 2.9, head: 13, opacity: .91 };
   return `<g id="s23-evolution" data-entry-part="chronic" transform="translate(1090 115)" fill="${charcoal}" text-anchor="middle">
@@ -111,14 +100,13 @@ function specimenLayers(specimen, art) {
 }
 
 export function chronicSpecimen() {
-  const notes = chronicNotes();
   const scale = 1.38;
   const x = 960 - ILEOCECAL_BOX.width * scale / 2;
   const y = 485 - ILEOCECAL_BOX.height * scale / 2;
   const specimen = createIleocecalAsset({ id: 's23-specimen', stage: 'chronic', x, y, scale });
   const inset = specimen.audit.crossSection;
   const cross = [x + inset.centre[0] * scale + 6, y + inset.centre[1] * scale + 13];
-  const insetSize = (inset.diameter + 6) * 1.61;
+  const insetSize = (inset.diameter + 6) * 1.75;
   const ileum = terminalIleumPoint(.18);
   const ileumTarget = [x + ileum.x * scale, y + ileum.y * scale];
   const wall = [x + (inset.anchor[0] - 5) * scale, y + (inset.anchor[1] + 7) * scale];
@@ -135,7 +123,7 @@ export function chronicSpecimen() {
   ];
 
   return {
-    paint: notes.paint + `<g id="s23-body" data-entry-part="subject">${specimen.paint}
+    paint: `<g id="s23-body" data-entry-part="subject">${specimen.paint}
       ${tracedInk('s23-link', linkPath, link, 12)}
       <g id="s23-cross-section">
         <foreignObject x="${cross[0] - insetSize / 2}" y="${cross[1] - insetSize / 2}" width="${insetSize}" height="${insetSize}">
@@ -143,7 +131,7 @@ export function chronicSpecimen() {
             style="display:block;width:100%;height:100%"></canvas>
         </foreignObject>
       </g></g>`,
-    lettering: `<g data-entry-part="notes">${notes.lettering}</g><g id="s23-labels" data-entry-part="subject">${evolution()}
+    lettering: `<g id="s23-labels" data-entry-part="subject">${evolution()}
         ${callout('s23-cecum', '盲肠', 556, 547, 'M617 549 Q673 541 730 566')}
         ${callout('s23-ileum', '回肠末端', 1176, 442, `M1225 459 Q1259 494 ${ileumTarget.join(' ')}`)}
         ${callout('s23-mesentery', '系膜纤维化牵拉', 1280, 655, 'M1262 646 C1156 652 1094 642 1009 623')}

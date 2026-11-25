@@ -86,9 +86,12 @@ const upperSeam = [line([-22, 123], [-42, 127, -68, 128, -87, 140]),
   line([22, 123], [42, 127, 68, 128, 87, 140])];
 const foldMarks = [line([-70, 212], [-63, 218, -64, 232]), line([70, 240], [63, 248, 63, 258]),
   line([-61, 298], [-49, 304, -37, 306])];
-const stethoscope = [line([-19, 129], [-33, 151, -37, 182, -21, 195], [-10, 204, 6, 197, 14, 188],
-  [25, 174, 23, 154, 17, 138]), line([-4, 199], [-1, 213, 4, 230, 19, 234], [25, 236, 28, 232, 29, 227])];
-const earpieces = [line([-19, 130], [-18, 124, -15, 120]), line([17, 139], [15, 134, 12, 131])];
+const stethoscope = [
+  line([-21, 135], [-29, 126, -14, 119, 0, 121], [14, 119, 29, 126, 21, 135]),
+  line([-21, 135], [-35, 156, -35, 182, -20, 195], [-11, 204, 9, 204, 19, 194], [34, 181, 35, 157, 21, 135]),
+  line([0, 202], [1, 216, 7, 233, 19, 234], [25, 236, 28, 231, 29, 226]),
+];
+const earpieces = [line([-21, 135], [-19, 128, -13, 124]), line([21, 135], [19, 128, 13, 124])];
 const bell = oval(29, 226, 7.5, 7.1);
 const glints = [oval(27.4, 224.2, 1.8, 1.2), oval(31.6, 227.2, 1.1, .8)];
 const pocket = line([44, 212], [65, 211], [65, 229], [56, 235, 44, 232], [44, 212]);
@@ -205,12 +208,12 @@ function ink(ctx, shape, size = 3.1, { color = INK, opacity = .93, seed = 4, tap
 
 const ARM_UPPER = 83;
 const ARM_LOWER = 79;
-function armRig(side, angles) {
+function armRig(side, angles, lowerReach = ARM_LOWER) {
   const shoulder = [side * 81.5, 149];
   const u = unit(angles[0]);
   const v = unit(angles[1]);
   const elbow = plus(shoulder, u, ARM_UPPER);
-  const wrist = plus(elbow, v, ARM_LOWER);
+  const wrist = plus(elbow, v, lowerReach);
   return { side, shoulder, elbow, wrist, u, v, n: normal(u), m: normal(v) };
 }
 
@@ -260,7 +263,8 @@ function skinArm(ctx, atlas, arm, seed) {
 }
 
 function coatSleeve(ctx, atlas, arm, seed) {
-  const limb = armForm(arm, -1, [21, 16.8, 12.2], false);
+  const widths = arm.wrist[0] > 100 ? [22.8, 18.6, 12.8] : [21, 16.8, 12.2];
+  const limb = armForm(arm, -1, widths, false);
   const { wrist, m, v } = arm;
   const hand = form(plus(wrist, m, 9.7), [
     coords(plus(plus(wrist, v, 11), m, 12), plus(plus(wrist, v, 19), m, 12), plus(plus(wrist, v, 22), m, 8)),
@@ -291,12 +295,16 @@ function torsoPaint(ctx, atlas, doctor) {
   }
 }
 
-function drawHead(ctx, atlas, doctor, distress, smile, phase) {
+function drawHead(ctx, atlas, doctor, distress, smile, phase, recovery) {
   tint(ctx, atlas, face, SKIN, 'skin', .36, [1.4, .3]);
   ctx.save();
   ctx.clip(face.path);
   fill(ctx, cheek, '#C2896B', .24);
   wash(ctx, atlas, cheek, 'skin', .66, 1.2, 1.5);
+  if (recovery > 0) {
+    fill(ctx, oval(-27, 83, 11, 6), '#E29880', .14 * recovery);
+    fill(ctx, oval(28, 83, 10, 6), '#E29880', .14 * recovery);
+  }
   ctx.restore();
   const style = doctor ? parted : hair;
   tint(ctx, atlas, style, '#665448', 'hair', .88, [-1.4, -.5]);
@@ -308,10 +316,10 @@ function drawHead(ctx, atlas, doctor, distress, smile, phase) {
   const eyeY = 66 + 2.6 * distress;
   for (const [i, x] of (doctor ? [-17.1, 17.1] : [-19, 14]).entries()) {
     const lift = i ? -1 : 1;
-    const figure = line([x - 4.4, eyeY - .25], [x - 1, eyeY - 2.5 + 4.1 * distress, x + 4.5, eyeY + .4]);
+    const figure = line([x - 4.4, eyeY - .25], [x - 1, eyeY - 2.5 + 4.1 * distress - 1.5 * recovery, x + 4.5, eyeY + .4]);
     ink(ctx, figure, 1.91 + .32 * distress, { taper: 1.17, seed: i * 2 + 3 });
     fill(ctx, oval(x + .1, eyeY + .72, 1.47, 1.76 - .60 * distress), INK,
-      clamp((.92 - distress) / .20) * (.97 - .27 * distress));
+      clamp((.92 - distress) / .20) * (.97 - .27 * distress) * (1 - .65 * recovery));
     const browY = 57 + .75 * phase;
     ink(ctx, line([x - 6, browY - 1.35 * lift * distress],
       [x - .5, browY - 2.85 + distress, x + 6, browY + 1.6 * lift * distress]), 1.84,
@@ -369,10 +377,10 @@ const dish = form([-43, 0], [[-39, 17, -24, 31, 0, 32], [25, 32, 39, 16, 43, 0],
 const rim = oval(0, 0, 43, 10.3);
 const tea = oval(0, .1, 36.4, 5.3);
 const bowlFoot = line([-14, 32], [-8, 36, 10, 36, 16, 31.5]);
-const vapour = [line([-13, -16], [-24, -27, -5, -34, -12, -47]),
-  line([8, -15], [1, -26, 19, -36, 13, -54])];
+const vapour = [-20, 0, 21].map((x, i) => line([x, -15],
+  [x - 8, -29, x + 18, -45, x + 11, -56 - i * 3]));
 
-function paintBowl(ctx, atlas, place, lean, opacity, breathing) {
+function paintBowl(ctx, atlas, place, lean, opacity) {
   if (opacity <= .001) return;
   ctx.save();
   ctx.globalAlpha *= opacity;
@@ -383,17 +391,67 @@ function paintBowl(ctx, atlas, place, lean, opacity, breathing) {
   fill(ctx, rim, '#FBF6EE');
   tint(ctx, atlas, tea, '#DCC6A2', 'tea', .62, [0, .6]);
   ink(ctx, rim, 2.0, { color: '#6F6052', seed: 19 });
+  ink(ctx, line([-36, 11], [-20, 20, 23, 20, 37, 11]), 1.85, { color: '#6F939C', opacity: .83, taper: 6 });
+  ink(ctx, line([-29, 20], [-13, 25, 17, 26, 28, 20]), 1.05, { color: '#7199A2', opacity: .59 });
   ink(ctx, bowlFoot, 1.7, { color: '#9B886F', seed: 7 });
-  ctx.translate(1.58 * breathing, -1.23 * breathing);
-  for (const [i, steam] of vapour.entries()) ink(ctx, steam, 1.75, { opacity: .54, color: '#877A68', seed: i + 9, taper: 4.2 });
   ctx.restore();
 }
 
+function paintSteam(ctx, place, lean, opacity, seconds) {
+  if (opacity <= .001) return;
+  ctx.save();
+  ctx.globalAlpha *= opacity;
+  ctx.translate(...place);
+  ctx.rotate(-lean);
+  for (const [i, steam] of vapour.entries()) {
+    const wave = Math.sin(seconds * 2.1 + i);
+    ctx.save();
+    ctx.translate(2.8 * wave, -3.1 * wave - 3);
+    ink(ctx, steam, 2.45, { opacity: .62 + .09 * wave, color: '#786A5A', seed: i + 9, taper: 6.5 });
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+const mealOrigin = 148;
+const setBowl = [120, mealOrigin + 118];
+const tableY = setBowl[1] + 36;
+const tableTop = line([-200, tableY], [-97, tableY - 3, 118, tableY + 2, 239, tableY - 1]);
+const tableShade = form([-202, tableY], [[-98, tableY - 5, 124, tableY - 1, 238, tableY - 1],
+  [235, tableY + 13, 76, tableY + 16, -34, tableY + 15], [-146, tableY + 16, -184, tableY + 12, -202, tableY]]);
+
+function paintTable(ctx, opacity) {
+  if (opacity <= .001) return;
+  ctx.save();
+  ctx.globalAlpha *= opacity;
+  const grain = ctx.createLinearGradient(-200, 0, 239, 0);
+  grain.addColorStop(0, '#AA805900');
+  grain.addColorStop(.29, '#BE936B49');
+  grain.addColorStop(.72, '#BE936B47');
+  grain.addColorStop(1, '#AA805900');
+  fill(ctx, tableShade, grain);
+  ink(ctx, tableTop, 2.2, { color: '#8F6C50', opacity: .70, taper: 45 });
+  ctx.restore();
+}
+
+export function drawSeatedMeal(ctx, { x, y, scale, opacity, seconds }) {
+  if (opacity <= .001) return null;
+  const density = unitDensity(ctx, scale);
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+  paintTable(ctx, opacity);
+  paintBowl(ctx, palette(density), setBowl, 0, opacity);
+  paintSteam(ctx, setBowl, 0, opacity, seconds);
+  ctx.restore();
+  return [x + setBowl[0] * scale, y + setBowl[1] * scale];
+}
+
 const profiles = {
-  eat: { hunch: .064, pain: 0, shiver: 0, smile: .48, dish: 1, arms: [[-.20, .39], [.22, .62]] },
+  eat: { hunch: 0, pain: 0, shiver: 0, smile: .53, dish: 1, arms: [[-.12, -.65], [.06, .72]] },
   navel_pain: { hunch: .35, pain: .46, shiver: .08, smile: 0, dish: 0, arms: [[-.08, 1.16], [.16, -.25]] },
   rlq_acute: { hunch: .80, pain: 1, shiver: .57, smile: 0, dish: 0, arms: [[-.275, .99], [.17, -.49]] },
-  recovered: { hunch: 0, pain: 0, shiver: 0, smile: .79, dish: 1, arms: [[-.20, .90], [.20, -.90]] },
+  recovered: { hunch: 0, pain: 0, shiver: 0, smile: 1, dish: 1, arms: [[-.18, -.66], [.09, .69]] },
 };
 const relaxed = [[-.17, .20], [.16, -.25]];
 
@@ -442,7 +500,8 @@ function rotate(point, angle) {
 }
 
 function drawPortrait(ctx, atlas, state) {
-  const { doctor, lean, lift, sideShift, nod, arms, smile, pain, distress, bowl, breath } = state;
+  const { doctor, lean, lift, sideShift, nod, arms, smile, pain, distress, bowl, breath,
+    table = 0, recovery = 0, seconds = 0, paintMeal = true } = state;
   const { waist, x: left, y: top, width, height } = PORTRAIT_LAYER;
   ctx.save();
   ctx.translate(sideShift, waist + lift);
@@ -475,13 +534,17 @@ function drawPortrait(ctx, atlas, state) {
     ink(ctx, collar, 2.33, { opacity: .90, taper: 2.8 });
     ink(ctx, line([-18, 128], [-13, 138, -4, 140]), 1.55, { opacity: .68, taper: 2.6 });
     glow(ctx, atlas, arms[0].wrist, pain, distress, breath);
-    paintBowl(ctx, atlas, bowl.position, lean, bowl.opacity, breath);
+    if (paintMeal) {
+      paintTable(ctx, table);
+      paintBowl(ctx, atlas, bowl.position, lean, bowl.opacity);
+    }
     for (const [i, arm] of arms.entries()) skinArm(ctx, atlas, arm, 5 + i * 11);
+    if (paintMeal) paintSteam(ctx, bowl.position, lean, bowl.opacity, seconds);
   }
 
   ctx.save();
   ctx.transform(figureMatrix.a, figureMatrix.b, figureMatrix.c, figureMatrix.d, figureMatrix.e, figureMatrix.f);
-  drawHead(ctx, atlas, doctor, doctor ? 0 : mix(pain * .72, 1, distress), smile, breath);
+  drawHead(ctx, atlas, doctor, doctor ? 0 : mix(pain * .72, 1, distress), smile, breath, recovery);
   ctx.restore();
   ctx.restore();
 
@@ -498,7 +561,7 @@ export function drawMinimalPatient(ctx, opts = {}) {
   if (![progress, breathPhase, seconds ?? 0, opts.hunch ?? 0, opts.shiver ?? 0, opts.painLevel ?? 0,
     Number(hasBowl ?? 0)].every(Number.isFinite)) throw new RangeError('Patient motion parameters must be finite');
   const t = clamp(progress);
-  const blend = t * t * (3 - 2 * t);
+  const blend = opts.eased ? t : t * t * (3 - 2 * t);
   const a = profiles[fromPose];
   const b = profiles[pose];
   const weight = key => mix(Number(fromPose === key), Number(pose === key), blend);
@@ -510,21 +573,22 @@ export function drawMinimalPatient(ctx, opts = {}) {
   const breath = mix(Math.sin(breathPhase), Math.sin(breathPhase * 1.62), distress);
   const tremor = shiver * Math.sin(seconds === undefined ? breathPhase * 2.75 : seconds * TAU * 1.82);
   const bowlAmount = hasBowl === undefined ? mix(a.dish, b.dish, blend) : clamp(Number(hasBowl));
+  const lowerReach = mix(ARM_LOWER, 65, weight('eat') + recovery);
   const arms = [-1, 1].map((side, i) => {
     const angles = a.arms[i].map((value, j) => angleBetween(value, b.arms[i][j], blend));
     const armAngles = i === 1 ? angles.map((value, j) => {
       const withMeal = angleBetween(value, profiles.eat.arms[i][j], (1 - recovery) * bowlAmount * (1 - weight('eat')));
       return angleBetween(withMeal, relaxed[i][j], recovery * (1 - bowlAmount));
     }) : angles.map((value, j) => angleBetween(value, relaxed[i][j], recovery * (1 - bowlAmount)));
-    return armRig(side, armAngles);
+    return armRig(side, armAngles, lowerReach);
   });
-  const dishByHand = plus(arms[1].wrist, [49, 9]);
-  const dishHeld = [mix(arms[0].wrist[0], arms[1].wrist[0], .5), mix(arms[0].wrist[1], arms[1].wrist[1], .5) + 1];
-  const bowl = { position: dishByHand.map((value, i) => mix(value, dishHeld[i], recovery)), opacity: bowlAmount };
+  const bowl = { position: setBowl, opacity: bowlAmount };
+  const table = bowlAmount;
   return renderPortrait(ctx, opts, (pen, atlas) => drawPortrait(pen, atlas, {
     doctor: false, lean: -.44 * hunch + .009 * tremor, lift: (1.48 + 1.1 * distress) * breath,
-    sideShift: 1.2 * tremor, nod: -.073 * hunch + .015 * breath, arms, smile: mix(a.smile, b.smile, blend),
-    pain, distress, bowl, breath,
+    sideShift: 1.2 * tremor, nod: -.073 * hunch + .015 * breath - recovery * Math.PI / 60,
+    arms, smile: mix(a.smile, b.smile, blend), pain, distress, bowl, breath, table, recovery,
+    seconds: seconds ?? breathPhase, paintMeal: opts.paintMeal !== false,
   }));
 }
 
@@ -535,7 +599,7 @@ export function drawMinimalDoctor(ctx, opts = {}) {
   if (![breathPhase, nod].every(Number.isFinite)) throw new RangeError('Doctor motion parameters must be finite');
   const breath = Math.sin(breathPhase);
   const dip = clamp(nod) * Math.sin(breathPhase * 1.72 + .5);
-  const arms = [armRig(-1, [-.16, .12]), armRig(1, [.31 + .034 * breath, 2.08 + .045 * dip])];
+  const arms = [armRig(-1, [-.16, .12]), armRig(1, [.245 + .026 * breath, 1.94 + .036 * dip])];
   return renderPortrait(ctx, opts, (pen, atlas) => drawPortrait(pen, atlas, {
     doctor: true, lean: .023 + .009 * breath, lift: 1.8 * breath, sideShift: 0, nod: -.064 * dip,
     arms, smile: .65, pain: 0, distress: 0, bowl: { opacity: 0 }, breath,

@@ -27,6 +27,6 @@ window.renderAt = time => {
 window.renderAt(0);
 ```
 
-分镜清单位于各板块的 `out/cues_s1.1-n.json`，每句带 `id`、`defaultDuration` 和双语字幕。`S01` 至 `S25` 默认 285.6 秒，八段桥接 16.3 秒，`S26` 片尾 8 秒。母带脚本读取 `shared/renderProfile.js`，外部配音齐全时按实测时长写入 `out/master_timeline.json`，并在渲染时使用同一份时间轴。字幕、画面标注和时间表通过共享盲审文字校验，素材与元数据同样采用匿名内容。
+分镜清单位于各板块的 `out/cues_s1.1-n.json`，每句带 `id`、`defaultDuration` 和双语字幕。默认原生时间线为口播 303.73 秒、九段桥接 14.52 秒及 6.5 秒片尾，总计 324.75 秒。母带脚本读取 `shared/renderProfile.js`，外部配音齐全时按实测时长写入 `out/master_timeline.json`，并在渲染时使用同一份时间轴。字幕、画面标注和时间表通过共享盲审文字校验，素材与元数据同样采用匿名内容。
 
 在 `s1.1` 目录运行 `npm test`。`npm run render -- --verify` 用原审定 PNG 做回归比对，`npm run render -- --components` 检查新增组件。六段时间表齐备后运行 `npm run verify:cues` 核对连续拼接与总时长。

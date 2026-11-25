@@ -8,7 +8,7 @@ export const HANDOFF_SLIDE_SEED = 8053;
 export function mountMicroscopeHandoff(root, density) {
   const { cx, cy, radius, mode } = MICROSCOPE_HANDOFF;
   let layer, paper, lens, posed;
-  return ({ opacity = 0, paperOpacity = 1, scale = 1 } = {}) => {
+  return ({ opacity = 0, paperOpacity = 1, scale = 1, mask, placement } = {}) => {
     if (!layer && opacity === 0) return;
     if (!layer) {
       layer = document.createElement('div');
@@ -27,6 +27,8 @@ export function mountMicroscopeHandoff(root, density) {
     layer.hidden = opacity === 0;
     layer.style.opacity = String(opacity);
     paper.style.opacity = String(paperOpacity);
-    posed.setAttribute('transform', `translate(${cx} ${cy}) scale(${scale}) translate(${-cx} ${-cy})`);
+    lens.style.clipPath = mask ? `path('${mask}')` : '';
+    const { x = cx, y = cy, sx = scale, sy = scale } = placement ?? {};
+    posed.setAttribute('transform', `translate(${x} ${y}) scale(${sx} ${sy}) translate(${-cx} ${-cy})`);
   };
 }

@@ -1,19 +1,75 @@
 import {
-  cellDot, clamp, fillPath, ink, inkLines, organic, pencil, pigment, roughProp, washLayer,
+  arrow, cellDot, clamp, fillPath, ink, inkLines, organic, pencil, pigment, roughProp, washLayer,
 } from '../../shared/canvasCore.js';
 import { logicalContext, sizeRaster } from '../../shared/detail/raster.js';
 import { drawMinimalDoctor } from '../../shared/minimalistCharacters.js';
 import { appear, CINNABAR, inkMask, label, penProgress, reveal } from './scene-tools.js';
 
-const pivot = { x: 1345, y: 265 };
-const doctorBox = { x: 355, y: 192, width: 558, height: 605 };
+const pivot = { x: 1368, y: 265 };
+const doctorBox = { x: 282, y: 228, width: 343, height: 459 };
 const baseY = 555;
 const loadedAngle = -11;
 const radians = angle => angle * Math.PI / 180;
-const arms = [-230, 240].map(x => x / Math.cos(radians(loadedAngle)));
+const arms = [-193, 192].map(x => x / Math.cos(radians(loadedAngle)));
 const suspension = 477 - 17 - pivot.y - arms[0] * Math.sin(radians(loadedAngle));
-const panLabels = [{ x: 1115, bottom: 477 }, { x: 1585, bottom: 400 }];
 const beamPath = `M${arms[0]} 0 Q-151 -3 -83 -5 Q-35 -9 0 -13 Q53 -9 101 -5 Q176 -3 ${arms[1]} 0`;
+const indigo = '#2F5D7C';
+const navel = [888, 279];
+const rightAsis = [840, 396];
+const mcburney = rightAsis.map((value, i) => value + (navel[i] - value) / 3);
+const routeEnd = [895, 423];
+const clinicalX = 1039;
+const symptomLabel = { x: clinicalX, y: 564 };
+const examLabel = { x: clinicalX, y: symptomLabel.y + 26 };
+const labsBaseline = examLabel.y + 26;
+const statDrop = 34;
+const painRoute = `M${navel.join(' ')} C905 326 902 374 ${routeEnd.join(' ')}`;
+const examGuide = `M${rightAsis.join(' ')} L${navel.join(' ')}`;
+const locatorLinks = [
+  { id: 's19-symptom-link', color: CINNABAR,
+    d: `M${clinicalX - 36} ${symptomLabel.y - 8} C971 549 955 522 943 493 Q927 452 ${routeEnd.join(' ')}` },
+  { id: 's19-exam-link', color: indigo,
+    d: `M${clinicalX - 40} ${examLabel.y - 7} C944 592 891 584 865 536 C842 491 852 407 ${mcburney.join(' ')}` },
+];
+
+function abdominalLocator() {
+  const pelvis = inkLines([
+    'M836 223 C838 248 828 270 819 291 Q811 315 811 340',
+    'M930 221 C928 247 938 267 944 290 Q951 316 948 342',
+    'M869 323 Q886 331 900 323 L899 350 Q885 368 874 349Z',
+    'M873 339 Q851 319 830 330 C805 340 801 371 818 395 Q833 407 847 401 C861 393 865 361 873 339Z',
+    'M898 339 Q921 319 942 332 C963 343 962 375 946 395 Q931 407 918 401 C904 390 910 360 898 339Z',
+    'M828 394 Q820 411 834 430 Q844 443 863 446 Q875 461 886 462 Q902 460 912 445 Q932 439 942 419 L945 395',
+    'M843 413 C850 403 873 407 874 422 Q871 436 855 434 Q844 428 843 413Z',
+    'M931 413 C924 403 902 407 899 422 Q903 436 918 434 Q929 428 931 413Z',
+    'M877 354 Q886 361 895 354',
+    'M885 447 Q880 454 886 462',
+  ], { color: '#697C7E', opacity: .78, size: 1.8, taperStart: 5, taperEnd: 7 });
+  const links = locatorLinks.map(({ id, color, d }) =>
+    `${inkMask(id, [835, 338, 254, 307], [[d, 36]])}
+    <g data-locator-link="${id}" fill="${color}" mask="url(#${id})">
+      ${arrow(d, { color, size: 5.4, head: 17 })}
+    </g>`).join('');
+  return {
+    paint: `<g data-abdominal-locator>
+      <g data-pelvis-linework>${pelvis}</g>
+      <path d="${examGuide}" stroke="${indigo}" stroke-width="1.35" stroke-dasharray="3 5" opacity=".47"/>
+      <path id="s19-pain-route" d="${painRoute}" fill="none" stroke="${CINNABAR}" stroke-width="2.7"
+        stroke-dasharray="5 7" stroke-linecap="round" opacity=".78"/>
+      <circle id="s19-navel" cx="${navel[0]}" cy="${navel[1]}" r="3.9" fill="#745649"/>
+      <circle id="s19-right-asis" cx="${rightAsis[0]}" cy="${rightAsis[1]}" r="2.6" fill="#816E65"/>
+      <circle id="s19-mcburney" cx="${mcburney[0]}" cy="${mcburney[1]}" r="8.3" fill="#F5F1E9"
+        stroke="${indigo}" stroke-width="2.2"/>
+      <circle cx="${mcburney[0]}" cy="${mcburney[1]}" r="3.4" fill="${CINNABAR}"/>
+      ${links}
+    </g>`,
+    lettering: `<g data-abdominal-locator-labels>
+      ${label('肚脐', 908, 270, { size: 20, weight: 680, anchor: 'start' })}
+      ${label('麦氏点', 826, 360, { size: 21, fill: indigo, weight: 720, anchor: 'end' })}
+      ${label('脐周 → 右下腹', 867, 198, { size: 22, fill: CINNABAR, weight: 720 })}
+    </g>`,
+  };
+}
 
 function stand() {
   const upright = 'M-17 16 Q-9 115 -13 233 L-17 280 Q-9 285 0 284 Q11 285 18 280 L13 232 Q9 114 17 16Z';
@@ -91,16 +147,12 @@ function statisticWash() {
 export function diagnosisScene(stage) {
   const base = stand();
   const crossbar = beam();
-  const pans = [pan(115, true), pan(105, false)];
+  const pans = [pan(108, true), pan(105, false)];
   const hub = cellDot(0, 0, 18, 18, '#E5D2B0')
     + roughProp('ellipse', [0, 0, 36, 36], 721, '#665243', 3.7, .29) + cellDot(0, 0, 5.5, 5.5, '#88725C');
-  const miniature = `<g data-entry-part="icon" transform="translate(185 296) scale(.255)" opacity=".59">${base}
-    <g transform="rotate(${loadedAngle})">${crossbar}</g>
-    ${arms.map((arm, i) => `<g transform="translate(${bearing(arm, loadedAngle).join(' ')})">${pans[i]}</g>`).join('')}
-    ${hub}</g>`;
+  const locator = abdominalLocator();
   const art = stage.paint(`
     <g data-diagnosis-figures>
-      ${miniature}
       <g data-entry-part="subject">
       <foreignObject data-doctor x="${doctorBox.x}" y="${doctorBox.y}" width="${doctorBox.width}" height="${doctorBox.height}">
         <canvas xmlns="http://www.w3.org/1999/xhtml" width="${doctorBox.width}" height="${doctorBox.height}" style="display:block"></canvas>
@@ -110,27 +162,33 @@ export function diagnosisScene(stage) {
         <g data-beam>${crossbar}</g><g data-pan="left">${pans[0]}</g>
         <g data-pan="right"><g data-ct-weight>${scanner()}</g>${pans[1]}</g>${hub}
       </g>
+      ${locator.paint}
       </g>
     </g>
-    ${inkMask('s115-stat-brush', [990, 638, 760, 112], [['M1018 711 C1209 683 1447 699 1710 678', 80]])}
-    <g data-stat-wash mask="url(#s115-stat-brush)">${statisticWash()}</g>`);
+    <g transform="translate(0 ${statDrop})">
+      ${inkMask('s115-stat-brush', [990, 638, 760, 112], [['M1018 711 C1209 683 1447 699 1710 678', 80]])}
+      <g data-stat-wash mask="url(#s115-stat-brush)">${statisticWash()}</g>
+    </g>`);
 
   const type = stage.lettering(`
     <g data-diagnosis-notes data-entry-part="subject">
       <g data-question>${label('怀疑急性阑尾炎，先做什么？', 1120, 110, { size: 34 })}</g>
+      ${locator.lettering}
       <g data-clinical-caption>
-        <g data-symptoms>${label('典型症状（转移性右下腹痛）', 1115, 526, { size: 26 })}</g>
-        <g data-exam>${label('+ 体格检查（麦氏点压痛、反跳痛）', 1115, 562, { size: 25, fit: 368 })}</g>
-        <g data-labs>${label('+ 化验结果', 1115, 598, { size: 24, weight: 570 })}</g>
+        <g data-symptoms>${label('典型症状：转移性右下腹痛', symptomLabel.x, symptomLabel.y,
+          { size: 21, fill: CINNABAR, anchor: 'start' })}</g>
+        <g data-exam>${label('体格检查：麦氏点压痛、反跳痛', examLabel.x, examLabel.y,
+          { size: 21, fill: indigo, anchor: 'start' })}</g>
+        <g data-labs>${label('化验结果', clinicalX, labsBaseline, { size: 21, weight: 570, anchor: 'start' })}</g>
       </g>
       <g data-ct-caption>
-        ${label('CT 检查', 1585, 450, { size: 26, fill: CINNABAR })}
-        ${label('（重要辅助工具，非人人必做）', 1585, 484, { size: 24, fill: '#5C564E', weight: 600 })}
+        ${label('CT 检查', 1560, 450, { size: 26, fill: CINNABAR })}
+        ${label('（重要辅助工具，非人人必做）', 1560, 484, { size: 24, fill: '#5C564E', weight: 600 })}
       </g>
     </g>
     <g data-stat>${label(`多层螺旋 CT 诊断敏感度 <tspan font-size="56" fill="${CINNABAR}" font-weight="820">&gt; 93%</tspan>`,
-      1365, 695, { size: 30 })}</g>
-    <g data-stat-scope>${label('成人疑似急性阑尾炎 · 文献汇总', 1365, 746, { size: 22, weight: 550 })}</g>`);
+      1365, 695 + statDrop, { size: 30 })}</g>
+    <g data-stat-scope>${label('成人疑似急性阑尾炎 · 文献汇总', 1365, 746 + statDrop, { size: 22, weight: 550 })}</g>`);
 
   const doctor = art.querySelector('[data-doctor]');
   const doctorCtx = logicalContext(sizeRaster(doctor.firstElementChild, doctorBox.width, doctorBox.height));
@@ -142,7 +200,9 @@ export function diagnosisScene(stage) {
   const statBrush = art.querySelector('#s115-stat-brush path');
   const statWash = art.querySelector('[data-stat-wash]');
   const question = type.querySelector('[data-question]');
-  const clinicalCaption = type.querySelector('[data-clinical-caption]');
+  const locationSketch = art.querySelector('[data-abdominal-locator]');
+  const locationLabels = type.querySelector('[data-abdominal-locator-labels]');
+  const linkMasks = locatorLinks.map(({ id }) => art.querySelector(`#${id} path`));
   const symptoms = type.querySelector('[data-symptoms]');
   const exam = type.querySelector('[data-exam]');
   const labs = type.querySelector('[data-labs]');
@@ -155,33 +215,36 @@ export function diagnosisScene(stage) {
     const opening = second ? 1 : p;
     const clinical = appear(opening, .20, .57);
     const elapsed = (cue.end - cue.start) * p;
-    const ct = second ? .88 + .12 * appear(elapsed, 0, .15) : 0;
+    const ct = second ? appear(p, .16, .36) : 0;
     const statistic = second ? appear(p, .43, .79) : 0;
     const angle = second ? loadedAngle + 4 * settle(p, .035, .35) : loadedAngle * settle(p, 0, .70);
     const landed = appear(elapsed, 0, .15);
     const seconds = cue.start + elapsed;
     doctorCtx.clearRect(0, 0, doctorBox.width, doctorBox.height);
-    drawMinimalDoctor(doctorCtx, { x: 568 - doctorBox.x, y: 218 - doctorBox.y, scale: 1.60,
+    drawMinimalDoctor(doctorCtx, { x: 405 - doctorBox.x, y: 249 - doctorBox.y, scale: .97,
       pose: 'explain', breathPhase: seconds * 2 * Math.PI / 3.85, nod: .58 });
     reveal(doctor, 1, 18);
     scale.setAttribute('opacity', 1);
     beamGroup.setAttribute('transform', `rotate(${angle})`);
     const positions = arms.map(arm => bearing(arm, angle));
-    [clinicalCaption, auxiliary].forEach((caption, i) => {
-      const [x, y] = positions[i];
-      const { x: baselineX, bottom } = panLabels[i];
-      const panBottom = pivot.y + y + suspension + 17;
-      panGroups[i].setAttribute('transform', `translate(${x} ${y})`);
-      caption.setAttribute('transform', `translate(${pivot.x + x - baselineX} ${panBottom - bottom})`);
-    });
+    positions.forEach(([x, y], i) => panGroups[i].setAttribute('transform', `translate(${x} ${y})`));
+    const [rightX, rightY] = positions[1];
+    auxiliary.setAttribute('transform', `translate(${pivot.x + rightX - 1560} ${pivot.y + rightY + suspension + 17 - 400})`);
     const [x, y] = positions[0];
     wash.setAttribute('transform', `translate(${pivot.x + x - 1115} ${pivot.y + y + suspension - 460})`);
     wash.setAttribute('opacity', .16 * clinical);
     weight.setAttribute('transform', `translate(0 ${suspension - 4 * (1 - landed)})`);
     weight.setAttribute('opacity', ct);
     reveal(question, 1, 0);
-    reveal(symptoms, appear(opening, .27, .44), 4);
-    reveal(exam, appear(opening, .43, .60), 4);
+    const symptomReveal = appear(opening, .27, .44);
+    const examReveal = appear(opening, .43, .60);
+    const guideReveal = second ? 0 : 1 - appear(p, .90, 1);
+    locationSketch.setAttribute('opacity', guideReveal);
+    locationLabels.setAttribute('opacity', guideReveal);
+    reveal(symptoms, symptomReveal, 0);
+    reveal(exam, examReveal, 0);
+    penProgress(linkMasks[0], symptomReveal);
+    penProgress(linkMasks[1], examReveal);
     reveal(labs, appear(opening, .59, .74), 4);
     auxiliary.setAttribute('opacity', ct);
     penProgress(statBrush, statistic);

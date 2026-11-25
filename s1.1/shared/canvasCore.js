@@ -18,6 +18,7 @@ export {
 const chinese = { font: `750 46px ${SANS_FONT}`, color: INK, baseline: 964 };
 const english = { font: `500 31px ${ENGLISH_FONT}`, color: '#5C564E', baseline: 1014 };
 export const CAPTION_SAFE_Y = 885;
+export const STORY_ART_BOTTOM = 872;
 const captionInset = 82;
 const captionWidth = WIDTH - 2 * captionInset;
 const graphemes = new Intl.Segmenter('zh-CN', { granularity: 'grapheme' });
@@ -187,6 +188,7 @@ const storyStyle = `
     position: absolute; inset: 0; width: 100%; height: 100%;
   }
   .story-grain { pointer-events: none; }
+  .story-paint > svg, .story-lettering { clip-path: inset(0 0 ${HEIGHT - STORY_ART_BOTTOM}px 0); }
   .story-stage [hidden] { display: none !important; }
   .story-stage .note { font-family: var(--hand); font-weight: 600; }
   .story-stage .title { font-weight: 740; }
@@ -240,7 +242,7 @@ export function createStoryStage(root, { paper = true } = {}) {
   });
   let current;
   return {
-    paint, lettering, ready,
+    paint, lettering, ready, caption,
     setSubtitles(subtitles, progress) {
       caption.hidden = halo.hidden = !subtitles;
       if (!subtitles) return;

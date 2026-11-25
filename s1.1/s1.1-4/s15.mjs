@@ -1,5 +1,5 @@
 import { RED, arrow, ink, inkLines, lerp } from '../shared/canvasCore.js';
-import { centeredSpecimen, opacity, pathologyProgress, phase, scaleAround, trace, traceMask } from './scene-tools.mjs';
+import { centeredSpecimen, opacity, phase, scaleAround, trace, traceMask } from './scene-tools.mjs';
 
 const cy = 430;
 const types = [
@@ -81,11 +81,10 @@ export function evolutionPlate(prefix) {
 }
 
 export function s15() {
-  const notes = pathologyProgress('s15-notes', '');
   const plate = evolutionPlate('s15');
   return {
-    paint: `<g data-entry-part="notes">${notes.paint}</g><g data-entry-part="subject">${plate.paint}</g>`,
-    lettering: `<g data-entry-part="notes">${notes.lettering}</g><g data-entry-part="subject">${plate.lettering}</g>`,
+    paint: `<g data-entry-part="subject">${plate.paint}</g>`,
+    lettering: `<g data-entry-part="subject">${plate.lettering}</g>`,
     mount: plate.mount,
     audit: { nativeDiameters: plate.specimens.map(({ organ }) => organ.dimensions.appendix) },
     update: (art, labels, p) => plate.update(art, labels, p, true),

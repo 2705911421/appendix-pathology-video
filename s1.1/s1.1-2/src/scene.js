@@ -10,7 +10,7 @@ import { mountPaperBridge } from '../../shared/detail/transitionPaper.js';
 import { phase, phaseOut, pushTo } from '../../shared/timelineHelper.js';
 import { calls, circle, inkReveal } from './brushwork.js';
 import { CUES, resolveCue } from './cues.js';
-import { appendixPoint, createGrossAnatomy, CUT, DIMENSIONS, LENS_SAMPLE, projectSpecimen, SPECIMEN } from './gross.js';
+import { appendixPoint, createGrossAnatomy, CUT, DIMENSIONS, LENS_SAMPLE, projectAppendixSilhouette, projectSpecimen, SPECIMEN } from './gross.js';
 import { createMagnifier, createMicroscope, MAGNIFIER } from './optics.js';
 import { addPaperGrain } from './paperGrain.js';
 
@@ -25,8 +25,8 @@ const zoom = 1.56 / SPECIMEN.scale;
 
 const subtitleCuts = {
   S06: ['后内侧，', 'cecum.', .51],
-  S07: ['通体暗红，', 'dark red,', .56],
-  S08: ['灰黄色脓苔，', 'purulent coating,', .53],
+  S07: ['通体暗红。', 'dark red.', .50],
+  S08: ['灰黄色脓苔。', 'grayish-yellow pus.', .34],
   S09: ['窄腔。', 'lumen.', .52],
 };
 
@@ -81,7 +81,8 @@ function drawObservationNotes(ctx, id, p) {
   } else if (id === 'S07') {
     letter(ctx, '大体观察 · 肿胀充血', 80, notesY + 106, { size: 24, halo: false });
   } else if (id === 'S08') {
-    letter(ctx, '大体提示 · 化脓性阑尾炎', 80, notesY + 106, { size: 21, halo: false });
+    letter(ctx, '急性蜂窝织性阑尾炎', 76, notesY + 106, { size: 20, halo: false });
+    letter(ctx, '外现特征', 80, notesY + 143, { size: 23, color: graphite, halo: false });
   }
   ctx.restore();
 }
@@ -113,9 +114,9 @@ function cueGeometry(id, p) {
     return { stage: 'phlegmon', morphProgress, coat: phase(p, .15, .85), push: phase(p, 0, .70),
       diameter: lerp(DIMENSIONS.simple.appendix, DIMENSIONS.phlegmon.appendix, morphProgress) };
   }
-  return { stage: 'phlegmon', cutaway: true, opening: phase(p, .23, .68),
-    cutProgress: phase(p, 0, .30), scissors: phase(p, 0, .035) * (1 - phase(p, .253, .30)),
-    guide: 1 - phase(p, .28, .58), progress: p, push: 1, diameter: DIMENSIONS.phlegmon.appendix };
+  return { stage: 'phlegmon', cutaway: true, opening: phase(p, .25, .55),
+    cutProgress: phase(p, 0, .25), scissors: phase(p, 0, .025) * (1 - phase(p, .25, .30)),
+    guide: 1 - phase(p, .25, .55), progress: p, push: 1, diameter: DIMENSIONS.phlegmon.appendix };
 }
 
 function lensOpening(p) {
@@ -148,7 +149,7 @@ function render({ cue, p }, captureEntry = false) {
     stretchY: 2 * breath / 520,
   };
   const project = projectSpecimen(pose);
-  const fading = microBridge ? 1 - phase(p, .46, .76) : 1;
+  const fading = microBridge ? 1 - phase(p, .12, .58) : 1;
   ctx.clearRect(0, 0, WIDTH, HEIGHT);
   if (fading > 0) {
     ctx.save();
@@ -160,7 +161,7 @@ function render({ cue, p }, captureEntry = false) {
   const observing = id === 'S07' ? phase(p, .025, .56) : Number(id !== 'S06');
   const diagnosis = id === 'S08' ? phase(p, .06, .64) : Number(id === 'S09' || microBridge);
   drawObservationNotes(ctx, id, p);
-  showDots({ marker: observing + diagnosis, opacity: captureEntry ? 0 : microBridge ? 1 - phase(p, .25, .76) : 1 });
+  showDots({ marker: observing + diagnosis, opacity: captureEntry ? 0 : 1 });
   if (id === 'S06') normalLabels(ctx, p, project);
 
   const closing = id === 'S08' ? 1 - phase(p, 0, .14) : 1;
@@ -172,7 +173,9 @@ function render({ cue, p }, captureEntry = false) {
   if (lens && id === 'S07') {
     ctx.save();
     ctx.globalAlpha *= lens.alpha * phase(p, .42, .56);
-    letter(ctx, '浆膜面血管剧烈扩张充血', MAGNIFIER.x, MAGNIFIER.labelTop, { align: 'center', top: true, halo: false });
+    letter(ctx, '浆膜血管扩张充血', MAGNIFIER.x, MAGNIFIER.labelTop, { align: 'center', top: true, halo: false });
+    letter(ctx, '像烧红的铁丝网', MAGNIFIER.x, MAGNIFIER.labelTop + 41,
+      { align: 'center', top: true, size: 25, color: red, halo: false });
     ctx.restore();
   }
 
@@ -194,13 +197,13 @@ function render({ cue, p }, captureEntry = false) {
       { size: 28, color: red, leader: red, bend: 12, progress: phase(poseP, .48, .641) });
     ctx.restore();
   }
-  const micro = microscope.draw(ctx, microBridge ? p : 0, project(appendixPoint(CUT.center)));
+  const micro = microBridge ? microscope.at(p, projectAppendixSilhouette(project)) : null;
   const subtitle = captureEntry ? null : subtitles.get(id);
   stage.setSubtitles(subtitle, p);
   showPaper(id === 'S06' && !captureEntry ? 1 - phase(p, 0, .10) : 0);
-  showMicroscopeHandoff({ opacity: microBridge ? phase(p, .68, .78) : 0,
-    scale: lerp(1, .46, phase(p, .81, 1)) });
-  return { id, p, diameter: state.diameter, camera: camera.scale, scale: pose.scale, lens, micro, specimenOpacity: fading };
+  showMicroscopeHandoff(micro ?? {});
+  return { id, p, diameter: state.diameter, camera: camera.scale, scale: pose.scale, lens, micro,
+    specimenOpacity: fading, cut: { opening: state.opening, guide: state.guide, scissors: state.scissors } };
 }
 
 await stage.ready;

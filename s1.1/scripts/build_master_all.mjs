@@ -43,7 +43,8 @@ export function planSections({ sheets, cues }, master, profile = renderProfile) 
       }
       const start = (elapsedMs - sectionStart) / 1000;
       elapsedMs += ms;
-      return { ...cue, type, defaultDuration, start, end: (elapsedMs - sectionStart) / 1000, duration: ms / 1000 };
+      return { ...cue, type, defaultDuration, start, end: (elapsedMs - sectionStart) / 1000,
+        duration: ms / 1000, effectiveDuration: ms / 1000 };
     });
     const startFrame = frameBoundary(sectionStart / 1000, profile.fps);
     const endFrame = frameBoundary(elapsedMs / 1000, profile.fps);
@@ -172,15 +173,15 @@ async function buildMaster(requested, profileName, force) {
     const master = inputs.length ? await syncDurations(source, inputs) : undefined;
     const voicePath = master ? voiceFile : undefined;
     if (!master) console.log('使用默认时间线与程序配乐。');
-    if (master && (master.duration < 305 || master.duration > 325)) {
-      console.warn(`配音版时间线 ${master.duration.toFixed(3)} 秒，超出 305–325 秒审片目标。`);
+    if (master && (master.duration < 315 || master.duration > 328)) {
+      console.warn(`配音版时间线 ${master.duration.toFixed(3)} 秒，超出 315–328 秒审片目标。`);
     }
     const sections = planSections(source, master, profile);
     const frames = sections.at(-1).endFrame;
     const bridges = sections.flatMap(section => {
       const origin = section.startFrame / profile.fps - section.samplingOffset;
       return section.sheet.cues.filter(cue => cue.type === 'bridge')
-        .map(({ start, end }) => ({ start: origin + start, end: origin + end }));
+        .map(({ id, start, end }) => ({ id, start: origin + start, end: origin + end }));
     });
     const workers = getWorkers(requested, profileName);
     console.log(`${profileName} 档位，总计 ${frames} 帧，${workers} 路并发（内存 ${(totalmem() / gib).toFixed(1)} GiB）。`);

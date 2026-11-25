@@ -1,4 +1,5 @@
-import { appendStorySvg, createStoryStage, lerp, prepareStorySubtitles } from '../shared/canvasCore.js';
+import { appendStorySvg, createStoryStage, lerp } from '../shared/canvasCore.js';
+import { cueCaptionAt, prepareCueCaptionPages } from '../shared/cueCaptions.js';
 import { mountBridgePlates } from '../shared/detail/bridgePlates.js';
 import { mountMicroscopeHandoff } from '../shared/detail/microscopeHandoff.js';
 import { mountStageDotOverlay } from '../shared/leftFloatNotes.js';
@@ -37,36 +38,36 @@ function mountedScene(id) {
   }
   return scenes.get(id);
 }
-const pageStarts = {
-  S10: ['始终绕不开', 'centers on'],
-  S11: ['缺血和细菌', 'Ischemia and bacteria'],
-  S12: ['分叶核中性粒细胞', 'Neutrophils with lobed nuclei'],
-  S13: ['最外面的浆膜', 'The outer serosa'],
-  S14: ['这层', 'This fibrinous'],
+const captionCuts = {
+  S10: [['眼里，急性阑尾炎的本质，', 'acute appendicitis']],
+  S11: [
+    ['堵塞管腔，', 'blocks the lumen,'],
+    ['急剧升高。', 'rise sharply.'],
+    ['破溃、脱落', 'and sloughing,'],
+  ],
+  S12: [
+    ['炎症介质参与反应。', 'the inflammatory response.'],
+    ['血浆被动漏出。', 'leaks out passively.'],
+    ['边集、滚动、黏附，', 'roll and adhere.'],
+  ],
+  S13: [
+    ['浸润阑尾壁全层。', 'the full appendiceal wall.'],
+    ['链激酶和透明质酸酶。', 'streptokinase and hyaluronidase.'],
+    ['促进纤维素降解；', 'fibrin breakdown.'],
+    ['降解透明质酸。', 'hyaluronic acid.'],
+    ['穿透肌层直达浆膜。', 'to the serosa.'],
+  ],
+  S14: [
+    ['化脓性炎症。', 'a suppurative inflammation.'],
+    ['这些是脓细胞。', 'called pus cells.'],
+    ['混在一起，', 'a mesh of fibrin'],
+    ['纤维素性脓性渗出物。', 'a fibrinopurulent exudate.'],
+  ],
 };
 
-function pairedCaptions({ id, zhText, highlightZh, enText }) {
-  const [chineseStart, englishStart] = pageStarts[id];
-  const zhCut = zhText.indexOf(chineseStart);
-  const enCut = enText.indexOf(englishStart);
-  if (zhCut <= 0 || enCut <= 0) throw new Error(`Missing subtitle break for ${id}`);
-  const english = [enText.slice(0, enCut).trimEnd(), enText.slice(enCut)];
-  return prepareStorySubtitles({ text: zhText, highlights: highlightZh }, english, { splitAt: zhCut });
-}
-
 await Promise.all([stage.ready, bridgePlates.ready]);
-const subtitles = new Map(cues.filter(cue => cue.type === 'speech').map(cue => [cue.id, pairedCaptions(cue)]));
-const exudation = byId.get('S12');
-const exudationAfter = ['化脓时可浸润全层。', 'In suppurative disease'];
-const splitExudation = [exudation.zhText.indexOf(exudationAfter[0]), exudation.enText.indexOf(exudationAfter[1])];
-if (splitExudation.some(index => index < 0)) throw new Error('Missing subtitle break for S12');
-const exudationPages = [
-  pairedCaptions({ ...exudation, zhText: exudation.zhText.slice(0, splitExudation[0]),
-    enText: exudation.enText.slice(0, splitExudation[1]) }),
-  prepareStorySubtitles({ text: exudation.zhText.slice(splitExudation[0]), highlights: exudation.highlightZh },
-    exudation.enText.slice(splitExudation[1]), { singlePage: true }),
-];
-exudationPages[0].breakAt = subtitles.get('S12').breakAt / .72;
+const subtitles = new Map(cues.filter(cue => cue.type === 'speech')
+  .map(cue => [cue.id, prepareCueCaptionPages(cue, captionCuts[cue.id])]));
 
 function posed(cue, p, bridgeProgress = 0) {
   const entry = mountedScene(sceneIds[cue.id]);
@@ -76,38 +77,42 @@ function posed(cue, p, bridgeProgress = 0) {
 
 function renderFrame({ cue, p }) {
   const { id } = cue;
-  const subtitle = id === 'S12' ? exudationPages[Number(p >= .72)] : subtitles.get(id);
-  const captionProgress = id === 'S12' && p < .72 ? p / .72 : p;
+  const subtitle = subtitles.has(id) ? cueCaptionAt(subtitles.get(id), p) : null;
   let layers;
+  let seam;
   if (id === 'B03b') {
     const opening = posed(byId.get('S10'), 1, p);
     const vessel = posed(byId.get('S11'), 0);
-    const spread = ramp(p, .05, .93);
-    layers = [{ ...opening, opacity: 1 - ramp(p, .12, .67) },
-      { ...vessel, scale: lerp(.66, 1, spread), opacity: ramp(p, .13, .76) }];
+    const spread = ramp(p, .40, .98);
+    layers = [{ ...opening, opacity: 1 - ramp(p, .24, .55) },
+      { ...vessel, scale: lerp(.73, 1, spread), opacity: spread }];
+    seam = { outgoing: layers[0].opacity, incoming: spread, branchOpacity: 1 - ramp(p, 0, .45) };
   } else if (id === 'B05') {
-    const moving = bridgePlates.available ? ramp(p, .04, .84) : 0;
-    const leave = bridgePlates.available ? ramp(p, .23, .92) : 0;
+    const moving = bridgePlates.available ? ramp(p, 0, .42) : 0;
+    const leave = moving;
     layers = [{ ...posed(byId.get('S14'), 1), opacity: 1 - leave, scale: 1 - .07 * moving,
       dx: 172 * moving, dy: -92 * moving }];
+    seam = { outgoing: 1 - leave, incoming: bridgePlates.available ? ramp(p, .48, 1) : 0 };
   } else {
     layers = [posed(cue, p)];
   }
-  paintArt(layers, subtitle, captionProgress);
-  bridgePlates.show(id === 'B05' ? { notes: ramp(p, .06, .48), subject: ramp(p, .38, .89) } : {});
-  stage.setSubtitles(subtitle, captionProgress);
-  const collapse = ramp(p * (cue.end - cue.start), 0, .15);
+  const opening = id === 'S10';
+  paintArt(layers, opening ? null : subtitle, p);
+  bridgePlates.show(id === 'B05' ? { subject: ramp(p, .48, 1) } : {});
+  stage.setSubtitles(subtitle, p);
+  stage.caption.style.visibility = opening && p > 0 ? 'visible' : '';
+  stage.caption.style.zIndex = opening ? '9' : '';
+  if (opening) stage.caption.style.opacity = String(ramp(p, 0, .043));
+  const collapse = ramp(p, 0, .28);
   showMicroscopeHandoff({ opacity: id === 'S10' ? 1 - collapse : 0,
-    paperOpacity: 1 - collapse, scale: lerp(.46, .29, collapse) });
-  const dots = { S10: collapse, B03b: 1 - ramp(p, 0, .40), S13: ramp(p, .08, .23),
-    B04: 1 - ramp(p, 0, .26), S14: ramp(p, .02, .16), B05: 1 - ramp(p, 0, .20) };
-  showDots({ marker: 2, opacity: dots[id] ?? 0 });
+    paperOpacity: 1 - collapse, scale: lerp(1, .34, collapse) });
+  showDots({ marker: id === 'B05' ? lerp(2, 1, ramp(p, .46, .98)) : 2 });
+  return seam;
 }
 
 function renderAt(t) {
   const selected = resolveCue(CUES, t);
-  renderFrame(selected);
-  return selected;
+  return { ...selected, ...renderFrame(selected) };
 }
 
 if (!master) renderAt(0);

@@ -145,8 +145,8 @@ export function createInkOpening() {
     lettering: `<g id="opening-branches"><g id="opening-left-trail"></g><g id="opening-right-trail"></g>
       ${concept('opening-left', 510, '#1F1C19', '变质', '细胞变性、坏死与破溃')}
       ${concept('opening-right', 1410, RED, '渗出', '血管扩张、血浆与白细胞游出')}
-      <text class="note title" x="90" y="105" font-size="26" fill="#2A2622">急性阑尾炎始终以变质、渗出为主</text>
-      ${ink('M91 122 Q150 123 207 120', { color: '#826E5F', size: 1.6, opacity: .43, seed: 66 })}</g>`,
+      <text class="note title" x="325" y="105" font-size="26" fill="#2A2622">急性阑尾炎始终以变质、渗出为主</text>
+      ${ink('M326 122 Q385 123 442 120', { color: '#826E5F', size: 1.6, opacity: .43, seed: 66 })}</g>`,
     mount(art, lettering) {
       mountSurface(art, 'opening-verm-canvas', vermilion);
       diagrams.mount(art);
@@ -156,7 +156,7 @@ export function createInkOpening() {
     update(_cue, p, bridgeProgress = 0) {
       const draw = ramp(p, 0, .23);
       const stretch = lerp(1, 1.28, ramp(bridgeProgress, 0, .73));
-      const branches = 1 - ramp(bridgeProgress, .02, .65);
+      const branches = 1 - ramp(bridgeProgress, 0, .45);
       artNodes['opening-diagrams'].setAttribute('opacity', branches);
       labelNodes['opening-branches'].setAttribute('opacity', branches);
       artNodes['opening-flame'].setAttribute('opacity', .94 + .06 * draw);

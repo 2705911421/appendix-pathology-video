@@ -1,7 +1,6 @@
-import { NS, RED } from '../shared/canvasCore.js';
+import { RED } from '../shared/canvasCore.js';
 import { createIleocecalAsset, ILEOCECAL_BOX } from '../shared/anatomyWatercolor.js';
 import { createHistologyAsset, HISTOLOGY_DIAMETER } from '../shared/histologyProcedural.js';
-import { drawPathologyProgress } from '../shared/leftFloatNotes.js';
 
 export { phase } from '../shared/timelineHelper.js';
 
@@ -16,19 +15,6 @@ export function histologyLens({ mode, id, x, y, radius }) {
     id, stage: mode, x: x - radius, y: y - radius, scale: 2 * radius / HISTOLOGY_DIAMETER,
     showLayers: mode === 'simple',
   });
-}
-
-export function pathologyProgress(id, stage) {
-  const notes = drawPathologyProgress({ id, stage });
-  const template = document.createElementNS(NS, 'g');
-  template.innerHTML = notes.lettering;
-  const reminder = [...template.querySelectorAll('text')].find(node => node.textContent === '非每个患者必经固定流程');
-  if (!reminder) throw new Error('The frozen stage notes are missing the variation reminder');
-  reminder.setAttribute('font-size', '22');
-  reminder.setAttribute('style', 'font-weight:750');
-  reminder.setAttribute('fill', '#2E2924');
-  reminder.querySelector('tspan').setAttribute('dy', '30');
-  return { paint: notes.paint, lettering: template.innerHTML };
 }
 
 export function opacity(layer, id, amount) {

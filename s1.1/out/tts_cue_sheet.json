@@ -6,6 +6,13 @@
     "zhText": "一顿再普通不过的午饭后，你的肚脐周围，突然开始隐隐作痛，甚至泛起恶心，连吐了两次。",
     "enText": "After an ordinary lunch, a dull ache starts around your navel, bringing nausea and two bouts of vomiting.",
     "defaultDuration": 9.5,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S01.wav"
   },
   {
@@ -15,24 +22,45 @@
     "zhText": "早期的疼痛经内脏神经传导，常让人觉得肚脐周围在疼，却很难指出具体位置。",
     "enText": "Early pain travels through visceral nerves. It is often felt around the navel, and its exact location is hard to pinpoint.",
     "defaultDuration": 8.5,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S02.wav"
   },
   {
     "id": "S03",
     "module": "s1.1-1",
     "type": "speech",
-    "zhText": "傍晚六点左右，疼痛转移到右下腹。检查时，麦氏点一按就痛，松手更痛。",
-    "enText": "Around 6 PM, the pain shifts to the right lower abdomen. On exam, McBurney's point is tender, with worse pain on release.",
-    "defaultDuration": 8.1,
+    "zhText": "傍晚六点左右，疼痛转移到右下腹。麦氏点是阑尾根部的体表投影。炎症刺激壁腹膜，按压时产生压痛；突然松手，壁腹膜受牵拉，引发反跳痛。两者都是腹膜刺激征，提示炎症已累及腹膜。",
+    "enText": "Around 6 PM, the pain shifts to the right lower abdomen. McBurney's point marks the surface projection of the appendiceal base. Inflammation irritates the parietal peritoneum, causing tenderness on pressure. Sudden release stretches the parietal peritoneum and elicits rebound tenderness. Both are signs of peritoneal irritation, indicating peritoneal involvement.",
+    "defaultDuration": 17.8,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S03.wav"
   },
   {
     "id": "S04",
     "module": "s1.1-1",
     "type": "speech",
-    "zhText": "晚上十点到急诊，测得体温三十九点三度。白细胞总数和中性粒细胞比例升高。",
-    "enText": "At 10 PM in the emergency department, the temperature is 39.3°C. The white blood cell count and neutrophil percentage are elevated.",
-    "defaultDuration": 8.8,
+    "zhText": "体温飙升至 39.3摄氏度（正常参考范围 36到37摄氏度），白细胞总数升至 13.0乘以10的9次方每升（正常 4到10乘以10的9次方每升），中性粒细胞数升至 11.3乘以10的9次方每升（正常 2到7乘以10的9次方每升）。",
+    "enText": "Temperature rose to 39.3°C (reference range 36–37°C). White blood cells rose to 13.0 × 10⁹/L (reference 4–10 × 10⁹/L). Absolute neutrophils rose to 11.3 × 10⁹/L (reference 2–7 × 10⁹/L).",
+    "defaultDuration": 18.4,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S04.wav"
   },
   {
@@ -42,6 +70,13 @@
     "zhText": "到急诊时已过去十小时。那根原本粉白细长的“小香肠”，在炎症中可经历变色：暗红、灰黄，甚至焦黑。",
     "enText": "Ten hours have passed by arrival at the emergency department. The slender, pale-pink appendix can change color with inflammation: dark red, grayish yellow, or even black.",
     "defaultDuration": 10.8,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S05.wav"
   },
   {
@@ -51,24 +86,45 @@
     "zhText": "正常阑尾起自盲肠后内侧，是一根粉白、细长的盲管，通常只有几毫米粗。",
     "enText": "The normal appendix arises from the posteromedial cecum. It is a slender, pale-pink, blind-ended tube, usually only a few millimeters across.",
     "defaultDuration": 8,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S06.wav"
   },
   {
     "id": "S07",
     "module": "s1.1-2",
     "type": "speech",
-    "zhText": "术中看到的阑尾肿胀增粗、通体暗红，浆膜血管扩张充血。",
-    "enText": "At surgery, the appendix is swollen and dark red, with dilated, congested serosal vessels.",
-    "defaultDuration": 7.5,
+    "zhText": "术中看到的阑尾肿胀增粗、通体暗红。浆膜血管扩张充血，交织起来像烧红的铁丝网。",
+    "enText": "At surgery, the appendix is swollen and dark red. Its dilated, congested serosal vessels form a network like red-hot wire mesh.",
+    "defaultDuration": 8.2,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S07.wav"
   },
   {
     "id": "S08",
     "module": "s1.1-2",
     "type": "speech",
-    "zhText": "暗红的浆膜面还覆有灰黄色脓苔，提示急性化脓性阑尾炎，也叫蜂窝织炎性阑尾炎。",
-    "enText": "The dark-red serosa bears a grayish-yellow purulent coating, suggesting acute suppurative, or phlegmonous, appendicitis.",
-    "defaultDuration": 9.4,
+    "zhText": "暗红的浆膜面还覆有灰黄色脓苔。这正是急性化脓性阑尾炎，也就是急性蜂窝织性阑尾炎的外现特征。",
+    "enText": "The dark-red serosa is coated in grayish-yellow pus. This is a characteristic external manifestation of acute suppurative (phlegmonous) appendicitis.",
+    "defaultDuration": 10.1,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S08.wav"
   },
   {
@@ -78,6 +134,13 @@
     "zhText": "沿虚线纵切，见水肿增厚的管壁和积脓的窄腔。有时可见阻塞管腔的粪石。再到镜下看看。",
     "enText": "The cut along the dashed line exposes an edematous, thick wall and a narrow, pus-filled lumen. An obstructing fecalith may be present. Let's look under the microscope.",
     "defaultDuration": 11.7,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S09.wav"
   },
   {
@@ -87,42 +150,77 @@
     "zhText": "在病理学家眼里，急性阑尾炎的本质，始终绕不开两个核心动作——“变质”和“渗出”。",
     "enText": "In pathology, acute appendicitis centers on two processes: tissue injury and exudation.",
     "defaultDuration": 8.6,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S10.wav"
   },
   {
     "id": "S11",
     "module": "s1.1-3",
     "type": "speech",
-    "zhText": "如果阑尾腔堵塞，腔内压会升高。缺血和细菌可使黏膜坏死、脱落并形成溃疡，这种组织损伤叫作“变质”。",
-    "enText": "An obstruction can raise pressure inside the appendix. Ischemia and bacteria can cause mucosal necrosis, sloughing and ulceration. This is tissue injury.",
-    "defaultDuration": 11.4,
+    "zhText": "在典型的梗阻—感染过程中，以粪石为主堵塞管腔，腔内压随之急剧升高。缺血与细菌感染可造成黏膜坏死、破溃、脱落并形成溃疡，这就是“变质”。",
+    "enText": "In the classic obstruction-infection model, a fecalith typically blocks the lumen, causing luminal pressure to rise sharply. Ischemia and bacterial infection can lead to mucosal necrosis, breakdown and sloughing, with ulceration. This is tissue injury.",
+    "defaultDuration": 13.7,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S11.wav"
   },
   {
     "id": "S12",
     "module": "s1.1-3",
     "type": "speech",
-    "zhText": "炎症使血管扩张、通透性增加，液体和蛋白外渗。分叶核中性粒细胞变形，穿过内皮间隙，化脓时可浸润全层。这些都属于“渗出”。",
-    "enText": "Inflamed vessels dilate and become more permeable, allowing fluid and proteins to leak out. Neutrophils with lobed nuclei deform and cross endothelial gaps. In suppurative disease they can infiltrate the full wall. All of this is exudation.",
-    "defaultDuration": 13.5,
+    "zhText": "组胺、缓激肽、前列腺素与趋化因子等炎症介质参与反应。血管扩张充血，通透性升高，血浆被动漏出。中性粒细胞受炎症介质与趋化因子引导，依次边集、滚动、黏附，最后以阿米巴样运动经内皮间隙游出。这是主动渗出。",
+    "enText": "Histamine, bradykinin, prostaglandins and chemotactic factors take part in the inflammatory response. Vessels dilate and become congested and more permeable, so plasma leaks out passively. Guided by inflammatory mediators and chemotactic factors, neutrophils marginate, roll and adhere. They then actively leave through endothelial gaps by amoeboid movement.",
+    "defaultDuration": 20.7,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S12.wav"
   },
   {
     "id": "S13",
     "module": "s1.1-3",
     "type": "speech",
-    "zhText": "化脓时，中性粒细胞可穿过肌层、浸润阑尾壁全层。最外面的浆膜可覆有纤维素性脓性渗出物。",
-    "enText": "In suppurative appendicitis, neutrophils can infiltrate the full wall, including muscle. The outer serosa may be coated with fibrinous-purulent exudate.",
-    "defaultDuration": 11.7,
+    "zhText": "化脓性炎症时，中性粒细胞可浸润阑尾壁全层。链球菌等细菌可产生链激酶和透明质酸酶。链激酶激活纤溶酶原，促进纤维素降解；透明质酸酶可降解透明质酸。炎症可沿组织间隙迅速蔓延，穿透肌层直达浆膜。这种弥漫蔓延，就是“蜂窝织性”名称的由来。",
+    "enText": "In suppurative inflammation, neutrophils can infiltrate the full appendiceal wall. Bacteria such as streptococci may produce streptokinase and hyaluronidase. Streptokinase activates plasminogen, promoting fibrin breakdown. Hyaluronidase breaks down hyaluronic acid. Inflammation can spread rapidly through tissue spaces and across the muscle to the serosa. This diffuse spread is why it is called phlegmonous.",
+    "defaultDuration": 24.6,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S13.wav"
   },
   {
     "id": "S14",
     "module": "s1.1-3",
     "type": "speech",
-    "zhText": "交织的纤维素丝网中，可见大量变性、坏死的中性粒细胞，也就是脓细胞。这层纤维素性脓性渗出物，使阑尾表面呈灰黄色。",
-    "enText": "The fibrin mesh contains many degenerated and necrotic neutrophils, or pus cells. This fibrinous-purulent exudate gives the appendix its grayish-yellow surface.",
-    "defaultDuration": 13.6,
+    "zhText": "这种阑尾炎的本质是化脓性炎症。渗出物以变性、坏死的中性粒细胞为主，这些是脓细胞。脓细胞与交织成网的纤维素混在一起，共同构成纤维素性脓性渗出物。肉眼看到的，就是阑尾表面的灰黄色脓苔。",
+    "enText": "This type of appendicitis is a suppurative inflammation. The exudate consists mainly of degenerated and necrotic neutrophils, called pus cells. Pus cells mix with a mesh of fibrin to form a fibrinopurulent exudate. To the naked eye, it forms a grayish-yellow purulent coating on the appendix.",
+    "defaultDuration": 19.8,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S14.wav"
   },
   {
@@ -132,33 +230,61 @@
     "zhText": "从暗红的单纯性、灰黄的化脓性，到焦黑的坏疽性，这是常见的典型演变路径。但请记住，有的病例可在早期控制，有的会迅速恶化，病程因人而异。",
     "enText": "Dark-red simple, grayish-yellow phlegmonous, and black gangrenous appendicitis illustrate a typical course. The course varies: some cases can be controlled early, while others worsen rapidly.",
     "defaultDuration": 13,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S15.wav"
   },
   {
     "id": "S16",
     "module": "s1.1-4",
     "type": "speech",
-    "zhText": "如果战火还停留在早期的单纯性阶段，中性粒细胞主要聚集在黏膜和黏膜下层，更深处的平滑肌层里，只能零星见到散在的寥寥几个。",
-    "enText": "In early simple appendicitis, neutrophils gather mostly in the mucosa and submucosa, with only a few scattered in the muscularis propria.",
-    "defaultDuration": 12.5,
+    "zhText": "镜下看，单纯性阑尾炎仍处于早期。中性粒细胞主要聚集在黏膜和黏膜下层。更深处可见肌层与浆膜层轻度水肿及少量中性粒细胞浸润。",
+    "enText": "Under the microscope, simple appendicitis shows early inflammation. Neutrophils gather mostly in the mucosa and submucosa. The muscularis propria and serosa show mild edema and sparse neutrophil infiltration.",
+    "defaultDuration": 13.5,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S16.wav"
   },
   {
     "id": "S17",
     "module": "s1.1-4",
     "type": "speech",
-    "zhText": "化脓波及全层时，水肿和腔内压升高可妨碍静脉回流；阑尾系膜静脉也可形成血栓，进一步损害阑尾壁的血液灌注。",
-    "enText": "With transmural suppuration, edema and raised luminal pressure can impede venous drainage. A thrombus can form in a mesoappendiceal vein, further reducing perfusion of the appendiceal wall.",
-    "defaultDuration": 12,
+    "zhText": "化脓蔓延到阑尾壁全层后，肿胀使管壁张力升高，直接压迫阑尾壁动脉。阑尾系膜静脉同时可形成血栓，堵塞回流。动静脉双重受阻，严重时可彻底切断血供，造成阑尾组织缺血、坏死。",
+    "enText": "With transmural suppuration, swelling raises tension in the appendiceal wall, directly compressing the appendiceal wall artery. A thrombus can form in the mesoappendiceal vein and block outflow. Combined arterial and venous obstruction can cut off the blood supply in severe cases, leading to appendiceal ischemia and necrosis.",
+    "defaultDuration": 17.6,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S17.wav"
   },
   {
     "id": "S18",
     "module": "s1.1-4",
     "type": "speech",
-    "zhText": "灌注严重受损时，阑尾壁可出血、坏死，形成坏疽性阑尾炎；脆弱的管壁可能穿孔，脓液外漏可引发危及生命的弥漫性腹膜炎。",
-    "enText": "Severely reduced perfusion can cause hemorrhage and necrosis of the wall, producing gangrenous appendicitis. The weakened wall may perforate, and leaking pus can cause life-threatening diffuse peritonitis.",
-    "defaultDuration": 13.5,
+    "zhText": "阑尾组织坏死后，继发腐败菌感染可形成坏疽，使阑尾发黑，这是坏疽性阑尾炎的典型外观。坏疽部位的管壁容易穿孔，脓液外漏可引发弥漫性腹膜炎。",
+    "enText": "After appendiceal tissue dies, secondary infection with putrefactive bacteria can cause gangrene. The appendix can turn black, a typical appearance in gangrenous appendicitis. The gangrenous wall is prone to perforation, and leaking pus can cause diffuse peritonitis.",
+    "defaultDuration": 14.7,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S18.wav"
   },
   {
@@ -168,6 +294,13 @@
     "zhText": "怀疑急性阑尾炎，医生先做什么？先问典型症状，再仔细做体格检查，并综合化验结果判断。",
     "enText": "How do doctors first assess suspected acute appendicitis? They ask about typical symptoms, perform a careful physical exam, and consider the lab results.",
     "defaultDuration": 10,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S19.wav"
   },
   {
@@ -177,6 +310,13 @@
     "zhText": "CT 是重要的辅助确诊工具，是否需要检查，要看临床评估。成人疑似病例中，多层螺旋 CT 诊断敏感度可超过百分之九十三。",
     "enText": "CT is an important diagnostic aid. Clinical assessment guides who needs it. In adults with suspected appendicitis, multidetector helical CT sensitivity can exceed 93%.",
     "defaultDuration": 11.5,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S20.wav"
   },
   {
@@ -186,24 +326,45 @@
     "zhText": "下面是三种病理表现的增强 CT 示意。单纯性可见阑尾轻度增粗，周围脂肪清晰；化脓性可见厚壁靶征、偏心粪石和脂肪条索；坏疽穿孔可见壁强化缺损、盲肠旁脓肿和腔外气泡。",
     "enText": "These drawings illustrate typical contrast-enhanced CT appearances. In simple appendicitis, the appendix is mildly enlarged with clear surrounding fat. In phlegmonous appendicitis, a thick-walled target sign, an eccentric fecalith and fat stranding may be seen. In perforated gangrenous appendicitis, focal loss of wall enhancement, a pericecal abscess and extraluminal gas may be seen.",
     "defaultDuration": 19.5,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S21.wav"
   },
   {
     "id": "S22",
     "module": "s1.1-5",
     "type": "speech",
-    "zhText": "医生先评估有无坏疽、穿孔或腹膜炎。怀疑坏疽或穿孔时，需尽快外科评估；弥漫性腹膜炎通常需紧急手术，局限性脓肿可视情况先抗感染，必要时引流。",
-    "enText": "Doctors look for gangrene, perforation or peritonitis. Suspected gangrene or perforation needs prompt surgical assessment. Diffuse peritonitis usually needs emergency surgery. A localized abscess may initially be treated with antibiotics and drainage if needed.",
-    "defaultDuration": 14,
+    "zhText": "疑似急性蜂窝织性阑尾炎，先评估有无坏疽、穿孔或腹膜炎。未穿孔者结合临床评估，通常尽早手术切除。怀疑坏疽或穿孔，需尽快外科评估。弥漫性腹膜炎通常需紧急手术；局限性脓肿可先抗感染，必要时引流。",
+    "enText": "For suspected acute phlegmonous appendicitis, assess for gangrene, perforation or peritonitis. Without perforation, early appendectomy is usual after clinical assessment. Suspected gangrene or perforation needs prompt surgical assessment. Diffuse peritonitis usually needs emergency surgery. A localized abscess may initially be treated with antibiotics and drainage if needed.",
+    "defaultDuration": 20.5,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S22.wav"
   },
   {
     "id": "S23",
     "module": "s1.1-6",
     "type": "speech",
-    "zhText": "反复或持续的右下腹痛，可能见于慢性阑尾炎。慢性炎症中，修复性增生可造成阑尾壁纤维化。",
-    "enText": "Chronic appendicitis can present with recurrent or persistent right lower abdominal pain. Reparative proliferation in chronic inflammation can cause fibrosis of the appendiceal wall.",
-    "defaultDuration": 10.5,
+    "zhText": "反复或持续的右下腹痛，可能见于慢性阑尾炎。长期炎症刺激导致的“增生”，可使阑尾壁逐渐增厚，并出现纤维化。",
+    "enText": "Chronic appendicitis can present with recurrent or persistent right lower abdominal pain. Inflammation-induced proliferation can gradually thicken and fibrose the appendiceal wall.",
+    "defaultDuration": 10.6,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S23.wav"
   },
   {
@@ -213,6 +374,13 @@
     "zhText": "镜下可见阑尾壁明显纤维化，有淋巴细胞和浆细胞浸润。一旦确诊，通常建议在症状缓解期择期切除；若正处于急性发作期，则视情况急诊手术。",
     "enText": "Microscopy shows wall fibrosis with lymphocyte and plasma cell infiltration. Once diagnosed, elective appendectomy is usually advised when symptoms have subsided. During an acute flare, emergency surgery may be needed depending on the clinical findings.",
     "defaultDuration": 16,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S24.wav"
   },
   {
@@ -222,6 +390,13 @@
     "zhText": "粉白、暗红、灰黄、焦黑，颜色帮助我们读懂阑尾的病理变化。若腹痛转移到右下腹，或持续加重，尤其伴发热或腹部拒按，应尽快就医。",
     "enText": "Pale pink, dark red, grayish yellow and black reflect changes in the appendix. Seek urgent medical care if abdominal pain moves to the right lower abdomen or keeps worsening, especially with fever or guarding.",
     "defaultDuration": 12,
+    "recommendedSpeed": 1.08,
+    "recommendedPauses": {
+      "comma": 0.11,
+      "dash": 0.18,
+      "semicolon": 0.18,
+      "period": 0.22
+    },
     "outputPath": "s1.1/external_tts/S25.wav"
   }
 ]

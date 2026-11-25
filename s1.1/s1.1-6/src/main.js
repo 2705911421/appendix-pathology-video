@@ -4,7 +4,7 @@ import {
 import { selectEntryPart } from '../../shared/detail/bridgePlates.js';
 import { mountPaperBridge } from '../../shared/detail/transitionPaper.js';
 import { mountStageDotOverlay } from '../../shared/leftFloatNotes.js';
-import { phase } from '../../shared/timelineHelper.js';
+import { phase, RECOVERY_FADE_SECONDS } from '../../shared/timelineHelper.js';
 import { CUES, resolveCue } from './cue-sheet.js';
 import { createCreditPlate } from './credit.js';
 import { chronicSpecimen } from './chronic-specimen.js';
@@ -40,12 +40,13 @@ const root = document.querySelector('#plate');
 const stage = createStoryStage(root);
 const storyLayers = [...root.children];
 const showPaper = mountPaperBridge(root);
+const speech = CUES.filter(cue => cue.type === 'speech');
 const scenes = [chronicSpecimen(), chronicSlide(), homecoming()].map((scene, i) => {
   const art = appendStorySvg(stage.paint, scene.paint, { hidden: true });
   const labels = appendStorySvg(stage.lettering, scene.lettering, { hidden: true });
   scene.mount?.(art);
-  return { ...scene, art, labels, cueId: CUES[i].id, breaks: subtitleBreaks[i].at,
-    captions: cueSubtitles(CUES[i], subtitleBreaks[i]) };
+  return { ...scene, art, labels, cueId: speech[i].id, breaks: subtitleBreaks[i].at,
+    captions: cueSubtitles(speech[i], subtitleBreaks[i]) };
 });
 const credit = createCreditPlate();
 root.append(credit.canvas);
@@ -66,19 +67,31 @@ function renderAt(time, capture = false) {
     return { id: cue.id, p };
   }
 
-  const index = scenes.findIndex(scene => scene.cueId === cue.id);
+  const bridge = cue.id === 'B08';
+  const index = bridge ? 2 : scenes.findIndex(scene => scene.cueId === cue.id);
   const scene = scenes[index];
-  for (const other of scenes) {
-    other.art.toggleAttribute('hidden', other !== scene);
-    other.labels.toggleAttribute('hidden', other !== scene);
-  }
-  scene.update(scene.art, scene.labels, p);
-  drawPaper(index);
-  showPaper(cue.id === 'S23' && !capture ? 1 - phase(p, 0, .10) : 0);
-  showDots({ gray: 1, opacity: capture || cue.id === 'S25' ? 0 : .55 });
+  const outro = cue.id === 'S25' ? phase(p * cue.duration, cue.duration - RECOVERY_FADE_SECONDS, cue.duration) : 0;
+  const outgoing = bridge ? 1 - phase(p, 0, .44) : 0;
+  const incoming = bridge ? phase(p, .48, 1) : 1 - outro;
+  scenes.forEach((item, i) => {
+    const alpha = i === index ? incoming : bridge && i === 1 ? outgoing : 0;
+    for (const layer of [item.art, item.labels]) {
+      layer.toggleAttribute('hidden', alpha <= 0);
+      layer.style.opacity = String(alpha);
+    }
+    if (alpha > 0) item.update(item.art, item.labels, bridge ? Number(i === 1) : p,
+      bridge ? speech[i].duration : cue.duration);
+  });
+  drawPaper(bridge ? 1 : index);
+  showPaper(outro);
+  const gray = bridge ? 1 - phase(p, .04, .81) : index < 2 ? 1 : 0;
+  const chronic = bridge ? outgoing : index === 0 ? phase(p, 0, .13) : Number(index === 1);
+  const marker = bridge ? 3 * (1 - phase(p, .12, .98)) : index < 2 ? 3 : 3 * phase(p, .07, .63);
+  showDots({ marker, gray, chronic, opacity: capture ? 0 : 1 - outro });
   const page = scene.breaks.filter(boundary => p >= boundary).length;
-  stage.setSubtitles(capture ? null : scene.captions[page], p);
-  return { id: cue.id, p };
+  stage.setSubtitles(capture || bridge ? null : scene.captions[page], p);
+  stage.caption.style.opacity = String(1 - outro);
+  return { id: cue.id, p, outgoing, incoming };
 }
 
 renderAt(0);

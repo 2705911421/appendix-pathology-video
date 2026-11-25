@@ -207,13 +207,13 @@ function pusCells() {
   });
   return {
     count, anchor,
-    draw(canvas, p) {
+    draw(canvas, p, prime) {
       const draw = canvas.getContext('2d');
       draw.setTransform(canvas.width / WIDTH, 0, 0, canvas.height / HEIGHT, 0, 0);
       draw.clearRect(0, 0, WIDTH, HEIGHT);
       let visible = 0;
-      for (const { x, y, tx, ty, begins, phase } of sprites) {
-        const emergence = ramp(p, begins, begins + .13);
+      for (const [i, { x, y, tx, ty, begins, phase }] of sprites.entries()) {
+        const emergence = Math.max(i < 90 ? prime : 0, ramp(p, begins * .57, begins * .57 + .11));
         if (emergence === 0) continue;
         const wave = p * Math.PI * 5.8 + phase;
         const spread = tile * (.92 + .08 * emergence + .015 * Math.sin(wave));
@@ -253,7 +253,7 @@ export function createSerosaDetail(pixelScale = 1) {
     { color: '#704451', head: 15, size: 3.8, seed: 28 });
   const calloutMesh = inkTrail('M1625 155 C1646 264 1612 413 1560 470 Q1507 524 1423 522',
     { color: '#87622C', head: 15, size: 3.8, seed: 64 });
-  const conclude = inkTrail('M756 824 C900 818 1067 824 1204 821', { color: RED, size: 3.4, seed: 84 });
+  const conclude = inkTrail('M811 851 C937 845 1052 851 1149 848', { color: RED, size: 3.4, seed: 84 });
   const audit = { highPowerCells: pus.count, fibrinThreads: network.threads.length, highPowerLens: detailView };
   let threads;
   let washNode;
@@ -283,8 +283,10 @@ export function createSerosaDetail(pixelScale = 1) {
         <g id="macro-pus-trail"></g>`)}
       ${group('macro-fibrin-label', `<text class="note title" x="1610" y="140" font-size="26" fill="#1F1C19">纤维素网</text>
         <g id="macro-mesh-trail"></g>`)}
-      ${group('macro-result', `<text class="note title" x="980" y="806" text-anchor="middle" font-size="32"
-        fill="${RED}">纤维素性脓性渗出物 · 浆膜面呈灰黄色</text><g id="macro-underline"></g>`)}`,
+      ${group('macro-result', `<text class="note title" x="980" y="785" text-anchor="middle" font-size="32"
+        fill="${RED}">化脓性炎症 · 纤维素性脓性渗出物</text>
+        <text class="note" x="980" y="833" text-anchor="middle" font-size="28" fill="#684335">肉眼可见灰黄色脓苔</text>
+        <g id="macro-underline"></g>`)}`,
     mount(art, lettering) {
       mountSurface(art, 'macro-muscle-wash', pigment.muscle);
       mountSurface(art, 'macro-watercolor', pigment.liquid);
@@ -303,12 +305,13 @@ export function createSerosaDetail(pixelScale = 1) {
       washNode.setAttribute('opacity', diffusion);
       washNode.setAttribute('transform',
         `translate(${cx} 332) scale(${lerp(.65, 1, diffusion)} ${lerp(.24, 1, diffusion)}) translate(${-cx} -332)`);
-      audit.visiblePus = pus.draw(cellsCanvas, p);
+      audit.visiblePus = pus.draw(cellsCanvas, p, prime);
       let woven = 0;
       for (const [i, thread] of threads.entries()) {
         const { node, strokes, length, arrival, travel } = thread;
-        const f = Math.max(i % 5 === 0 ? .73 * prime : 0, ramp(p, arrival, arrival + travel));
-        if (f > 0) woven++;
+        const primed = (i * 73) % threads.length < Math.ceil(.65 * threads.length);
+        const f = Math.max(primed ? prime : 0, ramp(p, arrival * .61, (arrival + travel) * .66));
+        woven += f;
         if (thread.previous === f) continue;
         node.setAttribute('opacity', f > 0 ? 1 : 0);
         for (const stroke of strokes) {
@@ -317,11 +320,11 @@ export function createSerosaDetail(pixelScale = 1) {
         }
         thread.previous = f;
       }
-      audit.visibleThreads = woven;
-      labels['macro-pus-label'].setAttribute('opacity', ramp(p, .31, .43));
-      labels['macro-fibrin-label'].setAttribute('opacity', ramp(p, .28, .40));
-      const stopCell = ramp(p, .34, .52);
-      const stopMesh = ramp(p, .30, .47);
+      audit.wovenFraction = woven / threads.length;
+      labels['macro-pus-label'].setAttribute('opacity', ramp(p, .035, .19));
+      labels['macro-fibrin-label'].setAttribute('opacity', ramp(p, .04, .20));
+      const stopCell = ramp(p, .055, .28);
+      const stopMesh = ramp(p, .065, .30);
       if (cellTrail !== stopCell) {
         labels['macro-pus-trail'].innerHTML = calloutCell(stopCell);
         cellTrail = stopCell;

@@ -1,5 +1,5 @@
 import {
-  cellDot, clamp, closedCurve, fillPath, lerp, mulberry32, organic, pigment, roughProp, strokePath, washLayer,
+  arrow, cellDot, clamp, closedCurve, fillPath, lerp, mulberry32, organic, pigment, roughProp, strokePath, washLayer,
 } from '../shared/canvasCore.js';
 import { phase } from './scene-tools.mjs';
 
@@ -41,10 +41,10 @@ function endothelium() {
     for (let x = 10; x < 450; x += 9 + rand() * 4.5) {
       const y = edge(x) + (side ? 1.5 : -1.5);
       const angle = Math.atan2(edge(x + 2) - edge(x - 2), 4) * 180 / Math.PI;
-      cells.push(cellDot(x, y, 5.7 + rand() * 1.2, 2.3 + rand() * .6, '#D7869F', angle, .61),
+      cells.push(cellDot(x, y, 5.7 + rand() * 1.2, 2.3 + rand() * .6, '#989CB6', angle, .61),
         cellDot(x + .4, y, 3.1 + rand() * 1.6, .9 + rand() * .31, VASCULAR_NUCLEUS, angle, .73));
     }
-    return strokePath('M' + rail(edge, ...bounds).join('L'), '#A95F7E', 1.35, .83) + cells.join('');
+    return strokePath('M' + rail(edge, ...bounds).join('L'), '#687991', 1.35, .83) + cells.join('');
   }).join('');
 }
 
@@ -128,7 +128,7 @@ function vascularStroma() {
     const y = i % 2 ? outerTop(x) - 4 - rand() * 111 : outerBottom(x) + 6 + rand() * 98;
     const length = 7 + rand() * 30;
     return strokePath(`M${x} ${y} q${length * .47} ${rand() * 6 - 3} ${length} ${rand() * 8 - 4}`,
-      '#D9949F', .8 + rand() * .7, .16 + rand() * .22)
+      '#99A9B9', .8 + rand() * .7, .16 + rand() * .22)
       + (i % 4 ? '' : cellDot(x, y, 2.6 + rand() * 1.7, 1, '#8A5680', rand() * 25 - 12, .51));
   }).join('');
 }
@@ -138,12 +138,12 @@ export function veinLens({ x, y, radius }) {
   const backedUp = redCells('queued', 69, 4819);
   const outlet = redCells('outlet', 43, 8167);
   const wash = washLayer(62231, () => {
-    pigment(band(x => upper(x) - 31, x => lower(x) + 28), '#D8879A', 52,
+    pigment(band(x => upper(x) - 31, x => lower(x) + 28), '#7193AE', 65,
       { bleed: .24, texture: .8, border: .34 });
-    pigment(outside, '#D28C9D', 149, { bleed: .11, direction: 'in', border: .48, texture: .86 });
-    pigment(band(outerTop, x => upper(x) - 5), '#C17189', 122,
+    pigment(outside, '#7193AC', 149, { bleed: .11, direction: 'in', border: .48, texture: .86 });
+    pigment(band(outerTop, x => upper(x) - 5), '#6886A2', 122,
       { bleed: .10, direction: 'in', border: .54 });
-    pigment(band(x => lower(x) + 4, outerBottom), '#CE7892', 123,
+    pigment(band(x => lower(x) + 4, outerBottom), '#718BA6', 123,
       { bleed: .12, texture: .77, border: .51 });
   }, 'normal', [0, 0, 460, 257]);
   const clotDye = washLayer(17981, () => {
@@ -160,11 +160,11 @@ export function veinLens({ x, y, radius }) {
   <g clip-path="url(#s17-optic)">
     <g transform="translate(${x} ${y}) rotate(33) translate(-230 -128)">
       ${vascularStroma()}
-      ${fillPath(outside, '#F0C0C8')}${wash}
-      ${fillPath(lumen, '#FFF7F2')}
+      <path id="s17-vein-wall" d="${outside}" fill="#9CB3CA"/>${wash}
+      ${fillPath(lumen, '#EEF3F1')}
       <g clip-path="url(#s17-lumen)">
-        ${fillPath(band(upper, lower, 4, 259), '#F5C4C8', .51)}
-        <g id="s17-downstream-tint">${fillPath(band(upper, lower, 239, 456), '#F5C4C8', .49)}</g>
+        ${fillPath(band(upper, lower, 4, 259), '#D8DDE5', .58)}
+        <g id="s17-downstream-tint">${fillPath(band(upper, lower, 239, 456), '#D8DDE5', .58)}</g>
         ${[...inlet, ...backedUp, ...outlet].map(cell => cell.paint).join('')}
         <g id="s17-plug-paint">
           ${fillPath(clot, '#5E1220')}
@@ -197,6 +197,81 @@ export function veinLens({ x, y, radius }) {
       const edge = pivotX + (164 - pivotX) * width;
       updateCirculation(inlet, backedUp, outlet, p, edge, growth);
       return growth;
+    },
+  };
+}
+
+export function arteryLens({ x, y, radius }) {
+  const tissue = washLayer(66519, () => {
+    pigment(organic(226, 39, 174, 62, 813, .27, -.07, 24), '#BA6684', 133, { bleed: .20, texture: .84 });
+    pigment(organic(236, 218, 152, 57, 902, .30, .06, 23), '#BB647F', 118, { bleed: .27, texture: .83 });
+    pigment(organic(137, 70, 63, 26, 971, .33, -.12, 21), '#DFA4AE', 125, { bleed: .30, texture: .78 });
+    pigment(organic(312, 171, 53, 34, 581, .26, -.14, 19), '#A85973', 85, { bleed: .28, texture: .73 });
+  }, 'multiply', [52, 0, 352, 257]);
+  const pressure = ['M207 63 Q219 74 226 93', 'M249 198 Q240 181 234 162']
+    .map(d => arrow(d, { color: '#9A5368', size: 2.5, head: 10, opacity: .64 })).join('');
+  const red = redCells('arterial', 62, 61008);
+  const rng = mulberry32(13821);
+  const fibres = Array.from({ length: 93 }, (_, i) => {
+    const x = 95 + rng() * 271;
+    const side = i % 3 ? 1 : -1;
+    const depth = 5 + rng() * 59;
+    const id = `s17-artery-fibre-${i}`;
+    const length = 5.4 + rng() * 8.1;
+    const mark = strokePath(`M${-length} 0 q${length} -4 ${length * 2.5} .1`, '#855675', .92, .47)
+      + cellDot(0, 0, 2.9 + rng() * 3, .9 + rng() * .65, '#704A6D', -8 + rng() * 16, .72);
+    return { id, x, side, depth, mark: `<g id="${id}">${mark}</g>` };
+  });
+  const paint = `<defs><clipPath id="s17-artery-clip">
+    <circle cx="${x}" cy="${y}" r="${radius}"/>
+  </clipPath><clipPath id="s17-artery-lumen-clip"><path id="s17-artery-clip-shape"/></clipPath></defs>
+  <circle cx="${x}" cy="${y}" r="${radius}" fill="#F4E4DB"/>
+  <g clip-path="url(#s17-artery-clip)">
+    <g transform="translate(${x - 230} ${y - 128})">
+      <path id="s17-artery-tissue-top" fill="#E3B4C0"/>
+      <path id="s17-artery-tissue-bottom" fill="#DEADBC"/>
+      ${tissue}
+      ${fibres.map(fibre => fibre.mark).join('')}
+      <path id="s17-artery-wall" fill="#B94F47" stroke="#8F3C3B" stroke-width="1.6"/>
+      <path id="s17-artery-lumen" fill="#D2766F" stroke="#8D3541" stroke-width="1.35"/>
+      <g clip-path="url(#s17-artery-lumen-clip)">${red.map(cell => cell.paint).join('')}</g>
+      <g id="s17-pressure-cues">${pressure}</g>
+    </g>
+  </g>
+  ${roughProp('circle', [x, y, 2 * radius + 9], 7729, '#60473E', 2.9, .40)}
+  ${roughProp('circle', [x, y, 2 * radius + 1], 8239, '#AB8775', 1.8, .45)}`;
+  let nodes, lumenClip;
+  const axis = a => 128 + 3.3 * Math.sin((a - 230) / 48);
+  return {
+    paint,
+    mount(art) {
+      nodes = ['tissue-top', 'tissue-bottom', 'wall', 'lumen'].map(key => art.querySelector(`#s17-artery-${key}`));
+      lumenClip = art.querySelector('#s17-artery-clip-shape');
+      for (const item of [...fibres, ...red]) item.node = art.querySelector(`#${item.id}`);
+    },
+    update(p) {
+      const compression = phase(p, .19, .41);
+      const halfWidth = a => 32 - 25 * compression * Math.exp(-(((a - 230) / 62) ** 2));
+      const top = a => axis(a) - halfWidth(a);
+      const bottom = a => axis(a) + halfWidth(a);
+      const outerTop = a => top(a) - 12 - 4 * Math.cos(a / 53);
+      const outerBottom = a => bottom(a) + 12 + 4 * Math.sin(a / 62);
+      const outlines = [band(() => -8, outerTop), band(outerBottom, () => 264),
+        band(outerTop, outerBottom), band(top, bottom)];
+      nodes.forEach((node, i) => node.setAttribute('d', outlines[i]));
+      lumenClip.setAttribute('d', outlines[3]);
+      for (const { x, side, depth, node } of fibres) {
+        const wall = side > 0 ? outerBottom(x) : outerTop(x);
+        node.setAttribute('transform', `translate(${x} ${wall + side * depth}) rotate(${12 * Math.sin((x - 160) / 53) * compression})`);
+      }
+      for (const [i, cell] of red.entries()) {
+        const travelling = 97 + modulo(268 * cell.offset + 147 * p, 268);
+        const waiting = 164 + (i % 11) * 5.8 + cell.offset * 10;
+        const along = i % 3 ? lerp(travelling, waiting, .85 * compression) : travelling;
+        const across = lerp(top(along), bottom(along), cell.lane);
+        placeCell(cell, along, across, Math.sin(p * 13 + i) * 15, .80);
+      }
+      return halfWidth(230) * 2;
     },
   };
 }

@@ -1,8 +1,7 @@
 import {
   HEIGHT, WIDTH, arrow, cellDot, ease, fillPath, ink, inkLines, lerp, organic, pigment, roughProp, svgId, washLayer,
 } from './canvasCore.js';
-import { paintWatercolor } from './anatomyWatercolor.js';
-import { createRaster, drawRaster, liftWhiteMatte, logicalContext } from './detail/raster.js';
+import { createRaster, logicalContext } from './detail/raster.js';
 import { SERIF_FONT } from './fonts.js';
 
 const left = 65;
@@ -22,9 +21,9 @@ const swatches = [
   [248, '#B39A5B', 163, '灰黄', 'phlegmon'],
   [317, '#1C1719', 230, '焦黑', 'gangrene'],
 ];
-export const STAGE_DOT_X = 88;
-export const STAGE_DOT_Y = 415;
-export const STAGE_DOT_CENTERS = Object.freeze(swatches.map(([x]) => STAGE_DOT_X + dotScale * (x - swatches[0][0])));
+export const STAGE_DOT_X = 84;
+export const STAGE_DOT_Y = 135;
+export const STAGE_DOT_CENTERS = Object.freeze(swatches.map((_, i) => STAGE_DOT_X + 52 * i));
 const stageDotsTransform = y => `translate(${STAGE_DOT_X} ${y}) scale(${dotScale} 1) translate(${-swatches[0][0]} -647)`;
 const stages = [
   { y: 319, key: 'simple', label: '单纯性', wash: '#CE7E83', strength: 172 },
@@ -158,68 +157,77 @@ export function drawStageDots({ stage = 'normal', mode = 'acute', y = STAGE_DOT_
   };
 }
 
-// Both sides of a cut draw the same fixed pigment, lettering and selection mark.
+// Use the same logical coordinates for every section and rendering density.
 export function mountStageDotOverlay(root, density) {
-  const x = 52, y = STAGE_DOT_Y - 31, width = 252, height = 84;
-  const canvas = createRaster(width, height, density);
-  canvas.hidden = true;
-  Object.assign(canvas.style, { position: 'absolute', left: `${x}px`, top: `${y}px`, pointerEvents: 'none' });
+  const x = 55, y = 109, w = 210, h = 135;
+  const canvas = createRaster(w, h, density);
+  canvas.dataset.stageNavigation = '';
   canvas.setAttribute('aria-hidden', 'true');
+  Object.assign(canvas.style, { position: 'absolute', left: x + 'px', top: y + 'px', zIndex: '8', pointerEvents: 'none' });
   root.append(canvas);
   const ctx = logicalContext(canvas);
-  let baked, previous;
-  function bake() {
-    baked = createRaster(width, height, density);
-    const pigment = logicalContext(baked);
-    pigment.translate(-x, -y);
-    for (const [i, [, color]] of swatches.entries()) {
-      pigment.globalAlpha = i % 2 ? .36 : .22;
-      pigment.fillStyle = color;
-      pigment.fill(new Path2D(organic(STAGE_DOT_CENTERS[i], STAGE_DOT_Y, 16, 15, 145 + i * 69, .2)));
-    }
-    pigment.globalAlpha = 1;
-    const glaze = createRaster(width, height, density);
-    const wet = logicalContext(glaze, { willReadFrequently: true });
-    wet.translate(-x, -y);
-    paintWatercolor(wet, 5568, wash => swatches.forEach(([seed, color, strength], i) => {
-      wash(organic(STAGE_DOT_CENTERS[i], STAGE_DOT_Y, 17, 19, seed, .16), color, strength,
-        { bleed: .22, texture: .72, edge: .76 });
-    }), { blend: 'source-over' });
-    liftWhiteMatte(wet);
-    const wells = new Path2D();
-    for (const center of STAGE_DOT_CENTERS) {
-      wells.moveTo(center + 26, STAGE_DOT_Y);
-      wells.ellipse(center, STAGE_DOT_Y, 26, 25, 0, 0, 2 * Math.PI);
-    }
-    pigment.save();
-    pigment.clip(wells);
-    drawRaster(pigment, glaze, x, y);
-    pigment.restore();
-    pigment.font = `730 26px ${SERIF_FONT}`;
-    pigment.textAlign = 'center';
-    pigment.fillStyle = '#2E2924';
-    swatches.forEach(([, , , label], i) => pigment.fillText(label, STAGE_DOT_CENTERS[i], STAGE_DOT_Y + 42));
-  }
-  return ({ marker = null, opacity = 1, gray = 0 } = {}) => {
-    canvas.hidden = opacity === 0;
-    if (!opacity) return;
+  const wells = swatches.map(([seed]) => new Path2D(organic(0, 0, 11, 10.6, seed, .12)));
+  const ring = new Path2D('M12 10 Q7 17 -5 15 Q-17 12 -16 -3 Q-13 -17 4 -16 Q16 -14 16 4');
+  const warmGray = [166, 158, 148];
+  let last;
+  return ({ marker = 0, opacity = 1, gray = 0, chronic = 0 } = {}) => {
+    canvas.hidden = opacity <= 0;
     canvas.style.opacity = String(opacity);
-    canvas.style.filter = gray ? `grayscale(${gray})` : '';
-    if (!baked) bake();
-    if (previous === marker) return;
-    previous = marker;
-    ctx.clearRect(0, 0, width, height);
-    drawRaster(ctx, baked);
-    if (marker === null) return;
-    const from = Math.floor(marker);
-    const center = lerp(STAGE_DOT_CENTERS[from], STAGE_DOT_CENTERS[Math.min(from + 1, 3)], marker - from) - x;
+    canvas.dataset.marker = String(marker);
+    canvas.dataset.gray = String(gray);
+    canvas.dataset.chronic = String(chronic);
+    if (opacity <= 0) return;
+    const key = [marker, gray, chronic].join('/');
+    if (last === key) return;
+    last = key;
+    ctx.clearRect(0, 0, w, h);
+    ctx.textAlign = 'center';
+    ctx.font = '700 15px ' + SERIF_FONT;
+    const selection = Math.min(3, Math.max(0, marker ?? 0));
     const at = STAGE_DOT_Y - y;
-    ctx.strokeStyle = '#A83C31';
-    ctx.lineWidth = 2.4;
-    ctx.lineCap = 'round';
+    for (const [i, [, dye, , label]] of swatches.entries()) {
+      const weight = Math.max(0, 1 - Math.abs(selection - i));
+      const center = STAGE_DOT_CENTERS[i] - x;
+      const color = dye.slice(1).match(/../g).map((n, j) => Math.round(lerp(parseInt(n, 16), warmGray[j], gray)));
+      const paint = (alpha, lift = 0) => 'rgba(' + color.map(c => Math.round(lerp(c, 245, lift))).join(',') + ',' + alpha + ')';
+      ctx.save();
+      ctx.globalAlpha = .42 + .58 * weight;
+      ctx.translate(center, at);
+      ctx.save();
+      const size = 1 + .18 * weight;
+      ctx.scale(size, size);
+      ctx.clip(wells[i]);
+      const wash = ctx.createRadialGradient(-3, -4, 1, 2, 2, 13);
+      wash.addColorStop(0, paint(.82, .40));
+      wash.addColorStop(.63, paint(.91, .10));
+      wash.addColorStop(1, paint(.95));
+      ctx.fillStyle = wash;
+      ctx.fillRect(-13, -13, 26, 26);
+      for (let j = 0; j < 17; j++) {
+        ctx.fillStyle = paint(.13, j % 3 ? .25 : .65);
+        ctx.beginPath();
+        ctx.ellipse(Math.sin(j * 13 + i) * 10, Math.cos(j * 7 + i) * 10, 1.4, .75, j, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+      ctx.restore();
+      ctx.fillStyle = '#332A25';
+      ctx.fillText(label, 0, 24);
+      ctx.restore();
+    }
+    const center = lerp(STAGE_DOT_CENTERS[Math.floor(selection)], STAGE_DOT_CENTERS[Math.ceil(selection)], selection % 1) - x;
     ctx.save();
     ctx.translate(center, at);
-    ctx.stroke(new Path2D('M18 11 Q12 23 -8 19 Q-24 13 -21 -5 Q-15 -23 6 -20 Q22 -16 21 4'));
+    ctx.strokeStyle = gray > .5 ? '#766D63' : '#9E3F34';
+    ctx.lineWidth = 1.35;
+    ctx.lineCap = 'round';
+    ctx.stroke(ring);
+    ctx.restore();
+    ctx.save();
+    ctx.globalAlpha = chronic;
+    ctx.fillStyle = '#443D37';
+    ctx.textAlign = 'center';
+    ctx.fillText('急性期：变质 + 渗出', 105, 89);
+    ctx.fillText('慢性期：炎症刺激导致增生', 105, 118);
     ctx.restore();
   };
 }

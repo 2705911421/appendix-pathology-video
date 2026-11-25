@@ -1,7 +1,6 @@
 import { RED, clamp, lerp } from '../shared/canvasCore.js';
 import { makeCanvas } from '../shared/anatomyWatercolor.js';
 import { drawRaster, logicalContext, logicalSize, rasterScale } from '../shared/detail/raster.js';
-import { drawStageSwatch } from '../shared/leftFloatNotes.js';
 import { ruptureMist } from './rupture-mist.mjs';
 import { centeredSpecimen, histologyLens, opacity, phase, scaleAround, setTangents, tangentPair } from './scene-tools.mjs';
 
@@ -80,7 +79,6 @@ function spreadingNecrosis(destination, gangrenous, organ, rupture) {
 }
 
 export function s18() {
-  const swatch = drawStageSwatch({ stage: 'gangrene', y: 405 });
   const inflamed = centeredSpecimen({ ...specimen, id: 's18-inflamed', stage: 'phlegmon', showThrombus: true });
   const organ = centeredSpecimen({ ...specimen, id: 's18-gangrene', stage: 'gangrene', exudateBoost, showThrombus: true });
   const slide = histologyLens({ mode: 'gangrene', id: 's18-micro', ...optic });
@@ -88,13 +86,15 @@ export function s18() {
   const audit = { histology: slide.audit, optic, exudateBoost, plume: organ.audit };
   let paintInjury;
   return {
-    paint: `<g data-b06-departure>${swatch.paint}${inflamed.paint}${organ.paint}${mist.paint}</g>
+    paint: `<g data-b06-departure>${inflamed.paint}${organ.paint}${mist.paint}</g>
       <g id="s18-inset">${slide.paint}</g>`,
-    lettering: swatch.lettering + tangentPair('s18-tangents') + `
+    lettering: tangentPair('s18-tangents') + `
       <text id="s18-micro-title" class="note title" x="${optic.x}" y="167" text-anchor="middle"
         font-size="24" fill="#1F1C19">镜下：出血坏死与全层穿孔</text>
-      <text id="s18-warning" class="note" x="${optic.x}" y="715" text-anchor="middle" font-size="32"
-        fill="${RED}" style="font-weight:800">管壁穿孔可引发弥漫性腹膜炎</text>`,
+      <g id="s18-warning" class="note" fill="${RED}" text-anchor="middle" style="font-weight:800">
+        <text x="${optic.x}" y="715" font-size="31">坏死 + 继发腐败菌感染</text>
+        <text id="s18-warning-result" x="${optic.x}" y="761" font-size="31">→ 坏疽发黑 → 穿孔 / 腹膜炎</text>
+      </g>`,
     audit,
     mount(art) {
       inflamed.mount(art);
@@ -106,10 +106,10 @@ export function s18() {
       opacity(art, 's18-gangrene-body', 0);
       mist.mount(art, audit.source);
     },
-    update(art, labels, p) {
-      const front = paintInjury(p);
+    update(art, labels, p, duration) {
+      const front = paintInjury(.45 * phase(p, .16, .45));
       art.querySelector('#s18-inflamed').dataset.necroticFront = front;
-      organ.update(art, { time: Math.max(0, p - .40) * 13.5, exudateBoost });
+      organ.update(art, { time: Math.max(0, p - .40) * duration, exudateBoost });
       opacity(art, 's18-gangrene-bleed', phase(p, .407, .548));
       mist.update(p);
 
@@ -120,7 +120,8 @@ export function s18() {
       setTangents(labels, 's18-tangents', audit.source, { ...optic, radius: optic.radius * magnification },
         .87 * zoom * phase(p, .410, .56));
       opacity(labels, 's18-micro-title', phase(p, .46, .69));
-      opacity(labels, 's18-warning', phase(p, .59, .81));
+      opacity(labels, 's18-warning', phase(p, .17, .34));
+      opacity(labels, 's18-warning-result', phase(p, .48, .64));
     },
   };
 }

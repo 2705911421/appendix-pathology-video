@@ -1,22 +1,33 @@
-import { HEIGHT, WIDTH, clamp, createRaster, drawSubtitlePaper, lerp } from '../../shared/canvasCore.js';
+import { HEIGHT, STORY_ART_BOTTOM, WIDTH, clamp, createRaster, drawSubtitlePaper, lerp } from '../../shared/canvasCore.js';
 import { mountBridgePlates } from '../../shared/detail/bridgePlates.js';
 import { mountPaperBridge } from '../../shared/detail/transitionPaper.js';
 import { mountStageDotOverlay } from '../../shared/leftFloatNotes.js';
 import { ENGLISH_FONT, HAND_FONT, SANS_FONT } from '../../shared/fonts.js';
 import { displayDensity } from '../../shared/renderProfile.js';
-import { phase } from '../../shared/timelineHelper.js';
+import { cubicInOut, phase } from '../../shared/timelineHelper.js';
 import sheet from '../out/cues_s1.1-1.json';
 import { mountCaptions } from './captions.js';
 import { makeLabs } from './labs.js';
 import { makeNotes } from './notes.js';
 import { fade, makePaper, makePigments } from './paint.js';
-import { drawOpeningPatient } from './patient.js';
+import { drawOpeningPatient, drawPinnedMeal } from './patient.js';
 import { drawAnatomy } from './symptoms.js';
 import { makeTitle, swatchesAt } from './title.js';
-import { resolveCue } from './timing.js';
+import { resolveCue, timeCues } from './timing.js';
 import { brushCalls } from './watercolorCanvas.js';
 
 const CUES = sheet.cues;
+const diningCut = timeCues(CUES).cues[0].end;
+const seatTransition = .60;
+const cutHold = 1 / 15;
+
+function leaveTable(t) {
+  const relative = t - diningCut;
+  const moving = seatTransition - cutHold;
+  // Share one seated-to-leaning pose across the two sampled frames at the cut.
+  return .5 * cubicInOut((relative + seatTransition) / moving)
+    + .5 * cubicInOut((relative - cutHold) / moving);
+}
 const root = document.querySelector('#plate');
 root.style.position = 'relative';
 const density = new URLSearchParams(window.location.search).has('preview') ? .5 : displayDensity();
@@ -72,7 +83,7 @@ function storyMotion(cue, p, t) {
   const motion = {
     t,
     camera: lunchView,
-    portraitX: 920,
+    portraitX: 960,
     portraitScale: 1,
     hipY: 747,
     patientPose: { pose: 'navel_pain' },
@@ -85,6 +96,7 @@ function storyMotion(cue, p, t) {
     markings: 0,
     lock: 0,
     migration: 0,
+    peritonealSigns: 0,
     sunset: 0,
     night: 0,
     noteOpacity: 1,
@@ -98,45 +110,36 @@ function storyMotion(cue, p, t) {
   };
   if (id === 'S01') {
     motion.camera = dolly({ scale: 1, x: 0, y: 0 }, lunchView, phase(p, 0, 1));
-    motion.patientPose = { fromPose: 'eat', pose: 'navel_pain', progress: clamp((p - .13) / (.72 - .13)),
-      hasBowl: 1 - phase(p, .80, .99) };
-    const makeRoom = phase(p, .90, 1);
-    motion.portraitX = lerp(920, 690, makeRoom);
-    motion.portraitScale = lerp(1, .92, makeRoom);
-    motion.hipY += 7 * makeRoom;
   } else if (id === 'S02') {
     motion.camera = dolly(lunchView, closeView, phase(p, 0, 1));
-    motion.portraitX = 690;
-    motion.portraitScale = .92;
-    motion.hipY += 7;
     motion.sunset = phase(p, .83, 1);
-    const entry = phase(t - start, 0, .15);
-    motion.diagramOpacity = .79 + .21 * entry;
-    motion.diagramSlide = 8 * (1 - entry);
+    const entry = phase(t - start, 0, .55);
+    motion.diagramOpacity = entry;
+    motion.diagramSlide = 25 * (1 - entry);
     motion.neural = phase(p, 0, .58);
-    motion.neuralLabel = phase(p, .035, .32);
   } else if (id === 'S03') {
-    const migrate = phase(p, .15, .72);
-    motion.camera = dolly(closeView, duskView, phase(p, 0, .76));
-    motion.portraitX = 690;
+    const migrate = phase(p, .05, .35);
+    motion.camera = dolly(closeView, duskView, phase(p, 0, .27));
+    motion.portraitX = 565;
     motion.portraitScale = .92;
     // The approved renderer applies the same smoothstep to the normalized pose progress.
-    motion.patientPose = { fromPose: 'navel_pain', pose: 'rlq_acute', progress: clamp((p - .15) / (.72 - .15)) };
+    motion.patientPose = { fromPose: 'navel_pain', pose: 'rlq_acute', progress: clamp((p - .05) / .30) };
     motion.hipY += 7 + 10 * migrate;
     motion.diagramOpacity = 1;
-    motion.neural = 1 - phase(p, 0, .23);
-    motion.neuralLabel = 1 - phase(p, 0, .19);
+    motion.neural = 1 - phase(p, 0, .11);
+    motion.neuralLabel = 1 - phase(p, 0, .08);
     motion.migrating = true;
     motion.migration = migrate;
-    motion.markings = phase(p, .056, .28);
-    motion.lock = phase(p, .64, .81);
+    motion.markings = phase(p, .05, .35);
+    motion.lock = phase(p, .25, .40);
+    motion.peritonealSigns = p;
     motion.sunset = 1;
   } else {
     const hospital = id === 'S04' || id === 'B01';
     const bridge = id === 'B01';
-    const exit = bridge ? phase(p, .07, .83) : 1;
+    const exit = bridge ? phase(p, 0, .44) : 1;
     motion.camera = dolly(duskView, hospitalView, exit);
-    motion.portraitX = 690 - 56 * exit;
+    motion.portraitX = 565;
     motion.portraitScale = .92;
     motion.hipY += 17 + 11 * exit;
     motion.patientPose = { pose: 'rlq_acute' };
@@ -145,12 +148,13 @@ function storyMotion(cue, p, t) {
     motion.diagramOpacity = bridge ? 1 - exit : 0;
     motion.markings = 1;
     motion.lock = 1;
+    motion.peritonealSigns = bridge ? 1 : 0;
     motion.sunset = 1;
-    motion.night = bridge ? exit : 1;
+    motion.night = bridge ? phase(p, .02, .96) : 1;
     motion.patientOpacity = bridge ? 1 - exit : 0;
     motion.labsProgress = bridge ? 0 : p;
-    motion.labsEntry = bridge ? phase(p, .10, .89) : 1;
-    motion.chartEntry = bridge ? phase(p, .44, .94) : 1;
+    motion.labsEntry = bridge ? phase(p, .48, 1) : 1;
+    motion.chartEntry = bridge ? phase(p, .55, .97) : 1;
     motion.labsOpacity = hospital ? motion.labsEntry : 0;
     motion.noteOpacity = hospital ? 1 : 0;
     motion.titleProgress = hospital ? 0 : 1;
@@ -158,6 +162,15 @@ function storyMotion(cue, p, t) {
     if (!hospital) {
       motion.swatches = swatchesAt(1);
     }
+  }
+  if (id === 'S01' || id === 'S02') {
+    const dining = leaveTable(t);
+    const guarding = id === 'S01' ? cubicInOut((p - .38) / .32) : 1;
+    motion.portraitX = lerp(960, 565, dining);
+    motion.portraitScale = lerp(1, .92, dining);
+    motion.hipY += 7 * dining;
+    motion.patientPose = { fromPose: 'eat', pose: 'navel_pain', progress: guarding, hunch: .35 * dining,
+      eased: true, hasBowl: 1 - dining };
   }
   return motion;
 }
@@ -169,13 +182,13 @@ function ambientLight(motion) {
     pigment(ctx, 'ochre', 1110 + 115 * twilight, -195 + washY, 1026, 593));
   const cool = clamp(twilight * .83 + motion.night * .39);
   fade(ctx, cool, () => {
-    const nightAir = ctx.createRadialGradient(1558, 20, 54, 1579, 74, 1114);
+    const nightAir = ctx.createRadialGradient(1385, 272, 52, 1406, 310, 610);
     nightAir.addColorStop(0, '#2F5D7C21');
     nightAir.addColorStop(.56, '#2F5D7C14');
     nightAir.addColorStop(1, '#2F5D7C00');
     ctx.fillStyle = nightAir;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
-    fade(ctx, .055, () => pigment(ctx, 'dusk', 954 + 85 * motion.night, -309, 1332, 740));
+    fade(ctx, .055, () => pigment(ctx, 'dusk', 908 + 62 * motion.night, 43, 872, 615));
   });
 }
 
@@ -188,11 +201,19 @@ function renderFrame(t) {
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   ctx.drawImage(paper, 0, 0, WIDTH, HEIGHT);
-  ambientLight(motion);
+  const light = cue.id === 'S03' ? 1 - phase(p * cue.duration, cue.duration - .32, cue.duration)
+    : Number(cue.id !== 'B01' && cue.id !== 'S04');
+  fade(ctx, light, () => ambientLight(motion));
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, 0, WIDTH, STORY_ART_BOTTOM);
+  ctx.clip();
   ctx.save();
   view.apply(ctx);
   const portrait = drawOpeningPatient(ctx, motion, view);
   ctx.restore();
+  const bowl = drawPinnedMeal(ctx, motion);
+  if (portrait) portrait.bowl = bowl;
   const anatomy = drawAnatomy(ctx, motion, pigment);
   drawLabs(ctx, motion);
   ctx.save();
@@ -203,17 +224,19 @@ function renderFrame(t) {
   const headlineProgress = drawTitle(ctx, motion);
   ctx.restore();
   drawNotes(ctx, motion);
+  ctx.restore();
   if (cue.type === 'speech') drawSubtitlePaper(ctx);
   drawCaptions(ctx, cue, p);
   const handoff = titleBridge && bridgePlates.available;
-  // The first blush of the next specimen overlaps the thinning title wash.
-  const visible = handoff ? 1 - phase(p, .38, .86) : 1;
+  const visible = handoff ? 1 - phase(p, 0, .42) : 1;
+  const incoming = handoff ? phase(p, .48, 1) : 0;
   canvas.style.opacity = String(visible);
   paperBridge(1 - visible);
-  bridgePlates.show(handoff ? { subject: phase(p, .43, .90) } : {});
-  const marker = titleBridge ? lerp(3, 0, phase(p, .30, .85)) : cue.id === 'S05' ? 3 : motion.sunset;
-  const hospital = cue.id === 'B01' || cue.id === 'S04';
-  const dotOpacity = hospital ? 1 - phase(motion.night, .16, .53) : 1;
+  bridgePlates.show(handoff ? { subject: incoming } : {});
+  const marker = titleBridge ? lerp(3, 0, phase(p, .25, .88)) : cue.id === 'S05' ? 3
+    : cue.id === 'S03' ? phase(p, .05, .35) : cue.id === 'B01' || cue.id === 'S04' ? 1 : 0;
+  const dotOpacity = cue.id === 'B01' ? 1 - phase(p, 0, .44)
+    : cue.id === 'S04' ? 0 : cue.id === 'S05' ? phase(p, 0, .18) : 1;
   stageDots({ marker, opacity: dotOpacity });
   return {
     id: cue.id,
@@ -223,18 +246,22 @@ function renderFrame(t) {
     transition: {
       labsOpacity: motion.labsOpacity,
       patientOpacity: motion.patientOpacity,
+      diagramOpacity: motion.diagramOpacity, dotOpacity,
       noteOpacity: motion.noteOpacity,
       night: motion.night,
       labsEntry: motion.labsEntry,
       headlineProgress,
       firstSwatch: motion.swatches?.[0] ?? 0,
+      outgoing: titleBridge ? visible : 0,
+      incoming,
     },
   };
 }
 
 window.renderAt = t => {
-  const { id, p } = renderFrame(t);
-  return { id, p };
+  const { id, p, transition } = renderFrame(t);
+  const { outgoing, incoming } = transition;
+  return { id, p, outgoing, incoming };
 };
 window.anatomyAt = t => renderFrame(t).anatomy;
 window.openingPatientAt = t => renderFrame(t).portrait;

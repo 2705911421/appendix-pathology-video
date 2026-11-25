@@ -21,7 +21,7 @@ const stages = [
   ['src/index.html', 'src/main.js', '/section.js', 'src/brush-canvases.js'],
 ];
 const outgoingPlates = {
-  B02: ['subject'], B05: ['notes', 'subject'], B06: ['icon', 'subject'], B07: ['notes', 'subject'],
+  B02: ['subject'], B05: ['subject'], B06: ['subject'], B07: ['subject'],
 };
 
 export function frameBoundary(seconds, fps = renderProfile.fps) {
@@ -107,16 +107,16 @@ export async function launchBrowser() {
   }
 }
 
-export async function withStage(browser, section, profile, task) {
+export async function withStage(browser, section, profile, task, options = {}) {
   const server = await host(section);
   try {
-    return await withPage(browser, server, section, profile, task);
+    return await withPage(browser, server, section, profile, task, options);
   } finally {
     await server.close();
   }
 }
 
-async function withPage(browser, server, section, profile, task) {
+async function withPage(browser, server, section, profile, task, { initScript, onRequest } = {}) {
   let page;
   let fault;
   try {
@@ -137,6 +137,8 @@ async function withPage(browser, server, section, profile, task) {
         return (state >>> 0) / 4294967296;
       };
     }, { sheet: section.sheet, hasVoice: section.hasVoice, bridgeParts: Object.keys(section.bridgePlates ?? {}) });
+    if (initScript) await page.addInitScript(initScript);
+    if (onRequest) page.on('request', onRequest);
     page.on('pageerror', error => { fault ??= error; });
     page.on('console', message => {
       if (message.type() === 'error') fault ??= new Error(message.text());
@@ -218,7 +220,7 @@ async function screenshot(page, t) {
   return { png, cue };
 }
 
-export async function smokeSection(browser, section, id, progress, profile = renderProfile) {
+export async function smokeSection(browser, section, id, progress, profile = renderProfile, inkRegion) {
   const density = profile.deviceScaleFactor;
   const expectedWidth = profile.logicalWidth * density;
   const expectedHeight = profile.logicalHeight * density;
@@ -238,9 +240,11 @@ export async function smokeSection(browser, section, id, progress, profile = ren
     if (!canvas.length || canvas.some(([w, h]) => w !== expectedWidth || h !== expectedHeight)) {
       throw new Error(`全幅画布 backing store 异常 ${JSON.stringify(canvas)}`);
     }
-    // Exclude the subtitle strip and count pigment/ink, not the off-white paper texture.
+    // Count ink in the authored subject area above the subtitles.
     const left = 1000 * density + 1;
-    const { data, info } = await sharp(png).extract({ left, top: 600 * density + 1, width: width - left, height: 320 * density })
+    const crop = inkRegion ? Object.fromEntries(Object.entries(inkRegion).map(([key, value]) => [key, Math.round(value * density)]))
+      : { left, top: 600 * density + 1, width: width - left, height: 320 * density };
+    const { data, info } = await sharp(png).extract(crop)
       .removeAlpha().raw().toBuffer({ resolveWithObject: true });
     let ink = 0;
     let rowsWithInk = 0;
@@ -256,7 +260,7 @@ export async function smokeSection(browser, section, id, progress, profile = ren
       ink += rowInk;
       if (rowInk >= 6 * density) rowsWithInk++;
     }
-    if (ink < 350 * density ** 2 || rowsWithInk < 15 * density) throw new Error(`右下象限缺少实际笔触（${ink} 像素，${rowsWithInk} 行）`);
+    if (ink < 350 * density ** 2 || rowsWithInk < 15 * density) throw new Error(`抽检区域缺少实际笔触（${ink} 像素，${rowsWithInk} 行）`);
     const captionTop = 919 * density;
     const caption = await sharp(png).extract({ left: 0, top: Math.floor(captionTop), width, height: height - Math.floor(captionTop) })
       .removeAlpha().raw().toBuffer();
@@ -275,7 +279,7 @@ export async function smokeSection(browser, section, id, progress, profile = ren
       || xmin < 75 * density || xmax > width - 75 * density || bottom > 1060 * density)) {
       throw new Error(`双语字幕超出安全区或缺失 ${JSON.stringify(extents)}`);
     }
-    console.log(`${section.sheet.module} ${id} PASS（${width}×${height}，右下 ${ink} 着色像素，字幕横向 ${extents.map(([x, right]) => `${x}–${right}`).join(' / ')}）`);
+    console.log(`${section.sheet.module} ${id} PASS（${width}×${height}，${ink} 着色像素，字幕横向 ${extents.map(([x, right]) => `${x}–${right}`).join(' / ')}）`);
     return png;
   });
 }

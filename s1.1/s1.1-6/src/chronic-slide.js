@@ -1,7 +1,6 @@
-import { PAPER, RED, arrow, cellDot, clamp, fillPath, ink, lerp, mulberry32 } from '../../shared/canvasCore.js';
+import { RED, arrow, cellDot, clamp, fillPath, ink, lerp, mulberry32 } from '../../shared/canvasCore.js';
 import { createHistologyAsset, HISTOLOGY_DIAMETER } from '../../shared/histologyProcedural.js';
 import { phase } from '../../shared/timelineHelper.js';
-import { chronicNotes } from './chronic-specimen.js';
 import { scaleAround, settleScale, tracedInk, traceTo } from './motion.js';
 
 const center = { x: 745, y: 445 };
@@ -9,7 +8,7 @@ const charcoal = '#1F1C19';
 const blue = '#2F5D7C';
 const emergencyInk = '#A4372E';
 const focusSwitch = .56;
-const hematoxylin = '#2B0F54';
+const hematoxylin = '#2E1259';
 const cells = [
   { id: 'lymphocyte', x: 595, y: 758, start: .16, end: .34, label: '淋巴细胞', paint: lymphocyte },
   { id: 'plasma-cell', x: 855, y: 758, start: .26, end: .45, label: '浆细胞', paint: plasmaCell },
@@ -23,7 +22,7 @@ const rules = [
 ];
 
 function legendField(x, y) {
-  return `<circle cx="${x}" cy="${y}" r="34" fill="${PAPER}" stroke="#8C8276" stroke-width="1.35"/>`;
+  return `<circle cx="${x}" cy="${y}" r="38" fill="#FCF9F5" stroke="#8C8276" stroke-width="1.55"/>`;
 }
 
 function lymphocyte(x, y) {
@@ -35,23 +34,24 @@ function lymphocyte(x, y) {
       '#553379', angle * 50, .50);
   }).join('');
   return legendField(x, y) + `<g transform="translate(${x} ${y})">
-    <circle r="21.1" fill="#C0CFDF" stroke="#8196A9" stroke-width=".7"/>
-    <circle r="19.4" fill="${hematoxylin}"/>${texture}</g>`;
+    <circle r="23" fill="#C8D8EC" stroke="#8196A9" stroke-width=".7"/>
+    <circle r="19" fill="${hematoxylin}"/>${texture}</g>`;
 }
 
 function plasmaCell(x, y) {
+  const nucleusX = -13;
   const chromatin = Array.from({ length: 5 }, (_, i) => {
     const angle = i * 72 + 7;
-    const spoke = 'M2 -1.05 C4.2 -2.3 6.7 -3 8.45 -2.6 Q10.1 -.15 8.25 2.52 C6 2.78 3.1 1.7 2 1.05Z';
-    return `<g transform="translate(-6 -4.8) rotate(${angle})">${fillPath(spoke, '#2B104D')}</g>`;
+    const spoke = 'M3 -1.2 C5 -2.8 8.4 -4 10.2 -3 Q11.7 0 10.2 3.1 C7.3 3.6 5.1 2.3 3 1.2Z';
+    return `<g transform="translate(${nucleusX} 0) rotate(${angle})">${fillPath(spoke, '#230840')}</g>`;
   }).join('');
-  const halo = 'M4 -10 C11 -8 14 -2 14 4 C12 11 4 15 -2 12 C3 10 6 6 7 1 C7 -3 6 -7 4 -10Z';
-  return legendField(x, y) + `<g transform="translate(${x} ${y}) rotate(24)">
-    <ellipse rx="18.8" ry="21.7" fill="#A7B2DD" stroke="#6B6DA6" stroke-width=".85"/>
-    <ellipse rx="16.8" ry="19.9" fill="#BDC6E8"/>
-    ${fillPath(halo, '#FFFFFF')}
-    <circle cx="-6" cy="-4.8" r="10.2" fill="#70448D" stroke="#3D1D61" stroke-width="1.05"/>
-    ${chromatin}${cellDot(-6, -4.8, 1.1, .95, '#3E1D58')}</g>`;
+  const halo = 'M1 -9 C8 -10 15 -7 16 -1 C16 6 10 10 2 8 C6 5 8 3 8 0 C8 -3 6 -6 1 -9Z';
+  return legendField(x, y) + `<g transform="translate(${x} ${y})">
+    <ellipse rx="27" ry="20" fill="#BACBE6" stroke="#7883A8" stroke-width=".85"/>
+    <ellipse cx="5" cy="-2" rx="18" ry="14" fill="#D0DBEE" opacity=".45"/>
+    <g transform="translate(-1.2 0) scale(${Math.sqrt(1.5)})">${fillPath(halo, '#FFFFFF', .96)}</g>
+    <circle cx="${nucleusX}" cy="0" r="12" fill="#9D74AC" stroke="#3D1D61" stroke-width="1.15"/>
+    ${chromatin}${cellDot(nucleusX, 0, 2.6, 2.4, '#C5A0C6', 0, .88)}</g>`;
 }
 
 function operationsBoard() {
@@ -67,16 +67,15 @@ function operationsBoard() {
 }
 
 export function chronicSlide() {
-  const notes = chronicNotes();
   const view = createHistologyAsset({
     id: 's24-histology', stage: 'chronic', x: center.x - 250, y: center.y - 250,
     scale: 500 / HISTOLOGY_DIAMETER, showLayers: true,
   });
   const fibrosisPath = 'M1042 712 C1085 665 1014 585 899 581';
   return {
-    paint: notes.paint + `<g id="s24-optics">${view.paint}</g>` + cells.map(cell =>
+    paint: `<g id="s24-optics">${view.paint}</g>` + cells.map(cell =>
       `<g id="s24-${cell.id}">${cell.paint(cell.x, cell.y)}</g>`).join(''),
-    lettering: notes.lettering + `
+    lettering: `
       <text id="s24-title" class="note" x="${center.x}" y="145" font-size="28" fill="${charcoal}" text-anchor="middle"
         style="font-weight:750">慢性阑尾炎 · H&amp;E</text>
       <g id="s24-layers">${view.lettering}</g>

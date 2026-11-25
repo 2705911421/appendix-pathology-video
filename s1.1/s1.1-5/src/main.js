@@ -49,8 +49,8 @@ const captionCuts = {
   S21: [[.12, '单纯性', 'In simple appendicitis'],
     [cases[1].start, '化脓性', 'In phlegmonous appendicitis'],
     [cases[2].start, '坏疽穿孔', 'In perforated gangrenous appendicitis']],
-  S22: [[.27, '怀疑坏疽', 'Suspected gangrene'], [.52, '弥漫性腹膜炎', 'Diffuse peritonitis'],
-    [.72, '局限性脓肿', 'A localized abscess']],
+  S22: [[.28, '未穿孔者', 'Without perforation'], [.47, '怀疑坏疽', 'Suspected gangrene'],
+    [.63, '弥漫性腹膜炎', 'Diffuse peritonitis'], [.80, '局限性脓肿', 'A localized abscess']],
 };
 
 function splitCaption(text, markers) {
@@ -82,16 +82,20 @@ function renderAt(time, entryPart) {
   const { id } = cue;
   const bridge = id === 'B07';
   const active = bridge ? treatment : scenes[id];
-  const mix = bridge && bridgePlates.available ? phase(p, .23, .86) : 0;
+  const leave = bridge && bridgePlates.available ? phase(p, 0, .42) : 0;
+  const mix = bridge && bridgePlates.available ? phase(p, .48, 1) : 0;
   [diagnosis, comparison, treatment].forEach(scene => scene.show(scene === active));
-  active.setOpacity(1 - mix);
+  active.setOpacity(1 - leave);
   active.update(bridge ? 1 : p, bridge ? lastSpeech : cue);
   drawPaper(active === comparison ? 2 : 0);
-  showPaper(entryPart ? 0 : bridge ? phase(p, .28, .88) : id === 'S19' ? 1 - phase(p, 0, .10) : 0);
-  const gray = bridge ? phase(p, 0, .5) : 0;
-  const dotOpacity = bridge ? lerp(1, .55, gray) : id === 'S22' ? 1 : active === diagnosis && entryPart !== 'icon' ? .65 : 0;
-  showDots({ opacity: dotOpacity, gray });
-  bridgePlates.show(bridge ? { notes: phase(p, .16, .62), subject: mix } : {});
+  showPaper(0);
+  const gray = bridge ? phase(p, .08, .95) : 0;
+  const marker = id === 'S19' ? 0 : id === 'S20' ? phase(p, .87, 1)
+    : id === 'S21' ? 1 + phase(p, cases[1].start - .035, cases[1].start + .05)
+      + phase(p, cases[2].start - .025, cases[2].start + .05)
+      : bridge ? lerp(2, 3, gray) : 3 - phase(p, 0, .14);
+  showDots({ marker, opacity: entryPart ? 0 : 1, gray });
+  bridgePlates.show(bridge ? { subject: mix } : {});
 
   const windows = captions.get(id);
   if (!windows || entryPart) stage.setSubtitles(null, 0);

@@ -3,7 +3,7 @@
   "width": 1920,
   "height": 1080,
   "fps": 30,
-  "duration": 53.2,
+  "duration": 61,
   "cues": [
     {
       "id": "S15",
@@ -25,55 +25,61 @@
     {
       "id": "S16",
       "type": "speech",
-      "defaultDuration": 12.5,
+      "defaultDuration": 13.5,
       "start": 13,
-      "end": 25.5,
-      "zhText": "如果战火还停留在早期的单纯性阶段，中性粒细胞主要聚集在黏膜和黏膜下层，更深处的平滑肌层里，只能零星见到散在的寥寥几个。",
+      "end": 26.5,
+      "zhText": "镜下看，单纯性阑尾炎仍处于早期。中性粒细胞主要聚集在黏膜和黏膜下层。更深处可见肌层与浆膜层轻度水肿及少量中性粒细胞浸润。",
       "highlightZh": [
-        "单纯性阶段",
-        "中性粒细胞",
+        "单纯性阑尾炎",
         "黏膜和黏膜下层",
-        "平滑肌层"
+        "肌层与浆膜层",
+        "轻度水肿",
+        "少量中性粒细胞浸润"
       ],
-      "enText": "In early simple appendicitis, neutrophils gather mostly in the mucosa and submucosa, with only a few scattered in the muscularis propria."
+      "enText": "Under the microscope, simple appendicitis shows early inflammation. Neutrophils gather mostly in the mucosa and submucosa. The muscularis propria and serosa show mild edema and sparse neutrophil infiltration."
     },
     {
       "id": "S17",
       "type": "speech",
-      "defaultDuration": 12,
-      "start": 25.5,
-      "end": 37.5,
-      "zhText": "化脓波及全层时，水肿和腔内压升高可妨碍静脉回流；阑尾系膜静脉也可形成血栓，进一步损害阑尾壁的血液灌注。",
+      "defaultDuration": 17.6,
+      "start": 26.5,
+      "end": 44.1,
+      "zhText": "化脓蔓延到阑尾壁全层后，肿胀使管壁张力升高，直接压迫阑尾壁动脉。阑尾系膜静脉同时可形成血栓，堵塞回流。动静脉双重受阻，严重时可彻底切断血供，造成阑尾组织缺血、坏死。",
       "highlightZh": [
-        "化脓波及全层",
-        "静脉回流",
+        "蔓延到阑尾壁全层",
+        "管壁张力升高",
+        "阑尾壁动脉",
         "阑尾系膜静脉",
         "血栓",
-        "血液灌注"
+        "动静脉双重受阻",
+        "缺血、坏死"
       ],
-      "enText": "With transmural suppuration, edema and raised luminal pressure can impede venous drainage. A thrombus can form in a mesoappendiceal vein, further reducing perfusion of the appendiceal wall."
+      "enText": "With transmural suppuration, swelling raises tension in the appendiceal wall, directly compressing the appendiceal wall artery. A thrombus can form in the mesoappendiceal vein and block outflow. Combined arterial and venous obstruction can cut off the blood supply in severe cases, leading to appendiceal ischemia and necrosis."
     },
     {
       "id": "S18",
       "type": "speech",
-      "defaultDuration": 13.5,
-      "start": 37.5,
-      "end": 51,
-      "zhText": "灌注严重受损时，阑尾壁可出血、坏死，形成坏疽性阑尾炎；脆弱的管壁可能穿孔，脓液外漏可引发危及生命的弥漫性腹膜炎。",
+      "defaultDuration": 14.7,
+      "start": 44.1,
+      "end": 58.8,
+      "zhText": "阑尾组织坏死后，继发腐败菌感染可形成坏疽，使阑尾发黑，这是坏疽性阑尾炎的典型外观。坏疽部位的管壁容易穿孔，脓液外漏可引发弥漫性腹膜炎。",
       "highlightZh": [
-        "出血、坏死",
+        "组织坏死",
+        "继发腐败菌感染",
+        "坏疽",
+        "发黑",
         "坏疽性阑尾炎",
         "穿孔",
         "弥漫性腹膜炎"
       ],
-      "enText": "Severely reduced perfusion can cause hemorrhage and necrosis of the wall, producing gangrenous appendicitis. The weakened wall may perforate, and leaking pus can cause life-threatening diffuse peritonitis."
+      "enText": "After appendiceal tissue dies, secondary infection with putrefactive bacteria can cause gangrene. The appendix can turn black, a typical appearance in gangrenous appendicitis. The gangrenous wall is prone to perforation, and leaking pus can cause diffuse peritonitis."
     },
     {
       "id": "B06",
       "type": "bridge",
       "duration": 2.2,
-      "start": 51,
-      "end": 53.2
+      "start": 58.8,
+      "end": 61
     }
   ]
 }

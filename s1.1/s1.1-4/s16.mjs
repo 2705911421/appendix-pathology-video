@@ -1,25 +1,32 @@
 import { NS, RED, arrow, lerp } from '../shared/canvasCore.js';
 import { makeCanvas, retainedCanvas } from '../shared/anatomyWatercolor.js';
 import { logicalContext } from '../shared/detail/raster.js';
-import { HISTOLOGY_DIAMETER, SIMPLE_MUSCLE_NEUTROPHILS, drawMicroNeutrophil } from '../shared/histologyProcedural.js';
-import { histologyLens, opacity, pathologyProgress, phase, scaleAround, trace, traceMask } from './scene-tools.mjs';
+import {
+  HISTOLOGY_DIAMETER, SIMPLE_MUSCLE_NEUTROPHILS, SIMPLE_SEROSAL_NEUTROPHILS, drawMicroNeutrophil,
+} from '../shared/histologyProcedural.js';
+import { histologyLens, opacity, phase, scaleAround, trace, traceMask } from './scene-tools.mjs';
 
 const field = { x: 920, y: 465, radius: 285 };
-const example = { x: 1430, y: 700, radius: 42 };
+const example = { x: 1430, y: 753, radius: 38 };
 const microscopeScale = field.radius * 2 / HISTOLOGY_DIAMETER;
-const muscleSweep = SIMPLE_MUSCLE_NEUTROPHILS
-  .map(([x, y]) => [field.x - field.radius + x * microscopeScale, field.y - field.radius + y * microscopeScale]);
+const projectCell = ([x, y]) => [field.x - field.radius + x * microscopeScale, field.y - field.radius + y * microscopeScale];
+const muscleSweep = SIMPLE_MUSCLE_NEUTROPHILS.map(projectCell);
+const serosaSweep = SIMPLE_SEROSAL_NEUTROPHILS.map(projectCell);
+const [serosaX, serosaY] = serosaSweep.at(-1);
 const callouts = [
-  { id: 's16-upper', x: 1003, y: 405, label: '黏膜与黏膜下层聚集', color: '#1F1C19', start: .35, end: .55 },
-  { id: 's16-lower', x: 1062, y: 605, label: '平滑肌层仅散在寥寥几个', color: RED, start: .59, end: .81 },
+  { id: 's16-upper', x: 1003, y: 405, lines: ['黏膜与黏膜下层聚集'], color: '#1F1C19', start: .25, end: .48 },
+  { id: 's16-lower', x: 1062, y: 605, lines: ['肌层与浆膜层轻度水肿', '及少量中性粒细胞浸润'],
+    color: RED, start: .55, end: .72 },
+  { id: 's16-serosa', x: serosaX, y: serosaY, fromY: 634, lines: [], color: RED, start: .59, end: .76 },
 ];
 
-function leader({ id, x, y, label, color }) {
-  const route = `M1350 ${y} Q${(x + 1350) / 2} ${y - 8} ${x} ${y}`;
+function leader({ id, x, y, fromY = y, lines, color }) {
+  const route = `M1350 ${fromY} Q${(x + 1350) / 2} ${fromY - 8} ${x} ${y}`;
+  const label = lines.map((text, i) => `<tspan x="1370" dy="${i ? 37 : 0}">${text}</tspan>`).join('');
   return `<defs>${traceMask(id, route, 22)}</defs>
     <g mask="url(#${id}-mask)">${arrow(route, { color, size: 3.2, head: 11 })}</g>
-    <text id="${id}-text" class="note" x="1370" y="${y + 9}" font-size="28" fill="${color}"
-      style="font-weight:750">${label}</text>`;
+    ${label ? `<text id="${id}-text" class="note" x="1370" y="${y + 8}" font-size="31" fill="${color}"
+      style="font-weight:750">${label}</text>` : ''}`;
 }
 
 function tracedBraces(slide) {
@@ -62,6 +69,7 @@ const softFocus = `<defs>
   <g clip-path="url(#s16-field-circle)" style="mix-blend-mode:soft-light">
     <ellipse id="s16-sweep-upper" rx="98" ry="59" fill="url(#s16-lens-glow)"/>
     <ellipse id="s16-sweep-lower" rx="70" ry="51" fill="url(#s16-lens-glow)"/>
+    <ellipse id="s16-sweep-serosa" rx="51" ry="23" fill="url(#s16-lens-glow)"/>
   </g>`;
 
 function moveSweep(node, x, y, strength) {
@@ -70,16 +78,26 @@ function moveSweep(node, x, y, strength) {
   node.setAttribute('opacity', strength);
 }
 
+function sweepCells(node, positions, p, from, to) {
+  const last = positions.length - 1;
+  const travel = last * phase(p, from, to);
+  const index = Math.min(last - 1, Math.floor(travel));
+  const [x1, y1] = positions[index];
+  const [x2, y2] = positions[index + 1];
+  moveSweep(node, lerp(x1, x2, travel - index), lerp(y1, y2, travel - index),
+    .86 * phase(p, from, from + .04) * (1 - phase(p, to, to + .09)));
+}
+
 export function s16() {
-  const notes = pathologyProgress('s16-notes', 'simple');
   const slide = histologyLens({ mode: 'simple', id: 's16-he', ...field });
   const legend = cellLegend();
   return {
-    paint: notes.paint + `<g id="s16-field">${slide.paint}${softFocus}</g>` + legend.paint,
-    lettering: notes.lettering + `<text id="s16-title" class="note title" x="${field.x}" y="143"
+    paint: `<g id="s16-field">${slide.paint}${softFocus}</g>` + legend.paint,
+    lettering: `<text id="s16-title" class="note title" x="${field.x}" y="143"
       text-anchor="middle" font-size="28" fill="#1F1C19">H&amp;E 光学视野 · 单纯性</text>`
       + tracedBraces(slide) + callouts.map(leader).join('')
-      + `<text id="s16-legend-label" class="note" x="1493" y="708" font-size="24" fill="#2E2924">分叶核中性粒细胞（放大）</text>`,
+      + `<text id="s16-exudation-reference" class="note" x="1370" y="691" font-size="23" fill="#635650">渗出过程见前</text>
+        <text id="s16-legend-label" class="note" x="1483" y="761" font-size="25" fill="#2E2924">分叶核中性粒细胞（放大）</text>`,
     audit: { ...slide.audit, lens: slide.lens },
     mount(art) {
       slide.mount(art);
@@ -97,20 +115,17 @@ export function s16() {
         trace(labels, `s16-brace-${i}`, drawn);
         opacity(labels, `s16-brace-${i}-text`, phase(drawn, .46, .99));
       }
-      for (const { id, start, end } of callouts) {
+      for (const { id, start, end, lines } of callouts) {
         trace(labels, id, phase(p, start, end));
-        opacity(labels, `${id}-text`, phase(p, end - .031, end + .036));
+        if (lines.length) opacity(labels, `${id}-text`, phase(p, end - .05, end + .036));
       }
 
       const top = phase(p, .35, .59);
       moveSweep(art.querySelector('#s16-sweep-upper'), lerp(962, 1080, top), lerp(367, 439, top),
         .77 * phase(p, .355, .437) * (1 - phase(p, .555, .660)));
-      const travel = (muscleSweep.length - 1) * phase(p, .59, .847);
-      const part = Math.min(muscleSweep.length - 2, Math.floor(travel));
-      const [x1, y1] = muscleSweep[part];
-      const [x2, y2] = muscleSweep[part + 1];
-      moveSweep(art.querySelector('#s16-sweep-lower'), lerp(x1, x2, travel - part), lerp(y1, y2, travel - part),
-        .86 * phase(p, .59, .634) * (1 - phase(p, .842, .933)));
+      sweepCells(art.querySelector('#s16-sweep-lower'), muscleSweep, p, .55, .80);
+      sweepCells(art.querySelector('#s16-sweep-serosa'), serosaSweep, p, .68, .87);
+      opacity(labels, 's16-exudation-reference', phase(p, .76, .86));
 
       const emerge = phase(p, .70, .85);
       const { x, y } = example;

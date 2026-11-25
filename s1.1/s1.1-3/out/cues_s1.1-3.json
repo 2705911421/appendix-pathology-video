@@ -3,7 +3,7 @@
   "width": 1920,
   "height": 1080,
   "fps": 30,
-  "duration": 64.2,
+  "duration": 92.8,
   "cues": [
     {
       "id": "S10",
@@ -26,70 +26,87 @@
     {
       "id": "S11",
       "type": "speech",
-      "defaultDuration": 11.4,
-      "zhText": "如果阑尾腔堵塞，腔内压会升高。缺血和细菌可使黏膜坏死、脱落并形成溃疡，这种组织损伤叫作“变质”。",
+      "defaultDuration": 13.7,
+      "zhText": "在典型的梗阻—感染过程中，以粪石为主堵塞管腔，腔内压随之急剧升高。缺血与细菌感染可造成黏膜坏死、破溃、脱落并形成溃疡，这就是“变质”。",
       "highlightZh": [
+        "梗阻—感染",
+        "粪石",
         "腔内压",
         "缺血",
-        "坏死",
+        "细菌感染",
+        "黏膜坏死",
         "溃疡",
         "变质"
       ],
-      "enText": "An obstruction can raise pressure inside the appendix. Ischemia and bacteria can cause mucosal necrosis, sloughing and ulceration. This is tissue injury."
+      "enText": "In the classic obstruction-infection model, a fecalith typically blocks the lumen, causing luminal pressure to rise sharply. Ischemia and bacterial infection can lead to mucosal necrosis, breakdown and sloughing, with ulceration. This is tissue injury."
     },
     {
       "id": "S12",
       "type": "speech",
-      "defaultDuration": 13.5,
-      "zhText": "炎症使血管扩张、通透性增加，液体和蛋白外渗。分叶核中性粒细胞变形，穿过内皮间隙，化脓时可浸润全层。这些都属于“渗出”。",
+      "defaultDuration": 20.7,
+      "zhText": "组胺、缓激肽、前列腺素与趋化因子等炎症介质参与反应。血管扩张充血，通透性升高，血浆被动漏出。中性粒细胞受炎症介质与趋化因子引导，依次边集、滚动、黏附，最后以阿米巴样运动经内皮间隙游出。这是主动渗出。",
       "highlightZh": [
-        "血管扩张",
-        "通透性增加",
-        "分叶核中性粒细胞",
-        "内皮间隙",
-        "渗出"
+        "炎症介质",
+        "趋化因子",
+        "血管扩张充血",
+        "通透性升高",
+        "血浆被动漏出",
+        "边集",
+        "滚动",
+        "黏附",
+        "阿米巴样运动",
+        "主动渗出"
       ],
-      "enText": "Inflamed vessels dilate and become more permeable, allowing fluid and proteins to leak out. Neutrophils with lobed nuclei deform and cross endothelial gaps. In suppurative disease they can infiltrate the full wall. All of this is exudation."
+      "enText": "Histamine, bradykinin, prostaglandins and chemotactic factors take part in the inflammatory response. Vessels dilate and become congested and more permeable, so plasma leaks out passively. Guided by inflammatory mediators and chemotactic factors, neutrophils marginate, roll and adhere. They then actively leave through endothelial gaps by amoeboid movement."
     },
     {
       "id": "S13",
       "type": "speech",
-      "defaultDuration": 11.7,
-      "zhText": "化脓时，中性粒细胞可穿过肌层、浸润阑尾壁全层。最外面的浆膜可覆有纤维素性脓性渗出物。",
+      "defaultDuration": 24.6,
+      "zhText": "化脓性炎症时，中性粒细胞可浸润阑尾壁全层。链球菌等细菌可产生链激酶和透明质酸酶。链激酶激活纤溶酶原，促进纤维素降解；透明质酸酶可降解透明质酸。炎症可沿组织间隙迅速蔓延，穿透肌层直达浆膜。这种弥漫蔓延，就是“蜂窝织性”名称的由来。",
       "highlightZh": [
+        "化脓性炎症",
         "浸润阑尾壁全层",
+        "链球菌",
+        "链激酶",
+        "透明质酸酶",
+        "纤溶酶原",
+        "纤维素降解",
+        "组织间隙",
+        "蔓延",
         "浆膜",
-        "纤维素性脓性渗出物"
+        "蜂窝织性"
       ],
-      "enText": "In suppurative appendicitis, neutrophils can infiltrate the full wall, including muscle. The outer serosa may be coated with fibrinous-purulent exudate."
+      "enText": "In suppurative inflammation, neutrophils can infiltrate the full appendiceal wall. Bacteria such as streptococci may produce streptokinase and hyaluronidase. Streptokinase activates plasminogen, promoting fibrin breakdown. Hyaluronidase breaks down hyaluronic acid. Inflammation can spread rapidly through tissue spaces and across the muscle to the serosa. This diffuse spread is why it is called phlegmonous."
     },
     {
       "id": "B04",
       "type": "bridge",
       "duration": 2,
-      "start": 46.6,
-      "end": 48.6
+      "start": 69,
+      "end": 71
     },
     {
       "id": "S14",
       "type": "speech",
-      "defaultDuration": 13.6,
-      "zhText": "交织的纤维素丝网中，可见大量变性、坏死的中性粒细胞，也就是脓细胞。这层纤维素性脓性渗出物，使阑尾表面呈灰黄色。",
+      "defaultDuration": 19.8,
+      "zhText": "这种阑尾炎的本质是化脓性炎症。渗出物以变性、坏死的中性粒细胞为主，这些是脓细胞。脓细胞与交织成网的纤维素混在一起，共同构成纤维素性脓性渗出物。肉眼看到的，就是阑尾表面的灰黄色脓苔。",
       "highlightZh": [
-        "纤维素丝网",
+        "化脓性炎症",
         "变性、坏死的中性粒细胞",
         "脓细胞",
+        "纤维素",
         "纤维素性脓性渗出物",
-        "灰黄色"
+        "灰黄色脓苔"
       ],
-      "enText": "The fibrin mesh contains many degenerated and necrotic neutrophils, or pus cells. This fibrinous-purulent exudate gives the appendix its grayish-yellow surface."
+      "enText": "This type of appendicitis is a suppurative inflammation. The exudate consists mainly of degenerated and necrotic neutrophils, called pus cells. Pus cells mix with a mesh of fibrin to form a fibrinopurulent exudate. To the naked eye, it forms a grayish-yellow purulent coating on the appendix."
     },
     {
       "id": "B05",
       "type": "bridge",
       "duration": 2,
-      "start": 62.2,
-      "end": 64.2
+      "start": 90.8,
+      "end": 92.8
     }
   ]
 }

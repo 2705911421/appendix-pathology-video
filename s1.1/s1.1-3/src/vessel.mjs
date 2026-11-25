@@ -1,5 +1,5 @@
 import {
-  HEIGHT, RED, WIDTH, cellDot, clamp, drawRaster, drawRasterCrop, fillPath, ink, lerp, logicalContext, mulberry32, organic, round, strokePath,
+  HEIGHT, WIDTH, cellDot, clamp, drawRaster, drawRasterCrop, fillPath, ink, lerp, logicalContext, mulberry32, organic, round, strokePath,
 } from '../../shared/canvasCore.js';
 import {
   ERYTHROCYTE, columnarCell, createDiapedesisCell, endothelialCell,
@@ -16,7 +16,8 @@ const redCellCount = 28;
 const flowWidth = 2040;
 const flowMargin = 60;
 const initialVelocity = 85;
-const dilationEnd = .35;
+const dilationStart = .18;
+const dilationEnd = .43;
 const debrisNuclei = 22;
 const apical = x => 277 + 12 * Math.sin((x - 248) / 190) + 6 * Math.cos((x + 35) / 104);
 const height = x => 76 + 6 * Math.sin(x / 94) + 3 * Math.cos(x / 53);
@@ -133,19 +134,26 @@ function bloodWashes() {
 }
 
 function plasmaWashes() {
-  return paintSurface(5219, () => {
-    wash(band(x => upper(x) - 24, x => lower(x) + 17), '#D63B2F', 48,
-      { bleed: .50, texture: .91, angle: 82, border: .42 });
-    junctions.forEach((x, i) => {
-      const y = upper(x);
-      const plume = `M${x - 24} ${y + 22} C${x - 26} ${y - 28} ${x - 115} ${y - 49}
-        ${x - 137} ${y - 104} Q${x - 120} ${y - 130} ${x - 67} ${y - 77}
-        C${x - 43} ${y - 59} ${x + 40} ${y - 14} ${x + 23} ${y + 12}Z`;
-      wash(plume, '#D63B2F', 48, { bleed: .50, texture: .89, border: .4, angle: 57 + i * 19 });
-      wash(organic(x - 27, y - 37, 73, 28, 212 + i, .3, .37, 18), '#EA8C80', 53,
-        { bleed: .39, texture: .88, border: .44 });
-    });
-  });
+  const surface = createSurface();
+  const ctx = logicalContext(surface);
+  for (const [i, x] of junctions.entries()) {
+    const y = upper(x);
+    for (let layer = 0; layer < 4; layer++) {
+      const bend = (i ? 1 : -1) * (13 + layer * 4);
+      const rise = 45 + layer * 15;
+      const mist = new Path2D(`M${x - 5} ${y + 4}
+        C${x - 12} ${y - 20} ${x + bend - 19} ${y - 36} ${x + bend - 22} ${y - rise}
+        Q${x + bend + 9} ${y - rise - 12} ${x + bend + 25} ${y - rise}
+        C${x + bend + 9} ${y - 39} ${x + 9} ${y - 12} ${x + 6} ${y + 4}Z`);
+      const pigment = ctx.createLinearGradient(x, y, x + bend, y - rise);
+      pigment.addColorStop(0, 'rgba(209,153,80,.22)');
+      pigment.addColorStop(.51, 'rgba(231,187,107,.17)');
+      pigment.addColorStop(1, 'rgba(239,206,136,0)');
+      ctx.fillStyle = pigment;
+      ctx.fill(mist);
+    }
+  }
+  return surface;
 }
 
 function erythrocytes() {
@@ -274,40 +282,64 @@ function endothelium() {
 }
 
 const migrants = [
-  { gap: 0, begin: .04, crossing: .30, arrive: .75, toX: 892, toY: 352, initialX: 853, depth: 111, radius: 24, lobes: 4, seed: 229 },
-  { gap: 1, begin: .07, crossing: .40, arrive: .83, toX: 949, toY: 362, initialX: 1476, depth: 104, radius: 25, lobes: 3, seed: 442 },
-  { gap: 0, begin: .26, crossing: .53, arrive: .92, toX: 866, toY: 386, initialX: 708, depth: 153, radius: 22, lobes: 3, seed: 346 },
-  { gap: 1, begin: .28, crossing: .58, arrive: .96, toX: 981, toY: 391, initialX: 1635, depth: 144, radius: 24, lobes: 4, seed: 503 },
-  { gap: 0, begin: .46, crossing: .75, arrive: 1, toX: 923, toY: 390, initialX: 667, depth: 60, radius: 28, lobes: 4, seed: 194 },
-  { gap: 1, begin: .51, crossing: .775, arrive: 1, toX: 958, toY: 419, initialX: 1774, depth: 118, radius: 28, lobes: 3, seed: 391 },
+  { gap: 0, begin: .44, crossing: .757, arrive: .93, toX: 892, toY: 352, initialX: 660, depth: 111, radius: 24, lobes: 4, seed: 229 },
+  { gap: 1, begin: .48, crossing: .805, arrive: .96, toX: 1042, toY: 362, initialX: 934, depth: 104, radius: 25, lobes: 3, seed: 442 },
+  { gap: 0, begin: .51, crossing: .814, arrive: .97, toX: 866, toY: 386, initialX: 550, depth: 153, radius: 22, lobes: 3, seed: 346 },
+  { gap: 1, begin: .55, crossing: .874, arrive: 1, toX: 1090, toY: 391, initialX: 845, depth: 144, radius: 24, lobes: 4, seed: 503 },
+  { gap: 0, begin: .568, crossing: .884, arrive: 1, toX: 923, toY: 390, initialX: 419, depth: 60, radius: 28, lobes: 4, seed: 194 },
+  { gap: 1, begin: .61, crossing: .909, arrive: 1, toX: 1010, toY: 419, initialX: 795, depth: 118, radius: 28, lobes: 3, seed: 391 },
 ].map(cell => ({ ...cell, shape: createDiapedesisCell(cell) }));
 
 function migrantPose(cell, movement, scale, prelude) {
-  const skim = ramp(movement, cell.begin, cell.crossing - .025);
-  const reach = ramp(movement, cell.begin, cell.crossing - .08);
-  const crossing = ramp(movement, cell.crossing - .084, cell.crossing);
+  const rollStart = cell.begin + .088;
+  const adhesionStart = cell.crossing - .091;
+  const crossingStart = cell.crossing - .041;
+  const margin = ramp(movement, cell.begin, rollStart);
+  const rolling = ramp(movement, rollStart, adhesionStart);
+  const crossing = ramp(movement, crossingStart, cell.crossing);
   const departure = clamp((movement - cell.crossing) / (cell.arrive - cell.crossing));
   const release = ramp(departure, .03, .96);
   const xGap = junctions[cell.gap];
   const entrance = cell.initialX + 28 * prelude;
   const crawl = Math.sin(release * Math.PI) * Math.sin(release * 8 + cell.seed);
-  const x = lerp(entrance, xGap, skim) + (cell.toX - xGap) * release + crawl * 5;
+  const rollFrom = entrance + 70;
+  const rollTo = xGap - 11;
+  const x = lerp(entrance, rollFrom, margin) + (rollTo - rollFrom) * rolling
+    + (xGap - rollTo) * crossing + (cell.toX - xGap) * release + crawl * 5;
   const approachY = vesselAxis + (upper(x) - vesselAxis) * scale;
   const wallY = vesselAxis + (upper(xGap) - vesselAxis) * scale;
-  const upright = Math.exp(-(((movement - cell.crossing) / .074) ** 2));
+  const upright = Math.exp(-(((movement - cell.crossing) / .038) ** 2));
   const squeeze = Math.round(upright * 48) / 48;
-  const yIn = approachY + scale * lerp(cell.depth, 14, reach) * (1 - crossing);
+  const yIn = approachY + scale * lerp(cell.depth, cell.radius * .72, margin) * (1 - crossing);
   const yOut = wallY + (cell.toY - wallY) * (1 - (1 - departure) ** 2) + crawl * 3;
   return {
     squeeze, x, y: movement <= cell.crossing ? yIn : yOut,
-    angle: (1 - upright) * (13 * Math.sin(movement * 12 + cell.seed + prelude) - 13 * release),
+    angle: (1 - upright) * ((rolling * 360) % 360 + margin * 9 + 14 * crawl),
     out: movement > cell.crossing && yOut < wallY - 28,
   };
 }
 
 function integralOfDilation(p) {
-  const u = clamp(p / dilationEnd);
-  return dilationEnd * (u ** 3 - .5 * u ** 4) + Math.max(0, p - dilationEnd);
+  const span = dilationEnd - dilationStart;
+  const u = clamp((p - dilationStart) / span);
+  return span * (u ** 3 - .5 * u ** 4) + Math.max(0, p - dilationEnd);
+}
+
+const neutrophilSteps = [
+  { text: '1. 边集', x: 480, y: 219, width: 98, start: .44, path: 'M548 232 Q635 324 714 468' },
+  { text: '2. 滚动', x: 707, y: 210, width: 99, start: .53, path: 'M771 224 Q839 324 851 459' },
+  { text: '3. 黏附', x: 929, y: 223, width: 99, start: .66, path: 'M988 236 Q1002 324 1020 450' },
+  { text: '4. 阿米巴样游出（主动渗出）', x: 1200, y: 221, width: 407, start: .72,
+    path: 'M1252 233 C1254 306 1220 354 1234 433' },
+].map((step, i) => ({
+  ...step,
+  id: `s3-diapedesis-${i}`,
+  trace: inkTrail(step.path, { color: '#55443A', size: 2.15, head: 9, seed: 960 + i }),
+}));
+
+function paperNote(text, x, y, width, color = '#493A33') {
+  return `<rect x="${x - 13}" y="${y - 34}" width="${width + 25}" height="48" rx="14" fill="#F5F1E9" fill-opacity=".86"/>
+    <text class="note title" x="${x}" y="${y}" font-size="27" fill="${color}">${text}</text>`;
 }
 
 const cutFrom = woundX - 123;
@@ -334,9 +366,12 @@ export function createVascularScene(entranceTime, pixelScale = 1) {
   const congestion = bloodWashes();
   const plasma = plasmaWashes();
   const drawBlood = erythrocytes();
-  const ulcerLeader = inkTrail('M542 141 C706 151 844 200 920 345', { color: '#793E50', size: 4.5, head: 20, seed: 41 });
-  const flowLeader = inkTrail('M1368 170 C1322 226 1244 262 1180 304 C1117 348 1104 410 1040 465',
-    { color: '#77374C', size: 4.1, head: 19, seed: 154 });
+  const ulcerLeader = inkTrail('M648 141 C751 158 854 244 920 345', { color: '#793E50', size: 4.5, head: 20, seed: 41 });
+  const flowLeader = inkTrail('M1628 129 C1686 203 1575 348 1348 366 Q1281 378 1252 438',
+    { color: '#A18052', size: 1.9, head: 11, seed: 154 });
+  const mediatorGlow = [[971, 163], [1059, 205], [1119, 169], [1222, 236], [1288, 182]].map(([x, y], i) =>
+    cellDot(x, y, 13 + i % 3 * 3, 7 + i % 2 * 3, '#D9A951', (i - 2) * 13, .18)
+    + cellDot(x + 1, y, 4.4, 3.2, '#B68144', 10, .38)).join('');
   const paint = `<defs>
     <clipPath id="s3-wall-mask"><path id="s3-wall-cut"/></clipPath>
     <clipPath id="s3-lumen-mask"><path d="${lumen}"/></clipPath>
@@ -363,12 +398,18 @@ export function createVascularScene(entranceTime, pixelScale = 1) {
   let sample;
   let lastDamage;
   let lastLeader;
+  const lastStep = [];
   const lastShapes = [];
   return {
     paint,
     lettering: `
-      ${group('s3-wound-label', '<text class="note title" x="220" y="148" font-size="32" fill="#1F1C19">黏膜破溃缺损 · 变质</text><g id="s3-wound-leader"></g>')}
-      ${group('s3-exudate-label', `<text class="note title" x="1310" y="148" font-size="31" fill="#1F1C19">中性粒细胞变形游出 · <tspan fill="${RED}">渗出</tspan></text><g id="s3-exudate-leader"></g>`)}`,
+      ${group('s3-wound-label', `<text class="note title" x="325" y="148" font-size="32" fill="#1F1C19">黏膜破溃缺损 · 变质</text>
+        <text class="note" x="325" y="201" font-size="27" fill="#683E40">粪石梗阻 → 腔内压升高 → 缺血与感染</text>
+        <g id="s3-wound-leader"></g>`)}
+      ${group('s3-mediators', paperNote('组胺 / 缓激肽 / 前列腺素 / 趋化因子等炎症介质', 332, 121, 672, '#654331') + mediatorGlow)}
+      ${group('s3-exudate-label', paperNote('通透性升高 · 血浆渗出', 1360, 116, 289, '#65452E') + '<g id="s3-exudate-leader"></g>')}
+      ${neutrophilSteps.map(({ id, x, y, text, width }) =>
+        group(id, `<g id="${id}-leader"></g>${paperNote(text, x, y, width, '#24201D')}`)).join('')}`,
     mount(art, lettering) {
       mountSurface(art, 'wall-washes', washes);
       mountSurface(art, 's3-congestion', congestion);
@@ -381,7 +422,8 @@ export function createVascularScene(entranceTime, pixelScale = 1) {
         ...junctions.map((_, i) => `vessel-bridge-${i}`),
         ...wall.retract.map(({ id }) => id), ...migrants.map((_, i) => `migrant-${i}`),
       ]);
-      labelNodes = selectIds(lettering, ['s3-wound-label', 's3-exudate-label', 's3-wound-leader', 's3-exudate-leader']);
+      labelNodes = selectIds(lettering, ['s3-wound-label', 's3-exudate-label', 's3-wound-leader',
+        's3-exudate-leader', 's3-mediators', ...neutrophilSteps.flatMap(({ id }) => [id, `${id}-leader`])]);
     },
     audit() {
       return { erythrocytes: redCellCount, leukocytes: migrants.length, debrisNuclei,
@@ -426,20 +468,19 @@ export function createVascularScene(entranceTime, pixelScale = 1) {
         lastDamage = damage;
       }
       const movement = isUlcer ? 0 : p;
-      const expansion = ramp(movement, 0, dilationEnd);
+      const expansion = ramp(movement, dilationStart, dilationEnd);
       const scale = lerp(restingScale, 1, expansion);
       const slowdown = isUlcer ? 0 : .23 * integralOfDilation(p);
       const travel = (start - entranceTime + duration * (p - slowdown)) * initialVelocity;
       artNodes['s3-vessel-dilate'].setAttribute('transform', `translate(0 ${vesselAxis}) scale(1 ${scale}) translate(0 ${-vesselAxis})`);
       artNodes['s3-plasma'].setAttribute('opacity', expansion);
-      const spread = lerp(.82, 1.05, expansion) + .065 * movement;
-      artNodes['s3-plasma'].setAttribute('transform', `translate(0 ${vesselAxis}) scale(1 ${spread}) translate(0 ${-vesselAxis})`);
       drawBlood(bloodCanvas, travel, expansion);
       const poses = migrants.map(cell => migrantPose(cell, movement, scale, isUlcer ? p : 1));
-      const opening = junctions.map((_, gap) => Math.max(...migrants
+      const leakage = .16 * expansion * (1 - ramp(movement, .90, .978));
+      const opening = junctions.map((_, gap) => Math.max(leakage, ...migrants
         .filter(cell => cell.gap === gap)
-        .map(({ crossing }) => ramp(movement, crossing - .085, crossing - .025)
-          * (1 - ramp(movement, crossing + .028, crossing + .090)))));
+        .map(({ crossing }) => ramp(movement, crossing - .052, crossing - .019)
+          * (1 - ramp(movement, crossing + .014, crossing + .064)))));
       wall.retract.forEach(({ id, far, length, gap }) => {
         const tip = 1 + (wall.halfGap - .24) * (1 - opening[gap]) / length;
         artNodes[id].setAttribute('transform', `translate(${far} 0) scale(${tip} 1) translate(${-far} 0)`);
@@ -457,19 +498,29 @@ export function createVascularScene(entranceTime, pixelScale = 1) {
           lastShapes[i] = squeeze;
         }
       });
-      sample = { cueId: id, dilation: round(24 * expansion), migrated: poses.filter(pose => pose.out).length,
+      sample = { cueId: id, dilation: round(24 * expansion), plasma: expansion, leadCell: poses[0],
+        migrated: poses.filter(pose => pose.out).length,
         crossingCells: poses.filter(pose => pose.squeeze > .87 && !pose.out).length,
         clefts: opening.map((openness, i) => [junctions[i], round(lerp(.48, wall.halfGap * 2, openness))]) };
       labelNodes['s3-wound-label'].setAttribute('opacity', isUlcer ? ramp(p, .20, .37) : 0);
-      labelNodes['s3-exudate-label'].setAttribute('opacity', isUlcer ? 0 : ramp(p, .11, .25));
-      const stroke = isUlcer ? ramp(p, .28, .58) : ramp(p, .18, .35);
-      const y = isUlcer ? wound(woundX) : vesselAxis + (upper(referenceX) - vesselAxis) * scale;
+      labelNodes['s3-mediators'].setAttribute('opacity', ramp(movement, .035, .16));
+      labelNodes['s3-exudate-label'].setAttribute('opacity', ramp(movement, .24, .34));
+      const stroke = isUlcer ? ramp(p, .28, .58) : ramp(p, .27, .44);
+      const y = isUlcer ? wound(woundX) : 422;
       const key = `${id}/${stroke}/${y}`;
       if (key !== lastLeader) {
         if (isUlcer) labelNodes['s3-wound-leader'].innerHTML = ulcerLeader(stroke, 0, y - 345);
-        else labelNodes['s3-exudate-leader'].innerHTML = flowLeader(stroke, 0, y - 465);
+        else labelNodes['s3-exudate-leader'].innerHTML = flowLeader(stroke);
         lastLeader = key;
       }
+      neutrophilSteps.forEach(({ id, trace, start }, i) => {
+        const progress = ramp(movement, start, start + .058);
+        labelNodes[id].setAttribute('opacity', progress);
+        if (progress !== lastStep[i]) {
+          labelNodes[`${id}-leader`].innerHTML = trace(progress);
+          lastStep[i] = progress;
+        }
+      });
     },
   };
 }

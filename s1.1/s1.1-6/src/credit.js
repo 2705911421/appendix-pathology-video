@@ -1,22 +1,22 @@
-import { HEIGHT, PAPER, WIDTH, assertBlindReviewText } from '../../shared/canvasCore.js';
-import { phase } from '../../shared/timelineHelper.js';
-import { createRaster, logicalContext } from '../../shared/detail/raster.js';
+import { HEIGHT, WIDTH, assertBlindReviewText } from '../../shared/canvasCore.js';
+import { CREDITS_TIMING, phase } from '../../shared/timelineHelper.js';
+import { createRaster, drawRaster, logicalContext } from '../../shared/detail/raster.js';
+import { createStoryPaperSurface } from '../../shared/detail/transitionPaper.js';
 import { REFERENCES } from '../../shared/references.js';
 import { SANS_FONT } from '../../shared/fonts.js';
-import { sceneFades } from './cue-sheet.js';
 
 const font = SANS_FONT;
 const bodyX = 252;
 const bodyWidth = WIDTH - 2 * bodyX;
 const audioCredit = new Map([
-  [true, '3. 音频处理：背景音乐与音效由程序化合成，旁白使用外部交付音频。'],
-  [false, '3. 音频处理：本版使用程序化合成的钢琴配乐。'],
+  [true, '3. 音频处理：AI 语音合成旁白（统一音色）+ 纯代码程序化合成配乐与音效。'],
+  [false, '3. 音频处理：纯代码程序化合成温润钢琴配乐。'],
 ]);
 const body = [
   '本作品在创作过程中使用了生成式人工智能工具辅助，具体用途如下：',
   '1. 画面与程序化绘制：使用 p5.brush、perfect-freehand 与 flubber 生成水彩和手绘动画。解剖、组织学与 CT 画面均为示意。',
   '2. 脚本与双语字幕：使用大语言模型辅助编写与翻译，医学内容参照下列教材与文献。',
-  audioCredit.get(globalThis.__masterHasVoice) ?? '3. 音频处理：背景音乐与音效由程序化合成，旁白由语音合成工具生成。',
+  audioCredit.get(globalThis.__masterHasVoice === true),
 ];
 const title = '创作说明';
 const subheading = '主要科学依据与参考资料';
@@ -52,6 +52,7 @@ export function createCreditPlate() {
     canvas.append(fallback);
   }
   const ctx = logicalContext(canvas, { willReadFrequently: true });
+  const paper = createStoryPaperSurface();
 
   let layout;
   function prepareLayout() {
@@ -74,17 +75,18 @@ export function createCreditPlate() {
     add(subheading, bodyX, rule + 53, `720 29px ${font}`, '#1F1C19');
     y = rule + 101;
     paragraphs(references, `400 24px ${font}`, 34, 5, '#3E3934');
-    const shift = Math.round((HEIGHT - (lines.at(-1).y + 13) - 108) / 2);
+    const shift = Math.round((872 - (lines.at(-1).y + 13) - 92) / 2);
     return { lines, rule, shift };
   }
 
   return {
     canvas,
     draw(p) {
-      ctx.fillStyle = PAPER;
-      ctx.fillRect(0, 0, WIDTH, HEIGHT);
+      drawRaster(ctx, paper);
       ctx.save();
-      ctx.globalAlpha = phase(p, 0, sceneFades.creditsEnd);
+      const { duration, fadeIn, fadeOut } = CREDITS_TIMING;
+      const elapsed = p * duration;
+      ctx.globalAlpha = phase(elapsed, 0, fadeIn) * (1 - phase(elapsed, duration - fadeOut, duration));
       layout ??= prepareLayout();
       const { lines, rule, shift } = layout;
       ctx.fillStyle = '#9D7869';

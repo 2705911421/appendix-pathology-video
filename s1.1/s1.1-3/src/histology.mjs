@@ -13,6 +13,21 @@ const layers = ['管腔', '黏膜', '黏膜下', '肌层', '浆膜'];
 const lensTop = lens.y - lens.diameter / 2;
 const lensLeft = lens.x - lens.diameter / 2;
 const lensScale = lens.diameter / HISTOLOGY_DIAMETER;
+const spread = [
+  { text: '链球菌等细菌', y: 232, start: .18 },
+  { text: '链激酶 + 透明质酸酶', y: 308, start: .27, note: '链激酶激活纤溶酶原' },
+  { text: '降解纤维素与透明质酸', y: 413, start: .43 },
+  { text: '沿组织间隙迅速蔓延至浆膜', y: 491, start: .62, note: '穿透肌层 · 蜂窝织性' },
+];
+
+function spreadNotes() {
+  return spread.map(({ text, y, note }, i) => group(`he-spread-${i}`, `
+    ${i ? `<text class="note" x="1308" y="${y - 20}" text-anchor="middle" font-size="30" fill="#9C5145">↓</text>` : ''}
+    <text class="note title" x="1340" y="${y}" font-size="30" fill="${i === 3 ? RED : '#523B34'}">${text}</text>
+    ${note ? `<text class="note" x="1340" y="${y + 34}" font-size="27" fill="#443D37">${note}</text>` : ''}`)).join('')
+    + group('he-spread-reference',
+      '<text class="note" x="1340" y="586" font-size="25" fill="#443D37">渗出详细过程见前</text>');
+}
 
 function serosalNote() {
   const { x, y, width, height } = frame;
@@ -60,13 +75,15 @@ export function createHistologySequence(pixelScale = 1) {
     paint: group('he-micro-lens', micro.paint) + group('he-high-power', closeup.paint),
     lettering: group('he-layer-labels', braces.map(item => item.markup).join(''))
       + group('he-surface-note', serosalNote())
+      + spreadNotes()
       + group('he-macro-labels', closeup.lettering),
     mount(art, lettering) {
       micro.mount(art);
       closeup.mount(art, lettering);
       artNodes = selectIds(art, ['he-micro-lens', 'he-high-power']);
       labelNodes = selectIds(lettering, ['he-layer-labels', 'he-surface-note', 'he-target', 'he-target-dash',
-        'he-surface-leader', 'he-macro-labels', ...layers.flatMap((_, i) => [`he-layer-${i}`, `he-brace-${i}`])]);
+        'he-surface-leader', 'he-macro-labels', 'he-spread-reference', ...spread.map((_, i) => `he-spread-${i}`),
+        ...layers.flatMap((_, i) => [`he-layer-${i}`, `he-brace-${i}`])]);
       labelRoot = lettering;
     },
     audit() {
@@ -76,6 +93,7 @@ export function createHistologySequence(pixelScale = 1) {
         infiltrate: micro.audit.shallow + micro.audit.muscle,
         serosalPus: micro.audit.serosalPus,
         overviewFibers: micro.audit.fibrin,
+        visiblePus: closeup.audit.visiblePus, wovenFraction: closeup.audit.wovenFraction,
       };
     },
     update(cue, p) {
@@ -91,8 +109,12 @@ export function createHistologySequence(pixelScale = 1) {
       artNodes['he-high-power'].setAttribute('transform',
         `translate(${x} ${y}) scale(${size}) translate(${-detailView.x} ${-detailView.y})`);
       artNodes['he-high-power'].setAttribute('opacity', zooming ? ramp(p, .17, .62) : Number(macro));
-      const outgoingLabels = zooming ? 1 - ramp(p, 0, .48) : 1 - Number(macro);
+      const outgoingLabels = zooming ? 1 - ramp(p, 0, .21) : 1 - Number(macro);
       labelNodes['he-layer-labels'].setAttribute('opacity', outgoingLabels);
+      spread.forEach(({ start }, i) => {
+        labelNodes[`he-spread-${i}`].setAttribute('opacity', outgoingLabels * ramp(p, start, start + .10));
+      });
+      labelNodes['he-spread-reference'].setAttribute('opacity', outgoingLabels * ramp(p, .61, .73));
       labelNodes['he-macro-labels'].toggleAttribute('hidden', !macro);
       if (zooming || macro) closeup.update(labelRoot, macro ? p : 0, zooming ? ramp(p, .45, .96) : 1);
       const overview = zooming || macro ? 1 : p;

@@ -3,6 +3,7 @@ node_modules/
 .chromium*/
 .env
 .env.*
+.env*
 /out/
 *.log
 *.bak
@@ -30,3 +31,4 @@ node_modules/
 *.[pP][eE][mM]
 *.[kK][eE][yY]
 **/out/frames*/
+**/out/*audit*.png

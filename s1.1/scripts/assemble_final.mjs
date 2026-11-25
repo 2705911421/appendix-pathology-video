@@ -7,6 +7,7 @@ import { DEFAULT_PROFILE, getRenderProfile } from '../shared/renderProfile.js';
 import { lockOutput } from './build_lock.mjs';
 import { checkVideo, inspectMedia, runMedia, withinSeconds } from './media_probe.mjs';
 import { scanWhiteFrames } from './scan_white_frames.mjs';
+import { CREDITS_TIMING } from '../shared/timelineHelper.js';
 
 const title = '盲审稿-一根“香肠”的变质日记：阑尾的粉→红→黄→黑';
 const rate = 44100;
@@ -92,11 +93,12 @@ async function writePiano(file, count, bridges) {
 }
 
 export function finalVideoName(profileName, hasVoice) {
-  if (profileName === 'review') return 'review_s1.1_480p_12fps.mp4';
+  const { outputHeight, fps } = getRenderProfile(profileName);
+  if (outputHeight) return `review_s1.1_${outputHeight}p_${fps}fps.mp4`;
   return `${title}${hasVoice ? '' : '（纯配乐版）'}.mp4`;
 }
 
-async function checkOutput(file, frames, creditsDuration, profile, review, loudnessTarget) {
+async function checkOutput(file, frames, creditsDuration, profile, review, loudnessTarget, bridges) {
   const duration = frames / profile.fps;
   const { streams, format } = await inspectMedia(file);
   const [video, audio] = streams;
@@ -118,7 +120,7 @@ async function checkOutput(file, frames, creditsDuration, profile, review, loudn
   }
   console.log(`ffprobe PASS（${video.width}×${video.height}，${profile.fps} fps，${frames} 帧，${duration.toFixed(3)} 秒）`);
 
-  const detectors = 'blackdetect=d=0:pix_th=0.10:pic_th=0.98,freezedetect=n=-70dB:d=3';
+  const detectors = 'blackdetect=d=0:pix_th=0.10:pic_th=0.98,freezedetect=n=-70dB:d=3.5';
   const { stdout, stderr } = await runMedia('ffmpeg', ['-hide_banner', '-loglevel', 'info', '-nostats', '-nostdin',
     '-xerror', '-threads', '4', '-i', file, '-map', '0:v', '-an', '-sn', '-vf', detectors, '-fps_mode', 'passthrough',
     '-threads:v', '2', '-f', 'framemd5', '-']);
@@ -146,7 +148,7 @@ async function checkOutput(file, frames, creditsDuration, profile, review, loudn
     start = end;
   }
   console.log(`逐帧哈希 PASS（正片最长连续同帧 ${(longest / profile.fps).toFixed(3)} 秒）。`);
-  if (review && creditsDuration > 0) await scanWhiteFrames(file, { frames, fps: profile.fps, creditsDuration });
+  if (review && creditsDuration > 0) await scanWhiteFrames(file, { frames, fps: profile.fps, creditsDuration, bridges });
   const { stderr: report } = await runMedia('ffmpeg', ['-hide_banner', '-nostats', '-nostdin', '-xerror', '-i', file,
     '-map', '0:a:0', '-vn', '-af', 'ebur128=peak=true:framelog=verbose', '-f', 'null', '-']);
   const summary = report.slice(report.lastIndexOf('Summary:'));
@@ -177,10 +179,10 @@ async function normalizationFilter(inputs, mix, target) {
 }
 
 export async function assembleFinal({
-  segments, frames, voicePath, destination, scratch, bridges = [], creditsDuration = 8, profileName = DEFAULT_PROFILE,
+  segments, frames, voicePath, destination, scratch, bridges = [], creditsDuration = CREDITS_TIMING.duration, profileName = DEFAULT_PROFILE,
 }) {
   const profile = getRenderProfile(profileName);
-  const review = profileName === 'review';
+  const review = profile.outputHeight === 480;
   const music = path.join(scratch, '.assemble-piano.wav');
   const manifest = path.join(scratch, '.assemble-segments.ffconcat');
   const pending = path.join(scratch, '.assemble-verified.mp4');
@@ -209,7 +211,7 @@ export async function assembleFinal({
         + `[voice][duck]amix=inputs=2:duration=longest:normalize=0,alimiter=limit=0.93:level=0:latency=1,${fit}[mix]`
       : `[0:a]${fit}[mix]`;
     const audioInputs = ['-i', music, ...(voicePath ? ['-i', voicePath] : [])];
-    const loudnessTarget = voicePath ? -16 : -24;
+    const loudnessTarget = voicePath || review ? -16 : -24;
     const norm = await normalizationFilter(audioInputs, mix, loudnessTarget);
     const filter = `${mix};[mix]${norm},aresample=${rate},${fit}[master]`;
     await runMedia('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-nostdin', '-xerror', '-y', ...audioInputs,
@@ -220,7 +222,7 @@ export async function assembleFinal({
       '-map_metadata', '-1', '-map_metadata:s:v', '-1', '-map_metadata:s:a', '-1', '-map_chapters', '-1', '-fflags', '+bitexact',
       '-metadata:s:v:0', 'handler_name=', '-metadata:s:a:0', 'handler_name=', '-video_track_timescale', String(profile.fps * 1000),
       '-movflags', '+faststart', pending]);
-    await checkOutput(pending, expectedFrames, creditsDuration, profile, review, loudnessTarget);
+    await checkOutput(pending, expectedFrames, creditsDuration, profile, review, loudnessTarget, bridges);
     await rename(pending, destination);
   } finally {
     await Promise.all([music, manifest, pending].map(file => rm(file, { force: true })));

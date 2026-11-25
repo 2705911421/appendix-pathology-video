@@ -1,4 +1,4 @@
-import { HEIGHT, INK, WIDTH, createRaster, drawPreparedStorySubtitles, drawSubtitlePaper } from '../../shared/canvasCore.js';
+import { HEIGHT, INK, PAPER, STORY_ART_BOTTOM, WIDTH, createRaster, drawPreparedStorySubtitles, drawSubtitlePaper } from '../../shared/canvasCore.js';
 import { createStoryPaperSurface } from '../../shared/detail/transitionPaper.js';
 import { SERIF_FONT } from '../../shared/fonts.js';
 import { paintSurfaces } from './brush.mjs';
@@ -21,7 +21,7 @@ function shape(node) {
     path.arc(num('cx'), num('cy'), num('r'), 0, Math.PI * 2);
   } else if (node.localName === 'rect') {
     path = new Path2D();
-    path.rect(num('x'), num('y'), num('width'), num('height'));
+    path.roundRect(num('x'), num('y'), num('width'), num('height'), num('rx'));
   }
   if (!['circle', 'rect'].includes(node.localName)) paths.set(node, { d, path });
   return path;
@@ -120,8 +120,11 @@ function paintNode(ctx, root, node, pixelScale) {
     const fill = node.getAttribute('fill') ?? '#000';
     const stroke = node.getAttribute('stroke');
     if (fill !== 'none') {
+      const alpha = ctx.globalAlpha;
+      ctx.globalAlpha *= Number(node.getAttribute('fill-opacity') ?? 1);
       ctx.fillStyle = fill;
       ctx.fill(path);
+      ctx.globalAlpha = alpha;
     }
     if (stroke && stroke !== 'none') {
       ctx.strokeStyle = stroke;
@@ -147,6 +150,10 @@ export function createArtSurface(layer, pixelScale = 1) {
   return (layers, subtitles, p) => {
     ctx.setTransform(pixelScale, 0, 0, pixelScale, 0, 0);
     ctx.drawImage(paperTexture, 0, 0, WIDTH, HEIGHT);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(265, 0, WIDTH - 265, STORY_ART_BOTTOM);
+    ctx.clip();
     for (const { art, lettering, opacity = 1, scale = 1, dx = 0, dy = 0 } of layers) {
       if (opacity <= 0) continue;
       ctx.save();
@@ -157,6 +164,12 @@ export function createArtSurface(layer, pixelScale = 1) {
       }
       ctx.restore();
     }
+    const feather = ctx.createLinearGradient(265, 0, 312, 0);
+    feather.addColorStop(0, PAPER);
+    feather.addColorStop(1, PAPER + '00');
+    ctx.fillStyle = feather;
+    ctx.fillRect(265, 0, 47, STORY_ART_BOTTOM);
+    ctx.restore();
     if (subtitles) {
       drawSubtitlePaper(ctx);
       drawPreparedStorySubtitles(ctx, subtitles, p);
