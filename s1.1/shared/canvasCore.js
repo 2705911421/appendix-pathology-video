@@ -118,9 +118,19 @@ export function prepareStorySubtitles(zh, en, { splitAt, pageAt, singlePage = fa
   return { pages, breakAt };
 }
 
-export function storySubtitleAt({ pages, breakAt }, progress = 0) {
+export function storySubtitleAt({ pages, breakAt, pageEnds }, progress = 0) {
   if (!Number.isFinite(progress)) throw new TypeError('Subtitle progress must be finite');
   const current = clamp(progress);
+  if (pageEnds) {
+    const next = pageEnds.findIndex(end => current < end);
+    const index = next < 0 ? pages.length - 1 : next;
+    const start = pageEnds[index - 1] ?? 0;
+    const end = pageEnds[index];
+    const window = Math.min(.014, (end - start) / 4);
+    const enter = index === 0 ? 1 : ease((current - start) / window);
+    const leave = index === pages.length - 1 ? 1 : ease((end - current) / window);
+    return { page: pages[index], opacity: .76 + .24 * Math.min(enter, leave), offset: 0 };
+  }
   const second = pages.length > 1 && current >= breakAt;
   const enter = second ? ease((current - breakAt) / .025) : 1;
   return {

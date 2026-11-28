@@ -3,83 +3,74 @@
   "width": 1920,
   "height": 1080,
   "fps": 30,
-  "duration": 61,
+  "duration": 62,
   "cues": [
     {
       "id": "S15",
       "type": "speech",
-      "defaultDuration": 13,
+      "defaultDuration": 14.1,
       "start": 0,
-      "end": 13,
-      "zhText": "从暗红的单纯性、灰黄的化脓性，到焦黑的坏疽性，这是常见的典型演变路径。但请记住，有的病例可在早期控制，有的会迅速恶化，病程因人而异。",
+      "end": 14.1,
+      "zhText": "顺着由浅入深的脉络，急性阑尾炎常分为急性单纯性阑尾炎、急性化脓性阑尾炎和急性坏疽性阑尾炎，但并非每位患者都按序走完全程。",
       "highlightZh": [
-        "单纯性",
-        "化脓性",
-        "坏疽性",
-        "早期控制",
-        "迅速恶化",
-        "病程因人而异"
+        "急性单纯性阑尾炎",
+        "急性化脓性阑尾炎",
+        "急性坏疽性阑尾炎"
       ],
-      "enText": "Dark-red simple, grayish-yellow phlegmonous, and black gangrenous appendicitis illustrate a typical course. The course varies: some cases can be controlled early, while others worsen rapidly."
+      "enText": "From superficial to transmural, acute appendicitis is classified into acute simple, acute suppurative, and acute gangrenous appendicitis, though not every patient follows this exact sequence."
     },
     {
       "id": "S16",
       "type": "speech",
-      "defaultDuration": 13.5,
-      "start": 13,
-      "end": 26.5,
-      "zhText": "镜下看，单纯性阑尾炎仍处于早期。中性粒细胞主要聚集在黏膜和黏膜下层。更深处可见肌层与浆膜层轻度水肿及少量中性粒细胞浸润。",
+      "defaultDuration": 13.9,
+      "start": 14.1,
+      "end": 28,
+      "zhText": "早期急性单纯性阑尾炎局限于黏膜和黏膜下层伴浅表糜烂，肌层与浆膜层仅见轻度水肿及少量中性粒细胞浸润，渗出详细过程见前。",
       "highlightZh": [
-        "单纯性阑尾炎",
-        "黏膜和黏膜下层",
-        "肌层与浆膜层",
+        "急性单纯性阑尾炎",
+        "浅表糜烂",
         "轻度水肿",
         "少量中性粒细胞浸润"
       ],
-      "enText": "Under the microscope, simple appendicitis shows early inflammation. Neutrophils gather mostly in the mucosa and submucosa. The muscularis propria and serosa show mild edema and sparse neutrophil infiltration."
+      "enText": "Early acute simple appendicitis stays within the mucosa and submucosa with superficial erosion, showing only mild edema and sparse neutrophil infiltration in the muscularis and serosa."
     },
     {
       "id": "S17",
       "type": "speech",
-      "defaultDuration": 17.6,
-      "start": 26.5,
-      "end": 44.1,
-      "zhText": "化脓蔓延到阑尾壁全层后，肿胀使管壁张力升高，直接压迫阑尾壁动脉。阑尾系膜静脉同时可形成血栓，堵塞回流。动静脉双重受阻，严重时可彻底切断血供，造成阑尾组织缺血、坏死。",
+      "defaultDuration": 12.6,
+      "start": 28,
+      "end": 40.6,
+      "zhText": "进展为急性化脓性阑尾炎时，管壁张力骤增压迫阑尾壁动脉，并合并阑尾系膜静脉血栓，动静脉双重受阻，致阑尾缺血坏死。",
       "highlightZh": [
-        "蔓延到阑尾壁全层",
-        "管壁张力升高",
+        "急性化脓性阑尾炎",
         "阑尾壁动脉",
-        "阑尾系膜静脉",
-        "血栓",
+        "阑尾系膜静脉血栓",
         "动静脉双重受阻",
-        "缺血、坏死"
+        "缺血坏死"
       ],
-      "enText": "With transmural suppuration, swelling raises tension in the appendiceal wall, directly compressing the appendiceal wall artery. A thrombus can form in the mesoappendiceal vein and block outflow. Combined arterial and venous obstruction can cut off the blood supply in severe cases, leading to appendiceal ischemia and necrosis."
+      "enText": "In acute suppurative appendicitis, rising wall tension compresses mural arteries while mesoappendiceal vein thrombosis forms—dual vascular obstruction causing ischemia and necrosis."
     },
     {
       "id": "S18",
       "type": "speech",
-      "defaultDuration": 14.7,
-      "start": 44.1,
-      "end": 58.8,
-      "zhText": "阑尾组织坏死后，继发腐败菌感染可形成坏疽，使阑尾发黑，这是坏疽性阑尾炎的典型外观。坏疽部位的管壁容易穿孔，脓液外漏可引发弥漫性腹膜炎。",
+      "defaultDuration": 19.2,
+      "start": 40.6,
+      "end": 59.8,
+      "zhText": "坏死基础上继发腐败菌感染形成坏疽，阑尾才变黑成为急性坏疽性阑尾炎；坏疽常伴穿孔致弥漫性腹膜炎，但穿孔不一定伴有坏疽，急性化脓性阑尾炎也可直接破溃穿孔，二者不能画等号。",
       "highlightZh": [
-        "组织坏死",
-        "继发腐败菌感染",
-        "坏疽",
-        "发黑",
-        "坏疽性阑尾炎",
-        "穿孔",
-        "弥漫性腹膜炎"
+        "腐败菌",
+        "急性坏疽性阑尾炎",
+        "穿孔不一定伴有坏疽",
+        "急性化脓性阑尾炎"
       ],
-      "enText": "After appendiceal tissue dies, secondary infection with putrefactive bacteria can cause gangrene. The appendix can turn black, a typical appearance in gangrenous appendicitis. The gangrenous wall is prone to perforation, and leaking pus can cause diffuse peritonitis."
+      "enText": "Secondary putrefactive infection of necrotic tissue produces black acute gangrenous appendicitis. Gangrene often leads to perforation and diffuse peritonitis, yet perforation does not require gangrene—acute suppurative appendicitis can also rupture directly."
     },
     {
       "id": "B06",
       "type": "bridge",
       "duration": 2.2,
-      "start": 58.8,
-      "end": 61
+      "start": 59.8,
+      "end": 62
     }
   ]
 }

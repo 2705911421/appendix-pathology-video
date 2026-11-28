@@ -94,9 +94,9 @@ export function s16() {
   return {
     paint: `<g id="s16-field">${slide.paint}${softFocus}</g>` + legend.paint,
     lettering: `<text id="s16-title" class="note title" x="${field.x}" y="143"
-      text-anchor="middle" font-size="28" fill="#1F1C19">H&amp;E 光学视野 · 单纯性</text>`
+      text-anchor="middle" font-size="28" fill="#1F1C19">急性单纯性阑尾炎 · H&amp;E 光学视野</text>`
       + tracedBraces(slide) + callouts.map(leader).join('')
-      + `<text id="s16-exudation-reference" class="note" x="1370" y="691" font-size="23" fill="#635650">渗出过程见前</text>
+      + `<text id="s16-exudation-reference" class="note" x="1370" y="691" font-size="23" fill="#635650">渗出详细过程见前</text>
         <text id="s16-legend-label" class="note" x="1483" y="761" font-size="25" fill="#2E2924">分叶核中性粒细胞（放大）</text>`,
     audit: { ...slide.audit, lens: slide.lens },
     mount(art) {

@@ -1,4 +1,5 @@
 import { RED, inkOutline, lerp, samplePath } from '../../shared/canvasCore.js';
+import { SANS_FONT } from '../../shared/fonts.js';
 import { phase } from '../../shared/timelineHelper.js';
 import { dot, fade, fill, ink, letter, pathOf, stroke } from './paint.js';
 
@@ -214,23 +215,37 @@ function showMigration(ctx, motion, pigment, point) {
     letter(ctx, '麦氏点（压痛、反跳痛）', -88, 257, { size: 34, color: RED, weight: 700 });
     letter(ctx, '从右髂前上棘向脐量 1/3', -88, 299, { size: 27, color: umber });
   });
-  const signs = motion.peritonealSigns;
-  fade(ctx, phase(signs, .36, .49), () => {
-    ink(ctx, 'M-235 331 Q-233 363 -234 389', '#A34338', 3.3);
-    letter(ctx, '按压壁腹膜 → 压痛', -218, 347, { size: 29, color: RED, weight: 670 });
-  });
-  fade(ctx, phase(signs, .55, .70), () => {
-    letter(ctx, '突然松手牵拉 → 反跳痛', 80, 347, { size: 29, color: RED, weight: 670 });
-  });
-  fade(ctx, phase(signs, .74, .88), () => {
-    letter(ctx, '腹膜刺激征 · 提示炎症累及腹膜', -218, 389, { size: 28, color: umber, weight: 660 });
+}
+
+export function drawPeritonealSigns(ctx, { diagramOpacity, peritonealSigns }) {
+  fade(ctx, diagramOpacity * phase(peritonealSigns, .39, .53), () => {
+    ctx.beginPath();
+    ctx.roundRect(1060, 775, 720, 68, 9);
+    ctx.fillStyle = '#F4ECE3';
+    ctx.fill();
+    ink(ctx, 'M1062 783 Q1061 808 1062 835', '#C43428', 2, 1149);
+
+    let x = 1077;
+    const runs = [
+      ['腹膜刺激征 = 压痛 + ', 22, 650, '#1F1C19'],
+      ['反跳痛', 22, 800, '#C43428'],
+      [' + ', 22, 650, '#1F1C19'],
+      ['腹肌紧张', 22, 800, '#C43428'],
+      ['（核心体征）', 17, 700, '#C43428'],
+    ];
+    for (const [text, size, weight, color] of runs) {
+      letter(ctx, text, x, 801, { size, weight, color, font: SANS_FONT });
+      x += ctx.measureText(text).width;
+    }
+    letter(ctx, '单纯压痛 ≠ 腹膜刺激征 ｜ 麦氏点压痛伴反跳痛（松手牵拉腹膜）→ 提示累及腹膜',
+      1077, 827, { size: 19, weight: 500, color: '#4E4740', font: SANS_FONT });
   });
 }
 
 export function drawAnatomy(ctx, motion, pigment) {
   if (motion.diagramOpacity <= .001) return null;
   const x = center.x + motion.diagramSlide;
-  const y = center.y;
+  const y = center.y - motion.diagramLift;
   const painCenter = motion.migrating ? routeAt(motion.migration) : U;
   fade(ctx, motion.diagramOpacity, () => {
     ctx.translate(x, y);

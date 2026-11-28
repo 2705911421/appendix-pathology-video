@@ -3,13 +3,13 @@ import { centeredSpecimen, opacity, phase, scaleAround, trace, traceMask } from 
 
 const cy = 430;
 const types = [
-  { x: 590, stage: 'simple', title: '暗红 · 单纯性', note: '充血水肿', start: 0 },
-  { x: 1100, stage: 'phlegmon', title: '灰黄 · 化脓性', note: '纤维素性脓性渗出', start: .12 },
-  { x: 1610, stage: 'gangrene', title: '焦黑 · 坏疽性', note: '出血坏死', start: .26 },
+  { x: 590, stage: 'simple', title: '暗红 · 急性单纯性阑尾炎', note: '充血水肿', start: 0 },
+  { x: 1100, stage: 'phlegmon', title: '灰黄 · 急性化脓性阑尾炎', note: '纤维素性脓性渗出', start: .12 },
+  { x: 1610, stage: 'gangrene', title: '焦黑 · 急性坏疽性阑尾炎', note: '出血坏死', start: .26 },
 ];
 
 const alternatives = [
-  { name: 'control', d: 'M654 261 C723 250 739 148 855 132 Q954 117 1090 130',
+  { name: 'control', d: 'M725 261 C799 250 832 150 912 132 Q988 116 1090 130',
     head: 'M1077 124 L1090 130 L1076 134', x: 1109, y: 138, align: 'start', text: '部分早期可及时控制' },
   { name: 'rapid', d: 'M676 574 C740 680 929 693 1125 676 C1301 659 1470 659 1610 695',
     head: 'M1597 686 L1610 695 L1594 696', x: 1610, y: 727, align: 'middle', text: '部分可迅速恶化' },

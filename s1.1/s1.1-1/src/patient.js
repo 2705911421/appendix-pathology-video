@@ -2,10 +2,12 @@ import { drawMinimalPatient, drawSeatedMeal, PORTRAIT_LAYER } from '../../shared
 import { fade } from './paint.js';
 
 const portraitScale = 1.81;
+export const SEATED_PORTRAIT_SCALE = .81;
 
 export function drawPinnedMeal(ctx, motion) {
-  return drawSeatedMeal(ctx, { x: 960, y: 735 - PORTRAIT_LAYER.waist * portraitScale,
-    scale: portraitScale, opacity: motion.patientPose.hasBowl ?? 0, seconds: motion.t });
+  const scale = portraitScale * SEATED_PORTRAIT_SCALE;
+  return drawSeatedMeal(ctx, { x: 960, y: 735 - PORTRAIT_LAYER.waist * scale,
+    scale, opacity: motion.patientPose.hasBowl ?? 0, seconds: motion.t });
 }
 
 export function drawOpeningPatient(ctx, motion, view) {

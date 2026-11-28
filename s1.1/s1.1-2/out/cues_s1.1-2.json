@@ -3,64 +3,62 @@
   "width": 1920,
   "height": 1080,
   "fps": 30,
-  "duration": 40.5,
+  "duration": 46,
   "cues": [
     {
       "id": "S06",
       "type": "speech",
-      "defaultDuration": 8,
-      "zhText": "正常阑尾起自盲肠后内侧，是一根粉白、细长的盲管，通常只有几毫米粗。",
+      "defaultDuration": 7.3,
+      "zhText": "正常状态下，藏在盲肠盲端的阑尾呈柔和粉白色，壁薄柔软，表面光滑。",
       "highlightZh": [
-        "盲肠后内侧",
-        "粉白",
-        "细长的盲管"
+        "盲肠盲端",
+        "粉白色"
       ],
-      "enText": "The normal appendix arises from the posteromedial cecum. It is a slender, pale-pink, blind-ended tube, usually only a few millimeters across."
+      "enText": "Normally, tucked at the blind end of the cecum, the appendix is soft, thin-walled, smooth, and pale pink."
     },
     {
       "id": "S07",
       "type": "speech",
-      "defaultDuration": 8.2,
-      "zhText": "术中看到的阑尾肿胀增粗、通体暗红。浆膜血管扩张充血，交织起来像烧红的铁丝网。",
+      "defaultDuration": 10.7,
+      "zhText": "一旦发炎，阑尾壁迅速充血水肿而肿胀，浆膜面毛细血管像一张烧红的铁丝网爬满表面，整体转为暗红。",
       "highlightZh": [
-        "肿胀增粗",
-        "通体暗红",
-        "扩张充血",
-        "烧红的铁丝网"
+        "充血水肿",
+        "烧红的铁丝网",
+        "暗红"
       ],
-      "enText": "At surgery, the appendix is swollen and dark red. Its dilated, congested serosal vessels form a network like red-hot wire mesh."
+      "enText": "Once inflamed, the wall swells rapidly with congestion and edema; serosal capillaries spread like red-hot wire mesh, turning the appendix dark red."
     },
     {
       "id": "S08",
       "type": "speech",
-      "defaultDuration": 10.1,
-      "zhText": "暗红的浆膜面还覆有灰黄色脓苔。这正是急性化脓性阑尾炎，也就是急性蜂窝织性阑尾炎的外现特征。",
+      "defaultDuration": 12.9,
+      "zhText": "炎症加剧后，肿胀的阑尾更粗硬，表面覆上一层灰黄色脓苔——这正是急性化脓性阑尾炎，又称急性蜂窝织性阑尾炎的外观特征。",
       "highlightZh": [
         "灰黄色脓苔",
         "急性化脓性阑尾炎",
         "急性蜂窝织性阑尾炎",
-        "外现特征"
+        "外观特征"
       ],
-      "enText": "The dark-red serosa is coated in grayish-yellow pus. This is a characteristic external manifestation of acute suppurative (phlegmonous) appendicitis."
+      "enText": "As inflammation intensifies, the swollen appendix stiffens under a turbid gray-yellow purulent coat—the gross external appearance of acute suppurative, also called acute phlegmonous, appendicitis."
     },
     {
       "id": "S09",
       "type": "speech",
-      "defaultDuration": 11.7,
-      "zhText": "沿虚线纵切，见水肿增厚的管壁和积脓的窄腔。有时可见阻塞管腔的粪石。再到镜下看看。",
+      "defaultDuration": 12.6,
+      "zhText": "之所以呈现这一外观，是因为阑尾壁各层浸润大量中性粒细胞，使阑尾壁在肉眼下明显肿胀，外表面覆盖一层灰黄色脓苔。",
       "highlightZh": [
-        "水肿增厚",
-        "积脓",
-        "粪石"
+        "阑尾壁各层",
+        "大量中性粒细胞",
+        "灰黄色脓苔"
       ],
-      "enText": "The cut along the dashed line exposes an edematous, thick wall and a narrow, pus-filled lumen. An obstructing fecalith may be present. Let's look under the microscope."
+      "enText": "This gross appearance arises because dense neutrophils infiltrate all layers of the appendiceal wall, causing visible swelling and a gray-yellow purulent coat on the surface."
     },
     {
       "id": "B03",
       "type": "bridge",
       "duration": 2.5,
-      "start": 38,
-      "end": 40.5
+      "start": 43.5,
+      "end": 46
     }
   ]
 }

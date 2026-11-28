@@ -184,7 +184,7 @@ export function axialComparison(stage, cases) {
     guide.setAttribute('stroke-dashoffset', -(2.8 * elapsed % 13));
     guide.setAttribute('opacity', .72 + .06 * breath);
 
-    notes.forEach((group, i) => group.toggleAttribute('hidden', i !== current));
+    notes.forEach((group, i) => group.toggleAttribute('hidden', i !== current || noteOpacity === 0));
     notes[current].setAttribute('opacity', noteOpacity);
   };
 }

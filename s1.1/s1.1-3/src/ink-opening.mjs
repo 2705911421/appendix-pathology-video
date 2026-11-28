@@ -144,8 +144,8 @@ export function createInkOpening() {
       + group('opening-flame', flame(), 'data-paint-cache=""') + group('opening-diagrams', diagrams.paint)),
     lettering: `<g id="opening-branches"><g id="opening-left-trail"></g><g id="opening-right-trail"></g>
       ${concept('opening-left', 510, '#1F1C19', '变质', '细胞变性、坏死与破溃')}
-      ${concept('opening-right', 1410, RED, '渗出', '血管扩张、血浆与白细胞游出')}
-      <text class="note title" x="325" y="105" font-size="26" fill="#2A2622">急性阑尾炎始终以变质、渗出为主</text>
+      ${concept('opening-right', 1410, RED, '渗出', '血管扩张、血浆漏出、白细胞游出')}
+      <text class="note title" x="325" y="105" font-size="26" fill="#2A2622">阑尾炎的本质主要是炎症</text>
       ${ink('M326 122 Q385 123 442 120', { color: '#826E5F', size: 1.6, opacity: .43, seed: 66 })}</g>`,
     mount(art, lettering) {
       mountSurface(art, 'opening-verm-canvas', vermilion);

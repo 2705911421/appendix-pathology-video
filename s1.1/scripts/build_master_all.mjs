@@ -166,7 +166,7 @@ async function buildMaster(requested, profileName, force) {
   try {
     const { bsize, bavail } = await statfs(output);
     const freeGiB = bsize * bavail / gib;
-    const reserve = profileName === 'master' ? 10 : 1;
+    const reserve = profileName === 'master' ? 10 : profileName === 'teammate_1080p36' ? 3 : 1;
     if (freeGiB < reserve) throw new Error(`输出磁盘可用 ${freeGiB.toFixed(1)} GiB，${profileName} 档需要至少 ${reserve} GiB。`);
     const source = await readCueSheets();
     const inputs = await findExternalInputs(source.cues, { allowEmpty: true });
@@ -183,12 +183,19 @@ async function buildMaster(requested, profileName, force) {
       return section.sheet.cues.filter(cue => cue.type === 'bridge')
         .map(({ id, start, end }) => ({ id, start: origin + start, end: origin + end }));
     });
+    const ctSection = sections[4];
+    const ctOrigin = ctSection.startFrame / profile.fps - ctSection.samplingOffset;
+    const assessment = ctSection.sheet.cues.find(({ id }) => id === 'S20');
+    const comparison = ctSection.sheet.cues.find(({ id }) => id === 'S21');
+    // The dip through paper retains the four navigation marks near the cut.
+    const inkAnchors = [...bridges, { id: 'S20-S21', start: ctOrigin + assessment.end - .04 * assessment.duration,
+      end: ctOrigin + comparison.start + .02 * comparison.duration }];
     const workers = getWorkers(requested, profileName);
     console.log(`${profileName} 档位，总计 ${frames} 帧，${workers} 路并发（内存 ${(totalmem() / gib).toFixed(1)} GiB）。`);
     const scratch = path.join(output, '.render-cache', profileName);
     const segments = await renderAll(sections, scratch, workers, profile, version.split('\n')[0].trim(), force);
     const destination = path.join(output, finalVideoName(profileName, Boolean(voicePath)));
-    await assembleFinal({ segments, frames, voicePath, destination, scratch, bridges,
+    await assembleFinal({ segments, frames, voicePath, destination, scratch, bridges, inkAnchors,
       creditsDuration: credits.duration, profileName });
     console.log(`${profileName} ${frames} 帧，${(frames / profile.fps).toFixed(3)} 秒\n${destination}`);
   } finally {

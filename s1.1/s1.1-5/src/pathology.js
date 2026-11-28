@@ -5,11 +5,17 @@ import { sheet } from './cue-sheet.js';
 import { appear, CINNABAR, inkMask, label, penProgress, reveal, SOFT_INK } from './scene-tools.js';
 
 export const cases = [
-  { stage: 'simple', title: '单纯性', colorName: '暗红', start: 0,
+  { stage: 'simple', title: '急性单纯性阑尾炎', start: 0,
+    zh: '增强CT上三型各有线索：急性单纯性阑尾炎仅轻度增粗、脂肪清晰；',
+    en: 'Contrast CT reveals distinct clues: mild thickening with clean fat in acute simple appendicitis;',
     lines: ['阑尾轻度增粗 · 薄壁轻度均匀强化', '周围脂肪间隙清晰'] },
-  { stage: 'phlegmon', title: '化脓性', colorName: '灰黄', start: .33,
+  { stage: 'phlegmon', title: '急性化脓性阑尾炎', start: .32,
+    zh: '急性化脓性阑尾炎见双环靶征、偏心粪石与脂肪条索；',
+    en: 'target sign, eccentric fecalith, and fat stranding in acute suppurative appendicitis;',
     lines: ['双环靶征 · 厚壁强化、偏心粪石', '周围非对称斑片状脂肪条索'] },
-  { stage: 'gangrene', title: '坏疽穿孔', colorName: '焦黑', start: .68,
+  { stage: 'gangrene', title: '急性坏疽性阑尾炎', qualifier: '伴穿孔', start: .65,
+    zh: '急性坏疽性阑尾炎伴穿孔时，见管壁强化缺损、盲肠旁脓肿及游离气体。',
+    en: 'wall enhancement defect, periappendiceal abscess, and free air in perforated acute gangrenous appendicitis.',
     lines: ['强化管壁局部缺损 · 提示坏死', '盲肠旁脓肿与腔外游离气泡'] },
 ];
 
@@ -20,9 +26,10 @@ function specimen({ cx, cy, scale, ...appearance }) {
   });
 }
 
-const steps = [916, 1120, 1324];
+const steps = [886, 1170, 1454];
 const inactive = '#6D655B';
-const halfDissolve = .02;
+const halfDissolve = .01;
+const labelFade = .025;
 const gangreneStart = cases[2].start;
 const comparisonCue = sheet.cues.find(cue => cue.id === 'S21');
 const carryTime = (comparisonCue.end - comparisonCue.start) * (1 - gangreneStart);
@@ -33,12 +40,12 @@ function studyAt(p) {
   const stop = cases[current + 1]?.start ?? Infinity;
   const [second, third] = cases.slice(1).map(study =>
     appear(p, study.start - halfDissolve, study.start + halfDissolve));
-  const opacity = stop === Infinity ? 1 : 1 - appear(p, stop - halfDissolve, stop);
+  const noteIn = current === 0 ? 1 : appear(p, start + halfDissolve, start + labelFade);
+  const noteOut = stop === Infinity ? 1 : 1 - appear(p, stop - labelFade, stop - halfDissolve);
   return {
     current,
     weights: [1 - second, second - third, third],
-    noteOpacity: (current === 0 ? .82 + .18 * appear(p, start, start + .028) : appear(p, start, start + .028)) * opacity,
-    drawIn: appear(p, start, start + .14),
+    noteOpacity: noteIn * noteOut,
   };
 }
 
@@ -49,16 +56,17 @@ export function comparisonScene(stage) {
     <g style="isolation:isolate">${organs.map(({ paint }, i) => `<g data-gross-stage="${i}" ${lighter}>${paint}</g>`).join('')}</g>`);
   const type = stage.lettering(`
     ${label('病理大体示意', 490, 217, { size: 26 })}
-    ${label('→', 1018, 115, { size: 25, fill: inactive, weight: 550 })}
-    ${label('→', 1222, 115, { size: 25, fill: inactive, weight: 550 })}
-    ${cases.map(({ title }, i) => `<g data-step="${i}">
-      ${label(title, steps[i], 115, { size: 26, fill: inactive, weight: 550 })}
+    ${steps.slice(1).map((x, i) => label('→', (steps[i] + x) / 2, 115,
+      { size: 25, fill: inactive, weight: 550 })).join('')}
+    ${cases.map(({ title, qualifier }, i) => `<g data-step="${i}">
+      ${label(title, steps[i], 115, { size: 24, fill: inactive, weight: 550 })}
+      ${qualifier ? label(qualifier, steps[i], 159, { size: 18, fill: inactive, weight: 550 }) : ''}
     </g>`).join('')}
     <path data-step-line fill="none" stroke="${CINNABAR}" stroke-width="2.6" stroke-linecap="round"/>`);
   const updateCt = axialComparison(stage, cases);
   const groups = [...art.querySelectorAll('[data-gross-stage]')];
   organs.forEach((organ, i) => organ.mount(groups[i]));
-  const headings = [...type.querySelectorAll('[data-step] text')];
+  const headings = [...type.querySelectorAll('[data-step] text:first-child')];
   const line = type.querySelector('[data-step-line]');
 
   return (p, cue) => {
@@ -78,8 +86,9 @@ export function comparisonScene(stage) {
     }
     updateCt({ ...state, elapsed: p * duration, visibility: 1 });
     const center = steps.reduce((value, x, i) => value + x * weights[i], 0);
-    const span = 47 + 28 * appear(p, 0, .15) + 2.2 * Math.sin(p * Math.PI * 6);
+    const span = 146 + 42 * appear(p, 0, .15) + 2.2 * Math.sin(p * Math.PI * 6);
     line.setAttribute('d', `M${center - span / 2} 128 Q${center} 123 ${center + span / 2} 127`);
+    return { current, marker: 1 + weights[1] + 2 * weights[2] };
   };
 }
 
@@ -116,21 +125,25 @@ export function treatmentScene(stage) {
 
   const type = stage.lettering(`
     <g data-treatment-heading>
-      ${label('疑似急性蜂窝织性阑尾炎', center, 182, { size: 33 })}
-      ${label('先评估有无坏疽、穿孔或腹膜炎', center, 233, { size: 28, fill: SOFT_INK, weight: 640 })}
+      ${label('疑似急性化脓性阑尾炎', center, 182, { size: 33 })}
+      ${label('先评估有无急性坏疽性阑尾炎、穿孔或腹膜炎', center, 233,
+        { size: 25, fill: SOFT_INK, weight: 640 })}
     </g>
     <g data-unperforated>
-      ${label('未穿孔者 → 结合临床评估', center, 368, { size: 32, fill: '#2F5D7C', weight: 810 })}
+      ${label('未穿孔的急性化脓性阑尾炎', center, 368, { size: 32, fill: '#2F5D7C', weight: 810 })}
       ${label('通常以尽早手术切除为主', center, 414, { size: 28, fill: '#2F5D7C', weight: 690 })}
     </g>
-    <g data-treatment-question>${label('怀疑坏疽或穿孔 → 尽快外科评估', center, 523,
-      { size: 32, fill: CINNABAR, weight: 810 })}</g>
+    <g data-treatment-question>${label('怀疑急性坏疽性阑尾炎或穿孔 → 尽快外科评估', center, 523,
+      { size: 26, fill: CINNABAR, weight: 810 })}</g>
     <g data-urgency="0">${label('弥漫性腹膜炎：通常需紧急手术', center, 602,
       { size: 30, fill: CINNABAR, weight: 790 })}</g>
     <g data-urgency="1">${label('局限性脓肿：可视情况先抗感染，必要时引流', center, 668,
       { size: 26, fill: '#4E4137', weight: 690 })}</g>
-    <g data-specimen-label="0">${label('急性蜂窝织性阑尾炎', 520, 714, { size: 26, fill: '#2F5D7C' })}</g>
-    <g data-specimen-label="1">${label('坏疽穿孔（焦黑）', 875, 714, { size: 26, fill: CINNABAR })}</g>`);
+    <g data-specimen-label="0">${label(cases[1].title, 520, 714, { size: 26, fill: '#2F5D7C' })}</g>
+    <g data-specimen-label="1">
+      ${label(cases[2].title, 875, 714, { size: 26, fill: CINNABAR })}
+      ${label(cases[2].qualifier, 875, 747, { size: 20, fill: CINNABAR, weight: 650 })}
+    </g>`);
 
   const views = [...art.querySelectorAll('[data-specimen]')];
   specimens.forEach((organ, i) => organ.mount(views[i]));

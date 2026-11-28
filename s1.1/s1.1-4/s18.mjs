@@ -2,10 +2,10 @@ import { RED, clamp, lerp } from '../shared/canvasCore.js';
 import { makeCanvas } from '../shared/anatomyWatercolor.js';
 import { drawRaster, logicalContext, logicalSize, rasterScale } from '../shared/detail/raster.js';
 import { ruptureMist } from './rupture-mist.mjs';
+import { acuteSpecimenPlacement } from './s17.mjs';
 import { centeredSpecimen, histologyLens, opacity, phase, scaleAround, setTangents, tangentPair } from './scene-tools.mjs';
 
 const optic = { x: 1515, y: 415, radius: 215 };
-const specimen = { cx: 760, cy: 475, scale: 1.28 };
 const exudateBoost = 1.48;
 
 function perforationSource(art, organ) {
@@ -79,8 +79,8 @@ function spreadingNecrosis(destination, gangrenous, organ, rupture) {
 }
 
 export function s18() {
-  const inflamed = centeredSpecimen({ ...specimen, id: 's18-inflamed', stage: 'phlegmon', showThrombus: true });
-  const organ = centeredSpecimen({ ...specimen, id: 's18-gangrene', stage: 'gangrene', exudateBoost, showThrombus: true });
+  const inflamed = centeredSpecimen({ ...acuteSpecimenPlacement, id: 's18-inflamed', stage: 'phlegmon', showThrombus: true });
+  const organ = centeredSpecimen({ ...acuteSpecimenPlacement, id: 's18-gangrene', stage: 'gangrene', exudateBoost, showThrombus: true });
   const slide = histologyLens({ mode: 'gangrene', id: 's18-micro', ...optic });
   const mist = ruptureMist();
   const audit = { histology: slide.audit, optic, exudateBoost, plume: organ.audit };
@@ -89,11 +89,20 @@ export function s18() {
     paint: `<g data-b06-departure>${inflamed.paint}${organ.paint}${mist.paint}</g>
       <g id="s18-inset">${slide.paint}</g>`,
     lettering: tangentPair('s18-tangents') + `
-      <text id="s18-micro-title" class="note title" x="${optic.x}" y="167" text-anchor="middle"
+      <text id="s18-seam-title" class="note title" x="${optic.x}" y="129" text-anchor="middle" font-size="32" fill="#1F1C19">急性坏疽性阑尾炎</text>
+      <text id="s18-micro-title" class="note" x="${optic.x}" y="167" text-anchor="middle"
         font-size="24" fill="#1F1C19">镜下：出血坏死与全层穿孔</text>
       <g id="s18-warning" class="note" fill="${RED}" text-anchor="middle" style="font-weight:800">
         <text x="${optic.x}" y="715" font-size="31">坏死 + 继发腐败菌感染</text>
-        <text id="s18-warning-result" x="${optic.x}" y="761" font-size="31">→ 坏疽发黑 → 穿孔 / 腹膜炎</text>
+        <text id="s18-warning-result" x="${optic.x}" y="757" font-size="31">→ 阑尾坏疽发黑</text>
+      </g>
+      <g id="s18-distinction" aria-label="重要区分：坏疽常伴穿孔，但穿孔不一定伴有坏疽（急性化脓性阑尾炎也可直接破溃穿孔，二者不能画等号）">
+        <rect x="1160" y="775" width="710" height="79" rx="13" fill="#F3E7DF" fill-opacity=".9"
+          stroke="${RED}" stroke-opacity=".52" stroke-width="1.4"/>
+        <text class="note title" x="${optic.x}" y="805" text-anchor="middle" font-size="23"
+          fill="#6F2923">重要区分：坏疽常伴穿孔，但穿孔不一定伴有坏疽</text>
+        <text class="note" x="${optic.x}" y="835" text-anchor="middle" font-size="21"
+          fill="#4E4740">（急性化脓性阑尾炎也可直接破溃穿孔，二者不能画等号）</text>
       </g>`,
     audit,
     mount(art) {
@@ -107,6 +116,7 @@ export function s18() {
       mist.mount(art, audit.source);
     },
     update(art, labels, p, duration) {
+      opacity(labels, 's18-seam-title', phase(p, 0, .08));
       const front = paintInjury(.45 * phase(p, .16, .45));
       art.querySelector('#s18-inflamed').dataset.necroticFront = front;
       organ.update(art, { time: Math.max(0, p - .40) * duration, exudateBoost });
@@ -122,6 +132,7 @@ export function s18() {
       opacity(labels, 's18-micro-title', phase(p, .46, .69));
       opacity(labels, 's18-warning', phase(p, .17, .34));
       opacity(labels, 's18-warning-result', phase(p, .48, .64));
+      opacity(labels, 's18-distinction', phase(p, .56, .72));
     },
   };
 }

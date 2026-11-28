@@ -6,7 +6,7 @@ import { REFERENCES } from '../../shared/references.js';
 import { SANS_FONT } from '../../shared/fonts.js';
 
 const font = SANS_FONT;
-const bodyX = 252;
+const bodyX = 304;
 const bodyWidth = WIDTH - 2 * bodyX;
 const audioCredit = new Map([
   [true, '3. 音频处理：AI 语音合成旁白（统一音色）+ 纯代码程序化合成配乐与音效。'],
@@ -86,13 +86,14 @@ export function createCreditPlate() {
       ctx.save();
       const { duration, fadeIn, fadeOut } = CREDITS_TIMING;
       const elapsed = p * duration;
-      ctx.globalAlpha = phase(elapsed, 0, fadeIn) * (1 - phase(elapsed, duration - fadeOut, duration));
+      const opacity = phase(elapsed, 0, fadeIn) * (1 - phase(elapsed, duration - fadeOut, duration));
+      ctx.globalAlpha = opacity;
       layout ??= prepareLayout();
       const { lines, rule, shift } = layout;
       ctx.fillStyle = '#9D7869';
       ctx.fillRect(Math.round(WIDTH / 2 - 36), Math.round(108 + shift), 72, 2);
       ctx.fillStyle = '#AB9F91';
-      ctx.fillRect(bodyX, Math.round(rule + shift), bodyWidth, 1);
+      ctx.fillRect(Math.round(bodyX), Math.round(rule + shift), Math.round(bodyWidth), 1);
       ctx.textBaseline = 'alphabetic';
       for (const line of lines) {
         ctx.textAlign = line.align;
@@ -101,6 +102,7 @@ export function createCreditPlate() {
         ctx.fillText(line.text, Math.round(line.x), Math.round(line.y + shift));
       }
       ctx.restore();
+      return opacity;
     },
   };
 }

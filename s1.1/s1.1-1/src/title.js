@@ -1,59 +1,48 @@
 import { RED, morphShape, organic } from '../../shared/canvasCore.js';
-import { phase } from '../../shared/timelineHelper.js';
+import { SERIF_FONT } from '../../shared/fonts.js';
+import { phase, phaseOut } from '../../shared/timelineHelper.js';
 import { palette } from './notes.js';
 import { fade, ink, letter } from './paint.js';
 
 const headline = '一根“香肠”的变质日记';
-const subtitle = '急性阑尾炎的色彩密码与炎症保卫战';
-const center = 1110;
+const subtitle = '阑尾的粉 → 红 → 黄 → 黑';
+const openingCenter = 960;
+const guideCenter = 1077;
 const black = '#2A2622';
 const colors = ['#9A534E', RED, '#856522', '#2A2622'];
-const colorCenters = [983, 1136, 1289, 1442];
 const swatchXs = [720, 958, 1196, 1434];
 const titlePace = p => p * .96 / .65;
 
+export function drawOpeningTitle(ctx, seconds, pigment) {
+  const arrival = phaseOut(seconds, .25, .95);
+  const alpha = arrival * (1 - phase(seconds, 4.10, 4.75));
+  const dy = 14 * (1 - arrival);
+  fade(ctx, alpha, () => {
+    ctx.translate(0, dy);
+    ctx.letterSpacing = '1px';
+    letter(ctx, headline, openingCenter, 119, {
+      align: 'center', size: 48, weight: 700, color: '#1F1C19', font: SERIF_FONT,
+    });
+    ctx.letterSpacing = '0px';
+    letter(ctx, subtitle, openingCenter, 165, {
+      align: 'center', size: 24, weight: 600, color: '#1F1C19', font: SERIF_FONT,
+    });
+    const left = openingCenter - ctx.measureText(subtitle).width / 2;
+    const marks = palette.map(({ key }, i) => ({
+      key, x: left + ctx.measureText(subtitle.slice(0, subtitle.indexOf('粉红黄黑'[i]))).width,
+    }));
+    fade(ctx, .24, () => {
+      for (const { key, x } of marks) pigment(ctx, key, x - 2, 168, 28, 9);
+    });
+  });
+  return { alpha, dy };
+}
 
 export function swatchesAt(p) {
   p = titlePace(p);
   return palette.map((_, i) => i === 0
     ? .42 * phase(p, 0, .17) + .58 * phase(p, .12, .60)
     : phase(p, .48 + i * .112, .60 + i * .112));
-}
-
-function makeWords(letters, size, baseline, weight = 700) {
-  // The offset is relative to each line's entrance window.
-  const stagger = .035;
-  const duration = 1 - (letters.length - 1) * stagger;
-  return (ctx, progress) => {
-    for (const [index, { char, x, color }] of letters.entries()) {
-      const start = index * stagger;
-      const amount = phase(progress, start, start + duration);
-      fade(ctx, amount, () =>
-        letter(ctx, char, x, baseline + 10 * (1 - amount), { align: 'center', size, weight, color }));
-    }
-  };
-}
-
-function firstLine() {
-  const widths = [...headline].map(char => '“”'.includes(char) ? 36 : 68);
-  let x = center - widths.reduce((sum, width) => sum + width, 0) / 2;
-  return [...headline].map((char, index) => {
-    const left = x;
-    x += widths[index];
-    return { char, x: (left + x) / 2, color: black };
-  });
-}
-
-function secondLine() {
-  return [
-    { char: '阑', x: 776, color: black }, { char: '尾', x: 838, color: black }, { char: '的', x: 900, color: black },
-    ...[...'粉红黄黑'].flatMap((char, index) => {
-      const x = colorCenters[index];
-      const run = [{ char, x, color: colors[index] }];
-      if (index < 3) run.push({ char: '→', x: x + 77, color: '#705D4F' });
-      return run;
-    }),
-  ];
 }
 
 function wetSwatch(ctx, pigment, x, key, progress, dab) {
@@ -82,38 +71,37 @@ function wetSwatch(ctx, pigment, x, key, progress, dab) {
   });
 }
 
-export function makeTitle(pigment) {
-  const writeHeadline = makeWords(firstLine(), 68, 459);
-  const writeColors = makeWords(secondLine(), 62, 561);
-  const subtitleChars = [...subtitle];
-  const writeSubtitle = makeWords(subtitleChars.map((char, index) => ({
-    char,
-    x: center + (index - (subtitleChars.length - 1) / 2) * 34,
-    color: '#64574C',
-  })), 34, 650, 500);
+export function makeColorGuide(pigment) {
   const dab = morphShape(organic(0, 0, 14, 32, 980, .15), organic(0, 0, 24, 23, 981, .22), 8);
 
   return (ctx, motion) => {
     const p = titlePace(motion.titleProgress);
     if (p <= 0) return 0;
-    palette.forEach(({ key }, i) => {
+    palette.forEach(({ key, label }, i) => {
       const progress = motion.swatches[i];
       const strength = .72 + .28 * phase(motion.titleAccent, i * .22, i * .22 + .29);
       fade(ctx, strength, () => wetSwatch(ctx, pigment, swatchXs[i], key, progress, dab));
-      fade(ctx, progress * .16 * phase(p, .48, .58),
-        () => pigment(ctx, key, colorCenters[i] - 54, 503, 108, 79));
+      fade(ctx, progress, () => {
+        letter(ctx, label, swatchXs[i], 374,
+          { align: 'center', size: 36, weight: 700, color: colors[i], font: SERIF_FONT });
+        if (i < swatchXs.length - 1) {
+          letter(ctx, '→', (swatchXs[i] + swatchXs[i + 1]) / 2, 374,
+            { align: 'center', size: 26, color: '#705D4F' });
+        }
+      });
     });
-    const headlineProgress = phase(p, .17, .61);
-    writeHeadline(ctx, headlineProgress);
-    writeColors(ctx, phase(p, .48, .91));
-
-    const sign = phase(p, .71, .96);
-    writeSubtitle(ctx, sign);
-    const trace = sign * (.68 + .32 * phase(motion.titleAccent, .08, .48));
-    fade(ctx, trace, () => {
-      ctx.translate(817, 0);
-      ctx.scale(trace, 1);
-      ink(ctx, 'M0 682 C168 673 396 678 584 683', '#B74232', 5.8, 348);
+    const headlineProgress = phase(p, .17, .53);
+    fade(ctx, headlineProgress, () => {
+      letter(ctx, '四道色彩密码 · 直击阑尾变质现场', guideCenter, 506 + 12 * (1 - headlineProgress),
+        { align: 'center', size: 60, weight: 700, color: black, font: SERIF_FONT });
+    });
+    const sign = phase(p, .32, .70);
+    fade(ctx, sign, () => {
+      letter(ctx, '10小时症状升级背后的病理演变', guideCenter, 581,
+        { align: 'center', size: 30, weight: 550, color: '#64574C', font: SERIF_FONT });
+      ctx.translate(874, 0);
+      ctx.scale(sign, 1);
+      ink(ctx, 'M0 601 C111 595 286 597 407 602', '#B74232', 4, 348);
     });
     return headlineProgress;
   };

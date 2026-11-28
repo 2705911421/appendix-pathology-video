@@ -3,63 +3,62 @@
   "width": 1920,
   "height": 1080,
   "fps": 30,
-  "duration": 46.5,
+  "duration": 51.1,
   "cues": [
     {
       "id": "S23",
       "type": "speech",
-      "defaultDuration": 10.6,
-      "zhText": "反复或持续的右下腹痛，可能见于慢性阑尾炎。长期炎症刺激导致的“增生”，可使阑尾壁逐渐增厚，并出现纤维化。",
+      "defaultDuration": 14.6,
+      "zhText": "部分患者急性发作缓解后，炎症反复拉锯转为慢性阑尾炎：此时出现炎症刺激导致的增生，使阑尾苍白僵硬、管壁纤维化增厚、管腔呈狭窄星形。",
       "highlightZh": [
         "慢性阑尾炎",
-        "炎症刺激导致的“增生”",
-        "增厚",
-        "纤维化"
+        "炎症刺激导致的增生",
+        "管壁纤维化增厚",
+        "狭窄星形"
       ],
-      "enText": "Chronic appendicitis can present with recurrent or persistent right lower abdominal pain. Inflammation-induced proliferation can gradually thicken and fibrose the appendiceal wall.",
+      "enText": "After acute episodes subside, recurrent flares can evolve into chronic appendicitis, where inflammation-induced proliferation causes a pale, stiff, fibrotic wall and a narrow stellate lumen.",
       "start": 0,
-      "end": 10.6
+      "end": 14.6
     },
     {
       "id": "S24",
       "type": "speech",
       "defaultDuration": 16,
-      "zhText": "镜下可见阑尾壁明显纤维化，有淋巴细胞和浆细胞浸润。一旦确诊，通常建议在症状缓解期择期切除；若正处于急性发作期，则视情况急诊手术。",
+      "zhText": "镜下见萎缩黏膜、致密胶原纤维束穿插分隔平滑肌层，伴淋巴细胞与浆细胞浸润；确诊慢性阑尾炎通常建议缓解期择期切除，急性发作期则视情况急诊手术。",
       "highlightZh": [
-        "纤维化",
-        "淋巴细胞",
-        "浆细胞",
-        "症状缓解期择期切除",
-        "急性发作期",
+        "萎缩黏膜",
+        "胶原纤维束",
+        "淋巴细胞与浆细胞",
+        "缓解期择期切除",
         "急诊手术"
       ],
-      "enText": "Microscopy shows wall fibrosis with lymphocyte and plasma cell infiltration. Once diagnosed, elective appendectomy is usually advised when symptoms have subsided. During an acute flare, emergency surgery may be needed depending on the clinical findings.",
-      "start": 10.6,
-      "end": 26.6
+      "enText": "Histology shows atrophic mucosa, dense collagen bundles separating smooth muscle, and lymphocytes with plasma cells; confirmed chronic appendicitis favors interval elective surgery, or emergency surgery during acute flares.",
+      "start": 14.6,
+      "end": 30.6
     },
     {
       "id": "B08",
       "type": "bridge",
       "duration": 1.4,
-      "start": 26.6,
-      "end": 28
+      "start": 30.6,
+      "end": 32
     },
     {
       "id": "S25",
       "type": "speech",
-      "defaultDuration": 12,
-      "zhText": "粉白、暗红、灰黄、焦黑，颜色帮助我们读懂阑尾的病理变化。若腹痛转移到右下腹，或持续加重，尤其伴发热或腹部拒按，应尽快就医。",
+      "defaultDuration": 12.6,
+      "zhText": "从粉白、暗红到灰黄、焦黑，阑尾变质就在十余小时内加速；读懂腹痛转移信号并及时就医，才能守住每一次安心吃饭的日常。",
       "highlightZh": [
-        "病理变化",
-        "右下腹",
-        "持续加重",
-        "发热",
-        "腹部拒按",
-        "尽快就医"
+        "粉白",
+        "暗红",
+        "灰黄",
+        "焦黑",
+        "腹痛转移",
+        "及时就医"
       ],
-      "enText": "Pale pink, dark red, grayish yellow and black reflect changes in the appendix. Seek urgent medical care if abdominal pain moves to the right lower abdomen or keeps worsening, especially with fever or guarding.",
-      "start": 28,
-      "end": 40
+      "enText": "From pink and dark red to gray-yellow and black, deterioration accelerates within hours; recognizing migratory pain early and seeking prompt care protects every peaceful meal.",
+      "start": 32,
+      "end": 44.6
     },
     {
       "id": "S26",
@@ -69,8 +68,8 @@
       "zhText": "",
       "highlightZh": [],
       "enText": "",
-      "start": 40,
-      "end": 46.5
+      "start": 44.6,
+      "end": 51.1
     }
   ]
 }

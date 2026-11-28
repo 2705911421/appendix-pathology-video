@@ -177,7 +177,7 @@ export function diagnosisScene(stage) {
       <g data-clinical-caption>
         <g data-symptoms>${label('典型症状：转移性右下腹痛', symptomLabel.x, symptomLabel.y,
           { size: 21, fill: CINNABAR, anchor: 'start' })}</g>
-        <g data-exam>${label('体格检查：麦氏点压痛、反跳痛', examLabel.x, examLabel.y,
+        <g data-exam>${label('体格检查：麦氏点压痛、<tspan font-weight="790">反跳痛与腹肌紧张</tspan>（腹膜刺激征）', examLabel.x, examLabel.y,
           { size: 21, fill: indigo, anchor: 'start' })}</g>
         <g data-labs>${label('化验结果', clinicalX, labsBaseline, { size: 21, weight: 570, anchor: 'start' })}</g>
       </g>

@@ -14,19 +14,20 @@ const lensTop = lens.y - lens.diameter / 2;
 const lensLeft = lens.x - lens.diameter / 2;
 const lensScale = lens.diameter / HISTOLOGY_DIAMETER;
 const spread = [
-  { text: '链球菌等细菌', y: 232, start: .18 },
-  { text: '链激酶 + 透明质酸酶', y: 308, start: .27, note: '链激酶激活纤溶酶原' },
-  { text: '降解纤维素与透明质酸', y: 413, start: .43 },
-  { text: '沿组织间隙迅速蔓延至浆膜', y: 491, start: .62, note: '穿透肌层 · 蜂窝织性' },
+  { text: '感染链球菌', y: 278, start: .13 },
+  { text: '产生链激酶 → 激活纤溶酶原 → 促进纤维素降解', y: 358, start: .25 },
+  { text: '配合透明质酸酶分解组织间质', y: 438, start: .39 },
+  { text: '局限性纤维素渗出被溶解 → 炎症迅速蔓延至各层', y: 518, start: .53 },
 ];
 
 function spreadNotes() {
-  return spread.map(({ text, y, note }, i) => group(`he-spread-${i}`, `
-    ${i ? `<text class="note" x="1308" y="${y - 20}" text-anchor="middle" font-size="30" fill="#9C5145">↓</text>` : ''}
-    <text class="note title" x="1340" y="${y}" font-size="30" fill="${i === 3 ? RED : '#523B34'}">${text}</text>
-    ${note ? `<text class="note" x="1340" y="${y + 34}" font-size="27" fill="#443D37">${note}</text>` : ''}`)).join('')
+  return group('he-title', `<text class="note title" x="1040" y="126" text-anchor="middle" font-size="34"
+      fill="#1F1C19">急性化脓性阑尾炎（又称急性蜂窝织性阑尾炎）· 全层蔓延</text>`)
+    + spread.map(({ text, y }, i) => group(`he-spread-${i}`, `
+      ${i ? `<text class="note" x="1268" y="${y}" text-anchor="middle" font-size="23" fill="#9C5145">↓</text>` : ''}
+      <text class="note title" x="1298" y="${y}" font-size="22" fill="#2A2622">${text}</text>`)).join('')
     + group('he-spread-reference',
-      '<text class="note" x="1340" y="586" font-size="25" fill="#443D37">渗出详细过程见前</text>');
+      '<text class="note" x="1298" y="597" font-size="19" fill="#443D37">渗出详细过程见前</text>');
 }
 
 function serosalNote() {
@@ -81,7 +82,7 @@ export function createHistologySequence(pixelScale = 1) {
       micro.mount(art);
       closeup.mount(art, lettering);
       artNodes = selectIds(art, ['he-micro-lens', 'he-high-power']);
-      labelNodes = selectIds(lettering, ['he-layer-labels', 'he-surface-note', 'he-target', 'he-target-dash',
+      labelNodes = selectIds(lettering, ['he-title', 'he-layer-labels', 'he-surface-note', 'he-target', 'he-target-dash',
         'he-surface-leader', 'he-macro-labels', 'he-spread-reference', ...spread.map((_, i) => `he-spread-${i}`),
         ...layers.flatMap((_, i) => [`he-layer-${i}`, `he-brace-${i}`])]);
       labelRoot = lettering;
@@ -93,7 +94,7 @@ export function createHistologySequence(pixelScale = 1) {
         infiltrate: micro.audit.shallow + micro.audit.muscle,
         serosalPus: micro.audit.serosalPus,
         overviewFibers: micro.audit.fibrin,
-        visiblePus: closeup.audit.visiblePus, wovenFraction: closeup.audit.wovenFraction,
+        visiblePus: closeup.audit.visiblePus, pusFraction: closeup.audit.pusFraction, wovenFraction: closeup.audit.wovenFraction,
       };
     },
     update(cue, p) {
@@ -110,6 +111,7 @@ export function createHistologySequence(pixelScale = 1) {
         `translate(${x} ${y}) scale(${size}) translate(${-detailView.x} ${-detailView.y})`);
       artNodes['he-high-power'].setAttribute('opacity', zooming ? ramp(p, .17, .62) : Number(macro));
       const outgoingLabels = zooming ? 1 - ramp(p, 0, .21) : 1 - Number(macro);
+      labelNodes['he-title'].setAttribute('opacity', outgoingLabels);
       labelNodes['he-layer-labels'].setAttribute('opacity', outgoingLabels);
       spread.forEach(({ start }, i) => {
         labelNodes[`he-spread-${i}`].setAttribute('opacity', outgoingLabels * ramp(p, start, start + .10));

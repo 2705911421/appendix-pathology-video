@@ -3,110 +3,98 @@
   "width": 1920,
   "height": 1080,
   "fps": 30,
-  "duration": 92.8,
+  "duration": 82,
   "cues": [
     {
       "id": "S10",
       "type": "speech",
-      "defaultDuration": 8.6,
-      "zhText": "在病理学家眼里，急性阑尾炎的本质，始终绕不开两个核心动作——“变质”和“渗出”。",
+      "defaultDuration": 7.1,
+      "zhText": "归根结底，阑尾炎的本质主要是炎症，离不开变质和渗出两个过程。",
       "highlightZh": [
+        "炎症",
         "变质",
         "渗出"
       ],
-      "enText": "In pathology, acute appendicitis centers on two processes: tissue injury and exudation."
+      "enText": "Fundamentally, appendicitis is inflammation driven by two core processes: tissue alteration and exudation."
     },
     {
       "id": "B03b",
       "type": "bridge",
       "duration": 1.4,
-      "start": 8.6,
-      "end": 10
+      "start": 7.1,
+      "end": 8.5
     },
     {
       "id": "S11",
       "type": "speech",
-      "defaultDuration": 13.7,
-      "zhText": "在典型的梗阻—感染过程中，以粪石为主堵塞管腔，腔内压随之急剧升高。缺血与细菌感染可造成黏膜坏死、破溃、脱落并形成溃疡，这就是“变质”。",
+      "defaultDuration": 12.2,
+      "zhText": "它遵循经典的“梗阻—感染”机制：管腔以粪石为主堵塞后，腔内压升高、缺血并继发细菌感染，致黏膜变性坏死脱落，即“变质”。",
       "highlightZh": [
         "梗阻—感染",
         "粪石",
-        "腔内压",
-        "缺血",
-        "细菌感染",
-        "黏膜坏死",
-        "溃疡",
+        "腔内压升高",
+        "黏膜变性坏死脱落",
         "变质"
       ],
-      "enText": "In the classic obstruction-infection model, a fecalith typically blocks the lumen, causing luminal pressure to rise sharply. Ischemia and bacterial infection can lead to mucosal necrosis, breakdown and sloughing, with ulceration. This is tissue injury."
+      "enText": "It follows the classic obstruction-infection model: luminal blockage, mainly by a fecalith, raises pressure, causes ischemia and bacterial invasion, leading to mucosal necrosis—alteration."
     },
     {
       "id": "S12",
       "type": "speech",
-      "defaultDuration": 20.7,
-      "zhText": "组胺、缓激肽、前列腺素与趋化因子等炎症介质参与反应。血管扩张充血，通透性升高，血浆被动漏出。中性粒细胞受炎症介质与趋化因子引导，依次边集、滚动、黏附，最后以阿米巴样运动经内皮间隙游出。这是主动渗出。",
+      "defaultDuration": 21.1,
+      "zhText": "黏膜破损后，组胺、缓激肽、前列腺素与趋化因子等炎症介质释放，引起血管充血、通透性升高，血浆被挤出或漏出；中性粒细胞则非被动挤出，而是在介质引导下经边集、滚动、黏附，以阿米巴样运动主动游出血管壁。",
       "highlightZh": [
         "炎症介质",
-        "趋化因子",
-        "血管扩张充血",
         "通透性升高",
-        "血浆被动漏出",
+        "血浆被挤出或漏出",
         "边集",
         "滚动",
         "黏附",
         "阿米巴样运动",
-        "主动渗出"
+        "主动游出"
       ],
-      "enText": "Histamine, bradykinin, prostaglandins and chemotactic factors take part in the inflammatory response. Vessels dilate and become congested and more permeable, so plasma leaks out passively. Guided by inflammatory mediators and chemotactic factors, neutrophils marginate, roll and adhere. They then actively leave through endothelial gaps by amoeboid movement."
+      "enText": "Once mucosa breaks, mediators—histamine, bradykinin, prostaglandins, chemokines—drive congestion and permeability so plasma leaks out, while neutrophils actively emigrate via margination, rolling, adhesion, and amoeboid diapedesis."
     },
     {
       "id": "S13",
       "type": "speech",
-      "defaultDuration": 24.6,
-      "zhText": "化脓性炎症时，中性粒细胞可浸润阑尾壁全层。链球菌等细菌可产生链激酶和透明质酸酶。链激酶激活纤溶酶原，促进纤维素降解；透明质酸酶可降解透明质酸。炎症可沿组织间隙迅速蔓延，穿透肌层直达浆膜。这种弥漫蔓延，就是“蜂窝织性”名称的由来。",
+      "defaultDuration": 22.3,
+      "zhText": "炎症为何迅速向肌层与浆膜层蔓延？那是因为感染的链球菌产生链激酶，激活纤溶酶原、促进纤维素降解，并配合透明质酸酶分解间质，溶解原本局限病灶的纤维素性渗出，使炎症蔓延至各层，故又称急性蜂窝织性阑尾炎。",
       "highlightZh": [
-        "化脓性炎症",
-        "浸润阑尾壁全层",
-        "链球菌",
         "链激酶",
+        "激活纤溶酶原",
+        "促进纤维素降解",
         "透明质酸酶",
-        "纤溶酶原",
-        "纤维素降解",
-        "组织间隙",
-        "蔓延",
-        "浆膜",
-        "蜂窝织性"
+        "急性蜂窝织性阑尾炎"
       ],
-      "enText": "In suppurative inflammation, neutrophils can infiltrate the full appendiceal wall. Bacteria such as streptococci may produce streptokinase and hyaluronidase. Streptokinase activates plasminogen, promoting fibrin breakdown. Hyaluronidase breaks down hyaluronic acid. Inflammation can spread rapidly through tissue spaces and across the muscle to the serosa. This diffuse spread is why it is called phlegmonous."
+      "enText": "Why does inflammation spread rapidly across the wall? Streptococcal streptokinase activates plasminogen to degrade fibrin while hyaluronidase breaks down matrix, dissolving confining exudate so suppuration spreads diffusely—hence acute phlegmonous appendicitis."
     },
     {
       "id": "B04",
       "type": "bridge",
       "duration": 2,
-      "start": 69,
-      "end": 71
+      "start": 64.1,
+      "end": 66.1
     },
     {
       "id": "S14",
       "type": "speech",
-      "defaultDuration": 19.8,
-      "zhText": "这种阑尾炎的本质是化脓性炎症。渗出物以变性、坏死的中性粒细胞为主，这些是脓细胞。脓细胞与交织成网的纤维素混在一起，共同构成纤维素性脓性渗出物。肉眼看到的，就是阑尾表面的灰黄色脓苔。",
+      "defaultDuration": 13.9,
+      "zhText": "在浆膜面，渗出并变性坏死的中性粒细胞形成大量脓细胞，混有交织纤维素构成纤维素性脓性渗出物，覆盖表面，肉眼即为灰黄色脓苔。",
       "highlightZh": [
-        "化脓性炎症",
-        "变性、坏死的中性粒细胞",
+        "浆膜面",
         "脓细胞",
-        "纤维素",
         "纤维素性脓性渗出物",
         "灰黄色脓苔"
       ],
-      "enText": "This type of appendicitis is a suppurative inflammation. The exudate consists mainly of degenerated and necrotic neutrophils, called pus cells. Pus cells mix with a mesh of fibrin to form a fibrinopurulent exudate. To the naked eye, it forms a grayish-yellow purulent coating on the appendix."
+      "enText": "On the serosal surface, degenerated neutrophils form pus cells interwoven with fibrin into a fibrinous-purulent exudate, appearing grossly as a gray-yellow purulent coat."
     },
     {
       "id": "B05",
       "type": "bridge",
       "duration": 2,
-      "start": 90.8,
-      "end": 92.8
+      "start": 80,
+      "end": 82
     }
   ]
 }

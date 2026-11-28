@@ -2,7 +2,7 @@ import { HEIGHT, STORY_ART_BOTTOM, WIDTH, clamp, createRaster, drawSubtitlePaper
 import { mountBridgePlates } from '../../shared/detail/bridgePlates.js';
 import { mountPaperBridge } from '../../shared/detail/transitionPaper.js';
 import { mountStageDotOverlay } from '../../shared/leftFloatNotes.js';
-import { ENGLISH_FONT, HAND_FONT, SANS_FONT } from '../../shared/fonts.js';
+import { ENGLISH_FONT, HAND_FONT, SANS_FONT, SERIF_FONT } from '../../shared/fonts.js';
 import { displayDensity } from '../../shared/renderProfile.js';
 import { cubicInOut, phase } from '../../shared/timelineHelper.js';
 import sheet from '../out/cues_s1.1-1.json';
@@ -10,9 +10,9 @@ import { mountCaptions } from './captions.js';
 import { makeLabs } from './labs.js';
 import { makeNotes } from './notes.js';
 import { fade, makePaper, makePigments } from './paint.js';
-import { drawOpeningPatient, drawPinnedMeal } from './patient.js';
-import { drawAnatomy } from './symptoms.js';
-import { makeTitle, swatchesAt } from './title.js';
+import { drawOpeningPatient, drawPinnedMeal, SEATED_PORTRAIT_SCALE } from './patient.js';
+import { drawAnatomy, drawPeritonealSigns } from './symptoms.js';
+import { drawOpeningTitle, makeColorGuide, swatchesAt } from './title.js';
 import { resolveCue, timeCues } from './timing.js';
 import { brushCalls } from './watercolorCanvas.js';
 
@@ -20,6 +20,8 @@ const CUES = sheet.cues;
 const diningCut = timeCues(CUES).cues[0].end;
 const seatTransition = .60;
 const cutHold = 1 / 15;
+const pelvisLift = 16;
+const guideFadeEnd = .08;
 
 function leaveTable(t) {
   const relative = t - diningCut;
@@ -45,6 +47,7 @@ await Promise.all([
   document.fonts.load(`700 68px ${HAND_FONT}`),
   document.fonts.load(`750 46px ${SANS_FONT}`),
   document.fonts.load(`500 31px ${ENGLISH_FONT}`),
+  document.fonts.load(`700 48px ${SERIF_FONT}`, '一根“香肠”的变质日记'),
   bridgePlates.ready,
 ]);
 await document.fonts.ready;
@@ -52,7 +55,7 @@ const paper = makePaper();
 const pigment = makePigments();
 const drawNotes = makeNotes(pigment);
 const drawLabs = makeLabs(pigment);
-const drawTitle = makeTitle(pigment);
+const drawColorGuide = makeColorGuide(pigment);
 
 const lunchView = { scale: 1, x: 9, y: -12 };
 const closeView = { scale: 1.38, x: 160, y: -48 };
@@ -90,6 +93,7 @@ function storyMotion(cue, p, t) {
     patientOpacity: 1,
     diagramOpacity: 0,
     diagramSlide: 0,
+    diagramLift: 0,
     neural: 0,
     neuralLabel: 0,
     migrating: false,
@@ -104,18 +108,22 @@ function storyMotion(cue, p, t) {
     labsOpacity: 0,
     labsEntry: 0,
     chartEntry: 0,
+    openingTitleTime: -1,
     titleProgress: 0,
     titleAccent: 1,
+    guideOpacity: 0,
     swatches: null,
   };
   if (id === 'S01') {
     motion.camera = dolly({ scale: 1, x: 0, y: 0 }, lunchView, phase(p, 0, 1));
+    motion.openingTitleTime = t - start;
   } else if (id === 'S02') {
     motion.camera = dolly(lunchView, closeView, phase(p, 0, 1));
     motion.sunset = phase(p, .83, 1);
     const entry = phase(t - start, 0, .55);
     motion.diagramOpacity = entry;
     motion.diagramSlide = 25 * (1 - entry);
+    motion.diagramLift = pelvisLift * phase(p, .83, 1);
     motion.neural = phase(p, 0, .58);
   } else if (id === 'S03') {
     const migrate = phase(p, .05, .35);
@@ -126,6 +134,7 @@ function storyMotion(cue, p, t) {
     motion.patientPose = { fromPose: 'navel_pain', pose: 'rlq_acute', progress: clamp((p - .05) / .30) };
     motion.hipY += 7 + 10 * migrate;
     motion.diagramOpacity = 1;
+    motion.diagramLift = pelvisLift;
     motion.neural = 1 - phase(p, 0, .11);
     motion.neuralLabel = 1 - phase(p, 0, .08);
     motion.migrating = true;
@@ -146,6 +155,7 @@ function storyMotion(cue, p, t) {
     motion.migrating = true;
     motion.migration = 1;
     motion.diagramOpacity = bridge ? 1 - exit : 0;
+    motion.diagramLift = bridge ? pelvisLift : 0;
     motion.markings = 1;
     motion.lock = 1;
     motion.peritonealSigns = bridge ? 1 : 0;
@@ -155,19 +165,22 @@ function storyMotion(cue, p, t) {
     motion.labsProgress = bridge ? 0 : p;
     motion.labsEntry = bridge ? phase(p, .48, 1) : 1;
     motion.chartEntry = bridge ? phase(p, .55, .97) : 1;
-    motion.labsOpacity = hospital ? motion.labsEntry : 0;
-    motion.noteOpacity = hospital ? 1 : 0;
-    motion.titleProgress = hospital ? 0 : 1;
-    motion.titleAccent = id === 'S05' ? p : 1;
+    const hospitalOpacity = id === 'S04' ? 1 - phase(p, .90, 1) : 1;
+    motion.labsOpacity = hospital ? motion.labsEntry * hospitalOpacity : 0;
+    motion.noteOpacity = hospital ? hospitalOpacity : 0;
     if (!hospital) {
-      motion.swatches = swatchesAt(1);
+      const guideProgress = id === 'S05' ? clamp(p / guideFadeEnd) : 1;
+      motion.titleProgress = guideProgress;
+      motion.titleAccent = id === 'S05' ? p : 1;
+      motion.guideOpacity = id === 'S05' ? phase(p, 0, guideFadeEnd) : 1;
+      motion.swatches = swatchesAt(motion.titleProgress);
     }
   }
   if (id === 'S01' || id === 'S02') {
     const dining = leaveTable(t);
     const guarding = id === 'S01' ? cubicInOut((p - .38) / .32) : 1;
     motion.portraitX = lerp(960, 565, dining);
-    motion.portraitScale = lerp(1, .92, dining);
+    motion.portraitScale = lerp(SEATED_PORTRAIT_SCALE, .92, dining);
     motion.hipY += 7 * dining;
     motion.patientPose = { fromPose: 'eat', pose: 'navel_pain', progress: guarding, hunch: .35 * dining,
       eased: true, hasBowl: 1 - dining };
@@ -202,7 +215,7 @@ function renderFrame(t) {
   ctx.lineJoin = 'round';
   ctx.drawImage(paper, 0, 0, WIDTH, HEIGHT);
   const light = cue.id === 'S03' ? 1 - phase(p * cue.duration, cue.duration - .32, cue.duration)
-    : Number(cue.id !== 'B01' && cue.id !== 'S04');
+    : Number(cue.id === 'S01' || cue.id === 'S02');
   fade(ctx, light, () => ambientLight(motion));
   ctx.save();
   ctx.beginPath();
@@ -215,13 +228,18 @@ function renderFrame(t) {
   const bowl = drawPinnedMeal(ctx, motion);
   if (portrait) portrait.bowl = bowl;
   const anatomy = drawAnatomy(ctx, motion, pigment);
+  drawPeritonealSigns(ctx, motion);
+  const openingTitle = drawOpeningTitle(ctx, motion.openingTitleTime, pigment);
   drawLabs(ctx, motion);
   ctx.save();
   const bloom = titleBridge ? phase(p, .30, .85) : 0;
   ctx.translate(1110, 459);
   ctx.scale(1 + .05 * bloom, 1 + .025 * bloom);
   ctx.translate(-1110, -459);
-  const headlineProgress = drawTitle(ctx, motion);
+  let headlineProgress = 0;
+  fade(ctx, motion.guideOpacity, () => {
+    headlineProgress = motion.guideOpacity * drawColorGuide(ctx, motion);
+  });
   ctx.restore();
   drawNotes(ctx, motion);
   ctx.restore();
@@ -236,7 +254,7 @@ function renderFrame(t) {
   const marker = titleBridge ? lerp(3, 0, phase(p, .25, .88)) : cue.id === 'S05' ? 3
     : cue.id === 'S03' ? phase(p, .05, .35) : cue.id === 'B01' || cue.id === 'S04' ? 1 : 0;
   const dotOpacity = cue.id === 'B01' ? 1 - phase(p, 0, .44)
-    : cue.id === 'S04' ? 0 : cue.id === 'S05' ? phase(p, 0, .18) : 1;
+    : cue.id === 'S04' ? 0 : cue.id === 'S05' ? motion.guideOpacity : 1;
   stageDots({ marker, opacity: dotOpacity });
   return {
     id: cue.id,
@@ -250,7 +268,9 @@ function renderFrame(t) {
       noteOpacity: motion.noteOpacity,
       night: motion.night,
       labsEntry: motion.labsEntry,
+      guideOpacity: motion.guideOpacity,
       headlineProgress,
+      openingTitle,
       firstSwatch: motion.swatches?.[0] ?? 0,
       outgoing: titleBridge ? visible : 0,
       incoming,

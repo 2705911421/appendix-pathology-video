@@ -95,10 +95,11 @@ async function writePiano(file, count, bridges) {
 export function finalVideoName(profileName, hasVoice) {
   const { outputHeight, fps } = getRenderProfile(profileName);
   if (outputHeight) return `review_s1.1_${outputHeight}p_${fps}fps.mp4`;
+  if (profileName === 'teammate_1080p36') return `teammate_s1.1_1080p_36fps${hasVoice ? '_voice' : ''}.mp4`;
   return `${title}${hasVoice ? '' : '（纯配乐版）'}.mp4`;
 }
 
-async function checkOutput(file, frames, creditsDuration, profile, review, loudnessTarget, bridges) {
+async function checkOutput(file, frames, creditsDuration, profile, review, loudnessTarget, inkAnchors) {
   const duration = frames / profile.fps;
   const { streams, format } = await inspectMedia(file);
   const [video, audio] = streams;
@@ -148,7 +149,9 @@ async function checkOutput(file, frames, creditsDuration, profile, review, loudn
     start = end;
   }
   console.log(`逐帧哈希 PASS（正片最长连续同帧 ${(longest / profile.fps).toFixed(3)} 秒）。`);
-  if (review && creditsDuration > 0) await scanWhiteFrames(file, { frames, fps: profile.fps, creditsDuration, bridges });
+  if (review && creditsDuration > 0) {
+    await scanWhiteFrames(file, { frames, fps: profile.fps, creditsDuration, bridges: inkAnchors });
+  }
   const { stderr: report } = await runMedia('ffmpeg', ['-hide_banner', '-nostats', '-nostdin', '-xerror', '-i', file,
     '-map', '0:a:0', '-vn', '-af', 'ebur128=peak=true:framelog=verbose', '-f', 'null', '-']);
   const summary = report.slice(report.lastIndexOf('Summary:'));
@@ -179,7 +182,8 @@ async function normalizationFilter(inputs, mix, target) {
 }
 
 export async function assembleFinal({
-  segments, frames, voicePath, destination, scratch, bridges = [], creditsDuration = CREDITS_TIMING.duration, profileName = DEFAULT_PROFILE,
+  segments, frames, voicePath, destination, scratch, bridges = [], inkAnchors = bridges,
+  creditsDuration = CREDITS_TIMING.duration, profileName = DEFAULT_PROFILE,
 }) {
   const profile = getRenderProfile(profileName);
   const review = profile.outputHeight === 480;
@@ -222,7 +226,7 @@ export async function assembleFinal({
       '-map_metadata', '-1', '-map_metadata:s:v', '-1', '-map_metadata:s:a', '-1', '-map_chapters', '-1', '-fflags', '+bitexact',
       '-metadata:s:v:0', 'handler_name=', '-metadata:s:a:0', 'handler_name=', '-video_track_timescale', String(profile.fps * 1000),
       '-movflags', '+faststart', pending]);
-    await checkOutput(pending, expectedFrames, creditsDuration, profile, review, loudnessTarget, bridges);
+    await checkOutput(pending, expectedFrames, creditsDuration, profile, review, loudnessTarget, inkAnchors);
     await rename(pending, destination);
   } finally {
     await Promise.all([music, manifest, pending].map(file => rm(file, { force: true })));

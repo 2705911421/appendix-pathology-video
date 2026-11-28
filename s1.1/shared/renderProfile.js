@@ -43,11 +43,20 @@ const review15 = Object.freeze({
   segmentSuffix: '_review_480p_15fps',
 });
 
-export const renderProfiles = Object.freeze({ master, review, review15 });
+const teammate_1080p36 = Object.freeze({
+  ...master,
+  deviceScaleFactor: 1,
+  fps: 36,
+  level: '4.2',
+  maxBitrate: 24,
+  segmentSuffix: '_1080p_36fps',
+});
+
+export const renderProfiles = Object.freeze({ master, review, review15, teammate_1080p36 });
 export const renderProfile = renderProfiles[DEFAULT_PROFILE];
 
 export function getRenderProfile(name = DEFAULT_PROFILE) {
-  if (!Object.hasOwn(renderProfiles, name)) throw new Error(`未知渲染档位 ${name}（可选 master、review 或 review15）`);
+  if (!Object.hasOwn(renderProfiles, name)) throw new Error(`未知渲染档位 ${name}（可选 ${Object.keys(renderProfiles).join('、')}）`);
   return renderProfiles[name];
 }
 

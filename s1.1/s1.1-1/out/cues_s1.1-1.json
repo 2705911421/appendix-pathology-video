@@ -7,68 +7,65 @@
     {
       "id": "S01",
       "type": "speech",
-      "defaultDuration": 9.5,
-      "zhText": "一顿再普通不过的午饭后，你的肚脐周围，突然开始隐隐作痛，甚至泛起恶心，连吐了两次。",
+      "defaultDuration": 6.9,
+      "zhText": "中午十二点，一顿普通午饭后，这位青年突感肚脐周围隐隐作痛。",
       "highlightZh": [
         "肚脐周围",
         "隐隐作痛"
       ],
-      "enText": "After an ordinary lunch, a dull ache starts around your navel, bringing nausea and two bouts of vomiting."
+      "enText": "At noon, right after an ordinary lunch, a young man suddenly feels a dull ache around his navel."
     },
     {
       "id": "S02",
       "type": "speech",
-      "defaultDuration": 8.5,
-      "zhText": "早期的疼痛经内脏神经传导，常让人觉得肚脐周围在疼，却很难指出具体位置。",
+      "defaultDuration": 9.8,
+      "zhText": "起初定位模糊，是因为早期炎症局限于阑尾内层，信号经内脏神经传导，大脑一时分不清痛源。",
       "highlightZh": [
-        "内脏神经",
-        "肚脐周围"
+        "阑尾内层",
+        "内脏神经"
       ],
-      "enText": "Early pain travels through visceral nerves. It is often felt around the navel, and its exact location is hard to pinpoint."
+      "enText": "The pain feels vague at first because early inflammation stays in the inner wall, carried by visceral nerves that the brain cannot pinpoint."
     },
     {
       "id": "S03",
       "type": "speech",
-      "defaultDuration": 17.8,
-      "zhText": "傍晚六点左右，疼痛转移到右下腹。麦氏点是阑尾根部的体表投影。炎症刺激壁腹膜，按压时产生压痛；突然松手，壁腹膜受牵拉，引发反跳痛。两者都是腹膜刺激征，提示炎症已累及腹膜。",
+      "defaultDuration": 28.8,
+      "zhText": "傍晚六点，炎症累及壁腹膜，疼痛便固定在右下腹麦氏点——肚脐与右髂前上棘连线的外三分之一处；临床上将压痛、反跳痛与腹肌紧张合称腹膜刺激征，反跳痛和腹肌紧张才是核心体征，压痛本身不等同于腹膜刺激征，麦氏点按压疼痛、突然松手牵拉腹膜引发反跳痛，提示炎症已累及腹膜。",
       "highlightZh": [
-        "右下腹",
-        "麦氏点",
-        "体表投影",
         "壁腹膜",
+        "麦氏点",
         "压痛",
         "反跳痛",
+        "腹肌紧张",
         "腹膜刺激征",
-        "累及腹膜"
+        "核心体征"
       ],
-      "enText": "Around 6 PM, the pain shifts to the right lower abdomen. McBurney's point marks the surface projection of the appendiceal base. Inflammation irritates the parietal peritoneum, causing tenderness on pressure. Sudden release stretches the parietal peritoneum and elicits rebound tenderness. Both are signs of peritoneal irritation, indicating peritoneal involvement."
+      "enText": "By 6 PM, as inflammation reaches the parietal peritoneum, pain localizes to McBurney's point—the outer third from the navel to the right ASIS. Tenderness, rebound tenderness, and guarding form peritoneal irritation signs, with rebound and guarding as core markers; tenderness alone is not equivalent, while rebound on sudden release signals peritoneal involvement."
     },
     {
       "id": "B01",
       "type": "bridge",
       "duration": 1.8,
-      "start": 35.8,
-      "end": 37.6
+      "start": 45.5,
+      "end": 47.3
     },
     {
       "id": "S04",
       "type": "speech",
-      "defaultDuration": 18.4,
-      "zhText": "体温飙升至 39.3℃（正常参考范围 36–37℃），白细胞总数升至 13.0×10⁹/L（正常 4–10×10⁹/L），中性粒细胞数升至 11.3×10⁹/L（正常 2–7×10⁹/L）。",
+      "defaultDuration": 11.4,
+      "zhText": "熬到晚上十点急诊入院，炎症继续加重，患者体温明显升高，血常规也提示白细胞总数与中性粒细胞计数增高。",
       "highlightZh": [
-        "39.3℃",
+        "体温明显升高",
         "白细胞总数",
-        "13.0×10⁹/L",
-        "中性粒细胞数",
-        "11.3×10⁹/L"
+        "中性粒细胞计数"
       ],
-      "enText": "Temperature rose to 39.3°C (reference range 36–37°C). White blood cells rose to 13.0 × 10⁹/L (reference 4–10 × 10⁹/L). Absolute neutrophils rose to 11.3 × 10⁹/L (reference 2–7 × 10⁹/L)."
+      "enText": "By 10 PM in the ER, worsening inflammation drives a clear rise in body temperature, with elevated total white blood cell and neutrophil counts."
     },
     {
       "id": "S05",
       "type": "speech",
-      "defaultDuration": 10.8,
-      "zhText": "到急诊时已过去十小时。那根原本粉白细长的“小香肠”，在炎症中可经历变色：暗红、灰黄，甚至焦黑。",
+      "defaultDuration": 11,
+      "zhText": "十小时内症状步步升级，背后究竟发生了什么？沿着粉白、暗红、灰黄、焦黑四色密码，我们直击阑尾变质现场。",
       "highlightZh": [
         "十小时",
         "粉白",
@@ -76,15 +73,15 @@
         "灰黄",
         "焦黑"
       ],
-      "enText": "Ten hours have passed by arrival at the emergency department. The slender, pale-pink appendix can change color with inflammation: dark red, grayish yellow, or even black."
+      "enText": "Symptoms escalate within ten hours—what is happening inside? Follow the four-color code—pink, dark red, gray-yellow, and black—into the pathology."
     },
     {
       "id": "B02",
       "type": "bridge",
       "duration": 2.2,
-      "start": 66.8,
-      "end": 69
+      "start": 69.7,
+      "end": 71.9
     }
   ],
-  "duration": 69
+  "duration": 71.9
 }

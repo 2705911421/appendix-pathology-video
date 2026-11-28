@@ -1,8 +1,8 @@
-import {
-  createStoryStage, HEIGHT, PAPER, WIDTH, lerp, prepareStorySubtitles,
-} from '../../shared/canvasCore.js';
+import { createStoryStage, HEIGHT, PAPER, WIDTH, lerp, mulberry32 } from '../../shared/canvasCore.js';
 import { terminalIleumPoint } from '../../shared/anatomyWatercolor.js';
+import { prepareProductionSubtitles } from '../../shared/cueCaptions.js';
 import { SERIF_FONT } from '../../shared/fonts.js';
+import { drawMicroNeutrophil } from '../../shared/histologyProcedural.js';
 import { mountStageDotOverlay, STAGE_DOT_Y } from '../../shared/leftFloatNotes.js';
 import { mountMicroscopeHandoff } from '../../shared/detail/microscopeHandoff.js';
 import { createRaster, logicalContext } from '../../shared/detail/raster.js';
@@ -10,7 +10,7 @@ import { mountPaperBridge } from '../../shared/detail/transitionPaper.js';
 import { phase, phaseOut, pushTo } from '../../shared/timelineHelper.js';
 import { calls, circle, inkReveal } from './brushwork.js';
 import { CUES, resolveCue } from './cues.js';
-import { appendixPoint, createGrossAnatomy, CUT, DIMENSIONS, LENS_SAMPLE, projectAppendixSilhouette, projectSpecimen, SPECIMEN } from './gross.js';
+import { appendixPoint, createGrossAnatomy, DIMENSIONS, LENS_SAMPLE, projectAppendixSilhouette, projectSpecimen, SPECIMEN } from './gross.js';
 import { createMagnifier, createMicroscope, MAGNIFIER } from './optics.js';
 import { addPaperGrain } from './paperGrain.js';
 
@@ -23,21 +23,8 @@ const closeNote = p => 1 - phase(p, .86, 1);
 const focus = projectSpecimen(SPECIMEN)(appendixPoint(.73));
 const zoom = 1.56 / SPECIMEN.scale;
 
-const subtitleCuts = {
-  S06: ['后内侧，', 'cecum.', .51],
-  S07: ['通体暗红。', 'dark red.', .50],
-  S08: ['灰黄色脓苔。', 'grayish-yellow pus.', .34],
-  S09: ['窄腔。', 'lumen.', .52],
-};
-
-const subtitles = new Map(CUES.filter(cue => cue.type === 'speech').map(({ id, zhText, highlightZh, enText }) => {
-  const [anchor, translated, pageAt] = subtitleCuts[id];
-  if (!zhText.includes(anchor) || !enText.includes(translated)) throw new Error(`Missing subtitle break for ${id}`);
-  const splitAt = zhText.indexOf(anchor) + anchor.length;
-  const translationAt = enText.indexOf(translated) + translated.length;
-  return [id, prepareStorySubtitles({ text: zhText, highlights: highlightZh },
-    [enText.slice(0, translationAt), enText.slice(translationAt)], { splitAt, pageAt })];
-}));
+const subtitles = new Map(CUES.filter(cue => cue.type === 'speech')
+  .map(cue => [cue.id, prepareProductionSubtitles(cue)]));
 
 function letter(ctx, text, x, y, { color = dark, size = 26, weight = 800, align = 'left', top = false, halo = true } = {}) {
   ctx.save();
@@ -80,9 +67,6 @@ function drawObservationNotes(ctx, id, p) {
     letter(ctx, '正常形态 · 约 6~8 cm', 80, notesY + 106, { size: 22, weight: 600, color: graphite, halo: false });
   } else if (id === 'S07') {
     letter(ctx, '大体观察 · 肿胀充血', 80, notesY + 106, { size: 24, halo: false });
-  } else if (id === 'S08') {
-    letter(ctx, '急性蜂窝织性阑尾炎', 76, notesY + 106, { size: 20, halo: false });
-    letter(ctx, '外现特征', 80, notesY + 143, { size: 23, color: graphite, halo: false });
   }
   ctx.restore();
 }
@@ -114,9 +98,86 @@ function cueGeometry(id, p) {
     return { stage: 'phlegmon', morphProgress, coat: phase(p, .15, .85), push: phase(p, 0, .70),
       diameter: lerp(DIMENSIONS.simple.appendix, DIMENSIONS.phlegmon.appendix, morphProgress) };
   }
-  return { stage: 'phlegmon', cutaway: true, opening: phase(p, .25, .55),
-    cutProgress: phase(p, 0, .25), scissors: phase(p, 0, .025) * (1 - phase(p, .25, .30)),
-    guide: 1 - phase(p, .25, .55), progress: p, push: 1, diameter: DIMENSIONS.phlegmon.appendix };
+  return { stage: 'phlegmon', sectionOpacity: phase(p, .35, .68), push: 1, diameter: DIMENSIONS.phlegmon.appendix };
+}
+
+const wallLayers = [
+  ['浆膜', '#E1B6C1'], ['肌层', '#D995A7'], ['黏膜下层', '#E9C7CE'], ['黏膜', '#DCA6BD'],
+];
+const wallWidth = 330;
+const wallRowHeight = 28;
+
+function makeWallLayers() {
+  const tile = createRaster(wallWidth, 128);
+  const pen = logicalContext(tile);
+  const random = mulberry32(13472);
+  const waves = (y, index) =>
+    `Q55 ${y - 4} 110 ${y + 1} T220 ${y + index % 2 * 3} T${wallWidth} ${y}`;
+  pen.fillStyle = '#BAA16A';
+  pen.fill(new Path2D(`M0 6 ${waves(6, 0)} L${wallWidth} 19 H0Z`));
+  for (const [index, [, shade]] of wallLayers.entries()) {
+    const y = 15 + index * wallRowHeight;
+    const band = new Path2D(`M0 ${y} ${waves(y, index)} V${y + wallRowHeight + 3} H0Z`);
+    pen.fillStyle = shade;
+    pen.fill(band);
+    pen.save();
+    pen.clip(band);
+    for (let i = 0; i < 24; i++) {
+      const x = (i + random()) / 24 * wallWidth;
+      drawMicroNeutrophil(pen, x, y + 6 + random() * 15, index * 100 + i + 771,
+        { scale: .95 + random() * .42, alpha: .82 });
+    }
+    pen.restore();
+  }
+  return tile;
+}
+
+function drawWallMechanism(ctx, alpha, progress) {
+  if (alpha <= 0) return;
+  const x = 1284;
+  const textX = x + 23;
+  const layerNameX = textX + wallWidth + 17;
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.beginPath();
+  ctx.roundRect(x, 270, 488, 284, 13);
+  ctx.fillStyle = '#F3EBE0';
+  ctx.fill();
+  ctx.strokeStyle = '#DCCDBB';
+  ctx.lineWidth = 1.4;
+  ctx.stroke();
+  letter(ctx, '外观成因 · 组织学透视', textX, 311, { size: 24, halo: false });
+  letter(ctx, '阑尾壁各层浸润大量中性粒细胞 →', textX, 348, { size: 20, weight: 700, halo: false });
+  letter(ctx, '肉眼观管壁明显肿胀、外表面覆盖一层灰黄色脓苔', textX, 380,
+    { size: 20, weight: 600, color: '#4E4740', halo: false });
+  ctx.drawImage(wallLayerArt, textX, 402, wallWidth, 128);
+  // Guide the eye down the fixed layers before the larger microscope view takes over.
+  const focus = phase(progress, .65, .98);
+  const visibility = phase(focus, 0, .12) * (1 - phase(focus, .86, 1));
+  if (visibility > 0) {
+    const y = lerp(430, 517, focus);
+    const wash = ctx.createLinearGradient(0, y - 17, 0, y + 17);
+    wash.addColorStop(0, '#672D4B00');
+    wash.addColorStop(.5, '#672D4B52');
+    wash.addColorStop(1, '#672D4B00');
+    ctx.save();
+    ctx.globalAlpha *= visibility;
+    ctx.fillStyle = wash;
+    ctx.fillRect(textX, 417, wallWidth, 113);
+    ctx.beginPath();
+    ctx.moveTo(textX - 13, y - 9);
+    ctx.quadraticCurveTo(textX - 15, y, textX - 13, y + 9);
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#8E4A57';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.restore();
+  }
+  letter(ctx, '灰黄色脓苔', layerNameX, 418, { size: 15, color: '#765C35', halo: false });
+  for (const [i, [name]] of wallLayers.entries()) {
+    letter(ctx, name, layerNameX, 438 + i * wallRowHeight, { size: 16, color: graphite, halo: false });
+  }
+  ctx.restore();
 }
 
 function lensOpening(p) {
@@ -135,6 +196,7 @@ const showMicroscopeHandoff = mountMicroscopeHandoff(root);
 const { drawIleocecal, window: incisionWindow } = createGrossAnatomy();
 const magnifier = createMagnifier();
 const microscope = createMicroscope();
+const wallLayerArt = makeWallLayers();
 
 function render({ cue, p }, captureEntry = false) {
   const { id, start, end } = cue;
@@ -179,7 +241,7 @@ function render({ cue, p }, captureEntry = false) {
     ctx.restore();
   }
 
-  const coatLabel = id === 'S08' ? phase(p, .58, .84) : 0;
+  const coatLabel = id === 'S08' ? phase(p, .48, .72) : 0;
   if (coatLabel > 0) {
     ctx.save();
     ctx.globalAlpha *= closeNote(p);
@@ -188,14 +250,17 @@ function render({ cue, p }, captureEntry = false) {
     ctx.restore();
   }
 
-  if ((id === 'S09' || microBridge) && fading > 0) {
+  if (id === 'S08') {
     ctx.save();
-    ctx.globalAlpha *= microBridge ? 1 - phase(p, 0, .25) : 1;
-    label(ctx, '粪石梗阻', 717, 749, project(appendixPoint(CUT.stone)),
-      { size: 28, align: 'right', bend: 30, progress: phase(poseP, .36, .51) });
-    label(ctx, '管腔充满黄红色脓液', 1305, 741, project(appendixPoint(CUT.pus)),
-      { size: 28, color: red, leader: red, bend: 12, progress: phase(poseP, .48, .641) });
+    ctx.globalAlpha *= phase(p, .20, .47) * closeNote(p);
+    letter(ctx, '急性化脓性阑尾炎（又称急性蜂窝织性阑尾炎）的外观特征', 1175, 219,
+      { size: 24, halo: false });
     ctx.restore();
+  }
+
+  if ((id === 'S09' || microBridge) && fading > 0) {
+    const cardOpacity = microBridge ? 1 - phase(p, 0, .25) : phase(p, .32, .59);
+    drawWallMechanism(ctx, cardOpacity, poseP);
   }
   const micro = microBridge ? microscope.at(p, projectAppendixSilhouette(project)) : null;
   const subtitle = captureEntry ? null : subtitles.get(id);
@@ -203,7 +268,7 @@ function render({ cue, p }, captureEntry = false) {
   showPaper(id === 'S06' && !captureEntry ? 1 - phase(p, 0, .10) : 0);
   showMicroscopeHandoff(micro ?? {});
   return { id, p, diameter: state.diameter, camera: camera.scale, scale: pose.scale, lens, micro,
-    specimenOpacity: fading, cut: { opening: state.opening, guide: state.guide, scissors: state.scissors } };
+    specimenOpacity: fading, sectionOpacity: state.sectionOpacity };
 }
 
 await stage.ready;

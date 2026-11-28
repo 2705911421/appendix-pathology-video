@@ -6,8 +6,8 @@ import path from 'node:path';
 import { isBuiltin } from 'node:module';
 import { build } from 'esbuild';
 import { assertBlindReviewText } from '../shared/blindReview.js';
-import { spokenHanCount } from '../shared/cueCaptions.js';
-import { CAPTION_SAFE_Y, STORY_ART_BOTTOM } from '../shared/canvasCore.js';
+import { CAPTION_HAN_LIMIT, prepareProductionSubtitles, spokenHanCount } from '../shared/cueCaptions.js';
+import { CAPTION_SAFE_Y, STORY_ART_BOTTOM, storySubtitleAt } from '../shared/canvasCore.js';
 import { DEFAULT_PROFILE, bridgeScale, getRenderProfile, inkTick, renderProfile, tempoScale, videoDimensions } from '../shared/renderProfile.js';
 import { CREDITS_TIMING, cueDurationMs } from '../shared/timelineHelper.js';
 import { REFERENCES } from '../shared/references.js';
@@ -18,8 +18,8 @@ import { launchBrowser, prepareBridgePlates, project, withStage } from './render
 
 const acute = /增[生殖]|\bproliferat(?:ion|ive|e\w*)\b/iu;
 const obsoleteSensitivity = /(?:98[.．]7|97)\s*%|百分之(?:九十七|九十八点七)/u;
-const obsoleteRevision = /\u6124\u6012\u7684\u86db\u7f51|\u70e7\u5230|\u70e7\u7a7f|\u4fee\u590d\u6027(?:\u7684)?[“「"]?\u589e\u751f|\u4e2d\u6027\u7c92\u7ec6\u80de.{0,8}\u6324\u51fa|\u6324\u51fa\u8840\u7ba1\u58c1|\u8702\u7a9d\u7ec7\u708e\u6027|\u6563\u5728(?:\u7684)?\u5be5\u5be5|reparative proliferation/iu;
-const retiredFinalReview = /J[A]MA Surg, 2026|202[5] Edition|\u6bcf\u5347\u4e00\u767e\u4e09\u5341\u4ebf|\u6bcf\u5347\u56db\u5341\u5230\u4e00\u767e\u4ebf|\u6bcf\u5347\u4e00\u767e\u4e00\u5341\u4e09\u4ebf|\u6bcf\u5347\u4e8c\u5341\u5230\u4e03\u5341\u4ebf|\u672c\u4f8b\u53c2\u8003\u4e09\u5341\u516d/u;
+const obsoleteRevision = /两者都是腹膜刺激征|沿虚线纵切|切开阑尾|剖开|外现特征|愤怒的蛛网|烧穿|烧到|修复性增生|蜂窝织炎性|每升一百三十亿|每升四十到一百亿|每升一百一十三亿|每升二十到七十亿|本例参考三十六|修复性的增生|散在(?:的)?寥寥|reparative proliferation/iu;
+const bareDiagnosis = /(?:单纯性|化脓性|坏疽性)(?!阑尾炎)/u;
 const offModel = /\u8fc7\u654f\u53cd\u5e94|\u9ecf\u819c\u539f\u53d1(?:\u6027)?\u6e83\u75a1|\u539f\u53d1(?:\u6027)?\u9ecf\u819c\u6e83\u75a1|allergic reaction|primary mucosal ulcer/iu;
 const smartApostrophes = /[\u2018\u2019\u201b\u02bb\u02bc\uff07]/u;
 const rasterFile = /\.(?:png|jpe?g|webp|avif|gif|bmp|tiff?)$/iu;
@@ -31,26 +31,9 @@ for (const [length, digest] of [[3,"02cef0d13500922533c5"],[3,"339995a414573e8d9
   nameDigests.get(length).add(digest);
 }
 const skips = new Set(['.git', 'node_modules', 'out', 'frames', 'audio', 'external_tts']);
-const surgery = '一旦确诊，通常建议在症状缓解期择期切除；若正处于急性发作期，则视情况急诊手术。';
 const lumaRange = [192, 232];
 const authoredStages = ['normal', 'simple', 'phlegmon', 'gangrene', 'chronic'];
 const checkpoints = [.16, .30, .49, .70, .92];
-const revisionHighlights = {
-  S03: ['体表投影', '压痛', '反跳痛', '腹膜刺激征'],
-  S04: ['白细胞总数', '中性粒细胞数', '13.0×10⁹/L', '11.3×10⁹/L'],
-  S07: ['烧红的铁丝网'],
-  S08: ['急性蜂窝织性阑尾炎', '外现特征'],
-  S11: ['梗阻—感染', '粪石', '黏膜坏死'],
-  S12: ['血浆被动漏出', '边集', '滚动', '黏附', '阿米巴样运动', '主动渗出'],
-  S13: ['链激酶', '透明质酸酶', '蔓延', '蜂窝织性'],
-  S14: ['化脓性炎症', '脓细胞', '纤维素性脓性渗出物', '灰黄色脓苔'],
-  S16: ['肌层与浆膜层', '轻度水肿', '少量中性粒细胞浸润'],
-  S17: ['阑尾壁动脉', '阑尾系膜静脉', '动静脉双重受阻', '缺血、坏死'],
-  S18: ['继发腐败菌感染', '坏疽', '发黑'],
-  S22: ['急性蜂窝织性阑尾炎', '未穿孔', '尽早手术切除'],
-  S23: ['炎症刺激导致的“增生”'],
-};
-
 const localPath = file => path.join(project, file);
 const read = file => readFile(localPath(file), 'utf8');
 const json = async file => JSON.parse((await read(file)).replace(/^\uFEFF/u, ''));
@@ -61,29 +44,29 @@ function checkedText(value, location) {
   assert.doesNotThrow(() => assertBlindReviewText(value), `${location} contains blind-review identifiers`);
   assert.ok(!obsoleteSensitivity.test(value.normalize('NFKC')), `${location} contains obsolete sensitivity`);
   assert.ok(!obsoleteRevision.test(value.normalize('NFKC')), `${location} contains retired revision wording`);
-  assert.doesNotMatch(value, retiredFinalReview, `${location} contains retired reference or lab wording`);
   assert.doesNotMatch(value, localLeak, `${location} has a private path, token, or unfinished marker`);
   assert.doesNotMatch(value, offModel, `${location} contains a prohibited etiology model`);
 }
 
-const textbookHashes = [
-  '317fc327e81d61983559d839c677847767dd44d58dc6656be79d0abf0bfe243d',
-  '41d91708fcf8824969295638155b42c9d391d86ccbefd2ff5c9da4c1aaf8a280',
-  'a63f6576d0d532983be73c2b525844514d39c4726912061b9f1b4d8665d37e44',
+const referenceHashes = [
+  '170f8746547233a89f70fed8a152e355f7cff38195ab1e3877a2c119662d1a92',
+  '510133525f7b17bd89846a275996be98847e72011d615837aaf374ae5d2ba989',
+  '597ff847e88f5724095bddb8c03635140c464ef48a5812613dc8e314a5d53c9b',
+  'd8b39786b145438fcad3c0047c7e68cb63ac0aa40a1c0a7da5671793631df77e',
+  'a48fa6f8cb4473eb5b44de3f566c7fac14122265e3d75a0e5f0d581e7c6238a1',
 ];
 
-function verifiedTextbooks() {
-  return textbookHashes.map((digest, index) => {
-    const row = REFERENCES[index];
-    assert.equal(createHash('sha256').update(row).digest('hex'), digest, `S26 textbook ${index + 1}`);
-    return row;
-  });
+function verifyReferenceRows() {
+  assert.equal(REFERENCES.length, referenceHashes.length);
+  REFERENCES.forEach((row, i) =>
+    assert.equal(createHash('sha256').update(row).digest('hex'), referenceHashes[i], 'S26 citation ' + (i + 1)));
+  return REFERENCES.slice(0, 3);
 }
 
-function checkNames(source, location) {
+function checkNames(source, location, digestsByLength = nameDigests) {
   const lower = source.normalize('NFKC').toLowerCase();
   const check = candidate => {
-    const digests = nameDigests.get(candidate.length);
+    const digests = digestsByLength.get(candidate.length);
     if (!digests) return;
     const token = createHash('sha256').update(candidate).digest('hex').slice(0, 20);
     assert.ok(!digests.has(token), `${location} matches a redacted publication name`);
@@ -110,7 +93,7 @@ async function* projectFiles(directory = '') {
 }
 
 async function verifySource() {
-  const textbooks = verifiedTextbooks();
+  const textbooks = verifyReferenceRows();
   let files = 0;
   let fontAssignments = 0;
   const modules = new Set();
@@ -173,11 +156,20 @@ async function verifySource() {
   for (const key of ['author', 'contributors', 'studentId', 'school', 'affiliation', 'supervisor']) {
     assert.ok(!Object.hasOwn(metadata, key), `Unblinded package metadata key: ${key}`);
   }
-  const journalTitles = [/^Computed tomography.*Cochrane Database Syst Rev, 2019, 2019\(11\): CD009977\.$/u,
-    /^Diagnosis and treatment.*World J Emerg Surg, 2020, 15\(1\): 27\.$/u];
-  assert.equal(REFERENCES.length, textbooks.length + journalTitles.length);
-  REFERENCES.slice(textbooks.length).forEach((entry, i) => assert.match(entry, journalTitles[i], 'S26 journal citation'));
-  assert.throws(() => checkNames(textbooks[0].split(',')[0], 'isolated editor outside S26'), /matches a redacted/u);
+  const references = await read('shared/references.js');
+  // Journal pagination is excluded from the year scan by its volume(issue): pages form.
+  const dates = references.replace(/\b\d+\(\d+\):\s+\d+[-–]\d+/gu, '');
+  const years = [...dates.matchAll(/\b\d{4}\b/gu)].map(([year]) => Number(year));
+  assert.deepEqual(years, [2024, 2024, 2024, 2024, 2025, 2026]);
+  assert.ok(years.every(year => year >= 2023 && year <= 2026));
+  for (const term of ['崔慧先', '卞修武', '陈孝平', 'Surg Endosc, 2024', 'JAMA Surg, 2026', 'Podda M']) {
+    assert.ok(references.includes(term), 'S26 citation missing ' + term);
+  }
+  pass('S26 · 5 exact references · 2024–2026 · journal pages excluded from year detection');
+  const sample = '测试名';
+  const sampleDigest = createHash('sha256').update(sample).digest('hex').slice(0, 20);
+  assert.throws(() => checkNames(sample, 'synthetic probe', new Map([[sample.length, new Set([sampleDigest])]])),
+    /matches a redacted/u);
   pass(`${files} sources · 0 known name, privacy or banned wording hits · ${modules.size} dependency roots · ${fontAssignments} canvas font assignments · 3 Style D entry points`);
 }
 
@@ -229,48 +221,58 @@ async function verifyCues(source) {
   const credits = source.cues.at(-1);
   assert.equal(credits.defaultDuration, CREDITS_TIMING.duration);
   const budget = source.cues.reduce((sum, cue) => sum + cueDurationMs(cue), 0) / 1000;
-  assert.ok(budget >= 305 && budget <= 335, `Native budget ${budget}`);
+  assert.ok(budget >= 315 && budget <= 335, `Native budget ${budget}`);
   const authored = new Map(source.sheets.flatMap(({ sheet }) => sheet.cues).map(cue => [cue.id, cue]));
   const required = {
-    S02: [/内脏神经/u, /\bvisceral nerves\b/u],
-    S03: [/右下腹.*麦氏点是阑尾根部的体表投影.*炎症刺激壁腹膜.*按压.*压痛.*突然松手.*壁腹膜受牵拉.*反跳痛.*腹膜刺激征.*累及腹膜/u,
-      /McBurney's point.*surface projection.*appendiceal base.*parietal peritoneum.*tenderness on pressure.*release stretches.*rebound tenderness.*peritoneal irritation.*peritoneal involvement/u],
-    S04: [/39\.3℃.*36–37℃.*白细胞总数.*13\.0×10⁹\/L.*4–10×10⁹\/L.*中性粒细胞数.*11\.3×10⁹\/L.*2–7×10⁹\/L/u,
-      /39\.3°C.*36–37°C.*white blood cells.*13\.0 × 10⁹\/L.*4–10 × 10⁹\/L.*absolute neutrophils.*11\.3 × 10⁹\/L.*2–7 × 10⁹\/L/iu],
-    S07: [/浆膜血管扩张充血.*烧红的铁丝网/u, /dilated, congested serosal vessels.*red-hot wire mesh/u],
-    S08: [/灰黄色脓苔。这正是急性化脓性阑尾炎，也就是急性蜂窝织性阑尾炎的外现特征。$/u,
-      /grayish-yellow pus.*external manifestation of acute suppurative \(phlegmonous\) appendicitis/u],
-    S09: [/水肿增厚.*积脓的窄腔.*粪石/u, /\bfecalith\b/u],
-    S10: [/变质.*渗出/u, /tissue injury and exudation/u],
-    S11: [/梗阻—感染.*以粪石为主堵塞管腔.*腔内压.*急剧升高.*缺血与细菌感染.*黏膜坏死、破溃、脱落.*溃疡.*变质/u,
-      /obstruction-infection.*fecalith.*blocks the lumen.*luminal pressure.*rise sharply.*Ischemia and bacterial infection.*necrosis.*breakdown and sloughing.*ulceration.*tissue injury/u],
-    S12: [/组胺.*缓激肽.*前列腺素.*趋化因子等炎症介质.*血管扩张充血.*通透性升高.*血浆被动漏出.*中性粒细胞受炎症介质与趋化因子引导.*边集、滚动、黏附.*阿米巴样运动经内皮间隙游出.*主动渗出/u,
-      /Histamine, bradykinin, prostaglandins and chemotactic factors.*dilate.*congested.*permeable.*plasma leaks out passively.*neutrophils marginate, roll and adhere.*actively leave through endothelial gaps by amoeboid movement/u],
-    S13: [/化脓性炎症.*链球菌.*链激酶和透明质酸酶.*激活纤溶酶原.*纤维素降解.*降解透明质酸.*沿组织间隙迅速蔓延.*穿透肌层直达浆膜.*“蜂窝织性”名称的由来/u,
-      /suppurative inflammation.*streptococci.*streptokinase and hyaluronidase.*plasminogen.*fibrin breakdown.*hyaluronic acid.*spread rapidly through tissue spaces.*muscle to the serosa.*phlegmonous/u],
-    S14: [/本质是化脓性炎症.*以变性、坏死的中性粒细胞为主.*脓细胞.*交织成网的纤维素.*纤维素性脓性渗出物.*灰黄色脓苔/u,
-      /suppurative inflammation.*mainly.*necrotic neutrophils.*pus cells.*mesh of fibrin.*fibrinopurulent exudate.*grayish-yellow purulent coating/u],
-    S15: [/早期控制.*迅速恶化/u, /controlled early.*worsen rapidly/u],
-    S16: [/黏膜和黏膜下层.*肌层与浆膜层轻度水肿及少量中性粒细胞浸润/u,
-      /mucosa and submucosa.*muscularis propria and serosa.*mild edema and sparse neutrophil infiltration/u],
-    S17: [/化脓蔓延到阑尾壁全层.*管壁张力升高.*压迫阑尾壁动脉.*阑尾系膜静脉.*血栓.*回流.*动静脉双重受阻.*切断血供.*缺血、坏死/u,
-      /transmural suppuration.*tension.*compressing the appendiceal wall artery.*thrombus.*mesoappendiceal vein.*block outflow.*arterial and venous obstruction.*cut off the blood supply.*ischemia and necrosis/u],
-    S18: [/组织坏死后.*继发腐败菌感染.*形成坏疽.*阑尾发黑.*坏疽性阑尾炎.*穿孔.*弥漫性腹膜炎/u,
-      /tissue dies.*secondary infection with putrefactive bacteria.*cause gangrene.*turn black.*gangrenous appendicitis.*perforation.*diffuse peritonitis/u],
-    S19: [/典型症状.*体格检查/u, /typical symptoms.*physical exam/u],
-    S20: [/辅助确诊工具.*临床评估.*成人疑似病例.*可超过百分之九十三/u, /diagnostic aid.*clinical assessment.*adults.*exceed 93\s*%/iu],
-    S21: [/轻度增粗.*偏心粪石.*脂肪条索.*壁强化缺损.*盲肠旁脓肿.*腔外气泡/u, /phlegmonous.*fecalith.*gangrenous.*extraluminal gas/u],
-    S22: [/急性蜂窝织性阑尾炎.*未穿孔.*尽早手术切除.*尽快外科评估.*弥漫性腹膜炎.*紧急手术.*局限性脓肿.*引流/u,
-      /acute phlegmonous appendicitis.*without perforation.*early appendectomy.*prompt surgical assessment.*diffuse peritonitis.*localized abscess/iu],
-    S23: [/慢性阑尾炎.*炎症刺激导致的“增生”.*纤维化/u, /chronic appendicitis.*inflammation-induced proliferation/iu],
-    S24: [/淋巴细胞和浆细胞/u, /elective appendectomy.*symptoms have subsided.*emergency surgery may be needed/u],
+    S02: [/内脏神经/u, /visceral nerves/u],
+    S03: [/右下腹.*麦氏点.*右髂前上棘.*压痛.*反跳痛.*腹肌紧张.*腹膜刺激征.*核心体征.*松手牵拉腹膜/u,
+      /McBurney's point.*right ASIS.*Tenderness.*rebound tenderness.*guarding.*core markers.*peritoneal involvement/u],
+    S04: [/体温明显升高.*白细胞总数.*中性粒细胞计数增高/u, /body temperature.*white blood cell.*neutrophil counts/iu],
+    S07: [/浆膜面毛细血管.*烧红的铁丝网.*暗红/u, /serosal capillaries.*red-hot wire mesh.*dark red/u],
+    S08: [/急性化脓性阑尾炎.*急性蜂窝织性阑尾炎.*外观特征/u, /gross external appearance of acute suppurative.*acute phlegmonous.*appendicitis/u],
+    S09: [/阑尾壁各层浸润大量中性粒细胞.*灰黄色脓苔/u, /neutrophils infiltrate all layers.*gray-yellow purulent coat/u],
+    S10: [/阑尾炎的本质主要是炎症.*变质.*渗出/u, /inflammation.*tissue alteration and exudation/u],
+    S11: [/梗阻—感染.*以粪石为主.*腔内压升高.*缺血.*细菌感染.*黏膜变性坏死脱落.*变质/u,
+      /obstruction-infection.*fecalith.*pressure.*ischemia.*bacterial invasion.*mucosal necrosis/u],
+    S12: [/组胺.*缓激肽.*前列腺素.*趋化因子.*通透性升高.*血浆被挤出或漏出.*边集、滚动、黏附.*阿米巴样运动主动游出/u,
+      /histamine, bradykinin, prostaglandins, chemokines.*plasma leaks out.*neutrophils actively emigrate.*margination, rolling, adhesion.*amoeboid diapedesis/u],
+    S13: [/链激酶.*激活纤溶酶原.*促进纤维素降解.*透明质酸酶.*急性蜂窝织性阑尾炎/u,
+      /streptokinase activates plasminogen to degrade fibrin.*hyaluronidase.*acute phlegmonous appendicitis/u],
+    S14: [/^在浆膜面，.*脓细胞.*纤维素性脓性渗出物.*灰黄色脓苔/u,
+      /^On the serosal surface,.*pus cells.*fibrinous-purulent exudate.*gray-yellow purulent coat/u],
+    S15: [/急性单纯性阑尾炎.*急性化脓性阑尾炎.*急性坏疽性阑尾炎.*并非每位患者/u, /not every patient follows/u],
+    S16: [/急性单纯性阑尾炎.*黏膜和黏膜下层.*肌层与浆膜层.*轻度水肿.*少量中性粒细胞浸润/u,
+      /mucosa and submucosa.*mild edema and sparse neutrophil infiltration.*muscularis and serosa/u],
+    S17: [/急性化脓性阑尾炎.*阑尾壁动脉.*阑尾系膜静脉.*动静脉双重受阻.*缺血坏死/u,
+      /mural arteries.*mesoappendiceal vein thrombosis.*dual vascular obstruction.*ischemia and necrosis/u],
+    S18: [/腐败菌.*急性坏疽性阑尾炎.*穿孔不一定伴有坏疽.*画等号/u,
+      /putrefactive infection.*gangrenous appendicitis.*perforation does not require gangrene/u],
+    S19: [/转移性右下腹痛.*体格检查.*反跳痛与腹肌紧张/u, /migratory right lower quadrant pain.*physical exam.*rebound.*guarding/u],
+    S20: [/多层螺旋CT.*辅助确诊工具.*百分之九十三.*并非人人必做/u, /multidetector CT.*diagnostic aid.*93% sensitivity.*not required for every patient/u],
+    S21: [/急性单纯性阑尾炎.*急性化脓性阑尾炎.*急性坏疽性阑尾炎.*管壁强化缺损.*盲肠旁脓肿.*游离气体/u,
+      /target sign.*fecalith.*fat stranding.*wall enhancement defect.*abscess.*free air/u],
+    S22: [/未穿孔的急性化脓性阑尾炎.*尽早手术切除.*急性坏疽性阑尾炎.*尽快外科评估.*弥漫性腹膜炎.*局限性脓肿.*引流/u,
+      /Unperforated acute suppurative appendicitis.*prompt appendectomy.*urgent surgical review.*diffuse peritonitis.*localized abscess/u],
+    S23: [/慢性阑尾炎.*炎症刺激导致的增生.*纤维化/u, /chronic appendicitis.*inflammation-induced proliferation/u],
+    S24: [/淋巴细胞与浆细胞.*缓解期择期切除.*急性发作期.*急诊手术/u, /interval elective surgery.*emergency surgery during acute flares/u],
   };
+  const durations = [6.9, 9.8, 28.8, 11.4, 11, 7.3, 10.7, 12.9, 12.6, 7.1, 12.2, 21.1, 22.3,
+    13.9, 14.1, 13.9, 12.6, 19.2, 14.3, 11.7, 19.6, 18.7, 14.6, 16, 12.6];
+  const ranges = /36–37|4–10|2–7/u;
+  const labs = await read('s1.1-1/src/labs.js');
+  for (const term of ['36–37℃', '4–10×10⁹/L', '2–7×10⁹/L']) assert.ok(labs.includes(term), 'S04 graph ' + term);
+  const serosa = await read('s1.1-3/src/serosa.mjs');
+  assert.doesNotMatch(serosa, /各层浸润大量中性粒细胞|macro-underline/u);
+  assert.equal(CAPTION_HAN_LIMIT, 28);
   for (const [i, cue] of speech.entries()) {
     const { id, zhText, enText, defaultDuration } = cue;
     const { highlightZh } = authored.get(id);
     assert.equal(id, `S${String(i + 1).padStart(2, '0')}`);
     for (const line of [zhText, enText]) checkedText(line, id);
     if (!['S23', 'S24'].includes(id)) assert.ok(!acute.test(zhText + ' ' + enText), `${id} presents proliferation outside the chronic scenes`);
+    assert.equal(defaultDuration, durations[i], id + ' raw duration');
+    assert.doesNotMatch(zhText, bareDiagnosis, id);
+    if (id === 'S04') assert.doesNotMatch(zhText, ranges, id);
     assert.ok(!smartApostrophes.test(enText), `${id} uses a non-ASCII apostrophe`);
     if (required[id]) {
       assert.match(zhText, required[id][0], id);
@@ -280,15 +282,24 @@ async function verifyCues(source) {
     assert.ok(Array.isArray(highlightZh) && highlightZh.length && highlightZh.every(term => term && zhText.includes(term)),
       `${id} has missing or unsynced Chinese highlights`);
     for (const term of highlightZh) checkedText(term, `${id} highlight`);
-    if (revisionHighlights[id]) {
-      for (const term of revisionHighlights[id]) assert.ok(zhText.includes(term) &&
-        highlightZh.some(highlight => highlight.includes(term)), `${id} must highlight ${term}`);
-      if (id !== 'S04') {
-        const rate = spokenHanCount(zhText) / defaultDuration;
-        assert.ok(rate >= 4 && rate <= 4.4, `${id} has a narration rate of ${rate.toFixed(3)} Han/s`);
-      }
+    // The comparison scene has its own bilingual pages, exercised with the CT layers below.
+    if (id === 'S21') continue;
+    const { pages, pageEnds } = prepareProductionSubtitles({ ...cue, highlightZh });
+    const total = spokenHanCount(zhText);
+    if (total > 34) assert.ok(pages.length >= 2 && pages.length <= Math.max(4, Math.ceil(total / 28)), id);
+    const chinese = pages.map(page => page.zh.map(run => run.text).join(''));
+    assert.equal(chinese.join(''), zhText, id);
+    const compact = text => text.replace(/\s+/gu, '');
+    assert.equal(compact(pages.map(page => page.en).join('')), compact(enText), id);
+    let accumulated = 0;
+    for (const [j, text] of chinese.entries()) {
+      const length = spokenHanCount(text);
+      assert.ok(length > 0 && length <= CAPTION_HAN_LIMIT, id + ' subtitle page ' + (j + 1));
+      assert.equal(storySubtitleAt({ pages, pageEnds }, (pageEnds[j] + (pageEnds[j - 1] ?? 0)) / 2).page, pages[j]);
+      accumulated += length;
+      assert.equal(pageEnds[j], accumulated / total, id + ' subtitle timing');
+      assert.doesNotMatch(pages[j].en, /[\r\n]/u, id);
     }
-    if (id === 'S24') assert.ok(zhText.includes(surgery), 'S24 timing principle must be quoted in full');
   }
   const local = await json('s1.1-5/cues_s1.1-5.json');
   const scriptWords = sheet => sheet.cues.map(({ id, zhText, enText, highlightZh, defaultDuration }) =>
@@ -298,12 +309,9 @@ async function verifyCues(source) {
   assert.deepEqual(tts.map(({ outputPath, ...cue }) => cue),
     speech.map(cue => ({ ...cue, zhText: formatTextForTTS(cue.zhText), ...recommendedTts })),
     'Re-export the edited narration sheet');
-  const numeric = tts.find(({ id }) => id === 'S04').zhText;
-  for (const term of ['13.0乘以10的9次方每升', '36到37摄氏度', '4到10乘以10的9次方每升',
-    '11.3乘以10的9次方每升', '2到7乘以10的9次方每升']) assert.ok(numeric.includes(term), term);
-  assert.doesNotMatch(numeric, /⁹|×|℃|\/L/u);
+  assert.doesNotMatch(tts.find(({ id }) => id === 'S04').zhText, ranges, 'S04 TTS');
   for (const { outputPath, id } of tts) assert.equal(outputPath, `s1.1/external_tts/${id}.wav`);
-  pass(`25 bilingual cues · TTS reading and pauses · 9 bridges · native budget ${budget.toFixed(3)} s`);
+  pass(`25 bilingual cues · 24 Han-paced cues ≤ 28 Han · S21 uses fixed CT pages · TTS and 9 bridges · native budget ${budget.toFixed(3)} s`);
   let cursor = 0;
   const timings = source.cues.map(cue => {
     const spoken = cue.type === 'speech' ? formatTextForTTS(cue.zhText) : '';
@@ -332,19 +340,17 @@ function verifyProfiles() {
   assert.deepEqual(videoDimensions(review), { width: 854, height: 480 });
   assert.deepEqual([review.logicalWidth, review.logicalHeight, review.deviceScaleFactor, review.fps], [1920, 1080, .5, 12]);
   assert.equal(getRenderProfile('review15').fps, 15);
-  try {
-    const peer = getRenderProfile('teammate_1080p36');
-    assert.deepEqual(videoDimensions(peer), { width: 1920, height: 1080 });
-    assert.deepEqual([peer.fps, peer.level], [36, '4.2']);
-  } catch (error) {
-    if (!String(error.message).startsWith('未知渲染档位')) throw error;
-  }
+  const peer = getRenderProfile('teammate_1080p36');
+  assert.deepEqual(videoDimensions(peer), { width: 1920, height: 1080 });
+  assert.deepEqual([peer.deviceScaleFactor, peer.fps, peer.profile, peer.level, peer.pixFmt],
+    [1, 36, 'high', '4.2', 'yuv420p']);
+  assert.deepEqual([peer.tempoScale, peer.bridgeScale], [tempoScale, bridgeScale]);
   assert.deepEqual([tempoScale, bridgeScale, master.tempoScale, master.bridgeScale], [1.15, .8, 1.15, .8]);
   assert.deepEqual(CREDITS_TIMING, { duration: 6.5, fadeIn: .6, fadeOut: .8 });
   assert.equal(inkTick(2.39), 11);
   assert.equal(cueDurationMs({ id: 'S01', defaultDuration: 11.5 }), 10000);
   assert.equal(cueDurationMs({ id: 'S01', defaultDuration: 11.5, effectiveDuration: 11.37 }), 11370);
-  pass('renderProfile · master 3840×2160 @ 60 fps · review 12/15 fps · native 1.15×/0.80 bridge');
+  pass('renderProfile · master 3840×2160 @ 60 fps · teammate 1920×1080 @ 36 fps · review 12/15 fps · native 1.15×/0.80 bridge');
 }
 
 const probeSource = String.raw`
@@ -521,15 +527,19 @@ function instrumentText() {
     if (capture && this.globalAlpha > .025) {
       const transform = this.getTransform();
       const origin = transform.transformPoint(new DOMPoint(x, y));
-      const end = transform.transformPoint(new DOMPoint(x + this.measureText(value).width, y));
+      const metrics = this.measureText(value);
+      const end = transform.transformPoint(new DOMPoint(x + metrics.width, y));
+      const bottom = transform.transformPoint(new DOMPoint(x, y + metrics.actualBoundingBoxDescent)).y;
       const previous = window.scienceText.at(-1);
       // SVG tspan fragments and colored Canvas caption runs share one rendered line.
       if (previous?.canvas === this.canvas && Math.abs(previous.y - origin.y) < .75
           && Math.abs(previous.end - origin.x) < 2.6) {
         previous.text += value;
         previous.end = end.x;
+        previous.bottom = Math.max(previous.bottom, bottom);
       } else {
-        window.scienceText.push({ text: String(value), x: origin.x, y: origin.y, end: end.x, canvas: this.canvas });
+        window.scienceText.push({ text: String(value), x: origin.x, y: origin.y, end: end.x, bottom,
+          font: this.font, fill: this.fillStyle, alpha: this.globalAlpha, canvas: this.canvas });
       }
     }
     return fill.call(this, value, x, y, ...args);
@@ -548,39 +558,46 @@ function instrumentText() {
 }
 
 const requiredScreen = {
+  S01: ['一根“香肠”的变质日记', '阑尾的粉 → 红 → 黄 → 黑'],
   S02: ['肚脐'],
-  S03: ['麦氏点（压痛、反跳痛）', '从右髂前上棘向脐量 1/3', '按压壁腹膜 → 压痛',
-    '突然松手牵拉 → 反跳痛', '腹膜刺激征 · 提示炎症累及腹膜'],
+  S03: ['麦氏点（压痛、反跳痛）', '从右髂前上棘向脐量 1/3',
+    '腹膜刺激征 = 压痛 + 反跳痛 + 腹肌紧张（核心体征）', '单纯压痛 ≠ 腹膜刺激征'],
   S04: ['39.3℃ 高热', '（正常 36–37℃）', '白细胞总数', '13.0×10⁹/L', '（正常 4–10×10⁹/L）',
-    '中性粒细胞数目（绝对值）', '11.3×10⁹/L', '（正常 2–7×10⁹/L）', '参考区间因实验室略有差异'],
+    '中性粒细胞数', '11.3×10⁹/L', '（正常 2–7×10⁹/L）', '参考区间因实验室略有差异'],
+  S05: ['四道色彩密码 · 直击阑尾变质现场', '10小时症状升级背后的病理演变'],
   S07: ['大体观察 · 肿胀充血', '浆膜血管扩张充血', '像烧红的铁丝网'],
-  S08: ['急性蜂窝织性阑尾炎', '外现特征', '浆膜面灰黄色脓苔'],
-  S10: ['急性阑尾炎始终以变质、渗出为主'],
+  S08: ['急性化脓性阑尾炎（又称急性蜂窝织性阑尾炎）的外观特征', '浆膜面灰黄色脓苔'],
+  S09: ['外观成因 · 组织学透视', '阑尾壁各层浸润大量中性粒细胞', '覆盖一层灰黄色脓苔'],
+  S10: ['变质', '渗出'],
   S11: ['黏膜破溃缺损 · 变质', '粪石梗阻 → 腔内压升高 → 缺血与感染'],
   S12: ['组胺 / 缓激肽 / 前列腺素 / 趋化因子等炎症介质', '通透性升高 · 血浆渗出',
     '1. 边集', '2. 滚动', '3. 黏附', '4. 阿米巴样游出（主动渗出）'],
-  S13: ['链球菌等细菌', '链激酶 + 透明质酸酶', '链激酶激活纤溶酶原', '降解纤维素与透明质酸',
-    '沿组织间隙迅速蔓延至浆膜', '穿透肌层 · 蜂窝织性', '渗出详细过程见前', '纤维素性脓性渗出物'],
-  S14: ['化脓性炎症 · 纤维素性脓性渗出物', '变性、坏死的中性粒细胞（脓细胞）', '纤维素网', '肉眼可见灰黄色脓苔'],
-  S15: ['纤维素性脓性渗出', '最常见典型路径 ≠ 每个患者必经的固定流程', '部分早期可及时控制', '部分可迅速恶化'],
-  S16: ['肌层与浆膜层轻度水肿及少量中性粒细胞浸润', '分叶核中性粒细胞（放大）', '渗出过程见前'],
+  S13: ['急性化脓性阑尾炎（又称急性蜂窝织性阑尾炎）· 全层蔓延', '感染链球菌',
+    '产生链激酶 → 激活纤溶酶原 → 促进纤维素降解', '配合透明质酸酶分解组织间质',
+    '局限性纤维素渗出被溶解 → 炎症迅速蔓延至各层', '渗出详细过程见前'],
+  S14: ['【视角切换 · 浆膜面高倍观】', '浆膜面外观真相：变性坏死的中性粒细胞（脓细胞）',
+    '= 纤维素性脓性渗出物 → 肉眼呈灰黄色脓苔'],
+  S15: ['急性单纯性阑尾炎', '急性化脓性阑尾炎', '急性坏疽性阑尾炎',
+    '纤维素性脓性渗出', '最常见典型路径 ≠ 每个患者必经的固定流程', '部分早期可及时控制', '部分可迅速恶化'],
+  S16: ['急性单纯性阑尾炎', '肌层与浆膜层轻度水肿及少量中性粒细胞浸润', '分叶核中性粒细胞（放大）', '渗出详细过程见前'],
   S17: ['阑尾壁动脉受压', '肿胀管壁使动脉变窄', '阑尾系膜静脉血栓', '血栓堵腔 · 回流受阻',
     '动静脉双重受阻 → 阑尾缺血、坏死'],
-  S18: ['出血坏死与全层穿孔', '坏死 + 继发腐败菌感染', '→ 坏疽发黑 → 穿孔 / 腹膜炎'],
-  S19: ['典型症状：转移性右下腹痛', '体格检查：麦氏点压痛、反跳痛', '肚脐', '脐周 → 右下腹', '麦氏点'],
+  S18: ['急性坏疽性阑尾炎', '出血坏死与全层穿孔', '坏死 + 继发腐败菌感染', '阑尾坏疽发黑',
+    '穿孔不一定伴有坏疽', '急性化脓性阑尾炎也可直接破溃穿孔，二者不能画等号'],
+  S19: ['典型症状：转移性右下腹痛', '体格检查：麦氏点压痛、反跳痛与腹肌紧张（腹膜刺激征）', '肚脐', '脐周 → 右下腹', '麦氏点'],
   S20: ['重要辅助工具，非人人必做', '多层螺旋 CT 诊断敏感度 > 93%', '成人疑似急性阑尾炎'],
-  S21: ['管壁轻增粗', '脂肪清晰', '双环靶征', '偏心粪石', '脂肪条索',
+  S21: ['急性单纯性阑尾炎', '急性化脓性阑尾炎', '急性坏疽性阑尾炎', '管壁轻增粗', '脂肪清晰', '双环靶征', '偏心粪石', '脂肪条索',
     '壁强化缺损', '盲肠旁脓肿', '游离气体', '2.4×'],
-  S22: ['急性蜂窝织性阑尾炎', '未穿孔者', '通常以尽早手术切除为主', '尽快外科评估',
+  S22: ['急性化脓性阑尾炎', '急性坏疽性阑尾炎', '未穿孔', '通常以尽早手术切除为主', '尽快外科评估',
     '弥漫性腹膜炎：通常需紧急手术', '局限性脓肿：可视情况先抗感染，必要时引流'],
   S23: ['慢性期：炎症刺激导致增生', '急性期：变质 + 渗出', '狭窄星形管腔'],
   S24: ['淋巴细胞', '浆细胞', '一旦确诊，通常建议在症状缓解期择期切除；', '若正处于急性发作期，则视情况急诊手术。'],
   S25: ['腹痛转移到右下腹，或持续加重', '尽快就医'],
-  S26: ['系统解剖学[M]', '病理学[M]', '外科学[M]', 'CD009977', 'World J Emerg Surg, 2020, 15(1): 27'],
+  S26: ['系统解剖学[M]', '病理学[M]', '外科学[M]', 'Surg Endosc, 2024', 'JAMA Surg, 2026', 'Podda M'],
 };
 
 function verifyScreenWords(id, texts) {
-  const textbooks = id === 'S26' ? verifiedTextbooks().map((row, i) => `[${i + 1}] ${row}`) : [];
+  const textbooks = id === 'S26' ? verifyReferenceRows().map((row, i) => `[${i + 1}] ${row}`) : [];
   for (const value of texts) {
     checkedText(value, id + ' screen');
     if (!textbooks.includes(value)) checkNames(value, id + ' screen');
@@ -593,6 +610,7 @@ function verifyScreenWords(id, texts) {
   if (id === 'S04') assert.doesNotMatch(all, /(?<!39\.3)℃ 高热|中性粒细胞比例|87\s*%/u, id);
   if (id === 'S11') assert.doesNotMatch(all, offModel, id);
   if (id === 'S13' || id === 'S14') assert.doesNotMatch(all, /单纯(?:的)?纤维素/u, id);
+  if (id === 'S14') assert.doesNotMatch(all, /各层浸润大量中性粒细胞/u, id);
   if (id === 'S17') assert.doesNotMatch(all, /核溶解|全层浸润|血供.{0,6}彻底/u, id);
   const joined = all.replace(/\s+/gu, ' ');
   for (const term of requiredScreen[id] ?? []) assert.ok(all.includes(term) || joined.includes(term),
@@ -708,7 +726,7 @@ function measureCanvasText(seconds) {
   window.scienceCapture(true);
   window.renderAt(seconds);
   window.scienceCapture(false);
-  return window.scienceText.map(({ text, x, y, end }) => ({ text, x, y, end }));
+  return window.scienceText.map(({ canvas: _canvas, ...metrics }) => metrics);
 }
 
 function measureNav(t) {
@@ -748,6 +766,7 @@ async function verifyStageEvidence(page, section) {
     assert.equal(hidden.segments.length, 0, 'S02 must withhold the localization guide');
     const { navel, asisR, mcburney, segments } = await page.evaluate(measureLandmarks, seconds('S03', .9));
     assert.ok(asisR.x < mcburney.x && mcburney.x < navel.x && asisR.y - navel.y >= 100);
+    assert.ok(close(mcburney.y, 433 + 2 / 3), 'S03 pelvis and McBurney labels raised 16 px');
     for (const axis of ['x', 'y']) assert.ok(close(mcburney[axis], asisR[axis] + (navel[axis] - asisR[axis]) / 3));
     assert.ok(segments.some(([[x1, y1], [x2, y2]]) =>
       close(x1, navel.x) && close(y1, navel.y) && close(x2, asisR.x) && close(y2, asisR.y)), 'S03 localization guide');
@@ -769,18 +788,27 @@ async function verifyStageEvidence(page, section) {
     assert.deepEqual(poses[2].bowl, poses[0].bowl, 'Meal cannot translate across the S01–S02 cut');
     assert.equal(poses[3].cx, 565);
     assert.equal(poses[3].bowl, null);
+    const opening = await page.evaluate(times => times.map(t => window.openingTransitionAt(t).openingTitle),
+      [.25, .60, .95, 2, 4.10, 4.425, 4.75, 5]);
+    assert.deepEqual(opening[0], { alpha: 0, dy: 14 });
+    assert.ok(close(opening[1].alpha, .875) && close(opening[1].dy, 1.75));
+    assert.deepEqual(opening.slice(2, 5), Array(3).fill({ alpha: 1, dy: 0 }));
+    assert.ok(close(opening[5].alpha, .5));
+    assert.deepEqual(opening.slice(6), Array(2).fill({ alpha: 0, dy: 0 }));
     const pressureNotes = await page.evaluate(measureCanvasText, seconds('S03', .92));
-    const mechanism = pressureNotes.filter(({ text }) => /^(?:按压壁腹膜|突然松手牵拉|腹膜刺激征 ·)/u.test(text));
-    assert.equal(mechanism.length, 3);
-    assert.ok(mechanism.every(({ x, y, end }) => x >= 1050 && end < 1900 && y > 700 && y < CAPTION_SAFE_Y - 12),
+    const mechanism = pressureNotes.filter(({ text }) => /^(?:腹膜刺激征 =|单纯压痛 ≠)/u.test(text));
+    assert.equal(mechanism.length, 2);
+    assert.ok(mechanism.every(({ x, y, end }) => x >= 1060 && end <= 1780 && y >= 675 && y <= 845),
       'S03 peritoneal signs must sit below the pelvis and above subtitles');
-    assert.ok(mechanism[0].end < mechanism[1].x - 12, 'S03 pressure and rebound labels overlap');
+    assert.deepEqual(mechanism.map(({ font }) => Number(/([\d.]+)px/u.exec(font)[1])), [22, 19]);
+    assert.equal(mechanism[1].y - mechanism[0].y, 26, 'S03 peritoneal signs two-line spacing');
+    assert.ok(mechanism[1].bottom <= 855, 'S03 graphic bottom clearance');
     const normalTemperatureBand = await page.evaluate(measureTemperatureBand, seconds('S04', .94));
     assert.deepEqual(normalTemperatureBand, [[725, 553, 755, 609]], 'S04 missing the 36–37℃ band on the scale');
     const readings = await page.evaluate(measureCanvasText, seconds('S04', .94));
     for (const [name, reading, range] of [
       ['白细胞总数', '13.0×10⁹/L', '（正常 4–10×10⁹/L）'],
-      ['中性粒细胞数目（绝对值）', '11.3×10⁹/L', '（正常 2–7×10⁹/L）'],
+      ['中性粒细胞数', '11.3×10⁹/L', '（正常 2–7×10⁹/L）'],
     ]) {
       const [label, value, reference] = [name, reading, range].map(term => readings.find(({ text }) => text === term));
       assert.ok(label && value && reference && close(value.y, reference.y) && value.y - label.y <= 50
@@ -796,17 +824,36 @@ async function verifyStageEvidence(page, section) {
       assert.ok(base[2] > base[0] + 20 && colors.at(-1)[0] > colors.at(-1)[2] + 25);
       assert.ok(colors.every(rgb => Math.min(...rgb.slice(0, 3)) < 180), 'S04 continuous bar');
     }
+    const titleCompositions = await page.evaluate(times => times.map(t => window.openingTransitionAt(t)),
+      [seconds('S04', .90), seconds('S04', .95), seconds('S04', .99999), seconds('S05', 0),
+        seconds('S05', .04), seconds('S05', .08)]);
+    const [fullLabs, halfLabs, lastLabs, paper, halfGuide, fullGuide] = titleCompositions;
+    assert.ok(close(fullLabs.labsOpacity, 1) && close(halfLabs.labsOpacity, .5) && lastLabs.labsOpacity < 1e-6);
+    assert.ok(titleCompositions.slice(0, 3).every(state => close(state.labsOpacity, state.noteOpacity)),
+      'S04 labs and clock must fade together');
+    assert.deepEqual([paper.labsOpacity, paper.noteOpacity, paper.guideOpacity], [0, 0, 0]);
+    assert.ok(close(halfGuide.guideOpacity, .5) && close(fullGuide.guideOpacity, 1), 'S05 8% guide fade');
+    const cleanRight = await page.evaluate(times => {
+      const sample = t => {
+        window.renderAt(t);
+        return document.querySelector('#opening-stage').getContext('2d').getImageData(1580, 180, 120, 16).data;
+      };
+      const [bare, guide] = times.map(sample);
+      return bare.every((value, i) => value === guide[i]);
+    }, [seconds('S01', 2 / section.sheet.cues[0].duration), seconds('S05', .15)]);
+    assert.ok(cleanRight, 'S05 right side must match the unwashed paper');
   }
   if (section.index === 1) {
     const lens = await page.evaluate(t => window.renderAt(t).lens, seconds('S07', .80));
     assert.ok(lens?.radius >= 140 && lens.alpha > .95 && lens.cleanGap > 24, 'S07 congested serosal-vessel lens');
     const wording = await page.evaluate(measureCanvasText, seconds('S08', .83));
-    assert.ok(wording.some(({ text, x, end }) => text === '急性蜂窝织性阑尾炎' && x >= 65 && end <= 320),
-      'S08 left observation notes must show the revised diagnosis');
-    const [scissor, incised, handoff] = await page.evaluate(times => times.map(t => window.renderAt(t)),
-      [seconds('S09', .20), seconds('S09', .75), seconds('B03', .75)]);
-    assert.ok(scissor.cut.scissors > .95 && scissor.cut.guide > .95 && scissor.cut.opening === 0);
-    assert.equal(incised.cut.opening, 1);
+    assert.ok(wording.some(({ text, x, end }) =>
+      text === '急性化脓性阑尾炎（又称急性蜂窝织性阑尾炎）的外观特征' && x >= 265 && end <= 1860),
+    'S08 gross title includes both complete names and appearance');
+    const [gross, mid, perspective, handoff] = await page.evaluate(times => times.map(t => window.renderAt(t)),
+      [seconds('S09', .35), seconds('S09', .50), seconds('S09', .75), seconds('B03', .75)]);
+    assert.ok(close(gross.sectionOpacity, 0) && mid.sectionOpacity > 0 && mid.sectionOpacity < 1);
+    assert.equal(perspective.sectionOpacity, 1);
     assert.deepEqual([handoff.micro.x, handoff.micro.y, handoff.micro.width, handoff.micro.opacity], [960, 455, 570, 1]);
   }
   if (section.index === 2) {
@@ -838,20 +885,32 @@ async function verifyStageEvidence(page, section) {
     const stages = linkedWords.filter(({ text }) => /^[1-4]\. /u.test(text));
     assert.equal(stages.length, 4);
     assert.ok(stages.every(({ y, x }) => y <= 225 && x >= 265), 'S12 phase labels must clear the vascular wall');
+    const footnote = (await page.evaluate(measureCanvasText, seconds('S13', .80)))
+      .find(({ text }) => text === '渗出详细过程见前');
+    assert.ok(footnote?.fill === '#443d37' && footnote.alpha === 1
+      && Number(/([\d.]+)px/u.exec(footnote.font)[1]) >= 19, 'S13 reference contrast, size, and opacity');
+    const [vesselFull, vesselHalved, vesselGone] = await separation('S12', [.91, .955, .99999]);
+    const [heHidden, heGrowing, heFull] = await separation('S13', [0, .045, .09]);
+    assert.ok(close(vesselFull.outgoing, 1) && close(vesselHalved.outgoing, .5) && vesselGone.outgoing < 1e-6);
+    assert.ok(close(heHidden.incoming, 0) && close(heGrowing.incoming, .5) && close(heFull.incoming, 1)
+      && heHidden.artScale < heGrowing.artScale && heGrowing.artScale < heFull.artScale && heFull.artScale === 1,
+    'S12 → S13 vessel fade and expanding H&E aperture');
     const priming = await page.evaluate(times => times.map(t => {
       window.renderAt(t);
-      const { visiblePus, wovenFraction } = window.artCounts();
-      return [visiblePus, wovenFraction];
+      const { visiblePus, highPowerCells, pusFraction, wovenFraction } = window.artCounts();
+      return { visiblePus, highPowerCells, pusFraction, wovenFraction };
     }), [seconds('B04', .98), seconds('S14', 0), seconds('S14', .55)]);
-    assert.ok(priming.slice(0, 2).every(([cells, fraction]) => cells >= 85 && fraction >= .65 && fraction < .70));
-    assert.ok(priming[2][0] >= 140 && priming[2][1] === 1);
+    assert.ok(priming.slice(0, 2).every(({ visiblePus, highPowerCells, pusFraction, wovenFraction }) =>
+      close(pusFraction, .70) && close(wovenFraction, .70) && Math.abs(visiblePus - highPowerCells * .70) <= 1),
+    'S14 primes both pus and fibrin to 70% before entry');
+    assert.ok(priming[2].visiblePus >= 140 && priming[2].wovenFraction === 1);
     await checkSeparation('B05');
     const [before, center, after] = await separation('B03b', [.25, .45, .75]);
     assert.ok(before.branchOpacity > 0 && before.incoming === 0 && center.branchOpacity === 0
       && center.incoming > 0 && after.outgoing === 0);
   }
   if (section.index === 3) {
-    const { scene, anchor, lines, clearance, pixel, wallSites, early, open, compressed, colors, dual, clotSpansLumen } = await page.evaluate(times => {
+    const { scene, clotAnchor, lines, clearance, veinPixel, clotPixel, wallSites, early, open, compressed, colors, dual, clotSpansLumen } = await page.evaluate(times => {
       const shape = id => document.getElementById(id);
       window.renderAt(times[0]);
       const scene = window.gate1SceneInfo.S17;
@@ -865,7 +924,7 @@ async function verifyStageEvidence(page, section) {
       const clot = shape('s17-plug-paint').querySelector('path');
       const clotSpansLumen = [93, 124, 155].every(y => clot.isPointInFill(new DOMPoint(234, y)));
       const aperture = document.getElementById('s17-gross-clot-aperture');
-      const anchor = ['cx', 'cy'].map(key => Number(aperture.getAttribute(key)));
+      const clotAnchor = ['cx', 'cy'].map(key => Number(aperture.getAttribute(key)));
       const venous = [...document.querySelectorAll('#s17-tangents path')];
       const arterial = [...document.querySelectorAll('#s17-arterial-guides path')];
       const lines = venous.map(el => {
@@ -875,8 +934,9 @@ async function verifyStageEvidence(page, section) {
       let clearance = Infinity;
       for (const path of [...venous, ...arterial]) {
         const length = path.getTotalLength();
-        for (let i = 0; i <= 100; i++) {
-          const { x, y } = path.getPointAtLength(length * i / 100);
+        const samples = Math.ceil(length);
+        for (let i = 0; i <= samples; i++) {
+          const { x, y } = path.getPointAtLength(length * i / samples);
           for (const [cx, cy] of scene.ileum) clearance = Math.min(clearance, Math.hypot(x - cx, y - cy));
         }
       }
@@ -893,15 +953,24 @@ async function verifyStageEvidence(page, section) {
         const { x, y } = path.getPointAtLength(0);
         const wall = scene.walls[i];
         const [r, g, b, a] = samplePigment(wall.interior);
-        return { distance: Math.hypot(x - wall.x, y - wall.y), yellow: r > 175 && g > 130 && g - b > 18 && a === 255 };
+        return { distance: Math.hypot(x - wall.x, y - wall.y),
+          yellow: r > 175 && g > 115 && r - g > 25 && g - b > 18 && a === 255 };
       });
-      return { scene, anchor, lines, clearance, pixel: samplePigment(anchor), wallSites, early, open, compressed, colors, dual, clotSpansLumen };
+      return { scene, clotAnchor, lines, clearance, veinPixel: samplePigment([scene.veinAnchor.x, scene.veinAnchor.y]),
+        clotPixel: samplePigment(clotAnchor), wallSites, early, open, compressed, colors, dual, clotSpansLumen };
     }, [seconds('S17', .17), seconds('S17', .92)]);
-    assert.ok(lines.every(([x, y]) => close(x, anchor[0], .05) && close(y, anchor[1], .05)), 'S17 guide anchors');
+    const { veinAnchor, ileumBottom, guideClearance, walls } = scene;
+    assert.ok(veinAnchor.y > ileumBottom && lines.every(([x, y]) =>
+      close(x, veinAnchor.x, .05) && close(y, veinAnchor.y, .05)), 'S17 venous guides start below the ileum');
+    assert.ok(veinPixel[2] > veinPixel[0] + 12 && veinPixel[2] > veinPixel[1] + 5 && veinPixel[3] === 255,
+      'S17 guide source does not point to blue vein pigment: ' + veinPixel.join(','));
+    assert.deepEqual(walls.map(({ side }) => side), [1, -1], 'S17 upper and lower appendix walls');
     assert.ok(wallSites.every(({ distance, yellow }) => distance < .05 && yellow), 'S17 arterial guides mark the swollen yellow wall');
-    assert.ok(clearance > scene.ileumRadius + 1, `S17 guide crosses the ileum (${clearance} vs ${scene.ileumRadius})`);
-    assert.deepEqual(anchor, [scene.source.x, scene.source.y], 'S17 aperture is detached from the vein');
-    assert.ok(pixel[0] - pixel[1] > 20 && pixel[2] - pixel[1] > 12 && pixel[3] === 255, 'S17 source point does not contain the clot pigment');
+    assert.ok(guideClearance > 2 && clearance > scene.ileumRadius + 1,
+      `S17 guide crosses the ileum (${clearance} vs ${scene.ileumRadius})`);
+    assert.deepEqual(clotAnchor, [scene.source.x, scene.source.y], 'S17 aperture is detached from the vein');
+    assert.ok(clotPixel[0] - clotPixel[1] > 20 && clotPixel[2] - clotPixel[1] > 12 && clotPixel[3] === 255,
+      'S17 aperture does not contain the clot pigment');
     assert.ok(dual && open && compressed && scene.arteryDiameter < early * .35 && clotSpansLumen,
       'S17 red artery must narrow while the blue vein lumen is blocked');
     const [red, blue] = colors.map(color => color.match(/\d+/gu).map(Number));
@@ -912,6 +981,28 @@ async function verifyStageEvidence(page, section) {
     }), [.05, .15, .35, .58].map(p => seconds('S18', p)));
     assert.ok(fronts[0] === fronts[1] && fronts[2] > fronts[1] && fronts[3] > fronts[2],
       'S18 blackening must follow the onset of secondary infection');
+    const [simpleFull, simpleHalf, simpleGone] = await separation('S16', [.92, .96, .99999]);
+    const [vascularHidden, vascularHalf, vascularFull] = await separation('S17', [0, .04, .08]);
+    assert.ok(close(simpleFull.artOpacity, 1) && close(simpleHalf.artOpacity, .5) && simpleGone.artOpacity < 1e-6);
+    assert.ok(close(vascularHidden.artOpacity, 0) && close(vascularHalf.artOpacity, .5) && close(vascularFull.artOpacity, 1),
+      'S16 → S17 8% subject fade');
+    const organJoin = await page.evaluate(times => times.map(t => {
+      const { id, artOpacity } = window.renderAt(t);
+      const s17 = id === 'S17';
+      const readOpacity = selector => Number(document.querySelector(selector).getAttribute('opacity'));
+      const subject = document.querySelector(s17 ? '#s17-organ-body' : '#s18-inflamed-body');
+      const { a, b, c, d, e, f } = subject.getCTM();
+      return { artOpacity, pose: [a, b, c, d, e, f],
+        right: readOpacity(s17 ? '#s17-right-insets' : '#s18-seam-title'),
+        labels: s17 ? readOpacity('#s17-right-labels') : null };
+    }), [seconds('S17', .92), seconds('S17', .96), seconds('S17', .99999),
+      seconds('S18', 0), seconds('S18', .04), seconds('S18', .08)]);
+    assert.ok(organJoin.every(({ artOpacity, pose }) =>
+      close(artOpacity, 1) && pose.every((value, i) => close(value, organJoin[0].pose[i]))),
+    'S17 → S18 holds left organ geometry and opacity');
+    assert.ok(organJoin.every(({ right }, i) => close(right, [1, .5, 0, 0, .5, 1][i]))
+      && organJoin.slice(0, 3).every(({ right, labels }) => close(right, labels)),
+    'S17 → S18 right-side fades');
     await checkSeparation('B06');
   }
   if (section.index === 4) {
@@ -971,7 +1062,7 @@ async function verifyStageEvidence(page, section) {
     }
     assert.ok(markers[0].left < main.left + 35 && markers[1].right > main.right - 35);
     assert.ok(roi.left > main.left && roi.right < main.left + main.width / 2);
-    for (const [i, p] of [.18, .65, .86].entries()) {
+    for (const [i, p] of [.18, .50, .75].entries()) {
       const tx = seconds('S21', p);
       const nav = await page.evaluate(measureNav, tx);
       assert.ok(nav.marks.every(Boolean) && Math.abs(nav.marker - i - 1) < .08, 'S21 fixed labels and moving highlight');
@@ -984,6 +1075,39 @@ async function verifyStageEvidence(page, section) {
       }, i);
       assert.deepEqual(inset, [i ? 3 : 2, true]);
     }
+    const fixedCtCaptions = [
+      ['增强CT上三型各有线索：急性单纯性阑尾炎仅轻度增粗、脂肪清晰；',
+        'Contrast CT reveals distinct clues: mild thickening with clean fat in acute simple appendicitis;'],
+      ['急性化脓性阑尾炎见双环靶征、偏心粪石与脂肪条索；',
+        'target sign, eccentric fecalith, and fat stranding in acute suppurative appendicitis;'],
+      ['急性坏疽性阑尾炎伴穿孔时，见管壁强化缺损、盲肠旁脓肿及游离气体。',
+        'wall enhancement defect, periappendiceal abscess, and free air in perforated acute gangrenous appendicitis.'],
+    ];
+    const samples = [.15, .294, .309, .3199, .32, .3201, .331, .346, .50,
+      .624, .639, .6499, .65, .6501, .661, .676, .75, .99];
+    const ct = await page.evaluate(times => times.map(t => {
+      const state = window.renderAt(t);
+      const cn = document.querySelector('.story-caption-cn');
+      const en = document.querySelector('.story-caption-en');
+      const { left, right, height } = en.getBoundingClientRect();
+      const notes = [...document.querySelectorAll('[data-ct-notes]')]
+        .filter(node => !node.hasAttribute('hidden') && Number(node.getAttribute('opacity') ?? 1) > 0)
+        .map(node => Number(node.dataset.ctNotes));
+      return { stage: state.ctStage, words: [cn.textContent, en.textContent], left, right, height, notes };
+    }), samples.map(p => seconds('S21', p)));
+    for (const [i, p] of samples.entries()) {
+      const expected = p < .32 ? 0 : p < .65 ? 1 : 2;
+      const { stage, words, left, right, height, notes } = ct[i];
+      assert.deepEqual([stage, words], [expected, fixedCtCaptions[expected]], 'S21 CT and subtitle alignment at ' + p);
+      assert.ok(left >= 60 && right <= 1860 && height <= 50, 'S21 English bounds at ' + p);
+      assert.ok(notes.length < 2 && (!notes.length || notes[0] === stage), 'S21 inset overlap at ' + p);
+      if (p === .32 || p === .65) assert.deepEqual(notes, [], 'S21 annotation blank at the stage cut');
+    }
+    const [ctOld, ctMiddle, ctEnd] = await separation('S20', [.92, .96, .99999]);
+    const [ctStart, ctIncoming, ctReady] = await separation('S21', [0, .04, .08]);
+    assert.ok(close(ctOld.sceneOpacity, 1) && close(ctMiddle.sceneOpacity, .5) && ctEnd.sceneOpacity < 1e-6);
+    assert.ok(ctStart.sceneOpacity === 0 && close(ctIncoming.sceneOpacity, .5) && close(ctReady.sceneOpacity, 1),
+      'S20 → S21 subject fade');
   }
   if (section.index === 5) {
     // These are the actual transparent entry layers that get baked for B07.
@@ -996,6 +1120,14 @@ async function verifyStageEvidence(page, section) {
       assert.doesNotMatch(words, acute, `B07/${part}`);
     }
     await checkSeparation('B08');
+    const recovery = section.sheet.cues.find(cue => cue.id === 'S25');
+    const blank = 1 - .30 / recovery.duration;
+    const [normal, fading, held, last] = await separation('S25', [.88, (.88 + blank) / 2, blank, .99999]);
+    assert.ok(close(normal.closingPaper, 0) && close(fading.closingPaper, .5) && close(held.closingPaper, 1)
+      && held.sceneOpacity === 0 && last.sceneOpacity === 0, 'S25 must hold clean paper for 0.300 s');
+    const [paper, creditFade, credit] = await separation('S26', [0, .30 / 6.5, .60 / 6.5]);
+    assert.ok(close(paper.creditOpacity, 0) && close(creditFade.creditOpacity, .5) && close(credit.creditOpacity, 1),
+      'S26 credits fade over the existing 0.600 s');
   }
 }
 

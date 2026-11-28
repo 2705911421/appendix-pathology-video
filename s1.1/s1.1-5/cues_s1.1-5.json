@@ -3,74 +3,77 @@
   "width": 1920,
   "height": 1080,
   "fps": 30,
-  "duration": 63.7,
+  "duration": 66.5,
   "cues": [
     {
       "id": "S19",
       "type": "speech",
-      "defaultDuration": 10,
-      "zhText": "怀疑急性阑尾炎，医生先做什么？先问典型症状，再仔细做体格检查，并综合化验结果判断。",
+      "defaultDuration": 14.3,
+      "zhText": "镜下凶险，术前如何判断？首选仍是抓准转移性右下腹痛等典型症状，配合体格检查，重点核实麦氏点压痛、反跳痛与腹肌紧张等腹膜刺激征。",
       "highlightZh": [
-        "典型症状",
+        "转移性右下腹痛",
         "体格检查",
-        "化验结果"
+        "反跳痛",
+        "腹肌紧张",
+        "腹膜刺激征"
       ],
-      "enText": "How do doctors first assess suspected acute appendicitis? They ask about typical symptoms, perform a careful physical exam, and consider the lab results."
+      "enText": "How do clinicians assess this before surgery? First-line evaluation pairs classic migratory right lower quadrant pain with physical exam checking McBurney tenderness, rebound, and guarding.",
+      "start": 0,
+      "end": 14.3
     },
     {
       "id": "S20",
       "type": "speech",
-      "defaultDuration": 11.5,
-      "zhText": "CT 是重要的辅助确诊工具，是否需要检查，要看临床评估。成人疑似病例中，多层螺旋 CT 诊断敏感度可超过百分之九十三。",
+      "defaultDuration": 11.7,
+      "zhText": "症状体征与化验仍难明确时，多层螺旋CT是重要辅助确诊工具，诊断敏感度超百分之九十三，但并非人人必做。",
       "highlightZh": [
+        "多层螺旋CT",
         "辅助确诊工具",
-        "临床评估",
-        "诊断敏感度",
-        "超过百分之九十三"
+        "百分之九十三"
       ],
-      "enText": "CT is an important diagnostic aid. Clinical assessment guides who needs it. In adults with suspected appendicitis, multidetector helical CT sensitivity can exceed 93%."
+      "enText": "When history, exam, and labs remain equivocal, multidetector CT is a key diagnostic aid with over 93% sensitivity, though not required for every patient.",
+      "start": 14.3,
+      "end": 26
     },
     {
       "id": "S21",
       "type": "speech",
-      "defaultDuration": 19.5,
-      "zhText": "下面是三种病理表现的增强 CT 示意。单纯性可见阑尾轻度增粗，周围脂肪清晰；化脓性可见厚壁靶征、偏心粪石和脂肪条索；坏疽穿孔可见壁强化缺损、盲肠旁脓肿和腔外气泡。",
+      "defaultDuration": 19.6,
+      "zhText": "增强CT上三型各有线索：急性单纯性阑尾炎仅轻度增粗、脂肪清晰；急性化脓性阑尾炎见双环靶征、偏心粪石与脂肪条索；急性坏疽性阑尾炎伴穿孔时，见管壁强化缺损、盲肠旁脓肿及游离气体。",
       "highlightZh": [
-        "单纯性",
-        "化脓性",
-        "厚壁靶征",
-        "偏心粪石",
-        "脂肪条索",
-        "坏疽穿孔",
-        "壁强化缺损",
-        "盲肠旁脓肿",
-        "腔外气泡"
+        "急性单纯性阑尾炎",
+        "急性化脓性阑尾炎",
+        "双环靶征",
+        "急性坏疽性阑尾炎",
+        "管壁强化缺损"
       ],
-      "enText": "These drawings illustrate typical contrast-enhanced CT appearances. In simple appendicitis, the appendix is mildly enlarged with clear surrounding fat. In phlegmonous appendicitis, a thick-walled target sign, an eccentric fecalith and fat stranding may be seen. In perforated gangrenous appendicitis, focal loss of wall enhancement, a pericecal abscess and extraluminal gas may be seen."
+      "enText": "Contrast CT reveals distinct clues: mild thickening with clean fat in acute simple appendicitis; target sign, fecalith, and fat stranding in acute suppurative; wall enhancement defect, abscess, and free air in perforated acute gangrenous appendicitis.",
+      "start": 26,
+      "end": 45.6
     },
     {
       "id": "S22",
       "type": "speech",
-      "defaultDuration": 20.5,
-      "zhText": "疑似急性蜂窝织性阑尾炎，先评估有无坏疽、穿孔或腹膜炎。未穿孔者结合临床评估，通常尽早手术切除。怀疑坏疽或穿孔，需尽快外科评估。弥漫性腹膜炎通常需紧急手术；局限性脓肿可先抗感染，必要时引流。",
+      "defaultDuration": 18.7,
+      "zhText": "综合评估后，未穿孔的急性化脓性阑尾炎通常以尽早手术切除为主；怀疑急性坏疽性阑尾炎或穿孔须尽快外科评估，弥漫性腹膜炎多需紧急手术，局限性脓肿可先抗感染、必要时引流。",
       "highlightZh": [
-        "急性蜂窝织性阑尾炎",
         "未穿孔",
+        "急性化脓性阑尾炎",
         "尽早手术切除",
-        "尽快外科评估",
+        "急性坏疽性阑尾炎",
         "弥漫性腹膜炎",
-        "紧急手术",
-        "局限性脓肿",
-        "引流"
+        "局限性脓肿"
       ],
-      "enText": "For suspected acute phlegmonous appendicitis, assess for gangrene, perforation or peritonitis. Without perforation, early appendectomy is usual after clinical assessment. Suspected gangrene or perforation needs prompt surgical assessment. Diffuse peritonitis usually needs emergency surgery. A localized abscess may initially be treated with antibiotics and drainage if needed."
+      "enText": "Unperforated acute suppurative appendicitis is usually managed with prompt appendectomy; suspected acute gangrenous appendicitis or perforation needs urgent surgical review—emergency surgery for diffuse peritonitis, or antibiotics and drainage for localized abscess.",
+      "start": 45.6,
+      "end": 64.3
     },
     {
       "id": "B07",
       "type": "bridge",
       "duration": 2.2,
-      "start": 61.5,
-      "end": 63.7
+      "start": 64.3,
+      "end": 66.5
     }
   ]
 }

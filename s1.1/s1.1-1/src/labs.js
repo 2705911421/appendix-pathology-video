@@ -9,8 +9,8 @@ const fever = 39.3;
 const normalTemperature = [36, 37];
 const normalInk = '#566B61';
 const assays = [
-  { y: 405, normal: [4, 10], result: 13.0, max: 15, start: .14, name: '白细胞总数' },
-  { y: 611, normal: [2, 7], result: 11.3, max: 15, start: .30, name: '中性粒细胞数目（绝对值）' },
+  { y: 405, normalMax: 10, reference: '4–10×10⁹/L', result: 13.0, max: 15, start: .14, name: '白细胞总数' },
+  { y: 611, normalMax: 7, reference: '2–7×10⁹/L', result: 11.3, max: 15, start: .30, name: '中性粒细胞数' },
 ];
 const glass = 'M-21 661 C-19 538 -20 359 -19 266 C-18 234 -7 222 3 225 C15 226 22 243 22 268 L22 660 C40 671 50 687 48 706 C46 732 26 753 2 754 C-25 753 -47 735 -49 709 C-51 688 -39 670 -21 661Z';
 const mercury = 'M-5 267 Q1 256 7 267 L8 675 C21 681 28 691 27 705 C25 722 14 733 1 733 C-14 733 -27 720 -27 706 C-27 692 -18 679 -6 675Z';
@@ -78,7 +78,7 @@ function temperature(ctx, p, pigment, glassInk) {
       size: 41, weight: 700, color: RED, font: NUMERAL_FONT,
     });
     fade(ctx, phase(p, .17, .24), () => {
-      letter(ctx, '（正常 ' + normalTemperature.join('–') + '℃）', 63, 53,
+      letter(ctx, '（正常 36–37℃）', 63, 53,
         { size: 27, weight: 650, color: normalInk });
     });
     ctx.restore();
@@ -87,9 +87,9 @@ function temperature(ctx, p, pigment, glassInk) {
 }
 
 function indicator(ctx, assay, p) {
-  const { y, normal, result, max, start, name } = assay;
+  const { y, normalMax, reference, result, max, start, name } = assay;
   const trackW = 555;
-  const xLimit = trackW * normal[1] / max;
+  const xLimit = trackW * normalMax / max;
   const maxW = trackW * result / max;
   const barW = maxW * phaseOut(p, start, start + .23);
   fade(ctx, phase(p, start, start + .065), () => {
@@ -98,7 +98,7 @@ function indicator(ctx, assay, p) {
     letter(ctx, value, zero + 2, y - 35, { size: 36, weight: 720, color: RED, font: NUMERAL_FONT });
     const referenceX = zero + ctx.measureText(value).width + 12;
     fade(ctx, phase(p, start + .035, start + .105), () => {
-      letter(ctx, '（正常 ' + normal.join('–') + '×10⁹/L）', referenceX, y - 35,
+      letter(ctx, '（正常 ' + reference + '）', referenceX, y - 35,
         { size: 28, weight: 620, color: normalInk });
     });
     ctx.beginPath();

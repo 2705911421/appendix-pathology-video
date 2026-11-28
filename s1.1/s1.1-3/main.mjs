@@ -1,5 +1,5 @@
 import { appendStorySvg, createStoryStage, lerp } from '../shared/canvasCore.js';
-import { cueCaptionAt, prepareCueCaptionPages } from '../shared/cueCaptions.js';
+import { prepareProductionSubtitles } from '../shared/cueCaptions.js';
 import { mountBridgePlates } from '../shared/detail/bridgePlates.js';
 import { mountMicroscopeHandoff } from '../shared/detail/microscopeHandoff.js';
 import { mountStageDotOverlay } from '../shared/leftFloatNotes.js';
@@ -38,36 +38,9 @@ function mountedScene(id) {
   }
   return scenes.get(id);
 }
-const captionCuts = {
-  S10: [['眼里，急性阑尾炎的本质，', 'acute appendicitis']],
-  S11: [
-    ['堵塞管腔，', 'blocks the lumen,'],
-    ['急剧升高。', 'rise sharply.'],
-    ['破溃、脱落', 'and sloughing,'],
-  ],
-  S12: [
-    ['炎症介质参与反应。', 'the inflammatory response.'],
-    ['血浆被动漏出。', 'leaks out passively.'],
-    ['边集、滚动、黏附，', 'roll and adhere.'],
-  ],
-  S13: [
-    ['浸润阑尾壁全层。', 'the full appendiceal wall.'],
-    ['链激酶和透明质酸酶。', 'streptokinase and hyaluronidase.'],
-    ['促进纤维素降解；', 'fibrin breakdown.'],
-    ['降解透明质酸。', 'hyaluronic acid.'],
-    ['穿透肌层直达浆膜。', 'to the serosa.'],
-  ],
-  S14: [
-    ['化脓性炎症。', 'a suppurative inflammation.'],
-    ['这些是脓细胞。', 'called pus cells.'],
-    ['混在一起，', 'a mesh of fibrin'],
-    ['纤维素性脓性渗出物。', 'a fibrinopurulent exudate.'],
-  ],
-};
-
 await Promise.all([stage.ready, bridgePlates.ready]);
 const subtitles = new Map(cues.filter(cue => cue.type === 'speech')
-  .map(cue => [cue.id, prepareCueCaptionPages(cue, captionCuts[cue.id])]));
+  .map(cue => [cue.id, prepareProductionSubtitles(cue)]));
 
 function posed(cue, p, bridgeProgress = 0) {
   const entry = mountedScene(sceneIds[cue.id]);
@@ -77,7 +50,7 @@ function posed(cue, p, bridgeProgress = 0) {
 
 function renderFrame({ cue, p }) {
   const { id } = cue;
-  const subtitle = subtitles.has(id) ? cueCaptionAt(subtitles.get(id), p) : null;
+  const subtitle = subtitles.get(id) ?? null;
   let layers;
   let seam;
   if (id === 'B03b') {
@@ -93,6 +66,12 @@ function renderFrame({ cue, p }) {
     layers = [{ ...posed(byId.get('S14'), 1), opacity: 1 - leave, scale: 1 - .07 * moving,
       dx: 172 * moving, dy: -92 * moving }];
     seam = { outgoing: 1 - leave, incoming: bridgePlates.available ? ramp(p, .48, 1) : 0 };
+  } else if (id === 'S12' || id === 'S13') {
+    const outgoing = id === 'S12' ? 1 - ramp(p, .91, 1) : 0;
+    const incoming = id === 'S13' ? ramp(p, 0, .09) : 0;
+    layers = [{ ...posed(cue, p), opacity: outgoing + incoming,
+      scale: id === 'S13' ? lerp(.975, 1, incoming) : 1 }];
+    seam = { outgoing, incoming, artScale: layers[0].scale };
   } else {
     layers = [posed(cue, p)];
   }
